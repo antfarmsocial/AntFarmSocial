@@ -6,6 +6,8 @@ Ant Simulator
 
 A web browser-based ant simulator game.
 
+**[▶️ Play Ant Farm Social now](http://antfarmsocial.github.io)**
+
 > Influenced by Matt & Mattingly's Ice Cream Social podcast, and Scoop Group.
 
 #### Developers
