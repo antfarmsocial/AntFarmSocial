@@ -15,4 +15,4 @@ A web browser-based ant simulator game.
 Developers: [Developers](DEVELOPERS.md)
 
 *************************************
-Created by D.A. Braksator, 2023-2024.
+Created by D.A. Braksator, 2023-2033.
