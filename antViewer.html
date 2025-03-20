@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>AFS Ant Viewer</title>
+    <meta name="author" content="D.A. Braksator">
+    <meta name="year" content="2023">
+    <link rel="stylesheet" type="text/css" href="./src/afs.css">
+    <style type="text/css">
+
+      body#ant-viewer {
+        height: 100%;
+        margin: 2em 1em;
+        padding: 0;
+        background: rgba(26, 142, 207,.75);
+        font-family: Optima, Candara, 'Noto Sans', source-sans-pro, sans-serif;
+        user-select: none
+      }
+      #classForm a {
+        display: inline;
+      }
+      .view-ant .ant {
+        background: rgba(255,255,136,0.5);
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        display: block;
+      }
+      .view-ant p {
+        font-size: small;
+        text-align: center;
+        
+        margin-bottom: 1em;
+        color: #eee;
+        position: absolute;
+        left: 50%;
+        top: 0.5em;
+        transform: translateX(-50%);
+      }
+      h3 {
+        margin: 1em;
+        color: #eee;
+      }
+      .view-ant {
+        margin: 0 0 1em 1em;
+        padding-top: 30px;
+        border: .5px solid #eee;
+        border-radius: 5px;
+        display: inline-block;
+        position: relative;
+        width: 64px;
+        height: 94px;
+      }
+      .full {
+        width: 320px;
+        height: 320px;
+      }
+      .full .ant .body {
+        transform: translate(-50%,-50%) scale(1) rotate(90deg);
+      }
+    </style>
+  </head>
+  <body id="ant-viewer">
+
+    <!-- Ant template -->
+    <div id="ant" class="ant">
+      <div class="spot"></div>
+      <div class="body">
+        <div class="body-wrap">
+          <div class="head">
+            <div class="antenna"></div>
+            <div class="antenna"></div>
+          </div>
+          <div class="torso">
+            <div class="legs legs-l">
+              <div class="leg"><div class="foot"></div></div>
+              <div class="leg"><div class="foot"></div></div>
+              <div class="leg"><div class="foot"></div></div>
+            </div>
+            <div class="legs legs-r">
+              <div class="leg"><div class="foot"></div></div>
+              <div class="leg"><div class="foot"></div></div>
+              <div class="leg"><div class="foot"></div></div>
+            </div>
+          </div>
+          <div class="rear"></div>
+        </div>
+      </div>
+    </div>
+    
+<script>
+const types = {
+  N: {
+    n: 'Black',
+    v: 1, // speed
+    s: 'm', // size
+    d: 2, // 2 = meat/protein preference.
+  },
+  T: {
+    n: 'Tiny',
+    v: .8, // speed
+    s: 's', // size
+    d: 1, // 1 = sugar/carb/sweet eater.
+  },
+  B: {
+    n: 'Bull',
+    v: 1.2, // speed
+    b: 1, // This ant bites.
+    s: 'l', // size
+    d: 2, // 2 = meat/protein preference.
+    m: 50, // maxmood
+  },
+  G: {
+    n: 'Green',
+    v: 1.1, // speed
+    b: 1, // This ant bites.
+    s: 'm', // size
+    d: 1, // 1 = sugar/carb/sweet eater.
+    m: 75, // maxmood
+  },
+  F: {
+    n: 'Fire',
+    v: .9, // speed
+    b: 1, // This ant bites.
+    s: 's', // size
+    d: 2, // 2 = meat/protein preference.
+    m: 75, // maxmood
+  },
+  C: {
+    n: 'Crazy',
+    v: 1.5, // Note: Code assumes this is max speed.
+    s: 'l', // size
+    d: 1, // 1 = sugar/carb/sweet eater.
+    m: 50, // maxmood
+  },
+};
+
+// Draw an ant.
+function drawAnt(ant, container = document.body) {
+  // Create a copy of the HTML template for the ant
+  const antTemplate = document.querySelector('#ant');
+  const newAnt = antTemplate.cloneNode(true);
+  newAnt.id = ant.id; // Remove the ID to avoid duplicate IDs
+  newAnt.classList.add(ant.type);
+  if (types[ant.type]) {
+    newAnt.classList.add(types[ant.type].s);
+  }
+  newAnt.dataset.id = ant.id;
+  // Add the ant to the document
+  container.appendChild(newAnt);
+  newAnt.style.display = 'block';
+}
+
+function viewAnts() {
+  const viewSizes = ['full', ''];
+  const antSizes = ['s', 'm', 'l'];
+
+  const heading = "Ant sizes";
+  for (var viewSize of viewSizes) {
+  
+    var h = document.createElement('h3');
+    h.textContent = heading + (viewSize ? ' (' + viewSize + ')' : '');
+    document.body.appendChild(h);
+      
+    for (var antSize of antSizes) {
+      const ant = {
+        id: antSize + (viewSize ? '-' + viewSize : ''),
+        type: antSize,
+        name: antSize + (viewSize ? '-' + viewSize : '')
+      };
+      var divElement = document.createElement('div');
+      divElement.className = 'view-ant ' + viewSize;
+      // Create the paragraph element and set its text content
+      var paragraphElement = document.createElement('p');
+      paragraphElement.textContent = antSize + (viewSize ? ' ' + viewSize : '');
+      // Append the paragraph element to the div
+      divElement.appendChild(paragraphElement);
+      drawAnt(ant, divElement);
+      document.body.appendChild(divElement);
+    }
+  }
+  
+  const typeNames = Object.keys(types);
+  var h = document.createElement('h3');
+  h.textContent = 'Types';
+  document.body.appendChild(h);
+  for (var type of typeNames) {
+    const ant = {
+      id: type,
+      type: type,
+      name: type
+    };
+    var divElement = document.createElement('div');
+    divElement.className = 'view-ant';
+    // Create the paragraph element and set its text content
+    var paragraphElement = document.createElement('p');
+    paragraphElement.textContent = type;
+    // Append the paragraph element to the div
+    divElement.appendChild(paragraphElement);
+    drawAnt(ant, divElement);
+    document.body.appendChild(divElement);
+  }
+  
+  // Get the form and input element
+  var form = document.getElementById('classForm');
+  var classNameInput = document.getElementById('classNameInput');
+
+  // Get the class parameter from the URL
+  var urlParams = new URLSearchParams(window.location.search);
+  var classParam = urlParams.get('class');
+
+  // Pre-fill the classname input with the value from the URL parameter
+  if (classParam) {
+    classNameInput.value = classParam;
+  }
+
+  // Add submit event listener to the form
+  form.addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    // Get the entered class name
+    var enteredClassName = classNameInput.value.trim();
+
+    // Redirect to the new URL with the class parameter
+    window.location.href = '?class=' + encodeURIComponent(enteredClassName);
+  });
+
+  // Add additional class(es) to all elements with class "ant"
+  function addAdditionalClassToAnts() {
+    var additionalClassName = urlParams.get('class');
+
+    if (additionalClassName) {
+      classNameInput.value = additionalClassName;
+      var ants = document.getElementsByClassName('ant');
+
+      for (var i = 0; i < ants.length; i++) {
+        ants[i].classList.add.apply(ants[i].classList, additionalClassName.split(' '));
+      }
+    }
+  }
+
+  // Call the function to add additional class(es) to ants
+  addAdditionalClassToAnts();
+}
+
+
+window.addEventListener('load', viewAnts);
+
+
+</script>
+    <form id="classForm">
+      <input type="text" id="classNameInput" placeholder="Add Classes">
+      <div><small>
+        <a href="?class=">(clear)</a> | 
+        <a href="?class=prone">prone</a> | 
+        <a href="?class=crawl">crawl</a> | 
+        <a href="?class=pick">pick</a> | 
+        <a href="?class=side">side</a> | 
+        <a href="?class=side%20walk">side walk</a> | 
+        <a href="?class=side%20dig">side dig</a> |
+        <a href="?class=D">D</a>
+      </small></div>
+    </form>
+  </body>
+</html>

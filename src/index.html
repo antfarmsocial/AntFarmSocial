@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ant Farm Social</title>
+    <meta name="author" content="D.A. Braksator">
+    <meta name="year" content="2023">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" sizes="180x180" href="./ico/180.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="./ico/192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="./ico/512.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="./ico/32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="./ico/16.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="./ico/192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="./ico/512.png">
+    <link rel="stylesheet" type="text/css" href="./src/afs.css">
+  </head>
+  <body id="afs">
+    <div id="ss"></div>
+    <div id="game">
+      <div id="msg-log" onClick="msgLog()">▼</div>
+      <div id="messages"></div>
+      <div id="bar">
+        <div id="menu">
+          <a id="a-bag"><span><img src="./img/bag.svg"></span></a>
+          <a id="a-tg"><span><img src="./img/tg.svg"></span></a>
+          <button id="score"></button>
+          <div id="bonus"></div>
+        </div>
+      </div>
+      <div id="wrapper" class="farm" data-col="green">
+        <div id="farm" data-fill="none">
+          <div id="card"></div>
+          <div id="scenery" class="above">
+          </div>
+          <div id="hills" class="above"></div>
+          <div id="fill" class="fill"><div class="specks"></div></div>
+          <div id="tunnels" class="fill"></div>
+        </div>
+        <div id="glass">
+          <div id="frost"></div>
+          <div class="ahole-set">
+            <div class="ahole"></div>
+            <div class="ahole"></div>
+            <div class="ahole"></div>
+          </div>
+          <div class="ahole-set">
+            <div class="ahole"></div>
+            <div class="ahole"></div>
+            <div class="ahole"></div>
+          </div>
+        </div>
+        <div id="loupe"><div id="lg"></div><div id="lh"></div></div>
+        <div class="frame-l frame">
+        </div>
+        <div class="frame-r frame">
+        </div>
+        <div id="dropzone" class="glow"></div>
+        <div id="lid">
+          <div class="hole frame"></div>
+          <div class="frame-t frame">
+          </div>
+        </div>
+        <div class="frame-b frame">
+        </div>
+        <div id="base" class="frame" data-col="green">
+          <div id="sign" class="plate">
+            <div class="sign-l plate"></div>
+            <h1 id="n">ANT FARM SOCIAL</h1>
+            <div class="sign-r plate"></div>
+          </div>
+          <div class="trim plate">
+            <div class="trim-inner"></div>
+          </div>
+        </div>
+        <div id="nip-tl" class="nip frame"><div class="nipcap frame"></div></div>
+        <div id="nip-tr" class="nip frame"><div class="nipcap frame"></div></div>
+        <div id="nip-bl" class="nip frame"><div class="nipcap frame"></div></div>
+        <div id="nip-br" class="nip frame"><div class="nipcap frame"></div></div>
+      </div>
+      <div id="ant" class="ant">
+        <div class="spot"></div>
+        <div class="body">
+          <div class="body-wrap">
+            <div class="head">
+              <div class="antenna"></div>
+              <div class="antenna"></div>
+            </div>
+            <div class="torso">
+              <div class="legs legs-l">
+                <div class="leg"><div class="foot"></div></div>
+                <div class="leg"><div class="foot"></div></div>
+                <div class="leg"><div class="foot"></div></div>
+              </div>
+              <div class="legs legs-r">
+                <div class="leg"><div class="foot"></div></div>
+                <div class="leg"><div class="foot"></div></div>
+                <div class="leg"><div class="foot"></div></div>
+              </div>
+            </div>
+            <div class="rear"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="throb"></div>
+    <div id="fx"></div>
+    <audio loop id="audio"><source id="audioSrc"></audio>
+    <script src="./src/afsItems.js"></script><script src="./src/afsData.js"></script><script src="./src/afs.js"></script><script src="./src/dev.js"></script>
+  </body>
+</html>
