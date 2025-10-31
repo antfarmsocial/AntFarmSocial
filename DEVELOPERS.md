@@ -5,6 +5,8 @@
 If you're fixing bugs, or you're future me finding this and confused about how
 to get back into it, here are some tips:
 
+### General
+
 - Start by installing NodeJS on your machine (there is an MSI installer).
 - Open repository folder in Visual Studio Code or similar editor.
 - Run "npm update" in the command line terminal.
@@ -17,11 +19,6 @@ to get back into it, here are some tips:
   so that you are aware of some of the quirks in this project.
 - If you create new css/js/html files, you'll need to study the gulpfile
   to figure out where to properly handle that.  Quit and restart gulp to test!
-- You'll notice aliases used in the JS for common properties and functions,
-  this is for the benefit of the terser minifier.  Try to keep up these
-  optimisatations by: 1) Being familiar with the existing aliases, and
-  2) Keeping an eye on the string analysis in the gulp output for hints
-  about inefficiencies.
 - You can edit antViewer.html (or create a similar file) to test out
   animations and other ideas.
 - Other than that, take your cues from what is already there.
@@ -29,29 +26,59 @@ to get back into it, here are some tips:
   'npm version patch', 'npm version minor' etc.., or modifying the package.json
   because the version is shown in the UI.
 - GitHub has an app called "GitHub Desktop" that makes the git stuff easier.
-- For graphics and UI design ideas check [this Pinterest board](https://www.pinterest.com.au/braksator/antfarmsocial/)
-- If game screws up while developing and you can't restart via the GUI type
-  Q() in the console.  This works in production releases too.
-- Developer-version browser console cheats (won't work in production release):
-  - score(1) [increment score]
-  - score(20,1) [20 point bonus]
-  - drop('obelisk') [Drop 'obelisk' item - you cannot specify color]
-     (note: wait until bag is loaded to use this)
-  - save() [Save game after editing vars: _ (game data) or F (current farm)]
-     (note: won't work within 30 seconds of loading)
-  - SS() [Super speed - farm is dug faster, reload to disable]
-  - clone(3) [Clone the first ant in your farm 3 times]
-  - spawnAnt() [Increase frequency of free ants appearing]
-  - spawner=0 [Disable auto spawning of free ants]
-  - testTuns() [Generate a fully built tunnel system]
-  - showLines=1 [Show potential joining tunnels coloured by score]
-  - getlEl('L').remove() [Clear lines added in showLines=1 mode]
-  - director('digStart') [Request ants perform digStart action]
-  - act [see a list of all ant actions]
-  - stopAnts=1 [Prevent ant actions]
-     (note: add this check to things that need to stop)
-- Most of these console cheats are available in a GUI when you add
-  ?dev=1 to the URL, which is easier when you need to hit it up quickly, but it
-  isn't idiot proof and understanding the code is key.
 - When publishing a production release; the files listed in .gitattributes do
   not need to be present.
+
+### Developer Cheats
+
+- If game screws up while developing and you can't restart via the GUI type
+  Q() in the console.  This works in production releases too.
+- When in dev mode any function can be called or global changed via the browser's console.
+- Many of the functions are available in a GUI when you add
+  ?dev=1 to the URL, which is easier when you need to hit it up quickly, but it
+  isn't idiot proof and understanding the code is key.  Add to dev.js as needed.
+
+### Images and Audio
+
+- For graphics and UI design ideas check [this Pinterest board](https://www.pinterest.com.au/braksator/antfarmsocial).
+  This also contains reference images (where potentially useful) from the original design of the UI.
+- The first goal should always be to avoid using images or external files for anything; use HTML/CSS/ASCII as much as you can push it.
+  Sometimes that works out better.
+- PSD/AI resources are NOT kept in the git repo, but are retained offline.
+- General rule for images is to make them at least twice the resolution that they'll be displayed (look up "@2x retina assets").
+- The process for making game graphics is ideally to make them as a vector first.  First step is to create a raster design in photoshop based
+  on reference images, and cleaning it up as much as possible.  Then in illustrator either manually trace the design or for more
+  complicated images use the Image Trace functionality and create an image with reduced complexity.  Sometimes you can get away with just
+  reducing the amount of colours in photoshop to make it look like game graphics.  Then create JPG (or PNG for transparency)
+  files from it typically with a maximum longest dimension of 512px, or 256px for "stickers".  Very small/simple (non-bag) GUI images and/or dynamically coloured
+  item images must be saved as SVG v1.1 with CSS Properties set to Presentation Attributes.
+- Small SVG files that are part of the GUI (other than bag/drop images) can be inserted directly into HTML/JS code, but should be compressed
+  as mentioned above, and further crushed using [HyperCrush](https://braksator.github.io/hypercrush).
+- SVG item (scene and paint) files should be compressed with an online tool first [vecta.io nano](https://vecta.io/nano), unless the result conflicts with
+ `JCrush SVG` in which case try [iLoveImg](https://www.iloveimg.com/compress-image) or another tool.
+- SVG item (scene and paint) images in ./src/img/items are converted to dynamic SVG code in ./src/svgItems.js.  The images must be 2 colours, the main
+  colour being #64bc41 and the other being an overlayed dark-grey (not #000000!) at 25% opacity.  The exception being files with
+  names containing the word 'paint', or the 'ants' file, where only the main color (#64bc41) is dynamic.
+  The files are to be saved as SVG v1.1, with Presentation Attributes instead of
+  CSS.  They should reprocess if a new file is added, or the svgItems.js is deleted, when gulp is run.
+- Take care with size of image files kept with the project; use a PNG crush like [TinyPng](https://tinypng.com) on all new PNG (PNG8!) files, and reduce
+  quality/size of new JPGs as much as acceptable.  Store them in /src/img and the gulpfile will do a webp
+  conversion and put them into the /img dir.
+- GIF files are manipulated and compressed slightly using the tools at [Ezgif](https://ezgif.com/optimize), stored in /src/img/gif,
+  and then converted manually with [Ezgif GIF to WebP](https://ezgif.com/gif-to-webp) and put in /img/gif.  Retain uncompressed and source
+  files offline.
+- Audio is converted to Opus 64kb mono using [Convertio](https://convertio.co/ogg-opus).  Higher quality versions
+  of the audio files are retained in /src/audio in case they need to be recreated.
+
+### Code Compression
+
+Since this app uses a lot of resources every opportunity is taken to reduce sizes of files served to the end user.
+
+- A library called [JsShrink](https://github.com/brandon942/js-shrink) is included to preprocess the code
+  before minification.  Careful; it has been modified specifically for AFS.
+- Gulpfile uses dev dependencies to minify JS/CSS/HTML (as normal).
+- HTML files and HTML in Javascript strings get squeezed using [HyperCrush](https://www.npmjs.com/package/hypercrush)
+- Note: `JCrush SVG`, and `HyperCrush` were developed specifically for this app.
+
+
+

@@ -1,8 +1,9 @@
 {
   "name": "antfarmsocial",
-  "version": "1.0.0-a",
+  "version": "1.0.0",
   "description": "Ant Simulator",
   "main": "index.html",
+  "private": true,
   "scripts": {
     "test": "echo \"Playtesting only.\" && exit 1"
   },
@@ -24,13 +25,21 @@
     "url": "https://github.com/braksator/AntFarmSocial.git"
   },
   "devDependencies": {
+    "browserslist": "^4.27.0",
     "fs": "^0.0.1-security",
-    "gulp": "^5.0.0",
-    "gulp-clean-css": "^4.3.0",
+    "gulp": "^5.0.1",
     "gulp-concat": "^2.6.1",
     "gulp-htmlmin": "^5.0.1",
-    "gulp-rename": "^2.0.0",
+    "gulp-lightningcss": "^1.0.0",
+    "gulp-rename": "^2.1.0",
     "gulp-replace": "^1.1.4",
-    "gulp-terser": "^2.1.0"
+    "gulp-terser": "^2.1.0",
+    "hypercrush": "^1.0.21",
+    "imagemin": "^9.0.1",
+    "imagemin-webp": "^6.1.0",
+    "jcrushsvg": "^1.1.40",
+    "js-shrink": "file:lib/JsShrink",
+    "longestrepeatedstrings": "^1.0.41",
+    "path": "^0.12.7"
   }
 }

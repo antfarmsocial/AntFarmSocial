@@ -1,23 +1,25 @@
 /*
- * Ant Farm Social 
+ * Ant Farm Social
  * afsData.js (Configuration and content)
- * 
+ *
  * This file contains or generates data structures containing configuration and content that would be obtrusive in the main file.
- * 
+ *
  */
 
-let types = {
+let types = {  // Note: Don't use keys "D", "Q", or "W" for these - they are reserved CSS identifiers for drone/queen/worker!
   N: {
     n: 'Black',
     v: 1, // speed
     s: 'm', // size
     d: 2, // 2 = meat/protein preference.
+    t: "A common basic ant that could not be more plain if it tried, which it won't."
   },
   T: {
     n: 'Tiny',
     v: .8, // speed
     s: 's', // size
     d: 1, // 1 = sugar/carb/sweet eater.
+    t: "The pesky little critter that gets stuck to your bottle of sweet chilli sauce."
   },
   B: {
     n: 'Bull',
@@ -26,6 +28,7 @@ let types = {
     s: 'l', // size
     d: 2, // 2 = meat/protein preference.
     m: 50, // maxmood
+    t: "A very nasty mean ant with a bad temper and a painful bite that penetrates your jeans."
   },
   G: {
     n: 'Green',
@@ -34,6 +37,7 @@ let types = {
     s: 'm', // size
     d: 1, // 1 = sugar/carb/sweet eater.
     m: 75, // maxmood
+    t: "This type of ant gets really mad if you pick it up and throw it at someone's neck."
   },
   F: {
     n: 'Fire',
@@ -42,6 +46,7 @@ let types = {
     s: 's', // size
     d: 2, // 2 = meat/protein preference.
     m: 75, // maxmood
+    t: "Fire ants are a severe invasive species and impact the quality of human life."
   },
   C: {
     n: 'Crazy',
@@ -49,8 +54,61 @@ let types = {
     s: 'l', // size
     d: 1, // 1 = sugar/carb/sweet eater.
     m: 50, // maxmood
+    t: "Notable for their quick erratic movements, these ants are simply quite cray."
+  },
+  J: {
+    n: 'Ghost',
+    v: .7, // speed
+    s: 's', // size
+    d: 2, // 2 = meat/protein preference.
+    p: 1, // pro-level (don't autospawn)
+    t: "The spookiest of all the ants, these tiny critters are quite the spectre-cle."
+  },
+  P: {
+    n: 'Pharaoh',
+    v: .7, // speed
+    b: 1, // This ant bites.
+    s: 'm', // size
+    d: 2, // 2 = meat/protein preference.
+    p: 1, // pro-level (don't autospawn)
+    t: "This type of ant will completely rely on a poor man to do everything for them."
+  },
+  M: {
+    n: 'Chimera',
+    v: .6, // speed
+    s: 's', // size
+    d: 0, // 0 - no food preference
+    p: 1, // pro-level (don't autospawn)
+    t: "This impossibly blue critter is slow, can adapt to different diets, and is illusory."
+  },
+  Z: {
+    n: 'Sugar',
+    v: .6, // speed
+    s: 'm', // size
+    d: 1, // 1 = sugar/carb/sweet eater.
+    p: 1, // pro-level (don't autospawn)
+    t: "An ant that has so much diabetes it can barely walk and always feels tingly."
+  },
+  K: {
+    n: 'Carpenter',
+    v: .6, // speed
+    s: 'm', // size
+    d: 1, // 1 = sugar/carb/sweet eater.
+    p: 1, // pro-level (don't autospawn)
+    t: "Fantastic at construction, but always slowed down from lugging a tool belt."
+  },
+  H: {
+    n: 'Red Harvester',
+    v: .7, // speed
+    b: 1, // This ant bites.
+    s: 'm', // size
+    d: 1, // 1 = sugar/carb/sweet eater.
+    p: 1, // pro-level (don't autospawn)
+    t: "This type of ant reaps the benefits of the strange places it just fell into."
   },
 },
+
+castes = {Q: 'Queen', D: 'Drone', W: 'Worker'},
 
 items = {
 
@@ -69,7 +127,7 @@ items = {
       ["We Dirty A.N.T. (We do it for fun)"],
       ["That's probably not the best stuff for an ant farm"],
       ["Ah, pay dirt…"],
-    ],
+    ]
   },
   trash: {
     n: 'Trash Bag',
@@ -86,14 +144,21 @@ items = {
       ["Great now throw it in the East River"],
       ["You certainly know your way around garbage"],
       ["Yeah that was a load of rubbish"],
-    ],
+    ]
   },
   tg: {
     n: 'The Glass',
     desc: "Want to know what your ants are up to?<br>Take a closer look.",
     lvl: 2,
     max: 1,
-    keep: 1,
+    keep: 1
+  },
+  car: {
+    n: 'Carousel',
+    desc: "Cycle through your farms automatically.<br>Like a screen saver but with ants.",
+    lvl: 80,
+    max: 1,
+    keep: 1
   },
 
   // ANT MAINTENANCE ITEMS
@@ -105,18 +170,17 @@ items = {
     t: 'hydration',
     dr: 10,
     fd: 2,
-    //md: -2,
     health: 1,
     sweet: 1,
     keep: 1,
     quip: [
-      ["Why you never drink water, fatty?"], 
-      ["She shoot Coca-Cola"], 
-      ["Oy Scarface, settle down with the coke"], 
-      ["Who is this?  Whitney Houston?"], 
+      ["Why you never drink water, fatty?"],
+      ["She shoot Coca-Cola"],
+      ["Oy Scarface, settle down with the coke"],
+      ["Who is this?  Whitney Houston?"],
       ["You want some fries to go with that mate?"],
-      ["And the waters prevailed upon the earth an hundred and fifty days"]
-    ],
+      ["And the waters prevailed upon the earth an hundred and fifty days"],
+    ]
   },
   bread: {
     n: 'Artesano Bread',
@@ -131,7 +195,7 @@ items = {
       ['Texture divine, a tender embrace, symphony of flavor, a delicate grace.'],
       ['Crust golden-brown, a whispering crunch. Gateway to taste, a lovely munch.'],
       ['Savor each bite with gratitude and glee for artesano bread is so right for me.'],
-    ],
+    ]
   },
   danish: {
     n: 'Cheese Danish',
@@ -144,7 +208,9 @@ items = {
     keep: 1,
     quip: [
       ['Let them eat crumbs!'],
-    ],
+      ["Happiness is a warm Cheese Danish."],
+      ['Sweet cheese wrapped in dough,', 'A burst of warmth in each bite,', 'Mornings taste so right.'],
+    ]
   },
   saltpork: {
     n: 'Salt Pork!',
@@ -159,7 +225,7 @@ items = {
       ['You could have just used bacon.'],
       ['I never eat a pig, cos a pig is a cop.'],
       ['Get some pork on your fork.'],
-    ],
+    ]
   },
   asti: {
     n: 'Asti Spumante',
@@ -173,20 +239,42 @@ items = {
     health: -1,
     keep: 1,
     quip: [
-      ['When my bottle pop.'], 
-      ['When my bottle pop, shake me.'], 
-      ["Throw 'em back till I lose count…"], 
+      ['When my bottle pop.'],
+      ['When my bottle pop, shake me.'],
+      ["Throw 'em back till I lose count…"],
       ["Don't cry for me next door neighbor."],
-    ],
+      ['You brought home champagne!'],
+      ["It's imported champagne"],
+      ["Mmm it's delicious champagne"],
+      ['A good taste for good friends'],
+    ]
+  },
+  hotdog: {
+    n: 'Microwaved Hot Dog',
+    desc: "That's the only way I cook my wieners.<br>(An ALDI in-house brand)",
+    lvl: 8,
+    t: 'nutrition',
+    fd: 12,
+    meat: 1,
+    max: 1,
+    keep: 1,
+    quip: [
+      ['A scent comes wafting...'],
+      ['Packaging said, "Warning: Do not recycle this plastic."'],
+      ["Ooh, it's hot dog time."],
+      ['These boys were 89 cents.'],
+      ['8 wieners, 89 cents.'],
+      ['Leaking. Leaking! The Hog Dogs are leaking, people!'],
+    ]
   },
 
   // PLAYER POWER-UPS
-  antaeus: {
+  cologne: {
     n: 'Antaeus Cologney',
     desc: "Smother yourself with it and the ants come marching in.<br>This is actually a real product.",
     max: 3,
     t: 'pheremone',
-    lvl: 12,    
+    lvl: 12,
     quip: [
       ['Smell like a man, man.'],
       ['Find Your Magic.'],
@@ -197,7 +285,7 @@ items = {
       ['A New Freshness.'],
       ["I'm the only one and I wore cologne."],
       ['You just cologney brother, when you need a hand.'],
-    ],
+    ]
   },
   antyvenom: {
     n: 'Anty Venom',
@@ -214,7 +302,31 @@ items = {
       ['When you need to unfriend someone… in person.'],
       ['The Champagne of Pain.'],
       ['Because your taste buds hate you.'],
-    ],
+    ]
+  },
+  clonekit: {
+    n: 'Cloning Kit',
+    desc: "Clones one of your worker ants three times.<br> ",
+    lvl: 25,
+    max: 1,
+    t: 'science gizmo',
+    quip: [
+      ["The best way to predict the future is to create it."],
+      ['We have not only the ability, but', 'the responsibility to guide our own evolution.'],
+      ['Cloning is the sincerest form of flattery.'],
+      ["You were so preoccupied with whether or not you could,", "you didn't stop to think if you should."],
+      ["Genetic power is the most awesome force the planet's ever seen,", "but you wield it like a kid who's found his dad's gun."],
+    ]
+  },
+  speedo: {
+    n: 'Speedo',
+    desc: "Warp time with this radio controller to speed up your farm.<br>(burns out after a few minutes)",
+    lvl: 45,
+    max: 1,
+    t: 'science gizmo',
+    quip: [
+      ['Engage!'], ['Punch it!'], ["Let's light this candle!"], ['Taking the leap!'], ['Warp factor 9 now!'], ['Full burn'], ['Max thrust!'], ['Jumping ahead now!'],
+    ]
   },
 
   // HATS
@@ -223,91 +335,98 @@ items = {
     desc: "I don't think that's the right spelling.<br>But you can call it whatever you like.",
     t: 'hat',
     lvl: 30,
-    max: 1,
+    max: 1
   },
   spy: {
     n: 'Spy Hat',
     desc: "Sometimes ants need to go undercover.<br>And they usually use an alias.",
     t: 'hat',
     lvl: 40,
-    max: 1,
+    max: 1
   },
   gangster: {
     n: 'Gangster Hat',
     desc: "Johnny Salami and Tony the Baker got ones just like it.<br>Those aren't even their real names.",
     t: 'hat',
     lvl: 40,
-    max: 1,
+    max: 1
   },
   gangster: {
     n: 'Jazz Hat',
     desc: 'What do you call someone wearing a "Make Jazz Great Again" hat?<br>A Trumpet Supporter.',
     t: 'hat',
     lvl: 40,
-    max: 1,
+    max: 1
   },
   landry: {
     n: 'Tom Landry Hat',
     desc: "It's officially known as the Tom Landry hat.<br>But you can call it a Cowboy hat for all I care.",
     t: 'hat',
     lvl: 40,
-    max: 1,
+    max: 1
   },
   rhi: {
     n: 'Rhianna Hat',
     desc: "Ooh na na, what's my name?<br>Ooh na na, what's my name?",
     t: 'hat',
     lvl: 60,
-    max: 1,
+    max: 1
   },
   bogart: {
     n: 'Humphrey Bogart Hat',
     desc: "Of all the ant farms in all the towns in all the world…<br>She walks into mine.",
     t: 'hat',
     lvl: 60,
-    max: 1,
+    max: 1
   },
   jt: {
     n: 'Justin Timberlake Hat',
     desc: "What did you expect?<br>A Suit & Tie?",
     t: 'hat',
     lvl: 60,
-    max: 1,
+    max: 1
   },
   sinatra: {
     n: 'Frank Sinatra Hat',
     desc: "Something stupid:<br>The way you look tonight.",
     t: 'hat',
     lvl: 60,
-    max: 1,
+    max: 1
+  },
+  cohen: {
+    n: 'Leonard Cohen Hat',
+    desc: "You say I took the name in vain,<br>I don't even know the name.",
+    t: 'hat',
+    lvl: 60,
+    max: 1
   },
   mj: {
     n: 'Michael Jackson Hat',
     desc: "Who?<br>He!",
     t: 'hat',
     lvl: 80,
-    max: 1,
+    max: 1
   },
   depp: {
     n: 'Johnny Depp Hat',
     desc: "The Mad Hatter's very own<br> ",
     t: 'hat',
     lvl: 80,
-    max: 1,
+    max: 1
   },
   pitt: {
     n: 'Brad Pitt Hat',
     desc: "So you're Brad Pitt.<br>That don't impress me much.",
     t: 'hat',
     lvl: 80,
-    max: 1,
+    max: 1
   },
   walt: {
     n: 'Walt Disney Hat',
     desc: "Put it right on top of<br>the most magical place on Earth.",
     t: 'hat',
     lvl: 80,
-    max: 1,
+    max: 1
   },
 
   // PAINTS
@@ -317,7 +436,7 @@ items = {
     t: 'paint',
     lvl: 20,
     col: '#64bc41',
-    max: 3,
+    max: 3
   },
   red: {
     n: 'Reddy Rich',
@@ -325,7 +444,7 @@ items = {
     t: 'paint',
     lvl: 30,
     col: '#d83030',
-    max: 3,
+    max: 3
   },
   blue: {
     n: 'Bright Blue',
@@ -333,7 +452,7 @@ items = {
     t: 'paint',
     lvl: 30,
     col: '#3fa1ec',
-    max: 3,
+    max: 3
   },
   yellow: {
     n: 'Yellow',
@@ -341,7 +460,7 @@ items = {
     t: 'paint',
     lvl: 40,
     col: '#ffca46',
-    max: 3,
+    max: 3
   },
   orchid: {
     n: "Owens' Orchid",
@@ -349,7 +468,7 @@ items = {
     t: 'paint',
     max: 3,
     lvl: 50,
-    col: '#9932CC',
+    col: '#9932CC'
   },
   orange: {
     n: "Orange Groove",
@@ -357,7 +476,7 @@ items = {
     t: 'paint',
     max: 3,
     lvl: 60,
-    col: '#fb8500',
+    col: '#fb8500'
   },
   white: {
     n: "Titanium",
@@ -365,7 +484,7 @@ items = {
     t: 'paint',
     max: 3,
     lvl: 80,
-    col: '#efefef',
+    col: '#efefef'
   },
   pink: {
     n: "P!nk",
@@ -373,7 +492,7 @@ items = {
     t: 'paint',
     max: 3,
     lvl: 80,
-    col: '#FF69B4',
+    col: '#FF69B4'
   },
   black: {
     n: "Midnight",
@@ -381,7 +500,7 @@ items = {
     t: 'paint',
     max: 3,
     lvl: 80,
-    col: '#333333',
+    col: '#333333'
   },
   silver: {
     n: "Ardent Argent",
@@ -393,8 +512,11 @@ items = {
     fx: 'm', // metallic
     quip: [
       ["Don't cry for me."],
-      ['Ardent Argent is an arduous agent.']
-    ],
+      ['Ardent Argent is an arduous agent.'],
+      ['The silver spoon is the hardest to remove from the mouth.'],
+      ["Oh there's that silver lining..."],
+      ['A shiny new masterpiece'],
+    ]
   },
   gold: {
     n: "Comedy Gold",
@@ -406,7 +528,87 @@ items = {
     fx: 'm', // metallic
     quip: [
       ['Solid gold...'],
-    ],
+      ['I got the Midas touch'],
+      ["I ain't saying she's a gold digger..."],
+      ["It's a gold-plated life"],
+    ]
+  },
+  // Dummy item for crucible burnt farms.
+  metal: {
+    nodrop: 1,
+    fx: 'm'
+  },
+
+  // ANT TUBES
+  harv: {
+    n: "The Red Queen",
+    desc: "There are worse lives to live.<br>Don't feel sorry for me.",
+    t: 'ants',
+    max: 1,
+    lvl: 120,
+    col: 'red',
+    ant: 'H'
+  },
+  carp: {
+    n: "The Carpenters",
+    desc: "Look what Mr Postman has delivered!<br>Oh yes, wait a minute.",
+    t: 'ants',
+    max: 1,
+    lvl: 120,
+    col: 'orange',
+    ant: 'K',
+    W: 5 // Gives 5 workers.
+  },
+  sug: {
+    n: "Sugar Mama",
+    desc: "An older, more experienced, Queen.<br>She'll get things going for you.",
+    t: 'ants',
+    max: 1,
+    lvl: 140,
+    col: 'yellow',
+    ant: 'Z'
+  },
+  chi: {
+    n: "Lady Chimera",
+    desc: "It's pronounced <em>chimera</em>.<br>But, go on…",
+    t: 'ants',
+    max: 1,
+    lvl: 140,
+    col: 'blue',
+    ant: 'M'
+  },
+  phar: {
+    n: "Queen Of The Nile",
+    desc: "Mother of Pharaohs.<br>She'll light the darkness that threatens the land.",
+    t: 'ants',
+    max: 1,
+    lvl: 160,
+    col: 'orchid',
+    ant: 'P'
+  },
+  ghst: {
+    n: "The Ghost Crew",
+    desc: "I ain't afraid of no ghost.<br> ",
+    t: 'ants',
+    max: 1,
+    lvl: 160,
+    col: 'silver',
+    ant: 'J',
+    W: 7 // Gives 7 workers.
+  },
+  vial: {
+    n: "Ant Collection Vial",
+    desc: "Ants love getting into these<br>and can survive in them forever.",
+    lvl: 0,
+    t: 'ants',
+    nodrop: 1
+  },
+  collected: {
+    n: "Collected Ants",
+    desc: "",
+    lvl: 0,
+    t: 'ants',
+    nodrop: 1
   },
 
   // EXPANSION ITEMS
@@ -421,7 +623,31 @@ items = {
       ['Why did you choose that?'],
       ['Interesting choice!'],
       ['OK well we did that.']
+    ],
+    keep: 1
+  },
+  antFarm: {
+    n: 'Ant Farm',
+    desc: "Set up a new Ant Farm.<br>100% SCIENTIFICALLY ACCURATE",
+    lvl: 20,
+    max: 2,
+    t: 'expansion pack',
+    quip: [
+      ['Alright! Here is a new farm.'],
+      ['New farm for you.'],
+      ['Here is your unboxed ant farm.'],
+      ['A clean slate.'],
+      ["You just wanna be startin' something."],
+      ["Enter HEYSCOOPS at checkout!"],
     ]
+  },
+  tube: {
+    n: 'ToobWay™ Connector',
+    desc: "DO YOU KNOW DA WAY™<br>YOU DO NOT KNOW DA WAY™",
+    lvl: 40,
+    max: 2,
+    t: 'expansion accessory',
+    keep: 1,
   },
   sand: {
     n: 'Sand Bag',
@@ -436,22 +662,7 @@ items = {
       ['Enter the sand, man.'],
       ["It's course and rough and irritating."],
       ['And it gets everywhere.'],
-    ],
-  },
-  antFarm: {
-    n: 'Ant Farm',
-    desc: "Set up a new Ant Farm.<br> ",
-    lvl: 20,
-    max: 2,
-    ext: 'png',
-    t: 'expansion pack',
-    quip: [
-      ['Alright! Here is a new farm.'],
-      ['New farm for you.'],
-      ['Here is your unboxed ant farm.'],
-      ['A clean slate.'],
-      ["You just wanna be startin' something."],
-    ],
+    ]
   },
   gel: {
     n: 'NASA Gel',
@@ -462,61 +673,58 @@ items = {
     quip: [
       ["I don't think you're ready for this."],
       ['Can you dig it? (Yes)'],
-    ],
-  },
-  clonekit: {
-    n: 'Cloning Kit',
-    desc: "Clones one of your worker ants three times.<br> ",
-    lvl: 25,
-    max: 1,
-    t: 'science gizmo',
-  },
-  tube: {
-    n: 'ToobWay™ Connector',
-    desc: "DO YOU KNOW DA WAY™<br>YOU DO NOT KNOW DA WAY™",
-    lvl: 40,
-    max: 2,
-    t: 'expansion accessory',
-  },
-  speedo: {
-    n: 'Speedo',
-    desc: "Warp time with this radio controller to speed up your farm.<br>(burns out after a few minutes)",
-    lvl: 45,
-    max: 1,
-    t: 'science gizmo',
+      ["That's one small step for an ant"]
+      ["Failure is not an option"],
+      ["Do the other things, not because they are easy, but because they are hard."],
+      ["The dream of yesterday is the hope of today and the reality of tomorrow."],
+    ]
   },
   beer: {
-    n: 'Beer Jello',
-    desc: "Ant habitat jello that provides some food/water and improves ant mood a lot.<br> ",
+    n: 'Beer Jell-O',
+    desc: "Ant habitat jell-O that provides some food/water<br>and improves ant mood a lot.",
     lvl: 50,
     t: 'filler',
     max: 1,
     quip: [
-      ["I don't think you're ready for this."],
       ['Can you dig it? (Yes)'],
-    ],
+      ['Open your world'],
+      ['Stay thirsty, my friends'],
+      ['This is the original'],
+      ['Take pride in your beer'],
+      ['Be legacy'],
+      ['Watch it wiggle, see it jiggle'],
+      ["There's always room for Jell-O"],
+      ["The Jell-O that jingles"],
+    ]
   },
   product: {
     n: 'Professional Wet-Look Product',
-    desc: 'Ant habitat product that provides some food/water, as well as a little mood and health boost.<br> ',
+    desc: 'Ant habitat product that provides some food/water,<br>as well as a little mood and health boost.',
     lvl: 60,
     t: 'filler',
     max: 1,
     quip: [
-      ["I don't think you're ready for this."],
       ['For all ant types'],
-    ],
+      ['For flip, bounce, and hold'],
+      ['Shape your style!'],
+      ['Rock your style!'],
+      ['Salon proven'],
+    ]
   },
   lube: {
     n: 'Expired Bulk Personal Lubricant',
-    desc: 'Ant habitat filth that provides some food/water, encourages egg-laying, and attracts queens.<br> ',
+    desc: 'Ant habitat filth that provides some food/water,<br>attracts queens, and encourages laying.',
     lvl: 69,
     t: 'filler',
     max: 1,
     quip: [
       ["I don't think you're ready for this."],
       ['Lube glorious lube'],
-    ],
+      ['This fkn town…'],
+      ['Keeps love going'],
+      ['For a smooth ride'],
+      ['Slip into pleasure'],
+    ]
   },
   slime: {
     n: 'Slime',
@@ -525,20 +733,35 @@ items = {
     t: 'filler',
     max: 1,
     quip: [
-      ["I don't think you're ready for this."],
       ['Slime… anyone?'],
-    ],
+      ["I don't know about this"],
+      ["What is slime made of? I don't know!"],
+      ["Grape? Next time get lime slime!"]
+      ['Drip. Drop. Squish. Pop!'],
+      ['The fun that never dries up'],
+    ]
   },
   ooze: {
     n: 'The Secret Ooze',
-    desc: "Ant habitat ooze that provides some food/water and gives a lot of health but decreases mood.<br> ",
+    desc: "Ant habitat ooze that provides some food/water<br>and gives a lot of health but decreases mood.",
     lvl: 84,
     t: 'filler',
     max: 1,
     quip: [
-      ["I don't think you're ready for this."],
-      ['Can you dig it? (Yes)'],
-    ],
+      ['Get ready to ooze with excitement'],
+      ["That's no ordinary ooze… it's the secret of our past!"],
+      ["The mutagen is unstable. If we're not careful, it could mutate us even further!"],
+      ["Dude, I still can't believe a little ooze made us totally awesome!"],
+      ["The ooze is what made us… and it can make others like us!"],
+    ]
+  },
+  feng: {
+    n: 'Mystical Feng Shui Pack',
+    desc: "For ants who crave better energy flow. Includes suspiciously scented incense.<br>Reorder your farms to achieve inner ant-peace.",
+    lvl: 168,
+    t: 'farm-sorter',
+    max: 1,
+    keep: 1
   },
 
   // SCENERY ITEMS
@@ -547,49 +770,49 @@ items = {
     desc: "Mountains rise tall like ant hills, their grandeur the landscape fulfills.<br>Ain't no mountain too high, for the ants or the sky. Both conquer with tiny, strong wills.",
     t: 'scenery',
     lvl: 5,
-    max: 2,
+    max: 2
   },
   liberty: {
     n: 'French Statue',
     desc: "Your huddled colonies yearning to breathe free.<br>Yet captive they will remain.",
-    t: 'scene-piece',
+    t: 'decor',
     lvl: 10,
-    max: 2,
+    max: 2
   },
   pyramids: {
     n: 'Pyramids',
     desc: "The pyramids house kings of old, in chambers with tunnels untold.<br>Like ants in their nest, the Pharaohs find rest, in a labyrinth of treasure and gold.",
     t: 'scenery',
     lvl: 30,
-    max: 2,
+    max: 2
   },
   obelisk: {
     n: 'Obelisk',
     desc: "You may tell one person about your ant farm.<br>(we don't talk about the tiny pyramid at the top)",
-    t: 'scene-piece',
+    t: 'decor',
     max: 1,
-    lvl: 30,
+    lvl: 30
   },
   barn: {
     n: 'Barn',
     desc: "Ants have sophisticated ways to store food.<br>A barn is not one of those ways.",
-    t: 'scene-piece',
+    t: 'decor',
     max: 2,
-    lvl: 30,
+    lvl: 30
   },
   piff: {
     n: 'Piff',
     desc: "Best show I've seen in ages.<br>(chairs were uncomfortable - one star)",
-    t: 'scene-piece',
+    t: 'decor',
     max: 1,
-    lvl: 60,
+    lvl: 60
   },
   jesus: {
     n: 'Jesus',
     desc: "The Ant Christ<br>Not to be confused with the other guy.",
-    t: 'scene-piece',
+    t: 'decor',
     max: 1,
-    lvl: 70,
+    lvl: 70
   },
 
   // BACKGROUND CARD ITEMS
@@ -598,44 +821,72 @@ items = {
     desc: "Add some immersive realism to your farm<br>with this high-quality printed card.",
     t: 'card',
     max: 1,
-    lvl: 20,
-    ext: 'jpg',
+    lvl: 20
   },
   canada: {
     n: 'Canada',
     desc: "<br>It's somewhere above…",
     t: 'card',
     max: 1,
-    lvl: 50,
-    ext: 'png',
+    lvl: 50
   },
   vegas: {
     n: 'Vegas',
     desc: "<br>(note: ants may become preoccupied with parking and weather)",
     t: 'card',
     lvl: 60,
-    max: 1,
-    ext: 'png',
+    max: 1
   },
   desert: {
     n: 'Desolation',
     desc: "A printed card so realistic that you can feel the despair and hopelessness<br>just like if you really drove to Arizona.",
     t: 'card',
     max: 1,
-    lvl: 60,
-    ext: 'jpg',
+    lvl: 60
   },
   space: {
     n: 'The Final Frontier',
-    desc: "I hear it's not as good as Star Trek: The Experience<br>I wanted to see that. Who was in that, anyway?",
+    desc: "I hear it's not as good as Star Trek: The Experience<br>I wanted to go to that. Who was in that, anyway?",
     t: 'card',
     max: 1,
-    lvl: 80,
-    ext: 'jpg',
+    lvl: 80
   },
 
   // SPECIAL ITEMS
-  ticket: {
+  antfax: {
+    n: 'ANT FAX',
+    desc: "THE ant fact organizer<br>of the nineties.",
+    t: 'educational fun',
+    max: 1,
+    lvl: 20,
+    keep: 1
+  },
+  antfaxpro: {
+    n: 'ANT FAX PRO',
+    desc: "Even more fun ant facts<br>for the brightest of learners.",
+    t: 'educational fun',
+    max: 1,
+    lvl: 120,
+    keep: 1
+  },
+  box: {
+    n: 'Nerd Box',
+    desc: "Whatever's in there might fill the empty void in your soul.<br>Just like the crate that housed the ark of the covenant.",
+    t: 'gift',
+    lvl: 17,
+    max: 3,
+    quip: [
+      ['Enter HEYSCOOPS at checkout!'],
+      ['From the nerd community as a whole.'],
+      ['Any of the items that you crave'],
+      ['It really is about the experience'],
+      ['For me personally, Nerd Box is great.'],
+      ['I think we all love Nerd Box'],
+      ['Nerd Box is the 23rd best nerd subscription service'],
+      ['Only the price of 6 to 8 cups of Starbucks coffee a day'],
+    ]
+  },
+  bus: {
     n: 'Ticket 2 Ride',
     desc: "Mystical pass to a whole new backdrop, doubles as an unspoken confession of mid-life crisis…<br>…admits one man/child.",
     t: 'location swapper',
@@ -648,7 +899,7 @@ items = {
       ["Let's fkn go!"],
       ["The wheels on the bus go 'round and 'round"],
       ["Great! Let's go…"]
-    ],
+    ]
   },
   backdrop: {
     n: 'Low Key Backdrop',
@@ -665,22 +916,50 @@ items = {
       ["If this backdrop had a dating profile, it would say 'seeks good lighting and interesting subjects.'"],
       ["This is the backdrop you didn't know you needed but will absolutely love."],
       ["It's so stunning!"]
-    ],
+    ]
+  },
+  crucible: {
+    n: 'The Crucible',
+    desc: "Liquid metal<br> ",
+    t: 'bad idea',
+    max: 2,
+    lvl: 200,
+    quip: [
+      ["Tsssssssssssssss..."],
+      ["Yeowwwww"],
+      ["Aaaaaaargghhhhhh"],
+    ]
+  },
+  ebay: {
+    n: 'eBay',
+    desc: "A digital garage sale for old ant farms.<br>The highest bid will be a serving of disappointment.",
+    t: 'app',
+    max: 1,
+    keep: 1,
+    lvl: 200
+  },
+  coexist: {
+    n: '☪︎☮︎é✡︎ì࿊✞',
+    desc: "Advocates that ants of different faiths and belief systems can live together peacefully.",
+    t: 'sticker',
+    max: 1,
+    lvl: 222
   },
   mom: {
     n: 'Mom',
-    desc: "Bucket to mop, you got all the achievements.<br>You cleaned up. You WON the whole game!",
+    desc: "Bucket to mop, you've done it all.<br>You cleaned up.",
     t: 'percent DAT UGLY BITCH',
     max: 1,
     keep: 1,
     lvl: 100,
-    nodrop: 1, // Don't randomly drop this item.
+    nodrop: 1 // Don't randomly drop this item.
   },
-  
+
 },
 
 // Button labels.
 dropOK = ['Yeah OK', 'Alrighty', 'Rightio', 'Huh', 'What', 'k', 'Mmm Hmm', 'Yup', 'Got it', 'OK whatever', 'Sweet', 'Thanks I guess'],
+achOK = ['Yes', 'I did', 'Cheers', 'Woohoo', 'Bam', 'Boom', 'Nice', 'Yay', 'Right?', 'There it is', 'Click this', 'Awesome'],
 
 // Pools of random messages for specific occasions.
 welcome = [['Welcome to Ant Farm Social.', "We're preaching ants."],['Hey Johnny, do you wanna go to an Ant Farm Social?']],
@@ -689,6 +968,9 @@ biteMsg = [["You've been bit!", "You can't collect ants until you're better"], [
 tapMsg = [["They don't like that"], ['Stop that'], ["Tappa-Tappa-Tappa"], ['Shh! This is the listening side of the plexiglass'], ['This is supposed to be a quiet activity']],
 firstPoint = [['You scored your first point! 🏆'], ['🎉🎉🎉 1 point! 🎉🎉🎉'], ['You caught your first ant! 🐜'], ["Well done, there's your first one. 1️⃣"]],
 secondPoint = [['You scored your second point! You go you! 😉'], ['Two points!!! 🥇🥇'], ["Two's company!"], ['Oh the number one is not my favourite number.', "Because one means there's just me and there's no you."]],
+lidLift = [['Check your openings for papers'], ["It's ALWAYS open"], ["It's like a sweathouse in there"], ["I lifted the lid, and now I have questions."], ["Lift the lid of curiosity"],
+["Some secrets are best left untouched"], ["You might regret this"], ["Get back in your hole!"], ["The mystery beneath is revealed!"], ["Dealing with what's inside? That's the real challenge."],
+["What are you looking in there for?"], ["Why do that?"], ["Hey put that back!"], ["Leave it on buddy"], ["What if they escape?"]],
 
 kudos = [
   // Silly congratulatory messages.
@@ -813,7 +1095,7 @@ kudos = [
     ["Cool, you achieved something. 🥇"],
   ],
   // Apathetic congratulatory messages.
-  [  
+  [
     ["Congrats."],
     ["Impressive, kind of."],
     ["You did it, I guess."],
@@ -854,14 +1136,13 @@ kudos = [
     ["Another for you."],
     ["One more caught."],
     ["You managed another."],
-    ["One more ant."],
     ["Captured again."],
     ["You caught it."],
     ["Another ant captured."],
   ],
   // Congratulatory messages that are indicative of malaise,
   // and that have contempt and disdain for the player, or are demeaning taunts.
-  [  
+  [
     ["Wow, another one. How impressive. Not."],
     ["Oh, you got another? Big deal."],
     ["Another ant? You're really scraping the bottom of the barrel."],
@@ -934,6 +1215,16 @@ jokes = [
     ["What do you call an army ant?", "Militant"],
     ["What is the top ranking ant in the military?", "Lieutenant"],
     ["What do you get when you cross an ant with French royalty?", "Marie Ant-toinette!"],
+    ["Will an Ant trip if you…", "Give it antacid?"],
+    ["What do you call an ant bartender?", "Piss-ant"],
+    ["What do you call a captive ant that hasn't been freed?", "Antebellum"],
+    ["What do ants sing while working?", "A sea sh-anty"],
+    ["Don't you just love the ant-icipation?"],
+    ["The stories playing out in this farm could make an ant-hology"],
+    ["Some of the older ants are ant-iques!"],
+    ["Having a queen is better than ant-archy"],
+    ["This farm should have its own national ant-hem"],
+    ["Ant nothin but a G thang"],
 
     // Limericks
     ["There once was an ant with great charm,", "Living in an ant farm, so warm.", "With tunnels so neat,", "It couldn't be beat,", "In its tiny ant-sized farm!"],
@@ -1036,8 +1327,8 @@ jokes = [
     ["If an ant had the ability to reflect on its existence…", "…what might it consider the meaning or purpose of its life?"],
     ["How does the life of an ant challenge our understanding…", "…of individual versus collective identity?"],
     ["Do ants exhibit any behaviors that suggest they experience emotions or subjective states…", "…and how might this influence our perception of…", "…consciousness in non-human species?"],
-    ["What can the intricate social scene-pieceure of an ant colony teach us…", "…about the balance between order and chaos in nature?"],
-    ["If ants were capable of philosophical thought, how might they interpret…", "…the concept of free will within the confines of their highly scene-pieceured lives?"],
+    ["What can the intricate social structure of an ant colony teach us…", "…about the balance between order and chaos in nature?"],
+    ["If ants were capable of philosophical thought, how might they interpret…", "…the concept of free will within the confines of their highly structured lives?"],
     ["How does the life cycle of an ant mirror…", "…the existential questions humans face about birth, life, and death?"],
     ["Do ants have a form of communication that could be considered a language…", "…and what implications does this have for our understanding of…", "…communication and intelligence in other species?"],
     ["If ants were able to contemplate the universe…", "…how might their understanding differ from human cosmology and metaphysics?"],
@@ -1059,7 +1350,7 @@ jokes = [
     ["Could the complex pheromone trails laid by ants…", "…be seen as a form of communication that transcends language…", "…suggesting a deeper, non-verbal mode of interaction…", "…that evokes existential questions about…", "…the limits of human understanding and perception?"],
     ["If ants exhibit behaviors that seem to defy individual survival instincts…", "…in favor of the collective good, does this compel us to reconsider the nature of self-preservation…", "…and the motivations behind our own actions in a world driven by material desires and personal gain?"],
     ["In observing the tireless labor of ants and their unwavering dedication to the colony…", "…do we confront our own existential anxieties about purpose and meaning…", "…prompting us to question whether our pursuits in the material world…", "…are ultimately fulfilling or illusory?"],
-    ["When ants conscene-piece elaborate nests and fortifications…", "…could these structures be seen as symbolic representations of our own quest…", "…for permanence and security in an impermanent and unpredictable universe?"],
+    ["When ants construct elaborate nests and fortifications…", "…could these structures be seen as symbolic representations of our own quest…", "…for permanence and security in an impermanent and unpredictable universe?"],
     ["If an ant's life is measured in moments of collective achievement…", "…rather than individual accomplishments…", "…does this challenge our preconceptions about success and fulfillment…", "…urging us to rethink the value of personal ambition and ego-driven pursuits?"],
     ["Can the orderly and disciplined behavior of ants…", "…in the face of adversity teach us lessons about resilience and adaptability…", "…prompting us to reconsider our own responses to challenges and uncertainties in life?"],
     ["When an ant navigates its environment with precision and purpose…", "…guided by instincts honed over millions of years of evolution…", "…does this suggest a form of knowledge and wisdom that transcends individual experience…", "…calling into question our own understanding of intelligence and consciousness?"],
@@ -1068,7 +1359,7 @@ jokes = [
   // Statements of existential dread referring to ants.
   [
     ["The ceaseless labor of ants, each one lost in its duties…", "…mirrors the existential terror of a life…", "…consumed by purpose yet devoid of meaning."],
-    ["In the intricate tunnels of an ant colony…", "…I see the futility of our human conscene-pieceions…", "…mere facades masking the void within."],
+    ["In the intricate tunnels of an ant colony…", "…I see the futility of our human constructions…", "…mere facades masking the void within."],
     ["The collective unity of ants belies a terrifying truth:", "Individual identity dissolves into insignificance…", "…amidst the vast expanse of cosmic indifference."],
     ["When ants march in unison, driven by instincts older than time…", "…I am haunted by the realization that our own pursuits may be equally predetermined…", "…devoid of true agency."],
     ["Ants, in their blind obedience to the colony…", "…serve as a stark reminder of our own submission to societal norms…", "…our identities eroded by conformity to systems we can neither control nor escape."],
@@ -1205,9 +1496,8 @@ ach = {
     lvl: 20,
   },
   'fac': {
-    n: "Factory Farmer",
-    desc: "Have multiple farms running.",
-    lvls: 1,
+    n: "Factory Fourm",
+    desc: "Have four farms developing.",
     sub: "farms",
     ico: "🏭",
     lvl: 25,
@@ -1229,28 +1519,24 @@ ach = {
   'sweep': {
     n: "Queen Sweep",
     desc: "A single queen wipes out a colony.",
-    lvls: 1,
-    sub: "killed in the colony",
     ico: "👸🏾",
     lvl: 35,
   },
   'kweens': {
     n: "Kweens",
     desc: "Have multiple queens in a colony.",
-    lvls: 1,
-    sub: "queens",
     ico: "👑",
     lvl: 40,
   },
   'progeny': {
-    n: "Progeny", // The Dad Joke ?  
+    n: "Progeny",
     desc: "Start a farm without capturing free ants.",
     ico: "🐜",
     lvl: 45,
   },
   'man': {
     n: "Man Fairies",
-    desc: "Hatch drone ants.",
+    desc: "Nurse drone ants to adulthood.",
     lvls: 1,
     sub: "drones",
     ico: "🧚‍♂️",
@@ -1287,6 +1573,168 @@ ach = {
     lvl: 100,
   },
 },
+
+// The blank data structure of a farm object.
+farmDefault = {
+  stats: {
+    death: {
+      hunger: 0,
+      thirst: 0,
+      fight: 0,
+      other: 0,
+    },
+    cap: 0,
+  },
+  a: [], // ants
+  e: [], // eggs
+  c: [], // carry
+  tuns: [],
+  hills: [],
+  items: [],
+  decals: [],
+  nips: [],
+  dig: [],
+},
+
+// Actions that can be enqueued when in certain areas, and a flag indicating whether they can be done randomly.
+// The first item in each list is the default action. There should always be a corresponding function in act[action].
+// Some functions rely on the actions being listed here, stop doubting it.
+acts = {
+  'bg': {crawl: 1, uncrawl: 1, rest: 1, fight: 0, slip: 0, land: 0, kip: 0, lay: 0, nip: 0, freeze: 0, die: 0, carry: 0},
+  'top': {pace: 1, dive: 1, dig: 1, crawl: 1, rest: 1, eat: 1, drink: 1, fight: 0, kip: 0, lay: 0, get: 0, nip: 0, freeze: 0, die: 0, carry: 0},
+  'bot': {dive: 1, climb: 1, rest: 1, srv: 0, fight: 0, eat: 0, kip: 0, lay: 0, get: 0, nip: 0, freeze: 0, die: 0, carry: 0, drop: 0},
+},
+
+// Nip Ids (Note: 0 is not a valid key for nipIds)
+nipIds = [0, 'nip-bl', 'nip-br', 'nip-tl', 'nip-tr'],
+
+// Reasons an ant might die.
+deathCauses = {
+  hunger: 'of hunger',
+  thirst: 'of thirst',
+  fight: 'in a fight',
+  other: 'of a broken heart'
+},
+
+// HTML for farm.
+farmTemplate =
+`<div id="kit">
+  <div id="wrapper" class="farm" data-col="green">
+    <div id="a-nip-tl" class="nants nip-tl"></div>
+    <div id="a-nip-tr" class="nants nip-tr"></div>
+    <div id="a-nip-bl" class="nants nip-bl"></div>
+    <div id="a-nip-br" class="nants nip-br"></div>
+    <div id="farm" data-fill="none">
+      <div id="card"></div>
+      <div id="scenery" class="above"></div>
+      <div id="food" class="above"></div>
+      <div id="hills" class="above"></div>
+      <div id="fill" class="fill"><div class="specks"></div></div>
+      <div id="tunnels" class="fill"></div>
+    </div>
+    <div id="glass">
+      <div id="frost"></div>
+      <div class="ahole-set">
+        <div class="ahole"></div>
+        <div class="ahole"></div>
+        <div class="ahole"></div>
+      </div>
+      <div class="ahole-set">
+        <div class="ahole"></div>
+        <div class="ahole"></div>
+        <div class="ahole"></div>
+      </div>
+    </div>
+    <div id="decals"></div>
+    <div id="l-wrap">
+      <div id="loupe"><div id="lg"></div><div id="lh"></div></div>
+      <div id="l-inf">
+        <div id="l-head"></div>
+        <div id="l-l">
+          <div id="l-t"><span class="txt"></span><span class="emo">🐜</span></div>
+          <div id="l-c"><span class="txt"></span><span class="emo"></span></div>
+          <div id="l-d"><span class="txt"></span><span class="emo">⌛</span></div>
+          <div id="l-a"><span class="txt"></span><span class="emo">💡</span></div>
+        </div>
+        <div id="l-r">
+          <div id="l-rot"><span class="emo">☣️</span><span class="bar"></span></div>
+          <div id="l-decay"><span class="emo">🥀</span><span class="bar"></span></div>
+          <div id="l-fd"><span class="emo">🍔</span><span class="bar"></span></div>
+          <div id="l-dr"><span class="emo">🥤</span><span class="bar"></span></div>
+          <div id="l-md"><span class="emo"></span><span class="bar"></span></div>
+          <div id="l-hp"><span class="emo">♥️</span><span class="bar"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="frame-l frame"></div>
+    <div class="frame-r frame"></div>
+    <div id="dropzone" class="glow"></div>
+    <div id="lid">
+      <div class="hole frame"></div>
+      <div class="frame-t frame"></div>
+    </div>
+    <div class="frame-b frame"></div>
+    <div id="nip-tl" class="nip frame"><div class="nipcap frame"></div></div>
+    <div id="nip-tr" class="nip frame"><div class="nipcap frame"></div></div>
+    <div id="nip-bl" class="nip frame"><div class="nipcap frame"></div></div>
+    <div id="nip-br" class="nip frame"><div class="nipcap frame"></div></div>
+    <div id="vial" class="vial">
+      <div class="vc"></div>
+      <div class="vt"></div>
+      <div class="vf"></div>
+      <div class="vw"></div>
+      <div class="vs"><div></div></div>
+    </div>
+    <div id="t-nip-tl" class="toob nip-tl"><div></div><span><span>►</span><span>►</span><span>►</span></span></div>
+    <div id="t-nip-tr" class="toob nip-tr"><div></div><span><span>►</span><span>►</span><span>►</span></span></div>
+    <div id="t-nip-bl" class="toob nip-bl"><div></div><span><span>►</span><span>►</span><span>►</span></span></div>
+    <div id="t-nip-br" class="toob nip-br"><div></div><span><span>►</span><span>►</span><span>►</span></span></div>
+  </div>
+  <div id="base" class="frame" data-col="green">
+    <div id="sign" class="plate">
+      <div class="sign-l plate"></div>
+      <h1 id="n">ANT FARM SOCIAL</h1>
+      <div class="sign-r plate"></div>
+    </div>
+    <div class="trim plate">
+      <div class="trim-inner"></div>
+    </div>
+  </div>
+</div>`,
+
+// HTML for ant.
+antTemplate =
+`<div id="ant" class="ant">
+  <div class="spot"></div>
+  <div class="body">
+    <div class="body-mag">
+      <div class="body-wrap">
+        <div class="legs legs-l">
+          <div class="leg"><div class="foot"></div></div>
+          <div class="leg"><div class="foot"></div></div>
+          <div class="leg"><div class="foot"></div></div>
+        </div>
+        <div class="head">
+          <div class="antenna"></div>
+          <div class="antenna"></div>
+          <div class="hat"></div>
+          <div class="c"></div>
+        </div>
+        <div class="torso"></div>
+        <div class="rear"></div>
+        <div class="legs legs-r">
+          <div class="leg"><div class="foot"></div></div>
+          <div class="leg"><div class="foot"></div></div>
+          <div class="leg"><div class="foot"></div></div>
+        </div>
+        <div class="wings">
+          <div class="wing wing-l"></div>
+          <div class="wing wing-r"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`,
 
 // Locations for the bus tickets (the bg images and corresponding ambient audio).
 locs = {
