@@ -3654,7 +3654,7 @@ act = {
           } while (temp && (temp == tun.id || temp == action.pt));
           // Check if next tunnel is not the one ant is heading to, or any other action's tunnel after that.
           // Note: This assumes there isn't some OTHER kind of act wedged in between expanded future dive actions.
-          if (ant.q.some(action => action?.act == 'dive' && action.id == temp)) {
+          if (!ant.q.some(action => action?.act == 'dive' && action.id == temp)) {
             console.log("Ant is heading towards:", temp, "instead of:", nextTun.id);
             // Ant is creeping toward wrong tunnel - switch to prone to make a proper turn, and loopback to this function.
             antToProneWithCorrection(ant, tun, action.rev);
