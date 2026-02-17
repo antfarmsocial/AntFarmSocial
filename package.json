@@ -25,6 +25,7 @@
     "url": "https://github.com/braksator/AntFarmSocial.git"
   },
   "devDependencies": {
+    "baseline-browser-mapping": "^2.9.19",
     "browserslist": "^4.27.0",
     "fs": "^0.0.1-security",
     "gulp": "^5.0.1",
@@ -33,13 +34,13 @@
     "gulp-lightningcss": "^1.0.0",
     "gulp-rename": "^2.1.0",
     "gulp-replace": "^1.1.4",
+    "gulp-strip-code": "^0.1.4",
     "gulp-terser": "^2.1.0",
+    "gzip-size": "^7.0.0",
     "hypercrush": "^1.0.21",
     "imagemin": "^9.0.1",
     "imagemin-webp": "^6.1.0",
     "jcrushsvg": "^1.1.40",
-    "js-shrink": "file:lib/JsShrink",
-    "longestrepeatedstrings": "^1.0.41",
     "path": "^0.12.7"
   }
 }

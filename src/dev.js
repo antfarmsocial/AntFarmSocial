@@ -8,8 +8,10 @@
  * Most of the functionality is easily accessible in a GUI when ?dev=1 is added to the app's URL.
  *
  */
-
+let dev = 1;
 let showLines = 0;
+let allActs = cloneData(acts);
+let devLoaded = 0;
 
 // Debug line: Draws a line defined in the obj parameter.
 const DL = (obj, score = 100) => {
@@ -80,10 +82,34 @@ const toggleWaypoints = (delOnly, tracer = 0) => {
 
   }
 
-}
+};
+
+// Handle the spawner checkbox.
+const handleSpawner = (doSpawn = 0) => {
+  spawner = !document.querySelector('#dev-spawner').checked;
+  document.querySelector('#dev-spawner-label').textContent = spawner ? '✅ Disable free ant spawner' : '🚫 Enable free ant spawner';
+  if (!spawner) {
+    setTimeout(X => _.a.forEach(antDelete), 5);
+  }
+  else {
+    doSpawn && spawnAnt();
+  }
+};
+
+// Allow the main script to notify us that a switch happened.
+const devNotifySwitch = X => {
+  // Do it immediately if possible.
+  if (devLoaded) {
+    handleSpawner();
+  }
+  // Do it after 1 second.
+  setTimeout(X => {
+    handleSpawner();
+  }, 1000);
+};
 
 // Creates a fully formed tunnel system.
-const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog = 100; tunProgDraw(t)}) || F.hills.forEach(h => {h.h = 25 + randomInt(25); drawHill(h)}), 0);
+const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog = 100; t.dun = 1; tunProgDraw(t)}) || F.hills.forEach(h => {h.h = (h.r - h.l) / 4; drawHill(h)}), 0);
 
 // Dispays the developer panel.
   const devPanel = X => {
@@ -100,13 +126,17 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
   });
 
   let devActsOpts = '';
-  Object.keys(act).sort((a, b) => a.localeCompare(b)).forEach(a => devActsOpts += `<option value="${a}">${a}</option>`);
+  //Object.keys(act).sort((a, b) => a.localeCompare(b)).forEach(a => devActsOpts += `<option value="${a}">${a}</option>`); // Old way of doing this - no longer safe to use.
+  // This functionality affects all ants, could add an ant selection box if needed to improve this.
+  keys(acts).forEach(areakey => acts[areakey].forEach(a => {
+    devActsOpts += `<option value="${areakey}-${a}">${areakey}: ${a}</option>`;
+  }));
 
   let devBannedActsOpts = '';
   let devAreas = Object.keys(acts);
   devAreas.forEach(devArea => {
     devBannedActsOpts += '<b>' + (devArea == 'bg' ? 'BG area' : devArea == 'top' ? 'Top area' : 'Bottom area') + ':</b> &nbsp;';
-    let devAreaActs = Object.keys(acts[devArea]).filter(devAct => acts[devArea][devAct]);
+    let devAreaActs = allActs[devArea];
     let devAreaActsOptsArray = [];
     devAreaActsOptsArray.push(devAreaActs.shift()); // Don't allow control of default action.
     devAreaActs.forEach(devAct => devAreaActsOptsArray.push(`<label><input type="checkbox" name="dev-banned-act-${devArea}-${devAct}" id="dev-banned-act-${devArea}-${devAct}" value="${devArea}-${devAct}">${devAct}</label>`));
@@ -157,7 +187,7 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
 
       <hr>
 
-      <label><input type="checkbox" id="dev-spawner" name="dev-spawner"><span id="dev-spawner-label">✨ Toggle free ant spawner</span></label>
+      <label><input type="checkbox" id="dev-spawner" name="dev-spawner"><span id="dev-spawner-label">✅ Disable free ant spawner</span></label>
       <br>
       <label><input type="checkbox" id="dev-stopants" name="dev-stopants"><span id="dev-stopants-label">🛑 Stop ants</span></label>
       <br>
@@ -183,14 +213,17 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
         <label><input type="checkbox" id="dev-director" name="dev-director"><span id="dev-director-label">✅ Disable "Director" loop</span></label>
       </div>
 
+
       <br>
 
       <h3>Allowed Random Actions</h3>
       <div id="dev-banned-acts">
         ${devBannedActsOpts}
+        <small>Some actions are forced, search code for "defaulting".</small>
       </div>
 
       <br>
+
 
       <select name="dev-act" id="dev-act">${devActsOpts}</select>
       <button id="dev-request">📢 Request action</button>
@@ -268,12 +301,6 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
       </details>
 
       <hr>
-
-      <div id="dev-msg-processes">
-        <label><input type="checkbox" id="dev-msg" name="dev-msg"><span id="dev-msg-label">✅ Disable message system</span></label>
-      </div>
-
-      <br>
 
       <button id="dev-save" style="margin-bottom: .5em" disabled>💾 Save game<span class="countdown"></span></button>
       <br>
@@ -491,19 +518,7 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
     </style>
   `);
 
-  // Handle the spawner checkbox.
-  const handleSpawner = () => {
-    spawner = !document.querySelector('#dev-spawner').checked;
-    // Removed this toggle because switching farms or reloading re-enables spawner without respecting this:
-    //document.querySelector('#dev-spawner-label').textContent = spawner ? '✅ Disable free ant spawner' : '🚫 Enable free ant spawner';
-    if (!spawner) {
-      setTimeout(X => _.a.filter(a => a.state == 'free').forEach(antDelete), 5);
-    }
-    else {
-      spawnAnt();
-    }
-  };
-  document.querySelector('#dev-spawner').addEventListener('change', event => { handleSpawner(); });
+  document.querySelector('#dev-spawner').addEventListener('change', event => { handleSpawner(1); });
 
   // Handle the director checkbox.
   const handleDirector = () => {
@@ -516,13 +531,6 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
     document.querySelector('#dev-director-label').innerHTML = directorCheckbox ? '✅ Disable "Director" loop' : '🚫 Enable "Director" loop<br>[currently only called once on load]';
   };
   document.querySelector('#dev-director').addEventListener('change', event => { handleDirector(); });
-
-  // Handle the msg checkbox.
-  const handleMsg = () => {
-    stopMsgs = document.querySelector('#dev-msg').checked;
-    document.querySelector('#dev-msg-label').textContent = !stopMsgs ? '✅ Disable message system' : '🚫 Enable message system';
-  };
-  document.querySelector('#dev-msg').addEventListener('change', event => { handleMsg(); });
 
   // Restore stopAnts from localStorage (default false)
   stopAnts = localStorage.getItem('stopAnts') === 'true';
@@ -537,11 +545,10 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
     if (!stopAnts) {
       F.a.forEach(a => antAction(a, getEl(a.id))); // restart
     }
-    // clear free ants every time or it becomes chaos.  [comment this out when needed I suppose]
-    ////for (let i = _.a.length - 1; i >= 0; i--) antDelete(_.a[i]);
     _.a.forEach(antDelete);
-    queryAll('.ant.free').forEach(el => el.remove());
-
+    setTimeout(() => {
+      queryAll('.ant.free').forEach(el => el.remove());
+    }, 50);
   });
 
   // Handle form buttons.
@@ -549,7 +556,9 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
     butt.addEventListener('click', event => devButtFunk[event.target.id]());
   });
 
+
   // Banned actions.
+
   document.querySelectorAll('#dev-banned-acts input').forEach(cb => {
     cb.addEventListener('change', event => banAction(cb));
   });
@@ -574,7 +583,6 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
 
   handleSpawner();
   handleDirector();
-  handleMsg();
 
   // Highlight selected tunnel in the list.
   if (document.querySelector('#dev-tunnel-list')) {
@@ -655,7 +663,6 @@ const devButtFunk = {
     queueAch(a[0]);
   },
   'dev-ss': X => {
-    ///speedo();
     useItem(0, 0, 0, {k: 'speedo'});
     clearInterval(devSpeedCheck);
     devSpeedCheck = setInterval(X => {
@@ -677,11 +684,9 @@ const devButtFunk = {
     antBite(0, 1);
   },
   'dev-clearbite': X => {
-    ///antyvenom();
     useItem(0, 0, 0, {k: 'antyvenom'});
   },
   'dev-cologne': X => {
-    ///cologne();
     useItem(0, 0, 0, {k: 'cologne'});
   },
   'dev-clone': X => {
@@ -694,7 +699,6 @@ const devButtFunk = {
     spawner = spawnState;
   },
   'dev-clearants': X => {
-    ///while(F.a.length) antDelete(F.a[0]);
     F.a.forEach(antDelete);
     _.a.forEach(antDelete);
   },
@@ -752,7 +756,8 @@ const devButtFunk = {
     location.reload();
   },
   'dev-request': X => {
-    F.a.filter(a => livesInFarm(a)).forEach(ant => antFinna(ant, document.querySelector('#dev-act').value));
+    let requested = document.querySelector('#dev-act').value.split('-');
+    F.a.filter(a => livesInFarm(a)).forEach(ant => antFinnaVia(ant, requested[1], {via: requested[0]}));
   },
   'dev-save': X => {
     save();
@@ -777,12 +782,10 @@ const devButtFunk = {
     const location = { n: locN };
     if (locN === "top" && document.getElementById("loc-tx").value) {
       location.tx = +document.getElementById("loc-tx").value;
-      ///if (document.getElementById("loc-tm").value) location.tm = +document.getElementById("loc-tm").value;
     }
     if (locN === "bg" && document.getElementById("loc-x").value && document.getElementById("loc-y").value) {
       location.x = +document.getElementById("loc-x").value;
       location.y = +document.getElementById("loc-y").value;
-      ///if (document.getElementById("loc-tm").value) location.tm = +document.getElementById("loc-tm").value;
     }
     if (locN === "bot") {
       if (document.getElementById("loc-tun").value)  location.tun = document.getElementById("loc-tun").value;
@@ -797,7 +800,12 @@ const devButtFunk = {
 const banAction = input => {
   let value = input.value.split('-');
   let checked = input.checked;
-  acts[value[0]][value[1]] = !checked;
+  if (checked) {
+    acts[value[0]] = acts[value[0]].filter(a => a != value[1]);
+  }
+  else if (!acts[value[0]].includes(value[1])) {
+    acts[value[0]].push(value[1]);
+  }
   let label = input.parentElement;
   checked ? label.classList.add('ban') : label.classList.remove('ban');
 };
@@ -912,8 +920,8 @@ const devObjectDisplay = obj => {
 // Displays the HTML of calculated properties of an ant.
 const devAntCalcDisplay = ant => {
   if (ant) return `
-    <div class="row"><span class="label">antGetX:</span><span class="value">${antGetX(ant)}</span></div>
-    <div class="row"><span class="label">antGetY:</span><span class="value">${antGetY(ant)}</span></div>
+    <div class="row"><span class="label">antFaceX:</span><span class="value">${antFaceX(ant)}</span></div>
+    <div class="row"><span class="label">antDiveY:</span><span class="value">${antDiveY(ant)}</span></div>
     <div class="row"><span class="label">antGroundLevel:</span><span class="value">${antGroundLevel(ant)}</span></div>
     <div class="row"><span class="label">Classes:</span><span class="value">${getEl(ant.id) ? getEl(ant.id).className.split(' ').join('<br>') : '?'}</span></div>
   `;
@@ -962,8 +970,10 @@ const devDrawFarmSupplement = () => {
 };
 
 const devResetAnt = (ant) => {
+  let stopVal = stopAnts;
+  stopAnts = 1;
   if (ant && ant.state == 'cap') {
-    ant.r = 90;
+    ant.r = 0;
     ant.x = getEl('farm').offsetWidth / 2;
     ant.y = antGroundLevel(ant);
     ant.q = [{act:'idle'}];
@@ -974,7 +984,8 @@ const devResetAnt = (ant) => {
     ant.dr = 100;
     ant.digDur = 0;
     ant.side = 1;
-    antUpdate(ant);
+    del(ant, 'carry', 'hist');
+    setTimeout(X => {stopAnts = stopVal; antSurface(ant); antRemAnimUpdate(ant);}, 1000);
   }
 };
 
@@ -983,4 +994,9 @@ const devResetAnt = (ant) => {
 /////////////////////////
 window.onload = function() {
   devPanel();
+  devLoaded = 1;
+
+  // Update antNext() to keep a history for dev purposes.
+  antNext = (ant, timeout) => {ant.hist ||= []; ant.hist.push(ant.q.shift()); antAction(ant, timeout); antThot(ant)};
+
 }

@@ -8,14 +8,13 @@ import {Features} from 'lightningcss';
 import replace from 'gulp-replace';
 import concat from 'gulp-concat';
 import htmlmin from 'gulp-htmlmin';
-import LRS from 'longestrepeatedstrings';
 import hypercrush from 'hypercrush';
 import jcrushSVG from 'jcrushsvg';
 import imagemin from 'imagemin';
 import imageminWebp from 'imagemin-webp';
-import shrink from './lib/JsShrink/JsShrink.js';
+import stripCode from 'gulp-strip-code';
+import {gzipSizeSync} from 'gzip-size';
 
-var analyzeStrings = true;
 var isDev = process.argv.includes('--dev');
 
 gulp.task('svgItems', function (done) {
@@ -89,20 +88,6 @@ gulp.task('imagemin', function (done) {
   done(); // Signal completion
 });
 
-gulp.task('analyze', function (done) {
-  if (analyzeStrings) {
-    if (isDev) {
-      LRS.filesReport(LRS.files(['src/afs.js', 'src/afs.css', 'src/index.html'], {trim: 1, minLen: 20, maxLen: 80, break: ['\n']}), 1, {delim: ", "});
-    }
-    else {
-      LRS.filesReport(LRS.files(['afs.min.js'], {clean: 1, words: 1, minLen: 6}), 1, {delim: ", "});
-    }
-    analyzeStrings = false;
-  }
-  setTimeout(() => {analyzeStrings = true}, 1000 * 60 * 60); // Only run once an hour.
-  done(); // Signal completion
-});
-
 gulp.task('minify-css', function () {
   return gulp.src('./src/*.css')
     .pipe(replace('url(../img/', 'url(img/'))
@@ -116,26 +101,26 @@ gulp.task('minify-css', function () {
     .pipe(gulp.dest('./'));
 });
 
-gulp.task('js-shrink', function (done) {
-  let afsJs = fs.readFileSync('src/afs.js', {encoding: 'utf-8'});
-  let afsData = fs.readFileSync('src/afsData.js', {encoding: 'utf-8'});
-  var outCode = shrink(afsJs + afsData, {
-    // posssible options:
-    all: false, // shrink everything (enables all of the below options, in case they aren't enabled by default - they are)
-    literals: true, // shrink string literals
-    properties: true, // shrink all property names
-    variables: true, // shrink all variable names
-    undeclared: true, // shrink all undeclared globals
-    values: true, // shrink null, undefined, Infinity
-    this: true, // shrink all "this."
-    debug: 0, // prints some debug info
-  });
-  fs.writeFileSync('src/temp/afs.shrink.js', '/* AUTO GENERATED FILE - DO NOT MODIFY */\n' + outCode);
-  done(); // Signal completion
+gulp.task('strip-js', function () {
+  // Removes anything between /* START-DEV */ and /* END-DEV */
+  if (!isDev) {
+    return gulp.src(['src/afs.js'])
+      .pipe(stripCode({
+        start_comment: "START-DEV",
+        end_comment: "END-DEV"
+      }))
+      .pipe(concat('afs.strip.js'))
+      .pipe(gulp.dest('src/temp'));
+  }
+  else {
+    return gulp.src(['src/afs.js'])
+      .pipe(concat('afs.strip.js'))
+      .pipe(gulp.dest('src/temp'));
+  }
 });
 
 gulp.task('prepare-js', function () {
-  return gulp.src(['src/temp/afs.shrink.js'])
+  return gulp.src(['src/temp/afs.strip.js', 'src/afsData.js'])
     .pipe(replace('THIS IS A DEV VERSION OF AFS AND SHOULD NOT BE DEPLOYED!', 'v' + JSON.parse(fs.readFileSync('./package.json')).version)) // Replace dev notice in code with app version.
     .pipe(concat('afs.prep.js'))
     .pipe(replace(' ', '〰️')) // Protect nbsp char.
@@ -170,7 +155,24 @@ gulp.task('minify-html', function () {
   return stream;
 });
 
-gulp.task('check-version', function (done) {
+gulp.task('check', function (done) {
+  let gzipSize = gzipSizeSync(fs.readFileSync('afs.min.js', {encoding: 'utf-8'}));
+  console.log("----------------------");
+  console.log('afs.min.js', gzipSize, 'bytes');
+  console.log("----------------------");
+  let logFile = 'src/temp/gzip-size.log';
+  let lastSize = 0;
+  if (fs.existsSync(logFile)) {
+    let logData = fs.readFileSync(logFile, 'utf8').trim().split('\n');
+    let logLine = logData[logData.length - 1].split(' ');
+    lastSize = logLine[logLine.length - 2];
+  }
+  if (gzipSize != lastSize) {
+    let date = new Date();
+    let formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} `+
+      `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+    fs.appendFileSync(logFile, `${formattedDate} - ${gzipSize} bytes\n`, 'utf8');
+  }
   if (!isDev) {
     console.log("\r\nNOTE: Run 'gulp --dev' to use raw (un-minified) html/js/css for debugging ease.\r\n");
   }
@@ -181,14 +183,10 @@ gulp.task('check-version', function (done) {
 });
 
 gulp.task('default', gulp.series(
-  'imagemin',
-  'svgItems',
-  'js-shrink',
+  gulp.parallel('imagemin', 'svgItems', 'strip-js'),
   'prepare-js',
-  gulp.parallel('minify-css', 'minify-js'),
-  'minify-html',
-  'analyze',
-  'check-version'
+  gulp.parallel('minify-css', 'minify-js', 'minify-html'),
+  'check'
 ));
 
 gulp.watch(['./src/*'], gulp.series('default'));

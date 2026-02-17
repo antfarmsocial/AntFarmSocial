@@ -1,4 +1,3 @@
-/* AUTO GENERATED FILE - DO NOT MODIFY */
 /*
  * Ant Farm Social
  * afs.js (Main program)
@@ -9,446 +8,503 @@
  *
  */
 
-
 // Core global state & methods (main program data & logic).
 
 let
 
-// Leave this following line in!
-g = "length", yb = "sort", i = "forEach", X = "find", nc = "width", yd = "height", Yh = "a-bag", s = "addEventListener", G = "click", L = "bag", Zh = "a-tg", U = "score", Xb = "stats", $h = "a-car", P = "farms", da = "state", Zd = "free", _h = "createElement", B = "innerHTML", Ne = "firstChild", n = "push", t = "col", hg = "green", Za = "plate", Fj = "switch-up", ig = "findIndex", d = "classList", zb = "contains", $d = "glass", m = "add", ai = "swipeL", bi = "swipeR", o = "remove", zd = "game", Ad = "appendChild", oa = "fill", Oe = "flare", _ = "carry", Aa = "nips", Na = "item", Bd = "a-", K = "nip", ra = "dataset", D = "some", _c = "offsetWidth", Cd = "farm", v = "tuns", Yb = "mTuns", oc = "hills", V = "card", r = "style", Pe = "background", aa = "items", M = "ent", e = "lvl", u = "prog", pc = "reduce", pa = "cav", k = "filter", Zb = "warn", Dd = "splice", Hc = " ", $b = "con", p = "tun", Y = "includes", jg = "tunnels", w = "", H = "top", Fa = "px", Ic = "shift", _d = "slice", ad = "closest", ea = "left", qc = "dn", kg = "innerText", ae = "up", ci = "switch-control", _b = "target", z = "vis", Qe = "antFarm", Ua = "food", Ga = "drink", y = "scale", Ab = "join", be = "decals", rc = "vial", Bb = "off", lg = "hide", sc = "on", mg = "fade", Gj = "#vial .vs div", di = ".toob > span", Hj = "parentElement", ei = "resize", hb = "getBoundingClientRect", Re = "innerWidth", Oa = "m", qb = "scenery", tc = "decor", Da = "paint", ib = "ants", sa = "hat", ac = "filler", Se = "lube", ng = "sanitation", ce = "nutrition", og = "hydration", Te = "sticker", uc = "lid", Jc = "bottom", fi = "collected", I = "pose", Kc = "pick", $a = "nipPh", Ue = "alate", bc = "tube", bd = "antfax", gi = "antyvenom", pg = "fog2", hi = "dystopia", Ve = "clonekit", We = "speedo", Z = "quip", Ed = "ebay", cd = "mom", dd = "olay", ii = "offsetHeight", _a = "clientX", cc = "touches", rb = "clientY", Ob = "coex", qa = "removeEventListener", Lc = "mousemove", ed = "mousedown", fd = "touchmove", vc = "touchstart", gd = "touchend", Xe = "right", Ij = "changedTouches", Fd = "passive", de = "transform", ji = "cloneNode", qg = "pull", C = "act", dc = "indexOf", ki = "className", jb = "bg", Jj = "backgroundImage", Pb = "cap", ee = "sizz2", q = "area", Ye = "burn", Gd = "other", hd = "a", sb = "s", fe = "disabled", Kj = "confirm", Lj = "Farm has attached items", id = "nodrop", Cb = "caste", ge = "car", Mj = "bag-items", j = "desc", Nj = '<span class=wait>⌛</span>', Oj = "waiting", Hd = "currentTarget", Qb = "drop", Ze = "toUpperCase", Pj = ".feng-item", $e = "drag", rg = "preventDefault", wc = "death", sg = "hunger", tg = "thirst", Ba = "fight", Qj = "numeric", he = "volume", _e = "modal", ug = "pik", Rj = "wrapper", li = "innerHeight", Pa = "prone", Sj = "flashit", ie = "idle", Ea = "inf", Tj = "mouseover", vg = "isConnected", fa = "walk", $ = "dig", mi = "dispatchEvent", af = "mouseup", wg = "throb", je = "ss", Mc = "rest", jd = "crawl", xc = "pace", ia = "dive", xg = "tunWalk", yg = "rotWalk", zg = "l-inf", Db = "side", kd = "egg", yc = "dead", bf = "climb", Eb = "bot", Id = "morgue", ld = "moveTo", Nc = "nest", md = "srv", cf = "nipTs", kb = "dest", Fb = "dist", df = "avoid", Jd = "eat", ni = "flesh", zc = "get", Oc = "freeze", Pc = "lay", oi = "circling", pi = "messages", Uj = "science gizmo", Vj = "Enter HEYSCOOPS at checkout!", Wj = "I don't think you're ready for this.", Xj = "Can you dig it? (Yes)", Yj = "educational fun", Zj = "You got one.", $j = "You got another.", _j = "You got it.", qi = "185 ants walk into a bar…", ef = "I like my women like I like my ants:", Ag = "I like my men like I like my ant colonies:", ak = "I like my women like I like my ant farms:", bk = "…no matter how small…",h = setTimeout, ta = document, Ha = setInterval, Va = parseInt, ab = Math, Gb = window, ff = Array, Bg = Object, Cg = console, ri = localStorage, ck = navigator,
-// Leave that above line in!
-
 // Main Globals
-b = 0, // app data
-a = 0, // current farm alias
-Kd = {}, // Element cache.
-tb = {}, // Tunnel waypoints
-gf = 0, // scroller interval
-nd = 0, // spawner interval
-ke = 0, // showMsgs flag
-hf = 0, // throbber interval
-le = 0, // warper interval
-jf = 0, // warpDirector interval
-kf = 0, // volumeUp interval
-Dg = 0, // magnifier interval
-Qc = 0, // another magnifier interval
-Eg = 0, // carousel interval
-Fg = 0, // bag scroll position
-Gg = 0, // user clicked state indicator
-lf = 0, // spilled farm state indicator
-mf = 0, // vial animation interval
-nf = 0, // tube animation interval
-bb = 0, // switcher flag
+_, // app data
+F, // current farm alias
+elCache = [], // Element cache.
+wayPoints = {}, // Tunnel waypoints
+scroller, // scroller interval
+spawner, // spawner interval
+spawnTimer, // spawn timer
+showMsgs, // showMsgs flag
+throbber, // throbber interval
+warper, // warper interval
+warpDirector, // warpDirector interval
+volumeUp, // volumeUp interval
+fightVolume, // fightVolume interval
+fightSong, // fightSong audio object
+magnifier, // magnifier interval
+magInterval, // another magnifier interval
+carInterval, // carousel interval
+bagScroll, // bag scroll position
+userClicked, // user clicked state indicator
+spilled, // spilled farm state indicator
+vialInterval, // vial animation interval
+tubeInterval, // tube animation interval
+switcher, // switcher flag
+modalCanClose, // modal can close flag
+prevMagAnt, // previous magnified ant tracker
+wrapperRect, // wrapperRect cache
+glassDragInterval, // Glass drag interval.
+glassDragX, // Glass drag x-position.
+glassDragY, // Glass drag y-position.
+quitting, // Quitting game flag.
+pickedAntEl, // Picked ant.
+pouring,
 
 // These variables exist purely to support the developer panel.
-Hg = 0, // developer mode indicator
-si = 0, // stop ants state indicator
-ti = 0, // director interval
-of = 0, // stopMsgs flag
+/* START-DEV */ // For use with gulp-strip-code.
+stopAnts, // stop ants state indicator
+dirInterval, // director interval
+/* END-DEV */
 
 // Common integers.
-ec = 200,
-R = 500,
-Ac = 800,
-ja = 1000,
-Ig = 1500,
-ua = 2000,
-ui = 540,
-fc = 360,
-Ld = 270,
-S = 180,
-gc = 510,
+// When integers are needed in code it is best to first choose from here.
+// These values can be considered as constants.
+num200 = 200,
+num500 = 500,
+num800 = 800,
+num1000 = 1000,
+num1500 = 1500,
+num2000 = 2000,
+deg540 = 540,
+deg360 = 360,
+deg270 = 270,
+deg180 = 180,
+surface = 510,
 
 // Animation/event timing globals.
-Ia = 20, // 50 fps
-od = R,
-Hb = ua,
-W = 5000, // 5 seconds
-la = 30000, // 30 seconds
-cb = 300000, // 5 minutes
+// These values can be CHANGED by features in the code.
+frameTick = 20, // 50 fps
+microDelay = num500,
+pauseDelay = num2000,
+shortDelay = 5000, // 5 seconds
+standardDelay = 30000, // 30 seconds
+longDelay = 300000, // 5 minutes
 
 // Message handling globals.
-Md = [],
-me = [],
-ne = [],
-Nd = [],
+messages = [],
+messageLog = [],
+randomMsgs = [],
+warnings = [],
 
-// Aliases for things that are in the form "something.something".  The first part isn't aliased because JS-SHRINK does that.
-E = ta.body,
-Jg = ab.PI, ba = ab.min, Qa = ab.max, Bc = ab.random, hc = ab.floor, N = ab.abs, oe = ab.sign,
-pf = ab.sqrt, qf = ab.pow, rf = ab.round, Kg = ab.atan2, Rc = ab.hypot, lb = ab.sin, db = ab.cos,
-ma = Bg.keys, Lg = Bg.values, ca = Bg.assign, Mg = Bg.entries,
+// Aliases for things that are in the form "something.something".
+B = document.body, bodyClasses = B.classList,
+PI = Math.PI, min = Math.min, max = Math.max, random = Math.random, floor = Math.floor, abs = Math.abs, sign = Math.sign,
+sqrt = Math.sqrt, pow = Math.pow, round = Math.round, atan2 = Math.atan2, hypot = Math.hypot, sin = Math.sin, cos = Math.cos,
+keys = Object.keys, values = Object.values, assign = Object.assign, entries = Object.entries,
 
 // Convenience functions.
-ga = ta.querySelector.bind(ta),
-Ra = ta.querySelectorAll.bind(ta),
-c = ta.getElementById.bind(ta),
-Ja = Date.now,
-mb = a => hc(Ja() / ja),
-Wa = (a, b) => a.insertAdjacentHTML('beforeend', b),
-f = a => hc(Bc() * a),
-x = a => a[f(a[g])],
-Cc = (a = 1) => x([-a, a]),
-Dc = a => a.at(-1),
-ha = a => a && clearInterval(a),
-pd = a => JSON.parse(JSON.stringify(a)),
-va = a => a ? 1 : -1,
-pe = a => a[yb](a => Bc() - .5),
-Ib = (a, b, c) => ba(Qa(a, b), c),
-Ca = (a, ...b) => b[i](b => delete a[b]),
-eb = (a, b) => a[X](a => a.id == b),
+query = document.querySelector.bind(document),
+queryAll = document.querySelectorAll.bind(document),
+getEl = document.getElementById.bind(document),
+hasFocus = X => document.hasFocus(),
+getTime = Date.now,
+getTimeSec = (ts = getTime()) => floor(ts / num1000),
+appendHTML = (el, html) => el.insertAdjacentHTML('beforeend', html),
+randomInt = mx => floor(random() * (mx + 1)),
+pickRandom = arr => arr[randomInt(arr.length - 1)],
+randomSign = (mag = 1) => pickRandom([-mag, mag]),
+last = arr => arr.at(-1),
+stopInterval = intvl => intvl && clearInterval(intvl),
+cloneData = data => JSON.parse(JSON.stringify(data)),
+getSign = val => val ? 1 : -1,
+shuffle = arr => arr.sort(X => random() - .5),
+clamp = (n, mn, mx) => min(max(n, mn), mx),
+del = (obj, ...keys) => keys.forEach(k => delete obj[k]),
+getById = (arr, id) => arr.find(i => i.id == id),
+mapJoin = (arr, fn) => arr.map(fn).join(''),
+repeat = (c, fn) => mapJoin(Array(c).fill(), fn),
 
 // Converts radians to degrees.
-Ng = a => a * (S / Jg),
+radToDeg = radians => radians * (deg180 / PI),
 // Converts degrees to radians.
-ub = a => a * (Jg / S),
+degToRad = deg => deg * (PI / deg180),
 // Normalizes an angle to be between -180 and 180 degrees.
-Ka = a => ((a + ui) % fc) - S,
+normalize180 = a => ((a + deg540) % deg360) - deg180,
 // Normalizes an angle.
-ka = a => (a + fc) % fc,
+normalize360 = a => (a + deg360) % deg360,
 // Gets the opposite of an angle.
-ic = a => ka(a + S),
+oppositeAngle = a => normalize360(a + deg180),
 // Gets the mirror of an angle.
-Og = a => ka(S - a),
+mirrorAngle = a => normalize360(deg180 - a),
 // Gets the flip of an angle.
-qd = a => ka(fc - a),
-// Gets the angle beteen two precalculated delta values.
-Ec = (a, b, c = 0) => ka(Ng(Kg(b, a)) + c),
+flipAngle = a => normalize360(deg360 - a),
+// Gets the angle between two precalculated delta values.
+angleFromDelta = (dx, dy, offset = 0) => normalize360(radToDeg(atan2(dy, dx)) + offset),
 // Gets the angle between two objects that have x/y props.
-rd = (a, b, c, d = Ec(b.x - a.x, b.y - a.y, c)) => d || fc,
+getAngle = (a, b, r = angleFromDelta(b.x - a.x, b.y - a.y)) => r || deg360,
 // Linearly interpolates between two angles along the shortest path.
-Pg = (a, b, c) => a + Ka(b - a) * c,
+lerpAngle = (a, b, t) => a + normalize180(b - a) * t,
 // Provides quadratic easing in: starts slow and accelerates.
-Qg = a => a * a,
+easeInQuad = t => t * t,
 // Provides quadratic easing out: starts fast and slows toward the end.
-vi = a => 1 - Qg(1 - a),
+easeOutQuad = t => 1 - easeInQuad(1 - t),
 // Calculates distance with components.
-Rb = (d, e, f, g, b = f - d, c = g - e, a = pf(b * b + c * c)) => ({d: a, x: a ? b / a : 0, y: a ? c / a : 0}),
+calcDistComponents = (x1, y1, x2, y2, dx = x2 - x1, dy = y2 - y1, dist = sqrt(dx * dx + dy * dy)) => ({d: dist, x: dist ? dx / dist : 0, y: dist ? dy / dist : 0}),
 // Performs a simple distance calculation.
-wa = (a, b, c, d) => Rb(a, b, c, d).d,
+calculateDistance = (x1, y1, x2, y2) => calcDistComponents(x1, y1, x2, y2).d,
 
-// Mark load time, to fix a bug where reloading speeds up tunnel building.
-wi = Ja(),
+// Mark load time, used for various purposes.
+loadTime = getTime(),
 
 // Loads the app.
-xi = a => {
+antFarmSocial = X => {
   // Adapt viewport to client's display.
-  Wa(ta.getElementsByTagName('head')[0], `<meta name=viewport content="width=1180, height=1100, initial-scale=${ba(screen[nc] / 1180, screen[yd] / 1100)}, user-scalable=no">`);
+  appendHTML(document.getElementsByTagName('head')[0], `<meta name=viewport content="width=1180, height=1100, initial-scale=${min(screen.width / 1180, screen.height / 1100)}, user-scalable=no">`);
   // Fetch stored data.
-  yi();
+  load();
   // Set correct background.
-  yf();
+  setBg();
   // Add an event handler for the bag link.
-  c(Yh)[s](G, a => La(L, 0, 0));
+  getEl('a-bag').addEventListener('click', X => popup('bag', 0, 0));
   // Add an event handler for the magnifying glass link.
-  c(Zh)[s](G, Xi);
-  // Handle the score/stats popup button.
-  c(U)[s](G, a => La(Xb, 0, 0));
+  getEl('a-tg').addEventListener('click', toggleGlass);
   // Add an event handler for the carousel link.
-  c($h)[s](G, Jf);
+  getEl('a-car').addEventListener('click', toggleCarousel);
+  // Handle the score/stats popup button.
+  getEl('score').addEventListener('click', X => popup('stats', 0, 0));
+  // Add an event handler for the stow link.
+  getEl('stow').addEventListener('click', stow);
   // Create the free ant array, also clears any existing free ants stored in the data.
-  b.a = [];
+  _.a = [];
+  // Fix unfinished sculptures. Must be run before switchFarm().
+  _.farms.filter(farm => farm.mTuns && !farm.sculpt).forEach(farmSetSculpture);
   // Check if loaded farms exist and set default if needed.
-  !b[P][g] ? Rg() : Sc(b.F);
-  // Start ant activity.
-  b[P][i](a => {
-    Wg(a); // Calculate waypoints.
-    a.a[i](a => {
-      a[da] == Zd && zh(a, Fc(a)); // Fix ants that didn't cop a cap before the last save().
-      O(a);
-    });
+  !_.farms.length ? addFarm() : switchFarm(_.F);
+  // Start farm activity. Must be run after switchFarm().
+  _.farms.forEach(farm => {
+    if (!farm.sculpt) {
+      updateWaypoints(farm); // Calculate waypoints.
+      farm.a.forEach(a =>
+        a.state == 'free' && antCap(a, objGetEl(a)) // Fix ants that didn't cop a cap before the last save().
+        || antAction(a)
+      );
+      getVial(farm)?.item.a.forEach(a => a.nipPh > 2 && exitVial(a)); // Fix ants trying to leave a vial.
+    }
   });
-  Ph();
-  Mh();
+  // Start nip loops.
+  tubeLoop();
+  vialLoop();
   // Show welcome message.
-  h(a => Ta(tj), ua);
+  setTimeout(X => randomMsg(welcome), num2000);
   // Start the joker message system.
-  h(Uh, la * 5);
+  setTimeout(joker, standardDelay * 5);
   // Update menu buttons and dirt.
-  gh();
+  updateMenuButtons();
   // If there's already a score, update that one.
-  b[U] && gb(0);
+  _.score && score(0);
   // Handle the throbber overlay.
-  nh();
+  doThrob();
   // Handle the speedo warp overlay.
-  oh();
+  doWarp();
   // Call ant director immediately.
-  dg();
+  director();
   // Repeatedly call the director function to control ants.
-  ti = Ha(dg, la);
+  /* START-DEV */dirInterval = /* END-DEV */setInterval(director, standardDelay);
   // Start ambient audio.
-  ta[s](G, Le);
+  document.addEventListener('click', ambience);
   // Activate message log button.
-  Gi();
+  setupMsgLog();
   // Set up the switch control panel.
-  Hi();
+  setupSwitcher();
 },
 
 // Retrieves all data from local storage.
 // Note: Start at half volume so you can listen to a podcast while playing.
-yi = a => b = JSON.parse(ri.getItem('_') || '{"score":0,"farms":[],"bag":[],"ach":{},"achQ":{},vol":50,"bg":"","grad":0,"sac":0,"arty":0,"scene":{},"man":0}'),
+load = X => _ = JSON.parse(localStorage.getItem('_') || '{"score":0,"farms":[],"bag":[],"ach":{},"achQ":[],"vol":50,"bg":"","grad":0,"sac":0,"arty":0,"scene":{},"man":0}'),
 
 // Saves all data to local storage.
-xa = a => {Rh(); Ja() - wi > la && ri.setItem('_', JSON.stringify(b))},
+// Will not allow saving within 30s of loading the page due to suspected exploit.
+// Note: This func does not filter zero/default values, round floats, or compress/smol-string/minson data before saving, all worth considering for future updates if data size becomes an issue.
+save = X => {checkAchievements(); getTime() - loadTime > standardDelay && !quitting && localStorage.setItem('_', JSON.stringify(_))},
+
+// Logs a time duration field on an object for calculating running times, as well as a timestamp for when the time duration field was last updated.
+// Must be called on app load and then at regular intervals such as 30 seconds.  Developer must default fields on objects to dur=0 and ts=getTimeSec() upon creation.
+timeLog = (obj, dur = 'dur', ts = 'ts', now = getTimeSec()) => {
+  obj[dur] += now - max(getTimeSec(loadTime), obj[ts]); // Time duration field.
+  obj[ts] = now; // Timestamp field.
+},
+
+// Formats a time duration in seconds to an d/h/m/s output string.
+formatTime = (s, d = floor(s / 86400), h = floor(s / 3600) % 24, m = floor(s / 60) % 60) =>
+  [d && printInt(d) + 'd', (d || h) && printInt(h) + 'h', printInt(m) + 'm'].filter(Boolean).join(' '),
 
 // Creates a templated element from reusable HTML snippets.
-qe = (b, a = ta[_h]('template')) => {
-  a[B] = b;
-  return a.content[Ne];
-},
+getTemplate = (tpl, template = assign(document.createElement('template'), {innerHTML: tpl})) => template.content.firstChild,
+
+// Generates an HTML tag.  By default it is a 'div'.
+html = (content, attrs = {}, tag = 'div', omitClose) => `<${tag + mapJoin(entries(attrs), ([k, v]) => ` ${k}="${v}"`)}>` + content + (omitClose ? '' : `</${tag}>`),
+
+// Generates an HTML img tag. Assuming it follows the filename pattern that other images in this app use.
+img = (slug, attrs = {}, ext = 'webp') => (attrs.src = `img/${slug}.${ext}`, html('', attrs, 'img', 1)),
+
+// Generates an HTML p tag.
+p = (content, attrs) => html(content, attrs, 'p'),
+
+// Generates an HTML span tag.
+span = (content, attrs) => html(content, attrs, 'span'),
+
+// Generates an empty div with a class attribute.
+divc = (className, attrs = {}) => html('', assign(attrs, {class: className})),
+
+// Generates a HTML tag with a different order of params.  Supports heading tags by just passing in the number as the first param, e.g. 4 for 'h4'.
+tag = (tag, content, attrs, tagName = tag % 1 == 0 ? 'h' + tag : tag) => html(content, attrs, tagName),
 
 // Gets a farm by id or an object with a .f property which is the farm id.
 // Note: This function must fail silently when fid is invalid because it is often used without checking that first.
-J = a => eb(b[P], a?.f || a),
+getFarm = fid => getById(_.farms, fid?.f || fid),
 
 // Determines if a farm object is of the currently displayed farm.
-Sb = b => b.id == a.id,
+currentFarm = farm => farm.id == F.id,
 
 // Adds a blank farm, and switches to it.
-Rg = (a = 'f' + Ja()) => {
-  b[P][n](
-    ca({
-      id: a,
+addFarm = (fid = 'f' + getTime()) => {
+  _.farms.push(
+    assign({
+      id: fid,
       n: 'ANT FARM SOCIAL',
-      [t]: hg,
-      [Za]: hg,
-    }, pd(Xh))
+      col: 'green',
+      plate: 'green',
+    }, cloneData(farmDefault))
   );
   // Switch to this farm.
-  Sc(a);
+  switchFarm(fid);
   // On the creation of second farm, reveal the switch panel.
-  b[P][g] == 2 && h(a => c(Fj)[G](), ua);
+  _.farms.length == 2 && setTimeout(X => getEl('switch-up').click(), num2000);
 },
 
 // Switches currently displayed kit to a particular farm.
-Sc = (e, f = c('kit'), g = a => b[P][ig](b => b.id == a)) => {
-  bb = 0;
-  Li();
-  if (a && a.id != e) {
-    nd = 0;
-    b.a[i](Rd);
-    Kd = []; // Clear ant cache.
-    E[d][zb]($d) && c(Zh)[G]();
-    let j = g(e) - g(a.id);
-    f[d][m](j > 0 ? ai : bi);
-    h(a => {f[o](); Sg(e, j)}, ja);
+switchFarm = (farmId, kit = getEl('kit'), getFarmIndex = fid => _.farms.findIndex(f => f.id == fid)) => {
+  switcher = 0;
+  hideTubeFollowLinks();
+  if (F && F.id != farmId) {
+    spawner = 0;
+    _.a.forEach(antDelete);
+    elCache = []; // Clear ant cache.
+    bodyClasses.contains('glass') && getEl('a-tg').click();
+    let swipeDir = getFarmIndex(farmId) - getFarmIndex(F.id);
+    kit.classList.add(swipeDir > 0 ? 'swipeL' : 'swipeR');
+    setTimeout(X => {kit.remove(); drawFarmKit(farmId, swipeDir)}, num1000);
   }
-  else Sg(e, 0);
+  else drawFarmKit(farmId, 0);
 },
 
 // Draws a farm kit.
-Sg = (g, e, j = qe(Dj)) => {
-  a = J(g); // The F global holds a reference to the currently displayed farm.
-  b.F = g;
-  e && j[d][m](e > 0 ? bi : ai);
-  c(zd)[Ad](j);
+drawFarmKit = (farmId, swipeDir, farmTpl = getTemplate(farmTemplate)) => {
+  F = getFarm(farmId); // The F global holds a reference to the currently displayed farm.
+  _.F = farmId;
+  swipeDir && farmTpl.classList.add(swipeDir > 0 ? 'swipeR' : 'swipeL');
+  getEl('game').appendChild(farmTpl);
   // Show the correct name and color on the frame.
-  Af();
+  updateFrame();
   // Resume by recreating farm.
-  a[oa] && sf();
+  F.fill && startFarm();
   // Redraw capped ants.
-  a.a[i](a => {
-    a.mag = a[Oe] = 0; // Remove mag styles.
-    Wc(a);
-    a[_] && Tf(a[_], a);
+  F.a.forEach(a => {
+    a.mag = a.flare = 0; // Remove mag styles.
+    antDraw(a);
+    carryDraw(a.carry, a);
   });
   // Redraw nipped ants.
-  a[Aa][i](a => a[Na].a[i](b => {
-    Wc(b, c(Bd + Nb[a[K]]));
-    b[_] && Tf(b[_], b);
+  F.nips.forEach(n => n.item.a.forEach(a => {
+    antDraw(a, getEl('a-' + nipIds[n.nip]));
+    carryDraw(a.carry, a);
   }));
-  let k = c('kit');
-  k[ra].id = g;
+  let kit = getEl('kit');
+  kit.dataset.id = farmId;
   // Shake handler.
-  c($d)[s](G, b => {
-    !E[d][zb]($d) && (
-      k[d][m]('shake'),
-      h(a => k[d][o]('shake'), R),
-      !f(10) && Lg(a.a)[D](a => a[da] != Zd) && Ta(wj)
+  getEl('glass').addEventListener('click', X => {
+    !bodyClasses.contains('glass') && (
+      kit.classList.add('shake'),
+      setTimeout(X => kit.classList.remove('shake'), num500),
+      !randomInt(10) && farmIsRunning(F) && randomMsg(tapMsg)
     );
   });
-  k[_c]; // This is a hack to "trigger layout" reflow - do not remove.
-  e && k[d][o](e > 0 ? bi : ai);
+  kit.offsetWidth; // This is a hack to "trigger layout" reflow - do not remove.
+  swipeDir && kit.classList.remove(swipeDir > 0 ? 'swipeR' : 'swipeL');
   // Activate or update the switcher if needed.
-  Tb();
+  updateSwitcher();
+  // Handle fight music.
+  fightSongCheckAndStop();
+  // Decide on stow button.
+  setTimeout(X => getEl('stow').classList.toggle('vis', !!(F.sculpt && _.farms.length > 1)), num2000); // Whether to show the stow button.
 },
 
 // Fills the farm with filler and spawn free ants.
-sf = d => {
+startFarm = isNew => {
   // Fill farm.
-  c(Cd)[ra][oa] = a[oa];
+  getEl('farm').dataset.fill = F.fill;
   // New farm setup.
-  if (d) {
-    a.ts = mb();
+  if (isNew) {
+    F.dur = 0;
+    F.ts = getTimeSec();
     // Create a new farm.
-    zi();
+    calcFarm();
     // New farm message.
-    !b[U] && !lf && Ta(uj);
+    !_.score && !spilled && randomMsg(newFarm);
   }
   // Draw tunnels.
-  a[v][i](Vg);
-  if (a[Yb]) {
+  F.tuns.forEach(drawTun);
+  if (F.sculpt) {
     // Draw mTuns sculptures.
-    a[Yb][i](Vg);
-    Zg();
+    F.mTuns.forEach(drawTun);
+    mTunsBg();
+    getEl('kit').classList.add('sculpt');
+    getEl('wrapper').innerHTML += tag(2, F.n);
   }
   // Draw hills.
-  a[oc][i](Fi);
+  F.hills.forEach(drawHill);
   // Draw card.
-  if (a[V]) c(V)[r][Pe] = `url(img/${a[V]}.webp)`;
+  if (F.card) getEl('card').style.background = `url(img/${F.card}.webp)`;
   // Draw anomaly.
-  a.hair ?
-    Wa(c(oa), `<img id=Fh src=img/hair.webp style=position:absolute;bottom:${a.hair[0]}px;left:${a.hair[1]}px;transform:rotate(${a.hair[2]}deg);opacity:.6>`) :
-      c('Fh') && c('Fh')[o]();
+  F.hair ?
+    appendHTML(getEl('fill'), img('hair', {id: 'Fh', style: `position:absolute;bottom:${F.hair[0]}px;left:${F.hair[1]}px;transform:rotate(${F.hair[2]}deg);opacity:.6`})) :
+    getEl('Fh')?.remove();
   // Draw items.
-  _g();
-  Ji();
-  Ki();
+  addItems();
+  addDecals();
+  addNipItems();
   // Re-add eggs into the farm.
-  a.e[i](Sf);
+  F.e.forEach(eggDraw);
   // Add lid function.
-  if (a[aa][g] || a[V]) xe();
+  if (F.items.length || F.card || F.a.some(deadInFarm)) addLidFunc();
   // Re-enable spawner if it got turned off by something.
-  !nd && h(a => {nd = 1; Cf()}, ja);
+  !spawner && !F.sculpt && setTimeout(X => {spawner = 1; spawnAnt()}, num1000);
 },
 
 // Precalculates the tunnel system layout of the current ant farm.
-zi = (t = 2 + f(4), w = 0, c = [-50, 1010], y = [0, 120, 240, 380, 495], m = 0, q = !f(4),
-  r = !f(4), d, o = [], s = [], b = [], p = [], h = 1, j = 0, l = -1) => {
+calcFarm = (numEntrances = 2 + randomInt(4), tries = 0, hills = [-50, 1010], sublevels = [0, 120, 240, 380, 495], adjustedTun = 0, adjustLeft = !randomInt(4),
+  adjustRight = !randomInt(4), entX, xCollector = [], cavLines = [], lines = [], joinLines = [], sublvl = 1, i = 0, stubEntIndex = -1) => {
   // Ants do not randomly pick tunnel surface entrances, the program does.
   // It also places the adjacent hills in position, but set at zero height, so they can grow as the tunnels are dug.
-  while (ma(a[v])[g] < t && 100> w++) {
-    d = 20 + f(920);
-    if (a[v].every(a => N(d - a.x1) >= 100)) {
-      a[v][n]({t: M, id: 'ent-' + d, [e]: 0, [u]: 0, w: 15, h: 15, x1: d, y1: 0, x2: d, y2: 0, r: 45, br: re(6, 2), co: []});
-      c[n](d - 8);
-      c[n](d + 8);
+  while (keys(F.tuns).length < numEntrances && 100> tries++) {
+    entX = 20 + randomInt(920);
+    if (F.tuns.every(t => abs(entX - t.x1) >= 100)) {
+      F.tuns.push({t: 'ent', id: 'ent-' + entX, lvl: 0, prog: 0, w: 15, h: 15, x1: entX, y1: 0, x2: entX, y2: 0, r: 45, br: borderRadius(6, 2), co: []});
+      hills.push(entX - 8);
+      hills.push(entX + 8);
     }
   }
-  a[v][yb]((a, b) => a.x1 - b.x1);
+  F.tuns.sort((a, b) => a.x1 - b.x1);
   // For the first and last cav in this row, randomly choose whether it will be adjusted over to butt against the edge of the farm.
   // If neither is chosen, then forcibly choose one or the other.
   // This will be needed later - but it's better to know this ahead of time.
-  !q && !r && (f(1) ? q = 1 : r = 1);
-  for (; h < 5; h++) {
-    let A = 1 + f(4),
-      G = [],
-      H = ff(A + 1)[oa](20),
-      I = 0,
-      J = [],
-      z = 0,
-      E, L, i, B, F, C, x;
+  !adjustLeft && !adjustRight && (randomInt(1) ? adjustLeft = 1 : adjustRight = 1);
+  for (; sublvl < 5; sublvl++) {
+    let cavCount = 1 + randomInt(4),
+      fixedWidths = [],
+      whiteSpaces = Array(cavCount + 1).fill(20),
+      left = 0,
+      rowCavs = [],
+      cavNum = 0,
+      remainingWhiteSpace, randomSpace, tun, cavHalfHeight, yOffset, prevTun, line;
     // Precalculate cavity widths.
-    for (; z++ < A;) G[n](60 + f(155));
+    for (; cavNum++ < cavCount;) fixedWidths.push(60 + randomInt(155));
     // Work out cavity spacing.
-    E = 960 - G[pc]((a, b) => a + b, 0) - H[pc]((a, b) => a + b, 0);
-    while (E > 0) {
-      L = Qa(1, hc(f(E / A)));
-      H[f(A + 1)] += L;
-      E -= L;
+    remainingWhiteSpace = 960 - fixedWidths.reduce((a, b) => a + b, 0) - whiteSpaces.reduce((a, b) => a + b, 0);
+    while (remainingWhiteSpace > 0) {
+      randomSpace = max(1, floor(randomInt(remainingWhiteSpace / cavCount)));
+      whiteSpaces[randomInt(cavCount + 1)] += randomSpace;
+      remainingWhiteSpace -= randomSpace;
     }
-    for (z = 0; z < A; z++) {
-      I += H[z];
-      i = {
-          t: pa,
-          id: `cav-${h}-${z}`,
-          [e]: h,
-          w: G[z],
-          h: 32 + f(24),
-          r: rf(f(16) - 8),
-          br: re(10, 22),
+    for (cavNum = 0; cavNum < cavCount; cavNum++) {
+      left += whiteSpaces[cavNum];
+      tun = {
+          t: 'cav',
+          id: `cav-${sublvl}-${cavNum}`,
+          lvl: sublvl,
+          w: fixedWidths[cavNum],
+          h: 32 + randomInt(24),
+          r: round(randomInt(16) - 8),
+          br: borderRadius(10, 22),
           co: [],
-          x1: I,
-          y1: y[h] + f(56) - 30,
-          [u]: 0,
+          x1: left,
+          y1: sublevels[sublvl] + randomInt(56) - 30,
+          prog: 0,
         },
-        B = i.h / 2;
-      I += i.w;
+        cavHalfHeight = tun.h / 2;
+      left += tun.w;
       // Calculate x2/y2.
-      tf(i);
+      calcTailPoint(tun);
       // Bump down if too close to the cav above.
-      a[v][D](a => a[e] == i[e] - 1 && a.h / 2 + Qa(a.y1, a.y2) + 6 > ba(i.y1, i.y2) - B) && (i.y1 += 15) && tf(i);
+      F.tuns.some(t => t.lvl == tun.lvl - 1 && t.h / 2 + max(t.y1, t.y2) + 6 > min(tun.y1, tun.y2) - cavHalfHeight) && (tun.y1 += 15) && calcTailPoint(tun);
       // Pull the cavity upward if it is too far below the bottom.
-      if (h == 4) {
-        let a = Qa(gc - i.y1 - (i.h / 2), gc - i.y2 - (i.h / 2));
-        if (a < 0) i.y1 += a;
-        if (Qa(i.y1 + i.h / 2, i.y2 + i.h / 2)> gc) i.y1 -= i.h/2;
+      if (sublvl == 4) {
+        let distanceToBottom = max(surface - tun.y1 - (tun.h / 2), surface - tun.y2 - (tun.h / 2));
+        if (distanceToBottom < 0) tun.y1 += distanceToBottom;
+        if (max(tun.y1 + tun.h / 2, tun.y2 + tun.h / 2)> surface) tun.y1 -= tun.h / 2;
       }
       // Pull cavities to the tube nip if required.
-      if (h == 3) {
-        if (q && !z) {
-          i.x1 = -5;
-          F = i.y1 - 332;
-          i.y1 -= F;
-          i[K] = 1; // Nip left.
-          m = i;
+      if (sublvl == 3) {
+        if (adjustLeft && !cavNum) {
+          tun.x1 = -5;
+          yOffset = tun.y1 - 332;
+          tun.y1 -= yOffset;
+          tun.nip = 1; // Nip left.
+          adjustedTun = tun;
         }
-        if (r && z == A - 1) {
-          i.x1 = 965 - i.w;
-          F = i.y2 - 332;
-          i.y1 -= F;
-          i[K] = 2; // Nip right.
-          m = i;
+        if (adjustRight && cavNum == cavCount - 1) {
+          tun.x1 = 965 - tun.w;
+          yOffset = tun.y2 - 332;
+          tun.y1 -= yOffset;
+          tun.nip = 2; // Nip right.
+          adjustedTun = tun;
         }
       }
       // Re-calculate x2/y2.
-      tf(i);
+      calcTailPoint(tun);
       // Find joining lines.
-      te(b, i.id, i[e], 'x2', 'y2', i.x1, i.y1, 0, -40);
-      te(b, i.id, i[e], 'x1', 'y1', i.x2, i.y2, -40, 0);
-      te(b, i.id, i[e], 'x1', 'y1', i.x1, i.y1, 0, -40);
-      te(b, i.id, i[e], 'x2', 'y2', i.x2, i.y2, -40, 0);
+      lineFinder(lines, tun.id, tun.lvl, 'x2', 'y2', tun.x1, tun.y1, 0, -40);
+      lineFinder(lines, tun.id, tun.lvl, 'x1', 'y1', tun.x2, tun.y2, -40, 0);
+      lineFinder(lines, tun.id, tun.lvl, 'x1', 'y1', tun.x1, tun.y1, 0, -40);
+      lineFinder(lines, tun.id, tun.lvl, 'x2', 'y2', tun.x2, tun.y2, -40, 0);
       // Store the top and bottom of the cav as obstructions.
-      s[n]({x1: i.x1, y1: i.y1 - B, x2: i.x2, y2: i.y2 - B});
-      s[n]({x1: i.x1, y1: i.y1 + B, x2: i.x2, y2: i.y2 + B});
+      cavLines.push({x1: tun.x1, y1: tun.y1 - cavHalfHeight, x2: tun.x2, y2: tun.y2 - cavHalfHeight});
+      cavLines.push({x1: tun.x1, y1: tun.y1 + cavHalfHeight, x2: tun.x2, y2: tun.y2 + cavHalfHeight});
       // Add the sideways line.
-      if (J[g]) {
-        C = Dc(J);
-        x = {tids: [i.id, C.id], x1: C.x2, y1: C.y2, x2: i.x1, y2: i.y1, l: wa(C.x2, C.y2, i.x1, i.y1)};
-        x.r = Ec(x.x2 - x.x1, x.y2 - x.y1);
-        x[U] = x.l < 50 ? 100 : 100 - (o[k](a => a.x > x.x1 && a.x < x.x2)[g] * 10) - (x.r % 90 < 23 || x.r % 90> 67 ? 20 : 0);
-        b[n](x);
+      if (rowCavs.length) {
+        prevTun = last(rowCavs);
+        line = {tids: [tun.id, prevTun.id], x1: prevTun.x2, y1: prevTun.y2, x2: tun.x1, y2: tun.y1, l: calculateDistance(prevTun.x2, prevTun.y2, tun.x1, tun.y1)};
+        line.r = angleFromDelta(line.x2 - line.x1, line.y2 - line.y1);
+        line.score = line.l < 50 ? 100 : 100 - (xCollector.filter(val => val.x > line.x1 && val.x < line.x2).length * 10) - (line.r % 90 < 23 || line.r % 90> 67 ? 20 : 0);
+        lines.push(line);
       }
-      a[v][n](i);
-      J[n](i);
-      o[n](i.x1);
-      o[n](i.x2);
+      F.tuns.push(tun);
+      rowCavs.push(tun);
+      xCollector.push(tun.x1);
+      xCollector.push(tun.x2);
     }
   }
   // Adjust the line scores.
-  b[i](b => {
-    b[U] = ((!b.y1 || !b.y2) && a[v][k](a => a[e] === 1)[pc]((c, a) => (a.x1 >= b.x1 && a.x1 <= b.x2) || (a.x2>= b.x1 && a.x2 <= b.x2), 0)) || s[D](a => uf(b, a, 6)) ?
-    0 : b.l < 50 ? 100 : 100 + b[U] - (o[k](a => a.x > b.x1 && a.x < b.x2)[g] * 20) - (b.r % 90 < 23 || b.r % 90> 67 ? 20 : 0);
-    Hg && DL(b, b[U] / 100);
+  lines.forEach(line => {
+    line.score = ((!line.y1 || !line.y2) && F.tuns.filter(tun => tun.lvl === 1).reduce((acc, tun) => (tun.x1 >= line.x1 && tun.x1 <= line.x2) || (tun.x2>= line.x1 && tun.x2 <= line.x2), 0)) || cavLines.some(ln => doLinesIntersect(line, ln, 6)) ?
+    0 : line.l < 50 ? 100 : 100 + line.score - (xCollector.filter(val => val.x > line.x1 && val.x < line.x2).length * 20) - (line.r % 90 < 23 || line.r % 90> 67 ? 20 : 0);
+    /* START-DEV */ // For use with gulp-strip-code.
+    dev && DL(line, line.score / 100);
+    /* END-DEV */
   }),
   // Join them up.
-  a[v][i](c => (!c.co[g] || !Jb(a, c, {t: M}) || !f(4)) && se(b, p, c));
+  F.tuns.forEach(tun => (!tun.co.length || !findPath(F, tun, {t: 'ent'}) || !randomInt(4)) && buildATun(lines, joinLines, tun));
   // Another pass to try and link up any inaccessible areas.
-  a[v][k](a => a.t == pa)[i](c => !Jb(a, c, {t: M}) && se(b, p, c, 'RL'));
+  F.tuns.filter(t => t.t == 'cav').forEach(tun => !findPath(F, tun, {t: 'ent'}) && buildATun(lines, joinLines, tun, 'RL'));
   // Give each entrance another shot to connect as well.
-  a[v][k](a => a.t == M)[i](a => !a.co[g] && se(b, p, a, 'RL'));
+  F.tuns.filter(t => t.t == 'ent').forEach(tun => !tun.co.length && buildATun(lines, joinLines, tun, 'RL'));
   // Give 4 more shots at connecting tunnels.
-  for (; j++ < 4;) {
-    let i = a[v][k](b => b.t == pa && b.co[g] < 2 && !Jb(a, b, {t: M}))[yb]((a, b) => a[e] - b[e]),
-      f = x(i[k](a => a[e] == i[0][e]));
-    if (!f) break;
-    Cg[Zb]("reconnecting tun", f);
-    se(b, p, f, 'RL');
+  for (; i++ < 4;) {
+    let orphans = F.tuns.filter(tun => tun.t == 'cav' && tun.co.length < 2 && !findPath(F, tun, {t: 'ent'})).sort((a, b) => a.lvl - b.lvl),
+      unconnected = pickRandom(orphans.filter(tun => tun.lvl == orphans[0].lvl));
+    if (!unconnected) break;
+    buildATun(lines, joinLines, unconnected, 'RL');
   }
   // Sort the hill boundaries from left to right to make this all easier.
-  c[yb]((a, b) => a - b);
+  hills.sort((a, b) => a - b);
   // Remove tuns without connections.
   do {
-    l = a[v][ig](a => a.t == M && !a.co[g]);
-    if (l > -1) {
+    stubEntIndex = F.tuns.findIndex(t => t.t == 'ent' && !t.co.length);
+    if (stubEntIndex > -1) {
       // Adjust hills.
-      c[Dd](2 * l + 1, 2);
+      hills.splice(2 * stubEntIndex + 1, 2);
       // Remove that tun.
-      a[v][Dd](l, 1);
+      F.tuns.splice(stubEntIndex, 1);
     }
-  } while (l != -1);
+  } while (stubEntIndex != -1);
   // Keep only the accessible tunnels.
-  a[v] = a[v][k](b => Jb(a, b, {t: M}));
+  F.tuns = F.tuns.filter(tun => findPath(F, tun, {t: 'ent'}));
   // In the rare cases where:
   // - No tuns left after filtering
   // - Adjusted tun is gone
@@ -456,2606 +512,2840 @@ zi = (t = 2 + f(4), w = 0, c = [-50, 1010], y = [0, 120, 240, 380, 495], m = 0, 
   // - There are fewer than 5 chamber cavities with paths to an entrance
   // It is a bad design. Used to do clearVars() and dumpFarm(1), but it's more fun to add
   // this feature where the user is blamed for a spill (and trigger it randomly too).
-  if (!f(50) || !a[v][g] || !m || !Jb(a, m, {t: M}) || a[v][k](b => b.t == pa && Jb(a, b, {t: M}))[g] < 5)
-    return Ai();
+  if (!randomInt(50) || !F.tuns.length || !adjustedTun || !findPath(F, adjustedTun, {t: 'ent'}) || F.tuns.filter(tun => tun.t == 'cav' && findPath(F, tun, {t: 'ent'})).length < 5)
+    return spill();
   // Store hills.
-  for (j = 0; j < c[g]; j += 2) a[oc][n]({id: j / 2, l: c[j], r: c[j + 1], h: 0});
+  for (i = 0; i < hills.length; i += 2) F.hills.push({id: i / 2, l: hills[i], r: hills[i + 1], h: 0});
 },
 
 // Handles the generation of random border radius values.
-re = (a, b) => ff.from({[g]: 6}, c => `${a + f(b)}px`)[pc]((a, b, c) => a + (c == 4 ? ' / ' : Hc) + b),
+borderRadius = (min, range) => Array.from({length: 6}, X => `${min + randomInt(range)}px`).reduce((acc, val, i) => acc + (i == 4 ? ' / ' : ' ') + val),
 
 // Handles a farm creation bug that is easily fixable with a reload.
-Ai = b => {
+spill = X => {
   // Blame the player and don't give them the fill item back so it looks like a feature.
-  bb = 0;
-  lf = 1;
-  xb(`Woops! You've spilled your ${a[oa] || Cd} out.  Bad luck.`, Zb);
-  Wa(E, `<div id=spill data-fill="${a[oa] || 'dirt'}"><div class=hill><div class=specks></div></div></div>`);
-  dh();
-  h(a => {gb(10, 1); xb('Here, have a bonus.')}, la / 2);
-  h(a => xb("Refreshing in 3… 2… 1…", Zb), la * .8);
-  h(a => location.reload(), la);
-  c(Yh)[o]();
-  c('kit')[o]();
+  switcher = 0;
+  spilled = 1;
+  msg(`Woops! You've spilled your ${F.fill || 'farm'} out.  Bad luck.`, 'warn');
+  appendHTML(B, html(html(divc('specks'), {class: 'hill'}), {id: 'spill', 'data-fill': F.fill || 'dirt'}));
+  dumpFarm();
+  setTimeout(X => {score(10, 1); msg('Here, have a bonus.')}, standardDelay / 2);
+  setTimeout(X => msg("Refreshing in 3… 2… 1…", 'warn'), standardDelay * .8);
+  setTimeout(X => location.reload(), standardDelay);
+  hideMenus();
+  getEl('switch').remove();
+  getEl('kit').remove();
+},
+
+// Hides the menu buttons instantly, but allows other code to be reactivate.
+hideMenus = X => {
+  queryAll('#menu > a, #score').forEach(a => {a.classList.add('hide'); a.classList.remove('vis')});
+  setTimeout(X => queryAll('#menu > a, #score').forEach(a => a.classList.remove('hide')), num2000 * 2);
 },
 
 // Builds a joining tunnel.
 // These are the code names of the tunnel pieces:
 // 'ent' - Surface level tunnel entrances.
-// 'tun' - Joining tunnels which are referred to as "connections" in the UI (the long skinny ones).
+// 'tun' - Joining tunnels which are referred to as "connectors" in the UI (the long skinny ones).
 // 'cav' - Chamber cavities (the thick horizontal ones).
 // 'con' - A transition junction connecting tuns and cavs to each other - not obvious they're there.
-se = (d, h, c, i = 'BL',
-    j = {
+buildATun = (lines, joinLines, tun1, func = 'BL',
+    funcs = {
       // Chooses one of the best available lines to implement as a joining tunnel.
-      BL: (b, a = b[pc]((b, a) => (a[U] > b[U] && a[U] !== 0 ? a : b), {[U]: 0})) => a[U] && a,
+      BL: (objects, maxObj = objects.reduce((maxObj, obj) => (obj.score > maxObj.score ? obj : maxObj), {score: 0})) => maxObj.score && maxObj,
       // Chooses a random line (favouring the "better" scored lines) to implement as a joining tunnel.
-      RL: (b, c = f(b[pc]((a, b) => a + b[U], 0)), a) => {for (a of b) {c -= a[U]; if (c <= 0) return a}},
+      RL: (objects, rand = randomInt(objects.reduce((sum, obj) => sum + obj.score, 0)), obj) => {for (obj of objects) {rand -= obj.score; if (rand <= 0) return obj}},
     },
-    b = j[i](d.map(a =>
-      (a.x1 == c.x1 && a.y1 == c.y1) ? {...a, X1: a.x1, Y1: a.y1, X2: a.x2, Y2: a.y2} :
-      (a.x2 == c.x1 && a.y2 == c.y1) ? {...a, X1: a.x2, Y1: a.y2, X2: a.x1, Y2: a.y1} :
-      (a.x1 == c.x2 && a.y1 == c.y2) ? {...a, X1: a.x1, Y1: a.y1, X2: a.x2, Y2: a.y2} :
-      (a.x2 == c.x2 && a.y2 == c.y2) ? {...a, X1: a.x2, Y1: a.y2, X2: a.x1, Y2: a.y1} :
-      null)[k](Boolean)[k](a => !h[D](b => uf(a, b, 2))))
+    choice = funcs[func](lines.map(ln =>
+      (ln.x1 == tun1.x1 && ln.y1 == tun1.y1) ? {...ln, X1: ln.x1, Y1: ln.y1, X2: ln.x2, Y2: ln.y2} :
+      (ln.x2 == tun1.x1 && ln.y2 == tun1.y1) ? {...ln, X1: ln.x2, Y1: ln.y2, X2: ln.x1, Y2: ln.y1} :
+      (ln.x1 == tun1.x2 && ln.y1 == tun1.y2) ? {...ln, X1: ln.x1, Y1: ln.y1, X2: ln.x2, Y2: ln.y2} :
+      (ln.x2 == tun1.x2 && ln.y2 == tun1.y2) ? {...ln, X1: ln.x2, Y1: ln.y2, X2: ln.x1, Y2: ln.y1} :
+      0).filter(Boolean).filter(tunLn => !joinLines.some(ln => doLinesIntersect(tunLn, ln, 2))))
   ) => {
-  if (b) {
+  if (choice) {
     // Remove this line from future choices.
-    d = d[k](a => a.x1 != b.x1 || a.y1 != b.y1 || a.x2 != b.x2 || a.y2 != b.y2);
-    h[n](b);
-    let q = na(a, b.tids[X](a => a != c.id)),
+    lines = lines.filter(l => l.x1 != choice.x1 || l.y1 != choice.y1 || l.x2 != choice.x2 || l.y2 != choice.y2);
+    joinLines.push(choice);
+    let tun2 = getTun(F, choice.tids.find(tid => tid != tun1.id)),
       // Create connection pieces on the ends of those tunnel pieces (unless it's an entrance, then we just use the entrance; or if there's already a connector there).
-      s = a[v][X](a => a.t == $b && a.x1 == b.X1 && a.y1 == b.Y1),
-      t = a[v][X](a => a.t == $b && a.x1 == b.X2 && a.y1 == b.Y2),
-      f = c.t == M ? c : s ? s : Tg(c, b.X1, b.Y1),
-      l = q.t == M ? q : t ? t : Tg(q, b.X2, b.Y2),
+      c1 = F.tuns.find(t => t.t == 'con' && t.x1 == choice.X1 && t.y1 == choice.Y1),
+      c2 = F.tuns.find(t => t.t == 'con' && t.x1 == choice.X2 && t.y1 == choice.Y2),
+      conn1 = tun1.t == 'ent' ? tun1 : c1 ? c1 : createConnection(tun1, choice.X1, choice.Y1),
+      conn2 = tun2.t == 'ent' ? tun2 : c2 ? c2 : createConnection(tun2, choice.X2, choice.Y2),
       // Figure out the top and bottom one.
-      m = f.y1 < l.y1 ? f : l,
-      o = f.y1> l.y1 ? f : l,
+      topConn = conn1.y1 < conn2.y1 ? conn1 : conn2,
+      botConn = conn1.y1> conn2.y1 ? conn1 : conn2,
       // Add the joining tunnel.
       // It would be better to create 3 or 4 tunnels in an s-shape with offset 'con' pieces along the way. But this works for now.
-      r = {
-        t: p,
-        id: 'tun-' + h[g],
-        [e]: (m[e] + o[e]) / 2,
+      tunnel = {
+        t: 'tun',
+        id: 'tun-' + joinLines.length,
+        lvl: (topConn.lvl + botConn.lvl) / 2,
         h: 14,
-        w: Rc(o.x2 - m.x1, o.y2 - m.y1),
-        r: Ec(o.x2 - m.x1, o.y2 - m.y1, 90),
-        br: re(5, 2),
-        co: [f.id, l.id],
-        x1: m.x1,
-        y1: m.y1,
-        x2: o.x2,
-        y2: o.y2,
-        [u]: 0,
+        w: hypot(botConn.x2 - topConn.x1, botConn.y2 - topConn.y1),
+        r: angleFromDelta(botConn.x2 - topConn.x1, botConn.y2 - topConn.y1),
+        br: borderRadius(5, 2),
+        co: [conn1.id, conn2.id],
+        x1: topConn.x1,
+        y1: topConn.y1,
+        x2: botConn.x2,
+        y2: botConn.y2,
+        prog: 0,
       };
     // Create inter-connection data.
-    f.co[n](r.id);
-    l.co[n](r.id);
+    conn1.co.push(tunnel.id);
+    conn2.co.push(tunnel.id);
     //
-    Hg && DL({x1: f.x1, y1: f.y1, x2: l.x2, y2: l.y2});
-    a[v][n](r);
+    dev && DL({x1: conn1.x1, y1: conn1.y1, x2: conn2.x2, y2: conn2.y2});
+    F.tuns.push(tunnel);
   }
 },
 
 // Finds paths for traversing tunnel systems and determines if and how tunnel pieces connect.
-Jb = (f, a, b, c = [], g = 0, h = 0, d = 0, e, i) => {
+// When calculating paths for ant to actually walk on, pathDun should probably be 1, meaning that the tunnels in the path have to be completed.
+// This is different when testing proposed future tunnels for whether yet-to-be-built tunnels would actually connect them properly to an entrance.
+// To understand usage; best to study how this function is used in the various cases where it is employed.  Sometimes used in reverse!
+findPath = (farm, tun, targetAttrs, path = [], invertMatch = 0, pathDun = 0, firstTunId = 0, tid, result) => {
   // If the current tunnel matches all target attributes, return the path.
-  if (ma(b).every(c => g ? a[c] != b[c] : a[c] == b[c])) return c;
-  if (!h || a[u] == 100 || !d)
+  if (keys(targetAttrs).every(attr => invertMatch ? tun[attr] != targetAttrs[attr] : tun[attr] == targetAttrs[attr])) return path;
+  if (!pathDun || tun.dun || !firstTunId)
     // Recursively search for the path. (Shuffle the next tunnels to introduce randomness.)
-    for (e of pe(a.co[k](a => !c[Y](a) && a != d)))
-      if (i = Jb(f, na(f, e), b, [...c, e], g, h, d || a.id)) return i;
+    for (tid of shuffle(tun.co.filter(tid => !path.includes(tid) && tid != firstTunId)))
+      if (result = findPath(farm, getTun(farm, tid), targetAttrs, [...path, tid], invertMatch, pathDun, firstTunId || tun.id)) return result;
 },
 
 // Creates a connection junction between chamber cavities and joining tunnels.
-Tg = (b, d, f, c = {t: $b, id: 'con-' + a[v][g], [e]: b[e], w: 28, h: 28, r: 45, br: re(9, 4), co: [b.id], x1: d, y1: f, x2: d, y2: f, [u]: 0}) => {
-  b.co[n](c.id);
-  a[v][n](c);
-  return c;
+createConnection = (tun, x, y, conn = {t: 'con', id: 'con-' + F.tuns.length, lvl: tun.lvl, w: 28, h: 28, r: 45, br: borderRadius(9, 4), co: [tun.id], x1: x, y1: y, x2: x, y2: y, prog: 0}) => {
+  tun.co.push(conn.id);
+  F.tuns.push(conn);
+  return conn;
 },
 
 // Calculates the 2nd point in a tunnel piece.
-tf = a => {
-  a.x2 = a.x1 + a.w * db(ub(a.r));
-  a.y2 = a.y1 + a.w * lb(ub(a.r));
+calcTailPoint = tun => {
+  tun.x2 = tun.x1 + tun.w * cos(degToRad(tun.r));
+  tun.y2 = tun.y1 + tun.w * sin(degToRad(tun.r));
 },
 
 // Finds how joining tunnels might connect the chamber cavities to each other and to entrances.
-te = (d, f, g, b, h, c, j, l, m) => {
-  a[v][k](a => a[e] < g && a[b] < c)[i](a => Ug(d, f, a.id, a[b], a[h], c, j, l));
-  a[v][k](a => a[e] < g && a[b]>= c)[i](a => Ug(d, f, a.id, c, j, a[b], a[h], m));
-},
-
-// Does the heavy lifting for lineFinder().
-Ug = (h, i, g, b, d, c, e, j, f = {tids: [i, g], x1: b, y1: d, x2: c, y2: e, d: N(c - b), l: wa(b, d, c, e), [U]: j}) => {
-  if (a[v][k](a => a.t != M && g != a.id).every(a => !uf(a, f, 20))) {
-    f.r = Ec(c - b, e - d);
-    b > 5 && c > 5 && b < 955 && c < 955 && h[n](f);
-  }
+lineFinder = (lines, tunId, thisLevel, xK, yK, tunX, tunY, score1, score2, t,
+  findLine = (tId2, x1, y1, x2, y2, score, line = {tids: [tunId, tId2], x1: x1, y1: y1, x2: x2, y2: y2, d: abs(x2 - x1), l: calculateDistance(x1, y1, x2, y2), score}) => {
+    if (F.tuns.filter(ot => ot.t != 'ent' && tId2 != ot.id).every(ot => !doLinesIntersect(ot, line, 20))) {
+      line.r = angleFromDelta(x2 - x1, y2 - y1);
+      x1 > 5 && x2 > 5 && x1 < 955 && x2 < 955 && lines.push(line);
+    }
+  }) => {
+  for (t of F.tuns) if (t.lvl < thisLevel) t[xK] < tunX ? findLine(t.id, t[xK], t[yK], tunX, tunY, score1) : findLine(t.id, tunX, tunY, t[xK], t[yK], score2);
 },
 
 // Checks if two lines (actually rectangles) intersect along their length.
-uf = (c, d, a, b = 30, e = 0) => {
-  let {x1: f, y1: g, x2: h, y2: i} = c,
-    {x1: j, y1: k, x2: l, y2: m} = d,
-    t = (a, b, c, d, f, e = f / wa(a, b, c, d)) => ({x: a + e * (c - a), y: b + e * (d - b)}),
-    {x: n, y: o} = t(j, k, l, m, b),
-    {x: p, y: q} = t(l, m, j, k, b),
-    r = (a, b, c, d, e, f) => ((e - a) * (d - b) - (f - b) * (c - a)),
-    u = r(n, o, p, q, f, g),
-    v = r(n, o, p, q, h, i),
-    w = r(f, g, h, i, n, o),
-    x = r(f, g, h, i, p, q),
-    y = ((u > 0 && v < 0) || (u < 0 && v> 0)) && ((w > 0 && x < 0) || (w < 0 && x> 0)),
-    z = (c, d, e, f, g, h = Rb(c, d, e, f), a = (g / 2) * h.y, b = (g / 2) * h.x) =>
-      [{x: c - a, y: d + b }, {x: c + a, y: d - b}, {x: e + a, y: f - b}, {x: e - a, y: f + b}],
-    A = (a, b) => !(
-      Qa(a[0].x, a[1].x, a[2].x, a[3].x) < ba(b[0].x, b[1].x, b[2].x, b[3].x) ||
-      ba(a[0].x, a[1].x, a[2].x, a[3].x)> Qa(b[0].x, b[1].x, b[2].x, b[3].x) ||
-      Qa(a[0].y, a[1].y, a[2].y, a[3].y) < ba(b[0].y, b[1].y, b[2].y, b[3].y) ||
-      ba(a[0].y, a[1].y, a[2].y, a[3].y)> Qa(b[0].y, b[1].y, b[2].y, b[3].y)
+doLinesIntersect = (line1, line2, thickness, ignoreEnds = 30, returnIntersectionPoint = 0) => {
+  let {x1: x1_1, y1: y1_1, x2: x2_1, y2: y2_1} = line1,
+    {x1: x1_2, y1: y1_2, x2: x2_2, y2: y2_2} = line2,
+    pointAlongLine = (x1, y1, x2, y2, distance, ratio = distance / calculateDistance(x1, y1, x2, y2)) => ({x: x1 + ratio * (x2 - x1), y: y1 + ratio * (y2 - y1)}),
+    adjusted1 = pointAlongLine(x1_2, y1_2, x2_2, y2_2, ignoreEnds),
+    adjusted2 = pointAlongLine(x2_2, y2_2, x1_2, y1_2, ignoreEnds),
+    getDirection = (x1, y1, x2, y2, x3, y3) => ((x3 - x1) * (y2 - y1) - (y3 - y1) * (x2 - x1)),
+    d1 = getDirection(adjusted1.x, adjusted1.y, adjusted2.x, adjusted2.y, x1_1, y1_1),
+    d2 = getDirection(adjusted1.x, adjusted1.y, adjusted2.x, adjusted2.y, x2_1, y2_1),
+    d3 = getDirection(x1_1, y1_1, x2_1, y2_1, adjusted1.x, adjusted1.y),
+    d4 = getDirection(x1_1, y1_1, x2_1, y2_1, adjusted2.x, adjusted2.y),
+    intersect = ((d1 > 0 && d2 < 0) || (d1 < 0 && d2> 0)) && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4> 0)),
+    expandLineToStrip = (x1, y1, x2, y2, thickness, dist = calcDistComponents(x1, y1, x2, y2), offsetX = (thickness / 2) * dist.y, offsetY = (thickness / 2) * dist.x) =>
+      [{x: x1 - offsetX, y: y1 + offsetY }, {x: x1 + offsetX, y: y1 - offsetY}, {x: x2 + offsetX, y: y2 - offsetY}, {x: x2 - offsetX, y: y2 + offsetY}],
+    rectanglesIntersect = (rect1, rect2) => !(
+      max(rect1[0].x, rect1[1].x, rect1[2].x, rect1[3].x) < min(rect2[0].x, rect2[1].x, rect2[2].x, rect2[3].x) ||
+      min(rect1[0].x, rect1[1].x, rect1[2].x, rect1[3].x)> max(rect2[0].x, rect2[1].x, rect2[2].x, rect2[3].x) ||
+      max(rect1[0].y, rect1[1].y, rect1[2].y, rect1[3].y) < min(rect2[0].y, rect2[1].y, rect2[2].y, rect2[3].y) ||
+      min(rect1[0].y, rect1[1].y, rect1[2].y, rect1[3].y)> max(rect2[0].y, rect2[1].y, rect2[2].y, rect2[3].y)
     ),
-    s = ((f - h) * (k - m) - (g - i) * (j - l));
-  return e && y && s != 0 ? {
-      x: ((f * i - g * h) * (j - l) - (f - h) * (j * m - k * l)) / s,
-      y: ((f * i - g * h) * (k - m) - (g - i) * (j * m - k * l)) / s
-    } : y || A(z(f, g, h, i, a), z(n, o, p, q, a));
+    denominator = ((x1_1 - x2_1) * (y1_2 - y2_2) - (y1_1 - y2_1) * (x1_2 - x2_2));
+  return returnIntersectionPoint && intersect && denominator != 0 ? {
+      x: ((x1_1 * y2_1 - y1_1 * x2_1) * (x1_2 - x2_2) - (x1_1 - x2_1) * (x1_2 * y2_2 - y1_2 * x2_2)) / denominator,
+      y: ((x1_1 * y2_1 - y1_1 * x2_1) * (y1_2 - y2_2) - (y1_1 - y2_1) * (x1_2 * y2_2 - y1_2 * x2_2)) / denominator
+    } : intersect || rectanglesIntersect(expandLineToStrip(x1_1, y1_1, x2_1, y2_1, thickness), expandLineToStrip(adjusted1.x, adjusted1.y, adjusted2.x, adjusted2.y, thickness));
 },
 
 // Gets tun object from tun ID.
-na = (b, a) => a && eb(b[v], a),
+getTun = (farm, id) => id && getById(farm.tuns, id),
 
 // Renders a tunnel.
-Vg = a => {
-  Wa(c(jg),
-    `<div id=${a.id} class="tp ${a.t}"style="left:${a.x1}px;top:${a.y1}px;height:${a.h}px;width:${a.w}px;transform:rotate(${a.t == p ? a.r - 90 : a.r}deg);border-radius:${a.br}${(wb(a) ? `;margin-left:-${a.w / 2}px` : w) + `;margin-top:-${a.h / 2}px`}"><div class=prog></div></div>`
+drawTun = tun => {
+  appendHTML(
+    getEl('tunnels'),
+    html(divc('prog'), {id: tun.id, class: 'tp ' + tun.t, style: `left:${tun.x1}px;top:${tun.y1}px;height:${tun.h}px;width:${tun.w}px;transform:rotate(${tun.r}deg);border-radius:${tun.br}` + ((isRotationTunnel(tun) ? `;margin-left:-${tun.w / 2}px` : '') + `;margin-top:-${tun.h / 2}px`)})
   );
-  ue(a);
+  tunProgDraw(tun);
 },
 
 // Updates tunnel progress.
 // Note: calling function is responsible for making sure the relevant farm is currently displayed.
-ue = (a, b = ga(`#${a.id} .prog`), e = c(a.id)) => {
-  if (b) {
-    a.rwip && b[d][m]('rwip');
-    switch (a.t) {
-      case M:
-        b[r][H] = a[u] / 100 * 15 - 15 + Fa;
+tunProgDraw = (tun, progEl = query(`#${tun.id} .prog`), tunEl = getEl(tun.id)) => {
+  if (progEl) {
+    tun.rwip && progEl.classList.add('rwip');
+    switch (tun.t) {
+      case 'ent':
+        progEl.style.top = tun.prog / 100 * 15 - 15 + 'px';
         break;
-      case $b:
-        b[r][yd] = b[r][nc] = a.h * a[u] / 100 + Fa;
-        e[r].marginTop = e[r].marginLeft = -a.h * a[u] / 200 + Fa;
+      case 'con':
+        progEl.style.height = progEl.style.width = tun.h * tun.prog / 100 + 'px';
+        tunEl.style.marginTop = tunEl.style.marginLeft = -tun.h * tun.prog / 200 + 'px';
         break;
-      case p:
-        b[r][nc] = a[u] + '%';
+      case 'tun':
+        progEl.style.width = tun.prog + '%';
         break;
-      case pa:
-        b[r][nc] = a[u] + '%';
-        b[d].toggle('wip', a[u] > 0 && a[u] < 100);
+      case 'cav':
+        progEl.style.width = tun.prog + '%';
+        progEl.classList.toggle('wip', tun.prog > 0 && tun.prog < 100);
         break;
     }
   }
 },
 
 // Updates the wayPoints global.
-Wg = a => {tb[a.id] = Di(Ci(a[v][k](a => a[u] > 0).map(a => Bi(a))))},
+updateWaypoints = farm => {wayPoints[farm.id] = reorderAndSmoothWaypoints(filterWaypoints(farm.tuns.filter(t => t.prog > 0).map(t => calculateWaypoints(t))))},
 
 // Calculates waypoints for the perimeter of the tunnel area.
-Bi = (d, c = 5, g = d.x1, e = d.y1, f = {x: 7, y: 7}, b = [], a) => {
-  let {x1: i, y1: j, x2: y, y2: z, t: m, [u]: v, w: k, h: l, r: w} = d, // <-- Important: Don't optimise the destructuring for brevity as the minifier will ruin it!
-    x = d.br.split('/').map(a => a.trim()),
-    r = x[0].split(Hc).map(a => Va(a)),
-    s = x[1].split(Hc).map(a => Va(a)),
-    h = {tl: {x: r[0], y: s[0]}, tr: {x: r[1], y: s[1]}, br: {x: r[2], y: s[0]}, bl: {x: r[3], y: s[1]}},
-    o = h.tl.y + h.bl.y, q = o - l,
-    t = (d, e, f, g, h, i, j, c = [], a = h, b) => {
-      for (; a <= i; a += j * 2) {
-        b = ub(a);
-        c[n]({x: d + f * db(b), y: e + g * lb(b)});
+calculateWaypoints = (tun, step = 5, pivotX = tun.x1, pivotY = tun.y1, wipBr = {x: 7, y: 7}, points = [], i) => {
+  let {x1, y1, x2, y2, t, prog, w, h, r} = tun,
+    fullW = w,
+    brParts = tun.br.split('/').map(s => s.trim()),
+    hz = brParts[0].split(' ').map(v => parseInt(v)),
+    ve = brParts[1].split(' ').map(v => parseInt(v)),
+    radii = {tl: {x: hz[0], y: ve[0]}, tr: {x: hz[1], y: ve[1]}, br: {x: hz[2], y: ve[0]}, bl: {x: hz[3], y: ve[1]}},
+    totalVert = radii.tl.y + radii.bl.y, excess = totalVert - h,
+    getEllipseArcPoints = (cx, cy, rx, ry, angleStart, angleEnd, step, points = [], angle = angleStart, rad) => {
+      for (; angle <= angleEnd; angle += step * 2) {
+        rad = degToRad(angle);
+        points.push({x: cx + rx * cos(rad), y: cy + ry * sin(rad)});
       }
-      return c;
+      return points;
     };
   // Corrections.
-  j -= l / 2;
-  if (m == p) w -= 90;
-  if (m == $b || m == M) i -= k / 2;
-  if (m == pa) e = (j + z) / 2;
+  y1 -= h / 2;
+  if (t == 'con' || t == 'ent') x1 -= w / 2;
+  if (t == 'cav') pivotY = (y1 + y2) / 2;
   // Arc trimming.
-  if (o> l) {
-    h.tl.y -= q / 2;
-    h.bl.y -= q / 2;
+  if (totalVert> h) {
+    radii.tl.y -= excess / 2;
+    radii.bl.y -= excess / 2;
   }
-  o = h.tr.y + h.br.y;
-  if (o > l) {
-    q = o - l;
-    h.tr.y -= q / 2;
-    h.br.y -= q / 2;
+  totalVert = radii.tr.y + radii.br.y;
+  if (totalVert > h) {
+    excess = totalVert - h;
+    radii.tr.y -= excess / 2;
+    radii.br.y -= excess / 2;
   }
   // Partial tun corrections.
-  if (v < 100) {
-    k *= v / 100;
-    if (d.rwip) {
-      if (m == pa) i = y - k;
-      if (m == p) i += k - k;
-      h.tl = h.bl = f;
+  if (prog < 100) {
+    w *= prog / 100;
+    if (tun.rwip) {
+      if (t == 'cav') x1 = x2 - w;
+      if (t == 'tun') x1 += fullW - w;
+      radii.tl = radii.bl = wipBr;
     }
     else {
-      if (m == $b) {
-        l = k;
-        i = i - k / 2;
-        h.tl = h.bl = f;
+      if (t == 'con') {
+        h = w;
+        x1 = x1 - w / 2;
+        radii.tl = radii.bl = wipBr;
       }
-      h.tr = h.br = f;
+      radii.tr = radii.br = wipBr;
     }
   }
   // Assemble the points.
-  b[n](...t(i + h.tl.x, j + h.tl.y, h.tl.x, h.tl.y, S, Ld, c)); // Top left
-  for (a = i + h.tl.x; a <= i + k - h.tr.x; a += c) b[n]({x: a, y: j}); // Top line
-  b[n](...t(i + k - h.tr.x, j + h.tr.y, h.tr.x, h.tr.y, Ld, fc, c)); // Top right
-  for (a = j + h.tr.y; a <= j + l - h.br.y; a += c) b[n]({x: i + k, y: a}); // Right line
-  b[n](...t(i + k - h.br.x, j + l - h.br.y, h.br.x, h.br.y, 0, 90, c)); // Bottom right
-  for (a = i + h.bl.x; a <= i + k - h.br.x; a += c) b[n]({x: a, y: j + l}); // Bottom line
-  b[n](...t(i + h.bl.x, j + l - h.bl.y, h.bl.x, h.bl.y, 90, S, c)); // Bottom left
-  for (a = j + h.tl.y; a <= j + l - h.bl.y; a += c) b[n]({x: i, y: a}); // Left line
+  points.push(...getEllipseArcPoints(x1 + radii.tl.x, y1 + radii.tl.y, radii.tl.x, radii.tl.y, deg180, deg270, step)); // Top left
+  for (i = x1 + radii.tl.x; i <= x1 + w - radii.tr.x; i += step) points.push({x: i, y: y1}); // Top line
+  points.push(...getEllipseArcPoints(x1 + w - radii.tr.x, y1 + radii.tr.y, radii.tr.x, radii.tr.y, deg270, deg360, step)); // Top right
+  for (i = y1 + radii.tr.y; i <= y1 + h - radii.br.y; i += step) points.push({x: x1 + w, y: i}); // Right line
+  points.push(...getEllipseArcPoints(x1 + w - radii.br.x, y1 + h - radii.br.y, radii.br.x, radii.br.y, 0, 90, step)); // Bottom right
+  for (i = x1 + radii.bl.x; i <= x1 + w - radii.br.x; i += step) points.push({x: i, y: y1 + h}); // Bottom line
+  points.push(...getEllipseArcPoints(x1 + radii.bl.x, y1 + h - radii.bl.y, radii.bl.x, radii.bl.y, 90, deg180, step)); // Bottom left
+  for (i = y1 + radii.tl.y; i <= y1 + h - radii.bl.y; i += step) points.push({x: x1, y: i}); // Left line
   // Adjust for rotation correctly.
-  return b.map((b, a = ub(w), c = b.x - g, d = b.y - e) => ({x: db(a) * c - lb(a) * d + g, y: lb(a) * c + db(a) * d + e}));
+  return points.map((p, index, arr, rad = degToRad(r), dx = p.x - pivotX, dy = p.y - pivotY) => ({x: cos(rad) * dx - sin(rad) * dy + pivotX, y: sin(rad) * dx + cos(rad) * dy + pivotY}));
 },
 
 // Removes points that are inside other shape's perimeters or out-of-bounds.
-Ci = (a, b = (f, a, c = f.y, h = a[g], d = 0, b = 0, e = h - 1) => {
-    for (; b < h; e = b++) {
-      let i = a[b].x, g = a[b].y, j = a[e].y;
-      if ((g> c) !== (j > c) && f.x < ((a[e].x - i) * (c - g)) / (j - g) + i) d = !d;
+filterWaypoints = (segments, inShape = (point, perimeterPoints, y = point.y, n = perimeterPoints.length, inside = 0, i = 0, j = n - 1) => {
+    for (; i < n; j = i++) {
+      let xi = perimeterPoints[i].x, yi = perimeterPoints[i].y, yj = perimeterPoints[j].y;
+      if ((yi> y) !== (yj > y) && point.x < ((perimeterPoints[j].x - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
     }
-    return d;
+    return inside;
   }) => {
-  a[i]((d, e, c) => {
-    d[i](d => {
-      for (c = 0; c < a[g]; c++)
-        if (c !== e && b(d, a[c]) || d.y < 2 || d.x < 0 || d.x> 960) {
-          d.r = 1;
+  segments.forEach((points, index, i) => {
+    points.forEach(p => {
+      for (i = 0; i < segments.length; i++)
+        if (i !== index && inShape(p, segments[i]) || p.y < 2 || p.x < 0 || p.x> 960) {
+          p.r = 1;
           break;
         }
     });
   });
-  return Xg(a.map(a => Ei(a[k](a => !a.r)))[k](a => a[g] > 2));
+  return stitchWaypointSegments(segments.map(points => filterCloseWaypoints(points.filter(p => !p.r))).filter(segment => segment.length > 2));
 },
 
 // Cleans up the waypoints.
-Di = (h, d = 2, e = .2, b = [...h], f = [], c, a) => {
-  b[yb]((a, b) => a.y - b.y);
-  while (b[g] > 0) {
-    let i = [], j = b[Ic](), l, k, m;
-    i[n](j);
-    while (b[g] > 0) {
-      l = -1;
-      k = Infinity;
-      for (c = 0; c < b[g]; c++) {
-        m = wa(j.x, j.y, b[c].x, b[c].y);
-        if (m < k) {
-          k = m;
-          l = c;
+reorderAndSmoothWaypoints = (points, radius = 2, factor = .2, remaining = [...points], segments = [], i, j) => {
+  remaining.sort((a, b) => a.y - b.y);
+  while (remaining.length) {
+    let segment = [], current = remaining.shift(), nearestIndex, nearestDist, d;
+    segment.push(current);
+    while (remaining.length) {
+      nearestIndex = -1;
+      nearestDist = Infinity;
+      for (i = 0; i < remaining.length; i++) {
+        d = calculateDistance(current.x, current.y, remaining[i].x, remaining[i].y);
+        if (d < nearestDist) {
+          nearestDist = d;
+          nearestIndex = i;
         }
       }
-      if (k> 12) break; // The max distance between points to consider.
-      j = b[Dd](l, 1)[0];
-      i[n](j);
+      if (nearestDist> 12) break; // The max distance between points to consider.
+      current = remaining.splice(nearestIndex, 1)[0];
+      segment.push(current);
     }
-    f[n](i[g] > 2 ? i.map((b, f, c, m = 0, n = 0, h = 0, i = 0, j, k, l) => {
-      if (b.y < 50) return b; // Skip smoothing for low-y points
-      for (a = f - d; a <= f + d; a++) {
-        if (j = c[(a + c[g]) % c[g]]) {
-          k = wa(b.x, b.y, j.x, j.y);
-          if (k> i) i = k;
+    segments.push(segment.length > 2 ? segment.map((p, i, arr, sumX = 0, sumY = 0, count = 0, maxNeighborDist = 0, neighbor, d, pt) => {
+      if (p.y < 50) return p; // Skip smoothing for low-y points
+      for (j = i - radius; j <= i + radius; j++) {
+        if (neighbor = arr[(j + arr.length) % arr.length]) {
+          d = calculateDistance(p.x, p.y, neighbor.x, neighbor.y);
+          if (d> maxNeighborDist) maxNeighborDist = d;
         }
       }
-      if (i > 12) return b;
-      for (a = f - d; a <= f + d; a++)
-        if (a>= 0 && a < c[g]) {
-          l = c[a];
-          m += l.x;
-          n += l.y;
-          h++;
+      if (maxNeighborDist > 12) return p;
+      for (j = i - radius; j <= i + radius; j++)
+        if (j>= 0 && j < arr.length) {
+          pt = arr[j];
+          sumX += pt.x;
+          sumY += pt.y;
+          count++;
         }
-      return h ? {x: b.x + (m / h - b.x) * e, y: b.y + (n / h - b.y) * e} : b;
-    }) : i);
+      return count ? {x: p.x + (sumX / count - p.x) * factor, y: p.y + (sumY / count - p.y) * factor} : p;
+    }) : segment);
   }
-  return Xg(f[k](a => a[g] > 5));
+  return stitchWaypointSegments(segments.filter(segment => segment.length > 5));
 },
 
 // Filters out waypoints that are too close to each other.
-Ei = (d, c = [], a, b) => {
-  for (a = 0; a < d[g]; a++) {
-    b = d[a];
-    if (!c[D](a => Rc(b.x - a.x, b.y - a.y) < 2)) c[n](b);
+filterCloseWaypoints = (points, result = [], i, p) => {
+  for (i = 0; i < points.length; i++) {
+    p = points[i];
+    if (!result.some(q => hypot(p.x - q.x, p.y - q.y) < 2)) result.push(p);
   }
-  return c;
+  return result;
 },
 
 // Stitches together segments of waypoints in an intelligent way to preserve as much continuity as possible.
-Xg = (a, b = []) => {
-  while (a[g] > 0) {
-    let c = a[Ic](), d = 1, e;
-    while (d) {
-      d = 0;
-      for (e = 0; e < a[g]; e++) {
-        let f = a[e], h = c[0], i = c[c[g] - 1], j = f[0], k = f[f[g] - 1];
-        // 12 is the join threshold.
-        if (wa(i.x, i.y, j.x, j.y) <= 12) {
-          c = c.concat(f);
-          d = 1;
-        }
-        else if (wa(i.x, i.y, k.x, k.y) <= 12) {
-          c = c.concat(f[_d]().reverse());
-          d = 1;
-        }
-        else if (wa(h.x, h.y, k.x, k.y) <= 12) {
-          c = f.concat(c);
-          d = 1;
-        }
-        else if (wa(h.x, h.y, j.x, j.y) <= 12) {
-          c = f[_d]().reverse().concat(c);
-          d = 1;
-        }
-        if (d) {
-          a[Dd](e, 1);
-          break;
+stitchWaypointSegments = (segments, stitched = []) => {
+  while (segments.length) {
+    let current = segments.shift(), i, c;
+    go: while (1) {// Named for use with a nested continue statement to avoid juggling a variable to track loooping and breaks.
+      for (i = 0; i < segments.length; i++) {
+        let seg = segments[i], curFirst = current[0], curLast = current[current.length - 1], segFirst = seg[0], segLast = seg[seg.length - 1],
+          cases = [
+            [curLast, segFirst, X => current.concat(seg)],
+            [curLast, segLast, X => current.concat(seg.slice().reverse())],
+            [curFirst, segLast, X => seg.concat(current)],
+            [curFirst, segFirst, X => seg.slice().reverse().concat(current)],
+          ];
+        for (c of cases) {
+          // 12 is the join threshold.
+          if (calculateDistance(c[0].x, c[0].y, c[1].x, c[1].y) < 12) {
+            current = c[2]();
+            segments.splice(i, 1);
+            continue go; // Break out of the two for-loops.
+          }
         }
       }
+      break; // No more joins found, stop looping.
     }
-    b[n](c);
+    stitched.push(current);
   }
-  return b.flat();
+  // The waypoints also store their own index.
+  return stitched.flat().map((wp, i) => ({...wp, i}));
 },
 
 // Renders hills.
-Fi = a => {
-  Wa(c(oc), `<div id=hill-${a.id} class=hill style="left:${a.l}px;width:${a.r - a.l}px"><div class=specks></div></div>`);
-  Yg(a);
+drawHill = hill => {
+  appendHTML(getEl('hills'), html(divc('specks'), {id: 'hill-' + hill.id, class: 'hill', style: `left:${hill.l}px;width:${hill.r - hill.l}px`}));
+  hillProgDraw(hill);
 },
 
 // Updates hill height.
-Yg = a => c('hill-' + a.id)[r][yd] = a.h + Fa,
+hillProgDraw = hill => getEl('hill-' + hill.id).style.height = /*(hill.h > 3 ? hill.h : 0)*/hill.h + 'px', /// Hills need to be over 3px for hill to show otherwise there are visual artifacts in the browser.
 
 // Corrects background position of farm sculptures.
-Zg = a => Ra('.prog')[i](a => {let b = a[ad]('.tp'); a[r].backgroundPosition = b[r][ea] + Hc + b[r][H]}),
+mTunsBg = X => queryAll('.prog').forEach(el => {let tp = el.closest('.tp'); el.style.backgroundPosition = tp.style.left + ' ' + tp.style.top}),
 
 // Set up the msgLog panel.
-Gi = (a = c('msglog'), b = c('msglog-dn'), e = c('msglog-txt')) => {
-  b[s](G, c => {
-    if (a[d][zb](qc)) {
-      a[d][o](qc);
-      b[kg] = '▼';
+setupMsgLog = (msgLogEl = getEl('msglog'), msgLogDn = getEl('msglog-dn'), msgLogTxt = getEl('msglog-txt')) => {
+  msgLogDn.addEventListener('click', (e, isShown = msgLogEl.classList.toggle('dn')) => {
+    if (isShown) {
+      msgLogTxt.innerHTML = html(p('Message Log'), {class: 'msg mlhd'});
+      messageLog.forEach(ml => msgLogTxt.innerHTML += html(ml.msg, {class: 'msg ' + ml.t}));
     }
-    else {
-      e[B] = '<div class="msg mlhd"><p>Message Log</p></div>';
-      me[i](a => e[B] += `<div class="msg ${a.t}">${a.msg}</div>`);
-      a[d][m](qc);
-      b[kg] = '▲';
-    }
+    msgLogDn.innerText = isShown ? '▲' : '▼';
   });
 },
 
 // Set up the switch control panel.
-Hi = (a = c('switch'), b = c(Fj)) => {
-  b[s](G, c => {
-    if (a[d][zb](ae)) {
-      a[d][o](ae);
-      b[kg] = '▲';
-    }
-    else {
-      a[d][m](ae);
-      b[kg] = '▼';
-    }
-  });
-  c(ci)[s](G, Ii);
+setupSwitcher = (switchEl = getEl('switch'), switchUp = getEl('switch-up')) => {
+  switchUp.addEventListener('click', (e, isUp = switchEl.classList.toggle('up')) => switchUp.innerText = isUp ? '▼' : '▲');
+  getEl('switch-control').addEventListener('click', switchFunc);
 },
 
 // Supports the switcher functionality.
-Ii = (c, b = c[_b][ad]('.switch-f')?.[ra].id) => b && a.id != b && Sc(b),
+switchFunc = (e, farmId = e.target.closest('.switch-f')?.dataset.id) => farmId && F.id != farmId && switcher && switchFarm(farmId),
 
 // Updates the farm switch control panel.
-Tb = a => {
-  if (b[P][g] > 1) c('switch')[d][m](z);
-  c(ci)[B] = w;
-  b[P][i](a => c(ci)[Ad](qe(`<div class="switch-f${Sb(a) ? ' cur' : w}"data-id=${a.id}><div class=sw-t>${a[Yb] ? '<img src=img/sculpt.webp>': Od(a)}</div></div>`)));
-  h(a => bb = 1, ja);
+updateSwitcher = X => {
+  if (_.farms.length > 1) getEl('switch').classList.add('vis');
+  getEl('switch-control').innerHTML = '';
+  _.farms.forEach(f => getEl('switch-control').appendChild(getTemplate(html(html(f.sculpt ? img('sculpt') : getFarmThumbnail(f), {class: 'sw-t'}), {class: 'switch-f' + (currentFarm(f) ? ' cur' : ''), 'data-id': f.id}))));
+  setTimeout(X => switcher = 1, num1000); // Re-enable switcher.
   // Prevent soft-lock due to crucible functionality. (Checked here because this func is somewhat of a multi-farm overwatcher)
-  b[P][g] && b[P].every(a => a[Yb]) && !b[L][D](a => a.k == Qe) && h(a => td(Qe), W);
+  _.farms.length && _.farms.every(f => f.sculpt) && !_.bag.some(obj => obj.k == 'antFarm') && setTimeout(X => drop('antFarm'), shortDelay);
+  /* START-DEV */
+  dev && devNotifySwitch(); // Tell the dev script that a switch happened.
+  /* END-DEV */
 },
 
 // Retrieves the HTML for a farm's thumbnail.
 // Note: the 'ab' and 'fl' classes are there in anticipation of future divs that match the same position/dimensions, but that can be changed if that is to never be implemented.
-Od = (a, b = 1, c = 1) => (b ?
-  `<div class=thumb data-col=${a[t]} data-fill=${a[oa]}><div class="crd ab"style="${a[V] ? `background-image:url(img/${a[V]}.webp)` : w}"></div><div class="fll fl"></div><div class=gl></div><div class=de></div><div class=ld></div><div class=n1></div><div class=n2></div><div class=n3></div><div class=n4></div></div>` : w)
-  + (c ? `<div class=Bthumb data-col=${a[Za]}><div class=Bl></div><div class=Bn>${a.n}</div><div class=Br></div><div class=Bt></div></div>` : w),
+getFarmThumbnail = (f, farm = 1, base = 1) => (farm ?
+  html(divc('crd ab', {style: f.card ? `background-image:url(img/${f.card}.webp)` : ''}) + divc('fll fl') + divc('gl') + divc('de') +
+  divc('ld') + divc('n1') + divc('n2') + divc('n3') + divc('n4'), {class: 'thumb', 'data-col': f.col, 'data-fill': f.fill}) : '')
+  + (base ? html(divc('Bl') + html(f.n, {class: 'Bn'}) + divc('Br') + divc('Bt'), {class: 'Bthumb', 'data-col': f.plate}) : ''),
 
 // Calculates the y-position of the drink feeder.
-$g = (b, a = Va(b)) => (ud(a + 25) + ba(ud(a), ud(a + 50))) / 2 + Fa,
+getDrinkHillHeight = (x, xPos = parseInt(x)) => (getHillHeight(xPos + 25) + min(getHillHeight(xPos), getHillHeight(xPos + 50))) / 2 + 'px',
 
 // Re-adds placed items when switching to farm or loading page.
-_g = b =>
-  a[aa][i](b => {
-    let e = [`left:${b.x}`], d = b.t == Ua, f = b.t == Ga;
-    (d || f) && e[n](`bottom:${d ? ud(Va(b.x) + 25) + Fa : $g(b.x)}`);
-    d && e[n](`transform:rotate(${Td({x: b.x, [y]: 1, f: a.id}) - 90}deg)`);
-    Wa(c(f ? Ua : b.t), `<div id=${b.id} style=${e[Ab](';')} class=${l[b.k].t} data-fx=${l[b[t]]?.fx}>${d || f ? vf(b) : Pd(b)}</div>`);
-  }) || Th(a),
+addItems = X =>
+  F.items.forEach(item => {
+    let isFood = ['food', 'drink'].includes(item.t);
+    appendHTML(getEl(isFood ? 'food' : item.t), html(isFood ? foodCode(item) : sceneImg(item), {id: item.id, style: 'left:' + item.x, class: items[item.k].t, 'data-fx': items[item.col]?.fx}));
+  }) || updateFoodAndDrink(),
 
 // Re-adds placed stickers when switching to farm or loading page.
-Ji = b => a[be][i](a => ch(c(be), a, w)),
+addDecals = X => F.decals.forEach(decal => appendDecalImg(getEl('decals'), decal, '')),
 
 // Re-adds the nip items if needed.
-Ki = b => {
-  a[Aa][i](a => {
-    let g = a[Na], b = Nb[a[K]], f = g.k == rc, e = f ? c(rc) : c('t-' + b);
-    c(b)[d][m](Bb, lg);
-    e[d][m](b, sc, z);
-    c(Bd + b)[d][m](sc, !f && mg);
-    if (f) ga(Gj)[r][Pe] = l[g[t]][t];
-    e[ra].id = a.f;
-    e[s](G, b => wf(a, e));
+addNipItems = X => {
+  F.nips.forEach(n => {
+    let nipItem = n.item, nipId = nipIds[n.nip], isVial = nipItem.k == 'vial', itemEl = isVial ? getEl('vial') : getEl('t-' + nipId);
+    getEl(nipId).classList.add('off', 'hide');
+    itemEl.classList.add(nipId, 'on', 'vis');
+    getEl('a-' + nipId).classList.add('on', !isVial && 'fade');
+    if (isVial) query('#vial .vs div').style.background = items[nipItem.col].col;
+    itemEl.dataset.id = n.f;
+    itemEl.addEventListener('click', e => createNipArrows(n, itemEl));
   });
-  ah();
+  tubeFollowLinks();
 },
 
 // Hides the tube follow links.
-Li = a => Ra(di)[i](a => a[d][o](z)),
+hideTubeFollowLinks = X => queryAll('.toob > span').forEach(fl => fl.classList.remove('vis')),
 
 // Updates the tube follow link functionality.
-ah = a => {
-  Ra(di)[i](a => {
-    let b = a[Hj];
-    a[s](G, c => {
-      c.stopPropagation();
-      bb ? Sc(b[ra].id) : Kf(a);
+tubeFollowLinks = X => {
+  queryAll('.toob > span').forEach(fl => {
+    let par = fl.parentElement;
+    fl.addEventListener('click', e => {
+      e.stopPropagation();
+      switcher ? switchFarm(par.dataset.id) : denyClick(fl);
     }, {once: 1});
   });
-  Gb[s](ei, bh);
-  bh();
+  tubeFollowLinkPosition();
 },
 
 // Updates the tube follow link visual position.
-bh = a => {
-  h(a => {
-    Ra(di)[i](a => {
-      let b = a[Hj], c = b[hb]()[ea] + (['t-nip-tl', 't-nip-bl'][Y](b.id) ? 1060 : 0);
-      a[r][ea] = ba(c + 480, Gb[Re] - 60) - c + Fa;
-      a[d].toggle(z, b[d][zb](sc));
+tubeFollowLinkPosition = X => {
+  setTimeout(X => {
+    queryAll('.toob > span').forEach(fl => {
+      let par = fl.parentElement, pbl = par.getBoundingClientRect().left + (['t-nip-tl', 't-nip-bl'].includes(par.id) ? 1060 : 0);
+      fl.style.left = min(pbl + 480, window.innerWidth - 60) - pbl + 'px';
+      fl.classList.toggle('vis', par.classList.contains('on'));
     });
-  }, ua);
+  }, num2000);
 },
 
 // Provides common markup for addDecals() and placeDecal() and appends it to the supplied container.
-ch = (b, a, c = ' temp') => Wa(b, `<div id=${a.id} style=left:${a.x};top:${a.y};transform:rotate(${a.r}deg) class="${l[a.k].t} ${a.k + c}"><img src=img/${a.k}.webp></div>`),
+appendDecalImg = (decalsEl, decal, temp = ' temp') =>
+  appendHTML(decalsEl, html(img(decal.k), {id: decal.id, style: `left:${decal.x};top:${decal.y};transform:rotate(${decal.r}deg)`, class: items[decal.k].t + ' ' + (decal.k + temp)})),
 
 // Provides the HTML code for a food or beverage item.
-vf = a => `<div class="${a.t} ${a.k} sz-${ba(4, hc(a.sz / 20))}"><div></div></div>`,
+foodCode = item => html(divc('sz-' + min(4, floor(item.sz / 20))), {class: item.t + ' ' + item.k}),
 
 // Calls SVG() to get the SVG code based on a scene item's attributes.
-Pd = a => SVG(a.k, l[a[t]][t], l[a[t]].fx == Oa ? '#fff' : '#000', l[a[t]].fx == Oa ? '.6' : '.25'),
+sceneImg = item => SVG(item.k, items[item.col].col, items[item.col].fx == 'm' ? '#fff' : '#000', items[item.col].fx == 'm' ? '.6' : '.25'),
 
 // Get img/svg tag for a bag/drop item.
-ve = (b, a = l[b.k]) => [qb, tc][Y](a.t) ? Pd(b) :
-  ['paintm', Da][Y](a.t) ? Pd({k: a.fx == Oa ? 'paintm' : Da, [t]: b.k }) :
-  a.t == ib ? Pd({k: ib, [t]: a[t] || b[t] }) :
-  `<img src="img/${a.t == sa ? sa : b.k}.${a.ext || 'webp'}">`,
+bagImg = (bagItem, item = items[bagItem.k]) => ['scenery', 'decor'].includes(item.t) ? sceneImg(bagItem) :
+  ['paintm', 'paint'].includes(item.t) ? sceneImg({k: item.fx == 'm' ? 'paintm' : 'paint', col: bagItem.k }) :
+  item.t == 'ants' ? sceneImg({k: 'ants', col: item.col || bagItem.col }) :
+  img(item.t == 'hat' ? 'hat' : bagItem.k, {}, item.ext),
 
 // Dumps the current farm, and optionally restart.
-dh = d => {
+dumpFarm = restart => {
   // Stow scenery items in bag.
-  if (a[V]) {
-    b[L][n]({k: a[V]});
-    a[V] = c(V)[r][Pe] = w;
+  if (F.card) {
+    _.bag.push({k: F.card});
+    F.card = getEl('card').style.background = '';
   }
   // Remove scenery and decor items, and place into bag.
-  a[aa][i](a => a.t != Ua && a.t != Ga && b[L][n](a));
-  a[aa] = [];
-  c(qb)[B] = w;
-  c(Ua)[B] = w;
-  if (!d) a[oa] = w;
-  a.a[i](Rd);
-  a.e[i](Qf);
-  Ra('.carry')[i](a => a[o]());
+  F.items.forEach(item => item.t != 'food' && item.t != 'drink' && _.bag.push(item));
+  F.items = [];
+  getEl('scenery').innerHTML = '';
+  getEl('food').innerHTML = '';
+  if (!restart) F.fill = '';
+  F.a.forEach(antDelete);
+  F.e.forEach(eggDelete);
   // Reset farm to defaults.
-  Ca(ca(a, pd(Xh)), 'dun', 'hair');
+  del(assign(F, cloneData(farmDefault)), 'dun', 'hair');
   // Undraw tunnels and hills.
   // Save these changes.
-  xa();
-  if (!lf) {
-    c(jg)[B] = w;
-    c(oc)[B] = w;
+  save();
+  if (!spilled) {
+    getEl('tunnels').innerHTML = '';
+    getEl('hills').innerHTML = '';
     // This should handle the rest...
-    sf(d);
+    startFarm(restart);
   }
-  Tb();
+  updateSwitcher();
 },
 
 // "Uses" an inventory item.
-eh = (e, u = 1, j = 1, p = b[L][e], i = p.k, C = l[i].t, q = 0,
-  v = {
-    [ac]() {
-      if (!a[oa]) {
-        a[oa] = i;
-        a.hair = i == Se ? [20 + f(400), 20 + f(860), f(fc)] : 0;
-        sf(1);
-        u = b[U] > 0;
-        Tb();
+useItem = (i, doQuip = 1, doDel = 1, item = _.bag[i], itemKey = item.k, itemType = items[itemKey].t, j = 0,
+  typeHandlers = {
+    filler() {
+      if (!F.fill) {
+        F.fill = itemKey;
+        F.hair = itemKey == 'lube' ? [20 + randomInt(400), 20 + randomInt(860), randomInt(deg360)] : 0;
+        startFarm(1);
+        doQuip = _.score > 0;
+        updateSwitcher();
       }
     },
-    [ng]: dh,
-    gift() {for (; q++ < 3 + f(2);) sd(0)},
-    [ce]() {p.sz = 100; we(e, Ua)},
-    [og](b = a[aa][X](a => a.t == Ga)) {p.sz = 100; b ? Ni(b, e) : we(e, Ga)},
-    [qb]() {j = 0; we(e, qb)}, // Don't del because placeItem() needs the item to remain in the bag, and will del the item when placed.
-    [tc]() {v[qb]()},// Uses same logic as scenery.
-    [Te]() {j = 0; Mi(e)}, // Don't del because placeDecal() needs the item to remain in the bag, and will del the item when placed.
-    [V](f = c(uc)[d], e = c(V)[r]) {
-      bb = 0;
+    sanitation: dumpFarm,
+    gift() {for (; j++ < 3 + randomInt(2);) scoreDrop(0)},
+    nutrition() {item.sz = 100; placeItem(i, 'food')},
+    hydration(existingDrink = F.items.find(i => i.t == 'drink')) {item.sz = 100; existingDrink ? refillDrink(existingDrink, i) : placeItem(i, 'drink')},
+    scenery() {doDel = 0; placeItem(i, 'scenery')}, // Don't del because placeItem() needs the item to remain in the bag, and will del the item when placed.
+    decor() {typeHandlers.scenery()}, // Uses same logic as scenery.
+    sticker() {doDel = 0; placeDecal(i)}, // Don't del because placeDecal() needs the item to remain in the bag, and will del the item when placed.
+    card(lidClasses = getEl('lid').classList, cardElStyle = getEl('card').style) {
+      switcher = 0;
       // Stow existing card in bag.
-      a[V] && b[L][n]({k: a[V]});
+      F.card && _.bag.push({k: F.card});
       // Insert card with animation.
-      a[V] = i;
-      h(b => {
-        f[m](Bb);
-        h(b => {
-          e[Jc] = '80vh';
-          h(b => {
-            e[Pe] = `url(img/${a[V]}.webp)`;
-            e[Jc] = '50%';
-            h(a => {
-              f[o](Bb);
-              xe();
-              Tb(); // Will re-enable switcher.
-            }, Ig);
-          }, ja);
-        }, R);
-      }, R);
+      F.card = itemKey;
+      setTimeout(X => {
+        lidClasses.add('off');
+        setTimeout(X => {
+          cardElStyle.bottom = '80vh';
+          setTimeout(X => {
+            cardElStyle.background = `url(img/${F.card}.webp)`;
+            cardElStyle.bottom = '50%';
+            setTimeout(X => {
+              lidClasses.remove('off');
+              addLidFunc();
+              updateSwitcher(); // Will re-enable switcher.
+            }, num1500);
+          }, num1000);
+        }, num500);
+      }, num500);
     },
-    [ib](q = p.a, k = pd(p)) {
-      j = 0; // Don't delete because it will dump the item before the setTimeout below can check it.
-      if (i == rc) {
-        h(b => {
-          xf((f, b = c(rc), g = Nb[f]) => {
-            k.a = [];
-            k.e = [];
-            a[Aa][n]({[K]: f, [Na]: k});
-            b[d][m](g, z);
-            ga(Gj)[r][Pe] = l[k[t]][t];
-            jc(e);
-            h(a => b[d][m](sc) || c(Bd + g)[d][m](sc), Ac);
-            b[s](G, c => wf(Wd(a), b));
+    ants(ants = item.a, emptyVial = cloneData(item)) {
+      doDel = 0; // Don't delete because it will dump the item before the setTimeout below can check it.
+      if (itemKey == 'vial') {
+        setTimeout(X => {
+          nippleSelection((nip, vialEl = getEl('vial'), nipId = nipIds[nip]) => {
+            emptyVial.a = [];
+            emptyVial.e = [];
+            F.nips.push({nip: nip, item: emptyVial});
+            vialEl.classList.add(nipId, 'vis');
+            query('#vial .vs div').style.background = items[emptyVial.col].col;
+            deleteBagItem(i);
+            setTimeout(X => vialEl.classList.add('on') || getEl('a-' + nipId).classList.add('on'), num800);
+            vialEl.addEventListener('click', e => createNipArrows(getVial(F), vialEl));
           });
-        }, R);
+        }, num500);
       }
       else {
-        bb = 0;
-        h(j => {
-          c(uc)[d][m](Bb);
-          h(j => {
-            if (i == fi) {
-              for (let b = 0; b < q[g]; b++) {
-                h(c => {
-                  let d = ca(q[b], {x: Gb[Re] / 2 + f(ec) - 100, y: -30, [I]: Kc});
-                  Ca(d, $a, rc);
-                  eg(d, a);
-                  Gf(d);
-                }, R * b);
+        switcher = 0;
+        setTimeout(X => {
+          getEl('lid').classList.add('off');
+          setTimeout(X => {
+            if (itemKey == 'collected') {
+              for (let a = 0; a < ants.length; a++) {
+                setTimeout(X => {
+                  let ant = assign(ants[a], {x: window.innerWidth / 2 + randomInt(num200) - 100, y: -30, pose: 'pick'});
+                  del(ant, 'nipPh', 'vial');
+                  checkExpatQueen(ant, F);
+                  dropAntInFarm(ant);
+                }, num500 * a);
               }
-              k.a = [];
+              emptyVial.a = [];
             }
             else {
-              for (let a = 0; a <= (l[i].W || 0); a++) {
-                h(c => {
-                  Gf(ca(Df(b, Gb[Re] / 2 + f(ec) - 100, -30, f(30), Zd, a ? 'W' : 'Q', l[i].ant), {
-                    [y]: va(f(1)),
-                    [I]: Kc,
-                    [Ue]: 0,
-                  }), b);
-                }, R * a);
+              for (let a = 0; a <= (items[itemKey].W || 0); a++) {
+                setTimeout(X => {
+                  dropAntInFarm(assign(createAnt(_, window.innerWidth / 2 + randomInt(num200) - 100, -30, randomInt(30), 'free', a ? 'W' : 'Q', items[itemKey].ant), {
+                    scale: getSign(randomInt(1)),
+                    pose: 'pick',
+                    alate: 0,
+                  }), _);
+                }, num500 * a);
               }
             }
             // Stow an empty vial in the bag.
-            k.k = rc;
-            k[t] ||= l[i][t];
-            b[L][n](k);
-            jc(e);
-            h(a => {
-              c(uc)[d][o](Bb);
-              xe();
-              bb = 1;
-            }, W * 2);
-          }, R);
-        }, R);
+            emptyVial.k = 'vial';
+            emptyVial.col ||= items[itemKey].col;
+            _.bag.push(emptyVial);
+            deleteBagItem(i);
+            setTimeout(X => {
+              getEl('lid').classList.remove('off');
+              addLidFunc();
+              switcher = 1;
+            }, shortDelay * 2);
+          }, num500);
+        }, num500);
       }
     },
-    [Da]() {j = 0; La(Da, e)}, // Don't del as we aren't marking every paint with "keep: 1", the popup workflow will do it.
-    [sa]() {j = 0; La(sa, e)}, // Don't del as we aren't marking every hat with "keep: 1", the popup workflow will do it.
+    paint() {doDel = 0; popup('paint', i)}, // Don't del as we aren't marking every paint with "keep: 1", the popup workflow will do it.
+    hat() {doDel = 0; popup('hat', i)}, // Don't del as we aren't marking every hat with "keep: 1", the popup workflow will do it.
   },
-  A = {
-    [Za]() {La(Za, e)},
-    [bc]() {La(bc, e)},
-    feng() {La('feng', e)},
-    [bd]() {La(bd, e)},
-    antfaxpro() {A[bd]()},
-    Hf,
-    cologne(a = c('fx')) {
-      pb('spray', .7);
-      a[d][m]('fog');
-      for (; q < 20;) h(a => Cf(0), q++ * W);
-      h(b => {
-        a[d][m](pg);
-        h(b => a[d][o]('fog', pg), 4500);
-      }, 19 * W);
+  keyHandlers = {
+    plate() {popup('plate', i)},
+    tube() {popup('tube', i)},
+    feng() {popup('feng', i)},
+    antfax() {popup('antfax', i)},
+    antfaxpro() {keyHandlers.antfax()},
+    antyvenom,
+    cologne(fx = getEl('fx')) {
+      playSound('spray', .7);
+      fx.classList.add('fog');
+      for (; j < 20;) setTimeout(X => {spawnAnt(0); spawnAnt(0); spawnAnt(0)}, j++ * shortDelay);
+      setTimeout(X => {
+        fx.classList.add('fog2');
+        setTimeout(X => fx.classList.remove('fog', 'fog2'), 4500);
+      }, 19 * shortDelay);
     },
-    bus(a = b[P][k](a => a.a[g])[g]) {//  @TODO test this
-        //let i = last(_.farms.filter(f => f.a.length)),
-        // @TODO this is not supposed to allow dystopia when you have just 1 or more than 4 farms - but it does.
-        //locKeys = (i == 3) ? ['dystopia'] : keys(locs).filter(lk => (i === 1 || i > 4) ? lk != 'dystopia' : lk),
-        locKeys = (a == 4) ? [hi] : ma(gg)[k](b => (a === 1 || a > 4) ? b != hi : b),
-        loc = x(locKeys);
-        b.bg = loc + (f(gg[loc].c) + 1);
-        b.au = gg[loc].a;
-        Le();
-        yf();
+    bus(countFarms = _.farms.filter(farmIsRunning).length, loc = pickRandom(countFarms == 4 ? ['dystopia'] : keys(locs).filter(lk => countFarms < 3 || countFarms> 4 ? lk != 'dystopia' : lk)), newBg = loc + (randomInt(locs[loc].c - 1) + 1)) {
+      if (newBg == _.bg) return keyHandlers.bus(); // Note: this could potentially recurse infinitely causing stack problems, but the odds are low enough to be negligible.
+      _.bg = newBg;
+      _.au = locs[loc].a;
+      ambience();
+      setBg();
     },
-    backdrop() {b.grad = (b.grad + 1) % 8; b.bg = w; yf()},
-    [Ve]() {Ti(3)},
-    [We]() {b.ss = Date.now() + (3 * cb) + f(cb); oh(); Ta(l[We][Z])},
-    [Ed]() {La(Ed, e)},
-    [Qe]() {Rg(); gb(20, 1)},
-    [cd]() {xb('<b>Win.</b>', 'err'); b.win = 1; gb(100, 1)},
-    crucible() {Pi(); gb(20, 1)},
+    backdrop() {_.grad = (_.grad + 1) % 8; _.bg = ''; setBg()},
+    clonekit() {clone(3)},
+    speedo() {_.ss = Date.now() + (3 * longDelay) + randomInt(longDelay); doWarp(); randomMsg(items['speedo'].quip)},
+    ebay() {popup('ebay', i)},
+    antFarm() {addFarm(); score(20, 1)},
+    mom() {msg('<b>Win.</b>', 'err'); _.win = 1; score(100, 1)},
+    crucible() {pourCrucible()},
+    sculpt() {_.farms.push(item.f); switchFarm(item.f.id)},
   },
-  B = A[i] || v[C]
+  handler = keyHandlers[itemKey] || typeHandlers[itemType]
 ) => {
-  fb();
-  B && B();
-  u && Ta(l[i][Z]);
-  j && !l[i].keep && jc(e);
+  closePopup();
+  handler && handler();
+  doQuip && randomMsg(items[itemKey].quip);
+  doDel && !items[itemKey].keep && deleteBagItem(i);
+},
+
+// Provides common functionality between placeDecal() and placeItem().
+pointerPlace = (obj, boundsEl, move, commit, boundsRect = boundsEl.getBoundingClientRect(), onMove = e => move(e, boundsRect),
+  onDown = (e, rect = obj.getBoundingClientRect()) => e.clientX >= rect.left && e.clientX <= rect.right && e.clientY>= rect.top && e.clientY <= rect.bottom && commit()) => {
+  B.addEventListener('pointermove', onMove);
+  B.addEventListener('pointerdown', onDown);
+  return X => {
+    B.removeEventListener('pointermove', onMove);
+    B.removeEventListener('pointerdown', onDown);
+  };
 },
 
 // Adds stickers into the farm.
-// This function is awfully similar to placeItem(), but just different enough to be annoying to refactor together :(
 // Note: Once the sticker is chosen it can't be cancelled, other than reloading the page.  I think that makes sense though, because once you peel a sticker... well, you're rather stuck.
-Mi = (g, e = c(be), f = ca(b[L][g], { id: 'i' + Ja() }), h = e[hb](), i = 0, j = 0) => {
-  c(dd)[d][m](z);
-  ch(e, f);
-  let b = c(f.id), l = b[_c], p = b[ii],
-  k = a => {
-    b[r][ea] = `${Ib((a[_a] ?? (a[cc] && a[cc][0][_a])) - h[ea] - l / 2, 0, e[_c] - l)}px`;
-    b[r][H]  = `${Ib((a[rb] ?? (a[cc] && a[cc][0][rb])) - h[H] - p / 2, 0, e[ii] - p)}px`;
-  },
-  v = e => {
-    b[d][o]('temp');
-    f.x = b[r][ea];
-    f.y = b[r][H];
-    a[be][n](f);
-    f.k == 'coexist' && (a[Ob] = 1);
-    jc(g);
-    c(dd)[d][o](z);
-    xa();
-    E[qa](Lc, k);
-    E[qa](ed, q);
-    E[qa](fd, k);
-    E[qa](vc, t);
-    E[qa](gd, u);
-  },
-  q = (a, c = b[hb]()) => a[_a] >= c[ea] && a[_a] <= c[Xe] && a[rb]>= c[H] && a[rb] <= c[Jc] && v(),
-  t = (b, a = b[cc][0]) => {i = a[_a]; j = a[rb]},
-  u = (b, a = b[Ij][0]) => N(a[_a] - i) < 5 && N(a[rb] - j) < 5 && q(a);
-  b[r][ea] = `${(e[_c] - l) / 2}px`;
-  b[r][H] = `${(e[ii] - p) / 2}px`;
-  E[s](Lc, k);
-  E[s](ed, q);
-  E[s](fd, k, {[Fd]: 0});
-  E[s](vc, t, {[Fd]: 1});
-  E[s](gd, u, {[Fd]: 1});
+placeDecal = (i, decals = getEl('decals'), decal = assign(_.bag[i], {id: 'i' + getTime()})) => {
+  getEl('olay').classList.add('vis');
+  appendDecalImg(decals, decal);
+  let obj = getEl(decal.id), imgWidth = obj.offsetWidth, imgHeight = obj.offsetHeight,
+    cleanup = pointerPlace(obj, decals,
+      (e, rect) => {
+        obj.style.left = `${clamp(e.clientX - rect.left - imgWidth / 2, 0, decals.offsetWidth - imgWidth)}px`;
+        obj.style.top = `${clamp(e.clientY - rect.top  - imgHeight / 2, 0, decals.offsetHeight - imgHeight)}px`;
+      },
+      X => {
+        obj.classList.remove('temp');
+        decal.x = obj.style.left;
+        decal.y = obj.style.top;
+        F.decals.push(decal);
+        decal.k == 'coexist' && (F.coex = 1);
+        deleteBagItem(i);
+        getEl('olay').classList.remove('vis');
+        save();
+        cleanup();
+      }
+    );
+  obj.style.left = `${(decals.offsetWidth - imgWidth) / 2}px`;
+  obj.style.top = `${(decals.offsetHeight - imgHeight) / 2}px`;
 },
 
 // Adds items into the farm.
-we = (i, f, e = ca(b[L][i], { id: 'i' + Ja(), t: f }), g = c(f == Ga ? Ua : f), p = g[hb](), j = 0, k = 0) => {
-  bb = 0;
-  c(dd)[d][m](z);
-  h(a => c(uc)[d][m](Bb), R);
-  Wa(g, `<div id=${e.id} class="${l[e.k].t} temp up">${f == qb ? Pd(e) : vf(e)}</div>`);
-  let q = c(e.id), t = q[_c],
-  u = (c, b = Ib((c[_a] ?? (c[cc] && c[cc][0][_a])) - p[ea] - t / 2, 0, g[_c] - t)) => {
-    q[r][ea] = b + Fa;
-    if (f == Ua) {
-      q[r][Jc] = ud(b + t / 2) + Fa;
-      q[r][de] = `rotate(${Td({ x: b + t / 2, [y]: 1, f: a.id }) - 90}deg)`;
-    }
-    if (f == Ga) q[r][Jc] = $g(b);
-  },
-  A = g => {
-    q[d][o]('temp');
-    e.x = q[r][ea];
-    a[aa][n](e);
-    if (!l[e.k].keep) jc(i);
-    h(() => c(uc)[d][o](Bb), R);
-    c(dd)[d][o](z);
-    xe();
-    bb = 1;
-    if (f == qb) b.scene[e.id] = 1;
-    xa();
-    E[qa](Lc, u);
-    E[qa](ed, v);
-    E[qa](fd, u);
-    E[qa](vc, w);
-    E[qa](gd, x);
-  },
-  v = (a, b = q[hb]()) => a[_a] >= b[ea] && a[_a] <= b[Xe] && a[rb]>= b[H] && a[rb] <= b[Jc] && A(),
-  w = (b, a = b[cc][0]) => {j = a[_a]; k = a[rb]},
-  x = (b, a = b[Ij][0]) => N(a[_a] - j) < 5 && N(a[rb] - k) < 5 && v(a);
-  h(a => q[d][o](ae), ja);
-  q[r][ea] = `${(g[_c] - t) / 2}px`;
-  E[s](Lc, u);
-  E[s](ed, v);
-  E[s](fd, u, {[Fd]: 0});
-  E[s](vc, w, {[Fd]: 1});
-  E[s](gd, x, {[Fd]: 1});
+placeItem = (i, type, item = assign(cloneData(_.bag[i]), {id: _.bag[i].id || 'i' + getTime(), t: type}), el = getEl(type == 'drink' ? 'food' : type)) => {
+  switcher = 0;
+  getEl('olay').classList.add('vis');
+  setTimeout(X => getEl('lid').classList.add('off'), num500);
+  appendHTML(el, html(type == 'scenery' ? sceneImg(item) : foodCode(item), {id: item.id, class: items[item.k].t + ' temp up'}));
+  let obj = getEl(item.id), itemWidth = obj.offsetWidth,
+    cleanup = pointerPlace(obj, el,
+      (e, rect) => {
+        let xPos = clamp(e.clientX - rect.left - itemWidth / 2, 0, el.offsetWidth - itemWidth);
+        obj.style.left = xPos + 'px';
+        if (type == 'food') {
+          obj.style.bottom = getHillHeight(xPos + itemWidth / 2) + 'px';
+          obj.style.transform = `rotate(${antHillAngle({x: xPos + itemWidth / 2, scale: 1, f: F.id})}deg)`;
+        }
+        if (type == 'drink') obj.style.bottom = getDrinkHillHeight(xPos);
+      },
+      X => {
+        obj.classList.remove('temp');
+        item.x = obj.style.left;
+        F.items.push(item);
+        if (!items[item.k].keep) deleteBagItem(i);
+        setTimeout(X => getEl('lid').classList.remove('off'), num500);
+        getEl('olay').classList.remove('vis');
+        addLidFunc();
+        switcher = 1;
+        if (type == 'scenery') _.scene[item.id] = 1;
+        save();
+        cleanup();
+      }
+    );
+  setTimeout(X => obj.classList.remove('up'), num1000);
+  obj.style.left = `${(el.offsetWidth - itemWidth) / 2}px`;
 },
 
 // Pulls existing drink feeder out of farm and switches to placeItem to insert new drink.
-Ni = (b, f, e = c(b.id)) => {
-  bb = 0;
-  h(a => c(uc)[d][m](Bb), R);
-  h(c => {
-    e[d][m](ae);
-    h(c => {
-      a[aa] = a[aa][k](a => a.id != b.id);
-      e[o]();
-      we(f, Ga); // Will re-enable switcher.
-    }, Ac);
-  }, Ac);
+refillDrink = (item, i, itemEl = getEl(item.id)) => {
+  switcher = 0;
+  setTimeout(X => getEl('lid').classList.add('off'), num500);
+  setTimeout(X => {
+    itemEl.classList.add('up');
+    setTimeout(X => {
+      F.items = F.items.filter(it => it.id != item.id);
+      itemEl.remove();
+      placeItem(i, 'drink'); // Will re-enable switcher.
+    }, num800);
+  }, num800);
 },
 
 // Puts lid functionality on the lid.
-xe = (a = c(uc)) => {
-  a[s](G, Oi);
-  a[d][m]('use');
+addLidFunc = (lid = getEl('lid')) => {
+  lid.addEventListener('click', createArrows);
+  lid.classList.add('use');
 },
 
 // Provides the common initialisation workflow for createArrows() and createNipArrows().
-fh = (a, b = c(dd)) => {
-  b[d][m](z);
-  a.replaceWith(a[ji](0));
-  b[s](G, Qd);
-  Gb[s](ei, Qd);
-  return c(qg);
+createArrowsInit = (pull, olay = getEl('olay')) => {
+  olay.classList.add('vis');
+  pull.replaceWith(pull.cloneNode(0));
+  olay.addEventListener('click', removeArrows);
+  window.addEventListener('resize', removeArrows);
+  return getEl('pull');
 },
 
 // Shows arrows when lid lifted.
-Oi = (j, e = fh(c(qg)), f = c(V), g = [...(a[V] ? [f] : []), ...Ra('#scenery > *, #food > *')], ) => {
-  c(uc)[d][m](Bb);
-  Ta(zj);
-  h(c => {
-    g[i]((c) => {
-      let i = eb(a[aa], c.id), l = c[hb](), g = ta[_h]('div'), j = l[nc], p = {[V]: 100, [qb]: 140, [Ga]: 220, [Ua]: 220};
-      g[d][m]('arrow');
-      e[Ad](g);
-      g[r][nc] = j + Fa;
-      g[r][ea] = `${(l[ea] + j / 2) - e[hb]()[ea] - j / 2}px`;
-      g[r][H] = `${p[c.id] ?? p[i.t] ?? 180}px`;
-      g[s](G, e => {
-        g[d][m](lg);
-        if (c == f) {
-          a[V] && b[L][n]({k: a[V]});
-          a[V] = 0;
-          f[r][Jc] = '80vh';
+createArrows = (e, pull = createArrowsInit(getEl('pull')), card = getEl('card'), items = [...(F.card ? [card] : []), ...queryAll('#scenery > *, #food > *')], ) => {
+  getEl('lid').classList.add('off');
+  randomMsg(lidLift);
+  setTimeout(X => {
+    items.forEach((item) => {
+      let Fitem = getById(F.items, item.id), itemRect = item.getBoundingClientRect(), arrow = document.createElement('div'), itemWidth = itemRect.width, topMap = {card: 100, scenery: 140, drink: 220, food: 220};
+      arrow.classList.add('arrow');
+      pull.appendChild(arrow);
+      arrow.style.width = itemWidth + 'px';
+      arrow.style.left = `${(itemRect.left + itemWidth / 2) - pull.getBoundingClientRect().left - itemWidth / 2}px`;
+      arrow.style.top = `${topMap[item.id] ?? topMap[Fitem.t] ?? 180}px`;
+      arrow.addEventListener('click', X => {
+        arrow.classList.add('hide');
+        if (item == card) {
+          F.card && _.bag.push({k: F.card});
+          F.card = 0;
+          card.style.bottom = '80vh';
         }
-        else if (c) {
-          if (i.t != Ua && i.t != Ga) {
-            b[L][n](i);
-            b[L] = b[L][k](a => a);
+        else if (item) {
+          if (Fitem.t != 'food' && Fitem.t != 'drink') {
+            _.bag.push(Fitem);
+            _.bag = _.bag.filter(bi => bi);
           }
-          a[aa] = a[aa][k](a => a.id != c.id);
-          c[d][m](ae);
-          h(a => c[o](), ja);
+          F.items = F.items.filter(i => i.id != item.id);
+          item.classList.add('up');
+          setTimeout(X => item.remove(), num1000);
         }
-        xa();
-        Tb();
+        save();
+        updateSwitcher(); // So card image is updated in the thumbnails.
       });
     });
-    e[d][m](z);
-  }, R);
+    // Allow plucking dead ants from surface.
+    F.a.filter(a => deadInFarm(a) && !a.area.t).forEach(a => {
+      let arrow = document.createElement('div'), antEl = getEl(a.id), itemRect = antEl.getBoundingClientRect();
+      arrow.classList.add('arrow');
+      pull.appendChild(arrow);
+      arrow.style.width = '16px';
+      arrow.style.left = itemRect.left + itemRect.width / 2 - 8 + 'px';
+      arrow.style.top = a.y - 80 + 'px';
+      arrow.addEventListener('click', X => {
+        arrow.classList.add('hide');
+        antEl.classList.add('up');
+        setTimeout(X => antDelete(a, 'a', F), num1000);
+        save();
+      });
+    });
+    pull.classList.add('vis');
+  }, num500);
 },
 
 // Replaces lid and removes arrows.
-Qd = (e, a = c(dd), b = c(qg)) => {
-  h(a => {
-    c(uc)[d][o](Bb);
-    b[B] = w;
-  }, ja);
-  a[d][o](z);
-  b[d][o](z);
-  a[qa](G, Qd);
-  Gb[qa](ei, Qd);
+removeArrows = (e, olay = getEl('olay'), pull = getEl('pull')) => {
+  setTimeout(X => {
+    getEl('lid').classList.remove('off');
+    pull.innerHTML = '';
+  }, num1000);
+  olay.classList.remove('vis');
+  pull.classList.remove('vis');
+  olay.removeEventListener('click', removeArrows);
+  window.removeEventListener('resize', removeArrows);
 },
 
 // Shows arrows when something attached to a nipple is clicked.
-wf = (e, t, j = e[Na], u = fh(c(qg)), p = Nb[e[K]], l = ta[_h]('div'),
-v = c(p), x = v[hb](), y = c(Bd + p), q = J(e.f)) => {
-  l[d][m]('arrow', 'niparrow', p);
-  u[Ad](l);
-  l[r][ea] = `${x[ea] - u[hb]()[ea] + 10}px`;
-  l[r][H] = `${x[H] - 80}px`;
-  l[s](G, c => {
-    if (a.a[D](a => a.q[0]?.[C] == K)) Kf(l); // An ant is trying to walk through the nip, deny this action.
+createNipArrows = (nipData, nipItemEl, nipItem = nipData.item, pull = createArrowsInit(getEl('pull')), nipId = nipIds[nipData.nip], arrow = document.createElement('div'),
+nipEl = getEl(nipId), nipRect = nipEl.getBoundingClientRect(), nantEl = getEl('a-' + nipId), otherFarm = getFarm(nipData.f)) => {
+  arrow.classList.add('arrow', 'niparrow', nipId);
+  pull.appendChild(arrow);
+  arrow.style.left = `${nipRect.left - pull.getBoundingClientRect().left + 10}px`;
+  arrow.style.top = `${nipRect.top - 80}px`;
+  arrow.addEventListener('click', X => {
+    if (F.a.some(a => a.q[0]?.act == 'nip')) denyClick(arrow); // An ant is trying to walk through the nip, deny this action.
     else {
-      Qd();
-      y[d][o](sc);
-      t[d][o](sc);
-      v[d][o](lg);
-      h(a => {
-        t[d][o](p);
-        v[d][o](Bb);
-        y[B] = w;
-        t[d][o](z);
-      }, Ac);
-      if (j.k == bc) {
+      removeArrows();
+      nantEl.classList.remove('on');
+      nipItemEl.classList.remove('on');
+      nipEl.classList.remove('hide');
+      setTimeout(X => {
+        nipItemEl.classList.remove(nipId);
+        nipEl.classList.remove('off');
+        nantEl.innerHTML = '';
+        nipItemEl.classList.remove('vis');
+      }, num800);
+      if (nipItem.k == 'tube') {
         // Chuck the ants into the other farm somewhere.
-        j.a[i](a => {
-          a.x = 20 + f(940);
-          a.y = Lb(a);
-          q.a[n](a);
-          eg(a, q);
+        nipItem.a.forEach(a => {
+          a.x = 20 + randomInt(940);
+          a.y = antGroundLevel(a);
+          otherFarm.a.push(a);
+          checkExpatQueen(a, otherFarm);
+          _CHECK_DUPE_ID();///
         });
-        j.a = [];
-        q[Aa] = q[Aa][k](a => a.id != e.id);
+        nipItem.a = [];
+        otherFarm.nips = otherFarm.nips.filter(n => n.id != nipData.id);
         // Note: tubeLoop() is responsible for stopping tubeInterval if no longer needed.
       }
-      if (j.a[g]) j.k = fi;
-      Ca(a[Aa], e[K]);
-      a[Aa] = a[Aa][k](a => a[K] != e[K]);
-      b[L][n](j);
-      xa();
+      if (nipItem.a.length) nipItem.k = 'collected';
+      del(F.nips, nipData.nip);
+      F.nips = F.nips.filter(n => n.nip != nipData.nip);
+      _.bag.push(nipItem);
+      save();
     }
   });
-  u[d][m](z);
+  pull.classList.add('vis');
+},
+
+/// temp function to check for duplicate ids in farm ants - for debugging purposes only
+_CHECK_DUPE_ID = X => {
+  const seen = new Map();
+
+  F.a.forEach((item, index) => {
+    if (seen.has(item.id)) {
+      console.warn(
+        `Duplicate id found: "${item.id}" at indexes ${seen.get(item.id)} and ${index}`
+      );
+    } else {
+      seen.set(item.id, index);
+    }
+  });
+  return 1;
 },
 
 // Fetches a list of usable nips the farm has, optionally restricted to available nips.
-ye = (d = 0, b = a, c = Nb[_d](-2)) => (b[v][i](a => a[K] && a[u] == 100 && c[n](Nb[a[K]])), c[k](a => !d || !b[Aa][D](b => b[K] == a))),
+getNips = (avail = 0, f = F, nips = nipIds.slice(-2)) => (f.tuns.forEach(t => t.nip && t.dun && nips.push(nipIds[t.nip])), nips.filter(n => !avail || !f.nips.some(nip => nipIds[nip.nip] == n))),
 
 // Enables the nipple selection UI mode.  Calling workflow is responsible for checking getNips(1) works.
-xf = (b, e = ye(1), a = e => {
-    let f = e[_b][ad]('.nip').id;
-    Ra('.nip')[i](b => {
-      b[d][o]('sel');
-      b[qa](G, a);
+nippleSelection = (callback, nips = getNips(1), nipCount = 0, nippleClick = e => {
+    let id = e.target.closest('.nip').id;
+    queryAll('.nip').forEach(n => {
+      n.classList.remove('sel');
+      n.removeEventListener('click', nippleClick);
     });
-    E[_c]; // force reflow
-    c(f)[d][m](Bb);
-    h(a => c(f)[d][m](lg), ua);
-    b(Nb[dc](f));
+    B.offsetWidth; // force reflow
+    getEl(id).classList.add('off');
+    setTimeout(X => getEl(id).classList.add('hide'), num2000);
+    callback(nipIds.indexOf(id));
   }) => {
-  e[i](b => {
-    c(b)[d][m]('sel');
-    c(b)[s](G, a);
+  nips.forEach(n => {
+    nipCount++;
+    getEl(n).classList.add('sel');
+    getEl(n).addEventListener('click', nippleClick);
   });
-  xb('Select a nipple.', Zb);
+  msg(nipCount ? 'Select a nipple.' : 'No nipples available!', 'warn');
 },
 
 // Sets the body background to simulate player location.
-yf = (a = c('afs')) => {
-  a[ki] = w;
-  if (b.bg) {
-    a[d][m](jb);
-    a[r][Jj] = `url(img/bg/${b.bg}.webp`;
+setBg = (afs = getEl('afs')) => {
+  afs.className = '';
+  if (_.bg) {
+    afs.classList.add('bg');
+    afs.style.backgroundImage = `url(img/bg/${_.bg}.webp`;
   }
-  else if (b.grad) {
-    a[d][m]('gr' + b.grad);
-    a[r][Jj] = w;
+  else if (_.grad) {
+    afs.classList.add('gr' + _.grad);
+    afs.style.backgroundImage = '';
   }
 },
 
 // Pours liquid metal into farm.
-// @TODO handle eggs, food/drink and anything else we didn't think of at the time this function was written. carried items!
-Pi = (l = rj('sizz1'), g = c('fx'), j = c(oc), e = qe('<div id=pour></div>')) => {
-  Ra('.toob .vis')[i](a => a[d][o](z));
-  bb = 0;
-  nd = 0; // Disable free ants coming in.
-  h(n => {
-    c(uc)[d][m](Bb);
-    j.before(e);
-    h(n => {
-      Ra('.ant.free')[i](a => a[o]());
-      b.a = [];
-      e[d][m](z);
-      j[B] += '<div id=mHill><div class=hill></div></div>';
-      let w = c('mHill'), p = c(jg)[ji](1), s;
-      p.id = Yb;
-      for (s of p.children) s.id = Oa + s.id;
-      c(jg).after(p);
-      a[Yb] = a[v].map(a => ({...a, [Pb]: a[u], [u]: 0, id: Oa + a.id}));
-      a[Yb][i](ue);
-      p[d][m](z);
-      h(b => {
-        g[d][m]('smoke');
-        pb(ee, .8);
-        w[d][m](z);
-        a.a[k](a => a[q].n == jb || a[q].n == H)[i](a => {
-          a[q].n == jb && f(2) && Ie(ant, antEl);
-          a[d][m](Ye);
-          h(b => {
-            pb(ee, .3);
-            a[q].n == jb && f(2) && Ie(ant, antEl);
-            bg(a, Gd);
-          }, ja + f(ua));
+pourCrucible = (audio = ambienceOverride('sizz1'), fx = getEl('fx'), hills = getEl('hills'), pourEl = getTemplate(divc('pour'))) => {
+  switcher = 0;
+  spawner = 0; // Disable free ants coming in.
+  pouring = 1;
+  hideMenus();
+  setTimeout(X => {
+    getEl('lid').classList.add('off');
+    hills.before(pourEl);
+    setTimeout(X => {
+      _.a.forEach(antDelete);
+      pourEl.classList.add('vis');
+      hills.innerHTML = html(divc('hill'), {id: 'mHill'}) + hills.innerHTML;
+      let mHillEl = getEl('mHill'), mTunsEl = getEl('tunnels').cloneNode(1), child;
+      mTunsEl.id = 'mTuns';
+      for (child of mTunsEl.children) child.id = 'm' + child.id;
+      getEl('tunnels').after(mTunsEl);
+      F.mTuns = F.tuns.map(tun => ({...tun, cap: tun.prog, prog: 0, id: 'm' + tun.id}));
+      F.mTuns.forEach(t => {
+        tunProgDraw(t);
+        if (t.t == 'ent') query(`#${t.id} .prog`).style.top = '-30px';
+      });
+      mTunsEl.classList.add('vis');
+      setTimeout(X => {
+        fx.classList.add('smoke');
+        playSound('sizz2', .8);
+        mHillEl.classList.add('vis');
+        F.a.filter(a => a.area.n == 'bg' || a.area.n == 'top').forEach(a => {
+          if (!a) {
+            console.warn("no ant!", JSON.stringify(F.a));
+            /////whyyyy
+            return;
+          }
+          a.area.n == 'bg' && randomInt(2) && antSlip(a);
+          a.classList.add('burn');
+          setTimeout(X => {
+            playSound('sizz2', .3);
+            a.area.n == 'bg' && randomInt(2) && antSlip(a);
+            antDeath(a, 'other');
+          }, num1000 + randomInt(num2000));
         });
-        Ra('#scenery > div')[i](a => {
-          a[d][m](Ye);
-          h(b => a[d][m](mg), ja + f(ua));
+        F.e.filter(e => e.y <= surface).forEach(e => {
+          e.classList.add('burn');
+          setTimeout(X => eggDelete(e), randomInt(num2000));
         });
-        c(V)[d][m](Ye);
-        pb(ee, .6);
-        h(b => {
-          pb(ee, .3);
-          c(V)[d][m](mg);
-          a[Yb][k](a => a.t == M)[i](zf);
-          Ra('.frame')[i](a => a[d][m](Ye));
-        }, ja);
-        h(b => {
-          p[r].overflow = 'visible';
-          e[d][o](z);
-          w[d][o](z);
-          h(b => {
-            pb(ee, .3);
-            l.pause();
-            e[o]();
-            h(b => {
-              [hd, v, oc, aa][i](b => a[b] = []);
-              a[V] = 0;
-              a[oa] = a[t] = a[Za] = ga('#kit #wrapper')[ra][t] = ga('#kit #base')[ra][t] = 'metal';
-              Zg();
-              xa();
-              h(a => p[d][m](mg), 10000);
-              h(a => {
-                g[d][m]([pg]);
-                h(a => g[d][o]('smoke', pg), ua * 2);
-                Le();
-                Tb(); // Will re-enable switcher.
+        queryAll('#scenery > div, #food > div').forEach(el => {
+          el.classList.add('burn');
+          setTimeout(X => el.classList.add('fade'), num1000 + randomInt(num2000));
+        });
+        getEl('card').classList.add('burn');
+        playSound('sizz2', .6);
+        setTimeout(X => {
+          playSound('sizz2', .3);
+          getEl('card').classList.add('fade');
+          F.mTuns.filter(tun => tun.t == 'ent').forEach(pourTun);
+          getEl('tunnels').classList.add('pouring');
+          queryAll('.frame').forEach(el => el.classList.add('burn'));
+        }, num1000);
+        setTimeout(X => {
+          mTunsEl.style.overflow = 'visible';
+          pourEl.classList.remove('vis');
+          mHillEl.classList.remove('vis');
+          getEl('decals').classList.add('fade');
+          F.a.forEach(antDelete);
+          setTimeout(X => {
+            farmSetSculpture(F); // Resets farm object to defaults, and adds 'metal' elements.
+            playSound('sizz2', .3);
+            audio.pause();
+            pourEl.remove();
+            setTimeout(X => {
+              queryAll('#menu > a').forEach(a => a.classList.remove('hide'));
+              query('#kit #wrapper').dataset.col = query('#kit #base').dataset.col = 'metal';
+              mTunsBg();
+              save();
+              ambience();
+              setTimeout(X => mTunsEl.classList.add('fade'), 10000);
+              setTimeout(X => {
+                fx.classList.add(['fog2']);
+                setTimeout(X => fx.classList.remove('smoke', 'fog2'), 4500);
+                setTimeout(X => {
+                  pouring = 0;
+                  score(20, 1);
+                  updateSwitcher(); // Will re-enable switcher.
+                }, 6000);
               }, 20000);
-            }, ua);
-          }, ua);
-        }, ua * 3);
-      }, ua);
-    }, R);
-  }, R);
+            }, num2000);
+          }, num2000);
+        }, 6000);
+      }, num2000);
+    }, num500);
+  }, num500);
+},
+
+// Sets the current farm to be a sculpture.
+farmSetSculpture = farm => {
+  farm.mTuns.forEach(t => t.prog = 100);
+  farm.fill = farm.col = farm.plate = 'metal';
+  let {id, n, mTuns} = farm;
+  farm = assign(farm, farmDefault, {id, n, mTuns, sculpt: 1});
 },
 
 // Draws progress of a tunnel pour.
-zf = b => {
-  b.pour = 1;
-  b[u] += 2;
-  ue(b);
-  a.a[k](a => a[q].t == b.id)[i](a => {
-    a[d][m](Ye);
-    pb(ee, .3);
-    h(b => bg(a, Gd), ja + f(ua));
+pourTun = tun => {
+  tun.pour = 1;
+  tun.prog += 2;
+  if (tun.t == 'con') tun.prog = 100;
+  tunProgDraw(tun);
+  if (tun.t == 'ent') query(`#${tun.id} .prog`).style.top = tun.prog / 100 * 30 - 30 + 'px'; // Ent needs to be special cased.
+  F.a.filter(a => a.area.t == tun.id).forEach(a => {
+    a.classList.add('burn');
+    playSound('sizz2', .3);
+    setTimeout(X => antDeath(a, 'other'), num1000 + randomInt(num2000));
   });
-  if (b[u] >= b[Pb]) b.co[i](c => {
-    let d = eb(a[Yb], Oa + c);
-    if (!d.pour) {
-      if (!wb(d) && d.x2 == b.x2) ga('#' + d.id + ' .prog')[r].float = Xe;
-      zf(d);
+  F.e.filter(e => e.tun == tun.id).forEach(e => {
+    e.classList.add('burn');
+    setTimeout(X => eggDelete(e), randomInt(num2000));
+  });
+  if (tun.prog >= tun.cap) tun.co.forEach(tunId => {
+    let nextTun = getById(F.mTuns, 'm' + tunId);
+    if (!nextTun.pour) {
+      if (!isRotationTunnel(nextTun) && nextTun.x2 == tun.x2) query('#' + nextTun.id + ' .prog').style.float = 'right';
+      pourTun(nextTun);
     }
   });
-  else h(a => zf(b), 3);
+  else setTimeout(X => pourTun(tun), 3);
+},
+
+// Handles presses of the stow button.
+stow = e => {
+  // Stow sculpture.
+  if (F.sculpt) {
+    getEl('stow').classList.remove('vis');
+    _.bag.push({k: 'sculpt', f: F});
+    _.farms = _.farms.filter(f => f.id != F.id);
+    switchFarm(_.farms[0].id);
+  }
 },
 
 // A collection of namespaced modal functions which all work in a similar way.
-Qi = {
+modal = {
 
   // Templates the inventory bag popup.
-  [L]: f => {
-    E[d][m](L);
-    f[B] = '<div id=bag-items></div><div id=bag-caption>'
-      + (b[L][g] > 9 ? `<div class="sort-caption vis"><h4>Sort</h4><a data-s=0 class=sel-${!b.bs}>Date</a> | <a data-s=1 class="sel-${b.bs === 1}">Auto</a> | <a data-s=2 class="sel-${b.bs>1}">Name</a></div>` : w)
-      + '</div>';
-    Ra('.sort-caption a')[i](a => a[s](G, a => {b.bs = Va(a[_b][ra][sb]); La(L, 0, 0)}));
-    for (let [r, q] of [...b[L].entries()][yb](b.bs > 1 ? (([, a], [, b]) => (l[a.k].n > l[b.k].n ? 1 : l[a.k].n < l[b.k].n ? -1 : 0)) : !b.bs ? a => 0 : ([, a], [, b]) => ma(l)[dc](a.k) - ma(l)[dc](b.k))) {
-      let u = 'Use item', v = 0, F, A = q.k, x = l[A], H = x.t, I,
-      J = (c, a = c[_b], b = a[ra].i) => {
-        if (H == ng) {
+  bag: el => {
+    bodyClasses.add('bag');
+    el.innerHTML =
+      html('', {id: 'bag-items'}) + html(
+        (_.bag.length > 9 ? html(
+          tag(4, 'Sort') +
+          [html('Date', {'data-s': 0, class: 'sel-' + !_.bs}, 'a'), html('Auto', {'data-s': 1, class: 'sel-' + (_.bs === 1)}, 'a'), html('Name', {'data-s': 2, class: 'sel-' + (_.bs > 1)}, 'a')].join(' | '),
+          {class: 'sort-caption vis'}
+        ) : ''), {id: 'bag-caption'});
+    queryAll('.sort-caption a').forEach(lnk => lnk.addEventListener('click', e => {_.bs = parseInt(e.target.dataset['s']); popup('bag', 0, 0)}));
+    for (let [i, bagItem] of [..._.bag.entries()].sort(_.bs > 1 ? (([, a], [, b]) => (items[a.k].n > items[b.k].n ? 1 : items[a.k].n < items[b.k].n ? -1 : 0)) : !_.bs ? X => 0 : ([, a], [, b]) => keys(items).indexOf(a.k) - keys(items).indexOf(b.k))) {
+      let cta = 'Use item', disable = 0, customDesc, itemKey = bagItem.k, item = items[itemKey], itemType = item.t, dumpItem,
+      useFunc = (e, el = e.target, i = el.dataset.i) => {
+        if (itemType == 'sanitation') {
           // This one needs a confirm workflow.
-          a[fe] = 1;
-          a[d][m](Kj);
-          a.textContent = '⌛';
-          a[qa](G, J);
-          h(c => {
-            a[B] = '🚮️ <span class=err>Confirm farm dump</span>';
-            a.onclick = a => eh(b);
-            a[fe] = 0;
-          }, ja);
+          el.disabled = 1;
+          el.classList.add('confirm');
+          el.textContent = '⌛';
+          el.removeEventListener('click', useFunc);
+          setTimeout(X => {
+            el.innerHTML = '🚮️ ' + span('Confirm farm dump', {class: 'err'});
+            el.onclick = event => useItem(i);
+            el.disabled = 0;
+          }, num1000);
         }
-        else eh(b); // Most items just hit up useItem() right away.
+        else useItem(i); // Most items just hit up useItem() right away.
       },
-      y = b => !a[oa] && (u = 'Ant farm has no fill', v = 1), // Several items need a generic fill check to block them from being put into empty farms.
-      C = a => u = 'Insert ' + x.n,
-      E = b => a[aa][g] > 9 && (u = 'Putting-stuff-in limit reached', v = 1),
-      K = {
-        [ac]() {a[oa] ? (u = 'Ant farm already filled', v = 1) : (u = 'Fill ant farm with ' + A)},
-        [ng]() {a[oa] ? (u = 'Dump contents of ant farm') : (u = 'Ant farm already empty', v = 1); a[Aa][g] && (u = Lj, v = 1)},
-        [ce]() {C(); a[aa][D](a => a.k == A) ? (u = `There is already some ${x.n} in the farm`, v = 1) : E(); y()},
-        [og]() {C(); a[aa][D](a => a.t == Ga) ? (u = 'Refill feeder') : E(); y()},
-        [qb]() {K[tc]()},
-        [tc]() {C(); E(); y()},
-        [V]() {C(); y()},
-        [sa]() {a.a[g] ? (u = 'Enhat an ant') : (u = 'No ants to enhat', v = 1)},
-        [Te]() {u = 'Peel backing paper, align adhesive decal, and smooth onto surface'},
-        [ib]() {
-          if (x[id]) {
-            if (A == rc) {!ye(1) ? (u = 'No free nipple', v = 1) : Wd(a) ? (u = 'Farm already has a vial', v = 1) : u = 'Attach to farm'}
+      fillCheck = X => !F.fill && (cta = 'Ant farm has no fill', disable = 1), // Several items need a generic fill check to block them from being put into empty farms.
+      insertCta = X => cta = 'Insert ' + item.n,
+      insertLimit = X => F.items.length > 9 && (cta = 'Putting-stuff-in limit reached', disable = 1),
+      typeHandlers = {
+        filler() {F.fill ? (cta = 'Ant farm already filled', disable = 1) : (cta = 'Fill ant farm with ' + itemKey)},
+        sanitation() {F.fill ? (cta = 'Dump contents of ant farm') : (cta = 'Ant farm already empty', disable = 1); F.nips.length && (cta = 'Farm has attached items', disable = 1)},
+        nutrition() {insertCta(); F.items.some(i => i.k == itemKey) ? (cta = `There is already some ${item.n} in the farm`, disable = 1) : insertLimit(); fillCheck()},
+        hydration() {insertCta(); F.items.some(i => i.t == 'drink') ? (cta = 'Refill feeder') : insertLimit(); fillCheck()},
+        scenery() {typeHandlers.decor()},
+        decor() {insertCta(); insertLimit(); fillCheck()},
+        card() {insertCta(); fillCheck()},
+        hat() {F.a.length ? (cta = 'Enhat an ant') : (cta = 'No ants to enhat', disable = 1)},
+        sticker() {cta = 'Peel backing paper, align adhesive decal, and smooth onto surface'},
+        ants() {
+          if (item.nodrop) {
+            if (itemKey == 'vial') {!getNips(1) ? (cta = 'No free nipple', disable = 1) : getVial(F) ? (cta = 'Farm already has a vial', disable = 1) : cta = 'Attach to farm'}
             else {
-              let b = [], a = [], c;
-              q.a[i](a => !b[Y](a.t) && b[n](a.t));
-              b[i](b => ma(Me)[i](d => (c = q.a[k](a => a[Cb] == d && a.t == b)[g]) && a[n](`<span class=num>${c}</span> ${ya[b].n} Ant ${Me[d] + (c === 1 ? w : sb)}`)));
-              F = `Your reused ant vial containing:<br>${a[g] > 1 ? a[_d](0, -1)[Ab](', ') + ', and ' + Dc(a) : a[0]}.`;
-              u = `Release ${q.a[g]} ant${q.a[g] === 1 ? w : sb}`;
+              let ts = [], cnts = [], cnt;
+              bagItem.a.forEach(a => !ts.includes(a.t) && ts.push(a.t));
+              ts.forEach(at => keys(castes).forEach(c => (cnt = bagItem.a.filter(a => a.caste == c && a.t == at).length) && cnts.push(printInt(cnt) + ` ${types[at].n} Ant ${castes[c] + (cnt === 1 ? '' : 's')}`)));
+              customDesc = `Your reused ant vial containing:<br>${cnts.length > 1 ? cnts.slice(0, -1).join(', ') + ', and ' + last(cnts) : cnts[0]}.`;
+              cta = `Release ${bagItem.a.length} ant${bagItem.a.length === 1 ? '' : 's'}`;
             }
           }
-          else u = `Release ${ya[x.ant].n} Ant Queen${x.W ? ` and ${x.W} Workers` : w}`;
-          y();
+          else cta = `Release ${types[item.ant].n} Ant Queen${item.W ? ` and ${item.W} Workers` : ''}`;
+          fillCheck();
+          F.a.length > 29 && (cta = 'Ant farm overpopulated', disable = 1);
         },
-        gift() {u = 'Unbox'},
+        gift() {cta = 'Unbox'},
       },
-      M = {
-        tg() {u = 'Item deployed'; v = 1},
-        [ge]() {M.tg()},
-        [bc]() {!b[P][D](b => b[oa] && b.id != a.id && ye(1, b)) && (u = 'No other farm to connect', v = 1); y()},
-        [bd]() {u = 'View'},
-        antfaxpro() {u = 'View'},
-        [Ve]() {!a.a[D](a => Kb(a) && a[da] == Pb) && (u = 'No eligible donor found', v = 1)},
-        [We]() {b.ss && (u = 'A second Speedo would tear a hole in space', v = 1)},
-        [Ed]() {u = 'Sell ant farm'; a[oa] && (u = 'Farm has not been cleaned out', v = 1); b[P][g] < 2 && (u = 'This is your only farm', v = 1)},
-        [cd]() {u = '🏆 WIN GAME 🏆'; if (b.win) (u = 'Game won', v = 1)},
-        crucible() {u = 'Pour'; !Ub(a) && (u = 'Farm undeveloped', v = 1); a[Aa][g] && (u = Lj, v = 1)},
+      keyHandlers = {
+        tg() {cta = 'Item deployed'; disable = 1},
+        car() {keyHandlers.tg()},
+        tube() {!_.farms.some(f => f.fill && f.id != F.id && getNips(1, f)) && (cta = 'No other farm to connect', disable = 1); fillCheck()},
+        antfax() {cta = 'View'},
+        antfaxpro() {cta = 'View'},
+        clonekit() {!F.a.some(a => isWorker(a) && a.state == 'cap') && (cta = 'No eligible donor found', disable = 1)},
+        speedo() {_.ss && (cta = 'A second Speedo would tear a hole in space', disable = 1)},
+        ebay() {cta = 'Sell ant farm'; F.fill && (cta = 'Farm has not been cleaned out', disable = 1); _.farms.length < 2 && (cta = 'This is your only farm', disable = 1)},
+        mom() {cta = '🏆 WIN GAME 🏆'; if (_.win) (cta = 'Game won', disable = 1)},
+        crucible() {cta = 'Pour'; !farmIsDeveloping(F) && (cta = 'Farm undeveloped', disable = 1); F.nips.length && (cta = 'Farm has attached items', disable = 1)},
+        sculpt() {cta = 'Put on display'; customDesc = 'Ant nest art of<br>' + bagItem.f.n}
       },
-      N = M[A] || K[H];
-      N && N();
+      handler = keyHandlers[itemKey] || typeHandlers[itemType];
+      handler && handler();
       // Block most items for metal sculpture farms, except ones that circumvent a soft-lock.
-      if (a[Yb] && !['box', cd, Qe][Y](q.k)) {
-        u = 'Farm annihilated';
-        v = 1;
+      if (F.sculpt && !['box', 'mom', 'antFarm', 'sculpt'].includes(bagItem.k)) {
+        cta = 'Farm annihilated';
+        disable = 1;
       }
-      Wa(c(Mj), `<div id=${q.k}-${r} class="bag-item ${q.k} ${l[q.k].t}" ${q.r ? `style=transform:rotate(${q.r}deg)` : w}>${ve(q)}</div>`);
-      Wa(c('bag-caption'),
-        `<div id=${q.k}-${r}-caption class=${q.k}-caption><h3>${l[q.k].n}</h3>` +
-        `<h4>level ${l[q.k][e]} ${l[q.k].t || Na}${l[q.k].t != ib && q[t] ? ` in ${l[q[t]].n}` : w}</h4><p>${F || l[q.k][j]}</p><button id=b-${r} data-i=${r} ${v && fe}>${u}</button>` +
-        (!l[q.k].keep && b[L][D](a => a.k == 'trash') ? `<div class=bag-d><span id=d-${r} data-i=${r} class=d><img src=img/trash.webp></span></div></div>` : w)
+      appendHTML(getEl('bag-items'), html(bagImg(bagItem), {id: bagItem.k + '-' + i, class: `bag-item ${bagItem.k} ${items[bagItem.k].t}`, style: bagItem.r ? `transform:rotate(${bagItem.r}deg)` : ''}));
+      appendHTML(getEl('bag-caption'),
+        html(
+          tag(3, items[bagItem.k].n) + tag(4, `level ${items[bagItem.k].lvl} ${items[bagItem.k].t || 'item'}` + (items[bagItem.k].t != 'ants' && bagItem.col ? ` in ${items[bagItem.col].n}` : '')) +
+          p(customDesc || items[bagItem.k].desc) + html(cta, {id: 'b-' + i, 'data-i': i, ...(disable ? {disabled: 1} : {})}, 'button') +
+          (!items[bagItem.k].keep && _.bag.some(bi => bi.k == 'trash') ? html(html(img('trash'), {class: 'd', id: 'd-' + i, 'data-i': i}), {class: 'bag-d'}) : ''),
+          {id: bagItem.k + '-' + i + '-caption', class: bagItem.k + '-caption'}
+        )
       );
       // Create confirmation to dump an item from the inventory.
-      if (I = c('d-' + r)) {
-        I[s](G, (c, a = c[_b][ad]('.d')) => {
-          a[B] = Nj;
-          a[d][m](Oj);
-          h(c => {
-            a[B] = '🚮️ <span class=err>Confirm item dump</span>';
-            a[d][m]('expand');
-            a[s](G, c => {
-              b[L][Dd](a[ra].i, 1);
-              xa();
+      if (dumpItem = getEl('d-' + i)) {
+        dumpItem.addEventListener('click', (e, dumpEl = e.target.closest('.d')) => {
+          dumpEl.innerHTML = span('⌛', {class: 'wait'});
+          dumpEl.classList.add('waiting');
+          setTimeout(X => {
+            dumpEl.innerHTML = '🚮️ ' + span('Confirm item dump', {class: 'err'});
+            dumpEl.classList.add('expand');
+            dumpEl.addEventListener('click', X => {
+              _.bag.splice(dumpEl.dataset.i, 1);
+              save();
               // Reopen modal or the IDs are fucked.
-              La(L, 0, 0);
+              popup('bag', 0, 0);
             });
-            a[d][o](Oj);
-          }, ja);
+            dumpEl.classList.remove('waiting');
+          }, num1000);
         });
       }
-      c(`${q.k}-${r}`)[s](G, (a, b = c(a[Hd].id + '-caption')[d], e = b[zb](z)) => {
-        Ra('#bag-caption > div')[i](a => a[d][o](z));
-        Ra('.bag-item')[i](a => a[d][o]('hover'));
-        if (!e) { // Note: 'active' was calculated earlier because at this point the above 2 lines deactivated it.
-          a[Hd][d][m]('hover');
-          b[m](z);
+      getEl(`${bagItem.k}-${i}`).addEventListener('click', (e, currentCaptionClasses = getEl(e.currentTarget.id + '-caption').classList, active = currentCaptionClasses.contains('vis')) => {
+        queryAll('#bag-caption > div').forEach(el => el.classList.remove('vis'));
+        queryAll('.bag-item').forEach(el => el.classList.remove('hover'));
+        if (!active) {// Note: 'active' was calculated earlier because at this point the above 2 lines deactivated it.
+          e.currentTarget.classList.add('hover');
+          currentCaptionClasses.add('vis');
         }
-        else ga('#bag-caption .sort-caption')?.[d][m](z);
+        else query('#bag-caption .sort-caption')?.classList.add('vis');
       });
       // Add click handler for the "use" button.
-      c('b-' + r)[s](G, J);
+      getEl('b-' + i).addEventListener('click', useFunc);
     }
     // Remember scroll position for usability.
-    let p = c(Mj);
-    p.scrollLeft = Va(Fg);
-    p[s]('scroll', a => {Fg = a[Hd].scrollLeft});
+    let bagItemsEl = getEl('bag-items');
+    bagItemsEl.scrollLeft = parseInt(bagScroll);
+    bagItemsEl.addEventListener('scroll', e => {bagScroll = e.currentTarget.scrollLeft});
   },
 
   // Templates the item drop popup.
-  [Qb]: (b, a) => {
-    b[B] =
-      `<div id=drop-top><h3>Congratulations! You've found:</h3><h2>${l[a.k].n}</h2></div><div id=drop-img class="${l[a.k].t} ${a.k}" ${a.r ? `style=transform:rotate(${a.r}deg)` : w}>${ve(a)}</div><div id=drop-caption><h4>level ${l[a.k][e]} ${l[a.k].t || Na}${l[a.k].t != ib && a[t] ? ` in ${l[a[t]].n}` : w}</h4><p>${l[a.k][j]}</p><button onClick=${fb.name}()>${x(Wh)}</button></div>`;
-    pb(Qb, .3);
+  drop: (el, bagItem) => {
+    el.innerHTML =
+      html(tag(3, "Congratulations! You've found:") + tag(2, items[bagItem.k].n), {id: 'drop-top'}) +
+      html(bagImg(bagItem), {id: 'drop-img', class: items[bagItem.k].t + ' ' + bagItem.k, style: bagItem.r ? `transform:rotate(${bagItem.r}deg)` : ''}) +
+      html(
+        tag(4, `level ${items[bagItem.k].lvl} ${items[bagItem.k].t || 'item'}${items[bagItem.k].t != 'ants' && bagItem.col ? ` in ${items[bagItem.col].n}` : ''}`) +
+        p(items[bagItem.k].desc) +
+        tag('button', pickRandom(dropOK), {onClick: xPop.name + '()'}),
+        {id: 'drop-caption'}
+      );
+    playSound('drop', .3);
   },
 
   // Templates the ach popup.
-  ach: a => {
-    if (b.achQ[0]) {
-      let f = b.achQ[0], d = f.l, c = f.a, e = mc[c];
-      a[B] =
-        `<div id=ach-top><h3>Congratulations! You've achieved:</h3><h2>${e.n}</h2></div><div id=ach-img class="ach-${c} ach-l${d}"><img src="img/${d ? 'medal' + d : 'trophy'}.webp"><span class=ach-ico>${e.ico}</span></div><div id=ach-caption><h4>${b.ach[c].v || ' '} ${e.sub || w}</h4><p>${e[j]}<br> </p><button onClick=${fb.name}()>${x(sj)}</button></div>`;
-      pb('ach', .5);
-      if (c != cd) {
+  ach: el => {
+    if (_.achQ[0]) {
+      let achQItem = _.achQ[0], lvl = achQItem.l, a = achQItem.a, achItem = ach[a];
+      el.innerHTML =
+        html(
+          tag(3, "Congratulations! You've achieved:") +
+          tag(2, achItem.n),
+          {id: 'ach-top'}
+        ) +
+        html(
+          img(lvl ? 'medal' + lvl : 'trophy', {}) +
+          span(achItem.ico, {class: 'ach-ico'}),
+          {id: 'ach-img', class: `ach-${a} ach-l${lvl}`}
+        ) +
+        html(
+          tag(4, `${_.ach[a].v || ' '} ${achItem.sub || ''}`) +
+          p(achItem.desc + '<br> ') +
+          tag('button', pickRandom(achOK), {onClick: xPop.name + '()'}),
+          {id: 'ach-caption'}
+        );
+      playSound('ach', .5);
+      if (a != 'mom') {
         // Bonus.
-        gb(f.b, 1);
+        score(achQItem.b, 1);
         // Forced drops.
-        sd(0);
-        sd(0);
-        sd(0);
+        scoreDrop(0);
+        scoreDrop(0);
+        scoreDrop(0);
       }
-      b.achQ = b.achQ[k](a => a.a != c && a.l !== d);
-      xa();
+      _.achQ = _.achQ.filter(aqi => aqi.a != a && aqi.l !== lvl);
+      save();
     }
-    else fb();
+    else closePopup();
   },
 
   // Templates the win popup.
-  win: a => {
-    a[B] =
-    `<div id=drop-top><h3>Congratulations! You've found:</h3><h2>Dave Matthews Band</h2></div><iframe width=560 height=315 src=https://www.youtube.com/embed/MNgJBIx-hK8?si=zPAJ6x6f-opQqOjF frameborder=0 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"referrerpolicy=strict-origin-when-cross-origin allowfullscreen></iframe><div id=drop-caption><h4>winning level celebratory merriment</h4><p>This is the highest honor available<br> </p><button>${x(Wh)}</button></div>`;
-    ga('#drop-top button')[s](G, a => {
-      fb();
-      xb("I'd like to thank Penn Jillette for creating that podcast");
+  win: el => {
+    el.innerHTML =
+      html(tag(3, "Congratulations! You've found:") + tag(2, 'Dave Matthews Band'), {id: 'drop-top'}) +
+      `<iframe width=560 height=315 src=https://www.youtube.com/embed/MNgJBIx-hK8?si=zPAJ6x6f-opQqOjF frameborder=0 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"referrerpolicy=strict-origin-when-cross-origin allowfullscreen></iframe>` +
+      html(
+        tag(4, 'winning level celebratory merriment') +
+        p('This is the highest honor available<br>') +
+        tag('button', pickRandom(dropOK)),
+        {id: 'drop-caption'}
+      );
+    query('#drop-top button').addEventListener('click', e => {
+      closePopup();
+      msg("I'd like to thank Penn Jillette for creating that podcast");
     });
-    b.dmb = 1;
-    xa();
+    _.dmb = 1;
+    save();
   },
 
   // Templates the farm rename popup.
-  [Za]: (b, d) => {
-    b[B] =
-    `<div id=plate-form><input id=plate-text type=text maxlength=19 placeholder="<type name here>"><button>Rename ant farm</button></div>`;
-    ga('#plate-form button')[s](G, (e, b) => {
-      if (b = c('plate-text').value[Ze]()) {
+  plate: (el, k) => {
+    el.innerHTML =
+      html(html('', {id: 'plate-text', type: 'text', maxlength: 19, placeholder: '<type name here>'}, 'input', 1) + tag('button', 'Rename ant farm'), {id: 'plate-form'});
+    query('#plate-form button').addEventListener('click', (e, newName) => {
+      if (newName = getEl('plate-text').value.toUpperCase()) {
         // Rename the farm.
-        a.n = b;
-        a[Za] = hg; // Hahaha
-        jc(d);
-        fb();
-        gb(1);
-        /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u.test(b) && gb(2); // bonus for using emojis
-        Af();
-        Tb();
+        F.n = newName;
+        F.plate = 'green'; // Hahaha.
+        deleteBagItem(k);
+        closePopup();
+        score(1);
+        /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/u.test(newName) && score(2); // Secret triple-pointer for using emojis in farm names.
+        updateFrame();
+        updateSwitcher();
       }
     });
   },
 
   // Templates the paint popup.
-  [Da]: (f, e, c = b[L][e].k, g = l[c], d = {}) => {
-    if (a[t] != c) d[Cd] = `<div class="select-img af">${Od(a, 1, 0)}</div><h3>Ant farm</h3>(${l[a[t]].n})`;
-    if (a[Za] != c) d[Za] = `<div class="select-img np">${Od(a, 0, 1)}</div><h3>Name plate</h3>(${l[a[Za]].n})`;
-    a[aa][k](a => a[t] && a[t] != c)[i](a => d[a.id] = `<div class="select-img ${l[a.k].t}">${ve(a)}</div><h3>${l[a.k].n}</h3>(${l[a[t]].n})`);
-    f[B] = ze(e, Da, d, 'Paint with ' + g.n, 'Paint item', `data-col="${c}"`);
+  paint: (el, k, paintKey = _.bag[k].k, paintItem = items[paintKey], opts = {}) => {
+    if (F.col != paintKey) opts.farm = html(getFarmThumbnail(F, 1, 0), {class: 'select-img af'}) + tag(3, 'Ant farm') + `(${items[F.col].n})`;
+    if (F.plate != paintKey) opts.plate = html(getFarmThumbnail(F, 0, 1), {class: 'select-img np'}) + tag(3, 'Name plate') + `(${items[F.plate].n})`;
+    F.items.filter(it => it.col && it.col != paintKey).forEach(it => opts[it.id] = html(bagImg(it), {class: 'select-img ' + items[it.k].t}) + tag(3, items[it.k].n) + `(${items[it.col].n})`);
+    el.innerHTML = selectForm(k, 'paint', opts, 'Paint with ' + paintItem.n, 'Paint item', {'data-col': paintKey});
   },
 
   // Templates the hat popup.
-  [sa]: (d, e, b = {}) => {
-    a.a[i](d => {
-      if (za(d) && (d.t == a.t || a[Ob])) {
-        let a = c(d.id)[ji](1);
-        a.removeAttribute('id');
-        b[d.id] = `<div class=select-img><div class=ant-thumb>${a.outerHTML}</div></div><h3>${d.n}</h3>${qh(d)} ${ya[d.t].n} Ant (${ph(d)})`
+  hat: (el, k, opts = {}) => {
+    F.a.forEach(a => {
+      if (livesInFarm(a) && (a.t == F.t || F.coex)) {
+        let thumb = getEl(a.id).cloneNode(1);
+        thumb.removeAttribute('id');
+        opts[a.id] = html(html(thumb.outerHTML, {class: 'ant-thumb'}), {class: 'select-img'}) + tag(3, a.n) + casteIcon(a) + ' ' + types[a.t].n + ' Ant (' + casteLabel(a) + ')';
       }
     });
-    d[B] = ze(e, sa, b, 'Choose your ant', 'Enhat');
+    el.innerHTML = selectForm(k, 'hat', opts, 'Choose your ant', 'Enhat');
   },
 
   // Templates the tube popup.
-  [bc]: (d, e, c = {}) => {
-    b[P][i](b => {a.id != b.id && ye(1, b) && (c[b.id] = `<div id=f-${b.id} class="select-img af">${Od(b)}</div><h3>${b.n}</h3>${Ae(b)}`)});
-    d[B] = ze(e, bc, c, 'Choose a farm', 'Connect farms');
+  tube: (el, k, opts = {}) => {
+    _.farms.forEach(f => {F.id != f.id && getNips(1, f) && (opts[f.id] = html(getFarmThumbnail(f), {id: 'f-' + f.id, class: 'select-img af'}) + tag(3, f.n) + getFarmDesc(f))});
+    el.innerHTML = selectForm(k, 'tube', opts, 'Choose a farm', 'Connect farms');
   },
 
   // Templates the ebay popup.
-  [Ed]: (f, h, d = {}, b = [], c, a = 0) => {
+  ebay: (el, k, opts = {}, candidates = [], itemKey, temp1 = 0) => {
     // Paints.
-    [[4, 50], [3, 100], [2, ec]][i](d => {
-      c = x(ma(l)[k](b => l[b].t == Da && l[b][e] < d[1] && l[b][e]>= a));
-      b[n]({k: [c], n: d[0] + `x ${l[c].n} Paint`, x: d[0], d: x(['Brand new', 'Unopened', 'Positive feedback'])});
-      a = d[1];
+    [[4, 50], [3, 100], [2, num200]].forEach(lot => {
+      itemKey = pickRandom(keys(items).filter(k => items[k].t == 'paint' && items[k].lvl < lot[1] && items[k].lvl>= temp1));
+      candidates.push({k: [itemKey], n: lot[0] + `x ${items[itemKey].n} Paint`, x: lot[0], d: pickRandom(['Brand new', 'Unopened', 'Positive feedback'])});
+      temp1 = lot[1];
     });
     // Hat.
-    c = x(ma(l)[k](a => l[a].t == sa));
-    b[n]({k: [c], n: `8x ${l[c].n}`, x: 8, d: 'Condition: slightly used'});
+    itemKey = pickRandom(keys(items).filter(k => items[k].t == 'hat'));
+    candidates.push({k: [itemKey], n: `8x ${items[itemKey].n}`, x: 8, d: 'Condition: slightly used'});
     // Science.
-    a =  ['cologne', gi, Ve, We], c = x(a);
-    a = a[k](a => a != c); // Remove one.
-    b[n]({k: a, n: `Science Lab`, d: a.map(a => l[a].n)[Ab](', ')});
+    temp1 =  ['cologne', 'antyvenom', 'clonekit', 'speedo'], itemKey = pickRandom(temp1);
+    temp1 = temp1.filter(s => s != itemKey); // Remove one.
+    candidates.push({k: temp1, n: `Science Lab`, d: temp1.map(k => items[k].n).join(', ')});
     // Tubes.
-    b[n]({k: [bc], n: `2x ${l[bc].n}`, x: 2, d: 'Free shipping!'});
+    candidates.push({k: ['tube'], n: `2x ${items['tube'].n}`, x: 2, d: 'Free shipping!'});
     // Fillers.
-    a = pe(ma(l)[k](a => l[a].t == ac && l[a][e] > 40))[_d](0, 2);
-    b[n]({k: a, n: `Filler Twin-Pack`, d: a.map(a => l[a].n)[Ab](', ')});
+    temp1 = shuffle(keys(items).filter(k => items[k].t == 'filler' && items[k].lvl > 40)).slice(0, 2);
+    candidates.push({k: temp1, n: `Filler Twin-Pack`, d: temp1.map(k => items[k].n).join(', ')});
     // Ants.
-    a = x(ma(l)[k](a => l[a].t == ib && !l[a][id]));
-    b[n]({k: [a], n: l[a].n, d: 'Seller rating: 98.5%'});
+    temp1 = pickRandom(keys(items).filter(k => items[k].t == 'ants' && !items[k].nodrop));
+    candidates.push({k: [temp1], n: items[temp1].n, d: 'Seller rating: 98.5%'});
     // Nerd boxes.
-    b[n]({k: ['box'], n: `3x ${l['box'].n}`, x: 3, d: 'Returns not accepted'});
-    pe(b)[_d](0, 4)[i](a => {
-      d[(a.x || 1) + '-' + a.k[Ab](',')] = `<div class="select-img ebay-img x-${a.x || a.k[g]}">${ff(a.x || 1)[oa]().map(b => a.k.map(a => ve({k: a}))[Ab](w))[Ab](w)}</div><h3>${a.n}</h3>${a.d || w}`
+    candidates.push({k: ['box'], n: `3x ${items['box'].n}`, x: 3, d: 'Returns not accepted'});
+    shuffle(candidates).slice(0, 4).forEach(c => {
+      opts[(c.x || 1) + '-' + c.k.join(',')] = html(repeat(c.x || 1, k => bagImg({k: k})), {class: `select-img ebay-img x-${c.x || c.k.length}`}) + tag(3, c.n) + (c.d || '');
     });
-    f[B] = ze(h, Ed, d, 'eBay offers', x(['Accept offer', 'This is how eBay works', 'Sell the farm']));
+    el.innerHTML = selectForm(k, 'ebay', opts, 'eBay offers', pickRandom(['Accept offer', 'This is how eBay works', 'Sell the farm']));
   },
 
   // Templates the fengshui popup.
-  feng: (c, e, a = `<h2>Drag the chi and let each farm find its place</h2><div id=feng-list><ul>`) => {
-    b[P][i](b => {
-      a += `<li class=feng-item draggable=true data-id=${b.id}><div id=f-${b.id} class="select-img af">${Od(b)}</div><h3>${b.n}</h3>${Ae(b)}<i class=g-dots>••<br>••<br>••</i></li>`
+  feng: (el, k) => {
+    el.innerHTML = tag(2, 'Drag the chi and let each farm find its place') +
+      html(tag('ul', mapJoin(_.farms, f =>
+        html(html(f.sculpt ? img('sculpt') : getFarmThumbnail(f), {id: `f-${f.id}`, class: 'select-img af'}) + tag(3, f.n) + getFarmDesc(f) + tag('i', '••<br>••<br>••', {class: 'g-dots'}), {class: 'feng-item', draggable: 'true', 'data-id': f.id}, 'li')
+      )) + tag('button', 'Harmonize'), {id: 'feng-list'});
+    let farmList = query('#feng-list ul'), draggedItem = 0,
+      touchMap = {touchstart: 'dragstart', touchmove: 'dragover', touchend: 'dragend'}, // Don't use "pointer" events because we want to target mobile only for the touch bridge code or it causes a headache!
+      handlers = {
+        dragstart: (e, item = e.target.closest('.feng-item')) => {
+          if (item) {
+            draggedItem = item;
+            item.classList.add('drag');
+            e.dataTransfer && (e.dataTransfer.effectAllowed = 'move');
+          }
+        },
+        dragend: e => {
+          draggedItem && draggedItem.classList.remove('drag');
+          draggedItem = 0;
+        },
+        dragover: (e, targetItem = e.target.closest('.feng-item'), listItems = Array.from(farmList.children)) => {
+          e.preventDefault();
+          if (targetItem && targetItem != draggedItem) listItems.indexOf(draggedItem) < listItems.indexOf(targetItem) ? targetItem.after(draggedItem) : targetItem.before(draggedItem);
+        },
+        drop: e => {
+          e.preventDefault();
+          draggedItem.classList.remove('drag');
+          draggedItem = 0;
+        }
+      };
+    keys(handlers).forEach(ev => farmList.addEventListener(ev, handlers[ev]));
+    // Touch bridge for mobile only.
+    keys(touchMap).forEach(ev => {
+      farmList.addEventListener(ev, (e, touch = e.touches[0] || e.changedTouches[0], target) => {
+        e.preventDefault();
+        if (target = document.elementFromPoint(touch.clientX, touch.clientY)) handlers[touchMap[ev]]({target: target, preventDefault: X => {}});
+      }, {passive: 0});
     });
-    c[B] = a + `</ul><button>Harmonize</button></div>`;
-    let g = ga('#feng-list ul'), f = 0;
-    g[s]('dragstart', a => {
-      let b = a[_b][ad](Pj);
-      if (b) {
-        f = b;
-        b[d][m]($e);
-        a.dataTransfer.effectAllowed = 'move';
-      }
-    });
-    g[s]('dragend', a => {
-      f && f[d][o]($e);
-      f = 0;
-    });
-    g[s]('dragover', a => {
-      a[rg]();
-      let b = a[_b][ad](Pj), c = ff.from(g.children);
-      if (b && b != f) c[dc](f) < c[dc](b) ? b.after(f) : b.before(f);
-    });
-    g[s](Qb, a => {
-      a[rg]();
-      f[d][o]($e);
-      f = 0;
-    });
-    ga('#feng button')[s](G, (c, a = [...Ra('#feng-list li')].map(a => a[ra].id)) => {
+    query('#feng button').addEventListener('click', (e, order = [...queryAll('#feng-list li')].map(li => li.dataset.id)) => {
       // Feng shuave.
-      b[P][yb]((b, c) => a[dc](b.id) - a[dc](c.id));
-      Tb();
-      fb();
+      _.farms.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+      updateSwitcher();
+      closePopup();
     });
   },
 
   // Templates the ant rename popup.
-  ren: (d, b) => {
-    d[B] =
-    `<div id=hat-form><input id=hat-text type=text maxlength=19 placeholder="<type name here>"><button>Rename ant</button></div>`;
-    ga('#hat-form button')[s](G, (f, d = Vb(a, b.a), e = c('hat-text').value[Ze]()) => {
-      xb([`${d.n} is now called ${e}.`], Zb);
-      d.n = e;
-      d.h = 1; // Hat.
-      jc(b.k);
-      fb();
-      gb(1);
+  ren: (el, arg) => {
+    el.innerHTML = html(html('', {id: 'hat-text', type: 'text', maxlength: 19, placeholder: '<type name here>'}, 'input', 1) + tag('button', 'Rename ant'), {id: 'hat-form'});
+    query('#hat-form button').addEventListener('click', (e, ant = getAnt(F, arg.a), newName = getEl('hat-text').value.toUpperCase()) => {
+      msg([`${ant.n} is now called ${newName}.`], 'warn');
+      ant.n = newName;
+      ant.h = 1; // Hat.
+      deleteBagItem(arg.k);
+      closePopup();
+      score(1);
     });
   },
 
   // Templates antfax popup.
-  [bd]: (h, f, d = b[L][f].k != bd, c = ya[b[d ? 'faxp' : 'fax'] || (d ? 'H' : 'N')], a = '<div>', e = 0) => {
-    for (; e++ < 6;) a += '<div class=rbind><div class=rhole></div><div class=ringb></div></div>';
-    a += `</div><img src="img/antfax${d ? 'pro' : w}.webp"><span class=tm>TM</span><div class=faxtop><h3>The</h3><h2>`;
-    for (e = 0; e < 3;) a += `<div id=faxh2-${e++}>${c.n[Ze]()}${c.n[g] > 10 ? w : ' ANT'}</div>`;
-    a += `</h2><p class=faxintro>${c.t}</p></div><div class=faxPager>`;
-    ma(ya)[i](b => !ya[b].p == !d && (a += `<a class="faxlnk faxlnk-${b}"data-key=${b}>${ya[b].n[Ze]()}${d ? w : ' ANT'}</a>`));
-    a += `<a class=faxlnk-cl onClick=${fb.name}(${f})>X</a></div><div class=faxcols><div class=faxl><div class=faxsz><div class=faxbx>`;
-    c.s == sb ? (a += "<h4>Small package!</h4><p>You'll need a keen eye to spot these critters, and their babies are tiny little specks!</p>") :
-      c.s == Oa ? (a += "<h4>Size: normal</h4><p>Rather unremarkably, these ants are best described as being the size of ants.</p>") :
-      (a += "<h4>A huge one</h4><p>These ants barely fit in their own nest.  You'd think they would dig their tunnels wider?</p>");
-    a += `</div></div><div class=faxdi><div class=faxbx>`;
-    !c.d ? (a += "<h4>Adaptive diet</h4><p>A little from column A, a little from column B.  It pays to not be too fussy!</p>") :
-      c.d < 2 ? (a += "<h4>Sweet tooth</h4><p>These ants have quite a taste for sugary foods and baked goods such as pastries and cakes.</p>") :
-      (a += "<h4>Meat lover</h4><p>As carnivorous monsters they enjoy cheeseburgers and pepperoni pizza. May become cannibals when opportune!</p>");
-    a += `</div></div><div class=faxmd><div class=faxbx>`;
-    !c.m || c.m > 75 ? (a += "<h4>Well-mannered</h4><p>These little guys are emotionally resilient with elastic hearts that will quickly learn to love again.</p>") :
-      c.m > 50 ? (a += "<h4>Average mood</h4><p>Keeping ants happy is always important for their health and fitness, but these guys aren't too bad.</p>") :
-      (a += "<h4>Tough customers</h4><p>A moody type that will never be completely happy.  Be careful because a dropping mood will slow them down and affect their health!</p>");
-    a += '</div></div></div><div class=faxr><div class=faxsp><div class=faxbx>';
-    c.v > 1.1 ? (a += "<h4>¡Ándale! ¡Ándale!</h4><p>A bunch of speedsters here!  This helps them greatly when it comes time to build and defend nests.</p>") :
-      c.v > .7 ? (a += "<h4>At a medium pace</h4><p>Neither fast nor slow, their speed is affected by their mood, health, a queen, or the need to complete an urgent task.</p>") :
-      (a += "<h4>Slowpokes!</h4><p>Ants like these are really good value for money because they give you more time to enjoy their fun little antics.</p>");
-    a += `</div></div><div class=faxbi><div class=faxbx>`;
-    c.b ? (a += "<h4>Ow! Chomp!</h4><p>Delivers a toxic venomous bite that will leave victims with intense pain, swelling, hallucinations, and paralysis… for 5 minutes.</p>") :
-      (a += "<h4>All bark</h4><p>Don't worry, it won't bite you, but it is said that sometimes its words can wound you deeply.  That nibble you felt is just affection.</p>");
-      a += `</div></div><div class=faxpr><div class=faxbx>`;
-    d ? (a += "<h4>VIP club</h4><p>These ants will not come looking for you, and are just a little bit harder to farm.  They must be ordered online from Sweden.</p>") :
-      (a += "<h4>Garden variety</h4><p>A very common ant that will seek out online ant farms on the daily.  Abundantly available and they'll give themselves over for free.</p>");
-    h[B] = a + '</div></div></div></div></div></div>';
-    Ra('.faxlnk')[i](a => a[s](G, a => {b[d ? 'faxp' : 'fax'] = a[_b][ra]['key']; La(bd, f, 0)}));
+  antfax: (el, k, pro = _.bag[k].k != 'antfax', fax = txt => 'fax' + txt, antType = types[_[pro ? fax('p') : fax()] || (pro ? 'H' : 'N')],
+    content = {
+      l: {// Left column.
+        // Size.
+        'sz': {
+            s: ["Small package!", "You'll need a keen eye to spot these critters, and their babies are tiny little specks!"],
+            m: ["Size: normal", "Rather unremarkably, these ants are best described as being the size of ants."],
+            l: ["A huge one", "These ants barely fit in their own nest. You'd think they would dig their tunnels wider?"]
+          }[antType.s],
+        // Diet.
+        'di': !antType.d ? ['Adaptive diet', 'A little from column A, a little from column B. It pays to not be too fussy!'] :
+          antType.d < 2 ? ['Sweet tooth', 'These ants have quite a taste for sugary foods and baked goods such as pastries and cakes.'] :
+          ['Meat lover', 'As carnivorous monsters they enjoy cheeseburgers and pepperoni pizza. May become cannibals when desperate!'],
+        // Mood.
+        'md': !antType.m || antType.m> 75 ? ['Well-mannered', 'These little guys are emotionally resilient with elastic hearts that will quickly learn to love again.'] :
+          antType.m > 50 ? ['Average mood', "Keeping ants happy is always important for their health and fitness, but these guys aren't too bad."] :
+          ['Tough customers', 'A moody type that will never be completely happy. Be careful because a dropping mood will slow them down and affect their health!'],
+      },
+      r: {// Right column.
+        // Speed.
+        'sp': antType.v > 1.1 ? ['¡Ándale! ¡Ándale!', 'A bunch of speedsters here! This helps them greatly when it comes time to build and defend nests.'] :
+          antType.v > .7 ? ['At a medium pace', 'Neither fast nor slow, their speed is affected by their mood, health, a queen, or the need to complete an urgent task.'] :
+          ['Slowpokes!', 'Ants like these are really good value for money because they give you more time to enjoy their fun little antics.'],
+        // Bite.
+        'bi': antType.b ? ['Ow! Chomp!', 'Delivers a toxic venomous bite that will leave victims with intense pain, swelling, hallucinations, and paralysis… for 5 minutes.'] :
+          ['All bark', "Don't worry, it won't bite you, but it is said that sometimes its words can wound you deeply. That nibble you felt is just affection."],
+        // Pro.
+        'pr': pro ? ['VIP club', 'These ants will not come looking for you, and are just a little bit harder to farm. They must be ordered online from Sweden.'] :
+          ['Garden variety', "A very common ant that will seek out online ant farms on the daily. Abundantly available and they'll give themselves over for free."],
+      },
+    }
+  ) => {
+    el.innerHTML =
+      // Binder bits.
+      html(repeat(6, X => html(divc('rhole') + divc('ringb'), {class: 'rbind'}))) +
+      // Logo.
+      img(`antfax${pro ? 'pro' : ''}`) + span('TM', {class: 'tm'}) +
+      // Heading.
+      html(tag(3, 'The') + tag(2, repeat(3, (X, i) => html(antType.n.toUpperCase() + (antType.n.length > 10 ? '' : ' ANT'), {id: fax('h2-' + i)}, 'div'))) + p(antType.t, {class: fax('intro')}), {class: fax('top')}) +
+      html(mapJoin(keys(types).filter(key => !types[key].p == !pro), key => html(types[key].n.toUpperCase() + (pro ? '' : ' ANT'), {class: fax('lnk') + ' ' + fax('lnk-' + key), 'data-key': key}, 'a')) + tag('a', 'X', {class: fax('lnk-cl'), onClick:`${xPop.name}(${k})`}), {class: fax('pgr')}) +
+      // Content boxes.
+      html(mapJoin(keys(content), side => html(mapJoin(keys(content[side]), key => html(html(tag(4, content[side][key][0]) + p(content[side][key][1]), {class: fax('bx')}), {class: fax(key)})), {class: fax(side)})), {class: fax('cols')});
+    // Add event listeners.
+    queryAll('.faxlnk').forEach(lnk => lnk.addEventListener('click', e => {_[pro ? fax('p') : fax()] = e.target.dataset['key']; popup('antfax', k, 0)}));
   },
 
   // Templates the stats modal.
-  [Xb]: (q, r, o = w, f = w, a, n) => {
+  stats: (el, k, scores = '', awards = '', a, lvl) => {
     // Scores output.
-    b[P][i]((a, f, i, e = hc((mb() - a.ts) / 3600), h = hc((mb() - a.ts) / 60) - e * 60,
-      c = b => a[v][k](a => a.t == a && a[u] == 100)[g],
-      d = b => Uc(a.a[k](c => za(c) && c[Cb] == b && (c.t == a.t || a[Ob]))[g], Me[b]),
-      b = a => `<div class=stat><b>${a ? a + ' . . .' : w}</b>`) => {
-      if (!a[Yb]) {// Don't show sculptures.
-        o += `<div class=F-stats style="outline: 2px dashed ${l[a[t]][t]}"><div class=F-id>#${f + 1}</div><div class=F-n><span style="border-bottom: 2px dashed ${l[a[Za]][t]}">${a.n}</span></div>
-        ${b('Colony') + Ae(a)}</div>
-        ${b('Running') + Uc(e, 'hour')} ${Uc(h, 'min')}</div>
-        ${b('Ant count') + d('W')}, ${d('D')},</div>
-        ${b() + d('Q')}, ${Uc(a.a[k](b => !a[Ob] && za(b) && b.t != a.t)[g], 'Foe')}.</div>
-        ${b('Deaths')}<em>Hunger</em> <span class=num>${a[Xb][wc][sg]}</span>, <em>Thirst</em> <span class=num>${a[Xb][wc][tg]}</span>,</div>
-        ${b()}<em>Fights</em> <span class=num>${a[Xb][wc][Ba]}</span>, <em>Other</em> <span class=num>${a[Xb][wc][Gd]}</span>.</div>
-        ${b('Tunnels') + Uc(c(M), 'entrance')}, with</div>
-        ${b() + Uc(c(pa), 'chamber')}, and</div>
-        ${b() + Uc(c(p), 'connection')}. (<span class=num>${a[v][k](a => a[u] > 0 && a[u] < 100)[g]}</span> WIP)</div></div>`;
+    _.farms.forEach((f, i, A,
+      getTunCount = tt => f.tuns.filter(t => t.t == tt && t.dun).length,
+      getCasteCount = caste => printCount(f.a.filter(a => livesInFarm(a) && a.caste == caste && (a.t == f.t || f.coex)).length, castes[caste]),
+      getStatMarkup = (label, stat) => html(tag('b', label ? label + ' . . . ' : '') + stat, {class: 'stat'})) => {
+      if (!f.mTuns) {// Don't show sculptures.
+        scores += html(
+          html(`#${i + 1}`, {class: 'F-id'}) +
+          html(span(f.n, {style: 'border-bottom: 2px dashed ' + items[f.plate].col}), {class: 'F-n'}) +
+          getStatMarkup('Colony', getFarmDesc(f)) +
+          getStatMarkup('Running', formatTime(f.dur)) +
+          getStatMarkup('Ant count', getCasteCount('W') + `, ${getCasteCount('D')},`) +
+          getStatMarkup(0, getCasteCount('Q') + `, and ${printCount(f.a.filter(a => !f.coex && livesInFarm(a) && a.t != f.t).length, 'Foe')}.`) +
+          getStatMarkup('Deaths', tag('em', 'Hunger') + ` ${printInt(f.stats.death.hunger)}, ${tag('em', 'Thirst')} ${printInt(f.stats.death.thirst)},`) +
+          getStatMarkup(0, tag('em', 'Fights') + ` ${printInt(f.stats.death.fight)}, ${tag('em', 'Sickness')} ${printInt(f.stats.death.sick)},`) +
+          getStatMarkup(0, `and ${tag('em', 'Other')} ${printInt(f.stats.death.other)}.`) +
+          getStatMarkup('Tunnels', printCount(getTunCount('ent'), 'entrance') + ', with') +
+          getStatMarkup(0, printCount(getTunCount('cav'), 'chamber') + ', and') +
+          getStatMarkup(0, printCount(getTunCount('tun'), 'connector') + '. (' + printInt(f.tuns.filter(t => t.prog > 0 && !t.dun).length) + ' WIP)'),
+        {class: 'F-stats', style: 'outline: 2px dashed ' + items[f.col].col});
       }
     });
     // Awards output.
-    for (a in mc) {
-      n = mc[a].lvls ? b.ach[a] && b.ach[a].l : b.ach[a] || 0;
-      if (n || b[U] >= mc[a][e]) {
-        f += `<div class="ach ach-${a} ach-lvl-${n}"><span class=icon>${mc[a].ico}</span><div class=caption><h3>${mc[a].n}</h3><p>${mc[a][j]}</p></div>`;
-        if (mc[a].lvls) {
-          f += `<div class=lvl-wrap><div class=levels>`;
-          [3, 6, 9][i](c => {f += `<span class="medal${3 * b.ach[a].l>= c ? ' got' : w}"><span class=l-${c}>${c}</span></span>`});
-          f += `</div><p class=sub>Progress: ${b.ach[a].v || 0} ${mc[a].sub}</p></div>`;
-        }
-        f += `</div>`;
+    for (a in ach) {
+      lvl = ach[a].lvls ? _.ach[a] && _.ach[a].l : _.ach[a] || 0;
+      if (lvl || _.score >= ach[a].lvl) {
+        awards += html(span(ach[a].ico, {class: 'icon'}) + html(tag(3, ach[a].n) + p(ach[a].desc), {class: 'caption'}) +
+          (ach[a].lvls ? html(
+              html(mapJoin([3, 6, 9], l => span(span(l, {class: `l-${l}`}), {class: `medal${3 * _.ach[a].l >= l ? ' got' : ''}`})), {class: 'levels'}) +
+              p(`Progress: ${printInt(_.ach[a].v || 0)} ${ach[a].sub}`, {class: 'sub'}),
+              {class: 'lvl-wrap'}
+            ) : ''
+          ),
+          {class: `ach ach-${a} ach-lvl-${lvl}`}
+        );
       }
     }
     // Main structure.
-    q[B] =
-    `<div id=scores-scroll><div id=scores-wrapper><h2><span>Official Score Card</span></h2><div id=scoreHead>Total score: ${b[U]} (inc. bonuses)<span class=date>${new Date().toLocaleDateString('en-US', {weekday: 'long', year: Qj, month: 'long', day: Qj})}</span></div><div id=scores class=stats>${o}</div></div></div><div id=awards-wrapper><h2><span>・✦ = Feathers in your hat = ✦・</span></h2><div id=awards class=stats>${f || '<p class=no-ach>It looks like you have achieved very little.</p>'}</div></div><div id=share class=stats><h3>Share to social media
-      <svg height=20 viewBox="0 0 24 24"width=20><path fill=#fff d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92zM18 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM6 13c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm12 7.02c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"></path></svg></h3><img src=img/social.webp height=32><p>It's easy, just take a photo of your screen and use your phone's in-built sharing options.</p></div><div id=resetButton><button>↩️ Restart game</button></div><div id=volume>🔊<input type=range min=1 max=100 value=${b.vol} id=vol></div><div id=credit><span>v1.0.0</span><a target=_blank href=https://github.com/antfarmsocial/AntFarmSocial>Github ↗️</a></div>`;
-    // Note: Do NOT modify the 'credit' div wording without changing the Gulpfile too.
-    c('vol')[s](G, a => {b.vol = c('vol').value; c('audio')[he] = b.vol / 100});
-    c("resetButton")[s](G, (b, a = b[_b]) => {
+    el.innerHTML =
+      html(html(tag(2, span('Official Score Card')) +
+        html(`Total score: ${_.score} (inc. bonuses)${span(new Date().toLocaleDateString('en-US', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}))}`, {id: 'scoreHead'}) +
+        html(scores, {id: 'scores', class: 'stats'}),
+        {id: 'scores-wrapper'}), {id: 'scores-scroll'}) +
+      html(tag(2, span('・✦ = Feathers in your hat = ✦・')) + html(awards || p('It looks like you have achieved very little.', {class: 'no-ach'}), {id: 'awards', class: 'stats'}), {id: 'awards-wrapper'}) +
+      html(
+        tag(3, `Share to social media <svg height=20 viewBox="0 0 24 24"width=20><path fill=#fff d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92zM18 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM6 13c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm12 7.02c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"></path></svg>`) +
+        img('social', {height: 32}) +
+        p("It's easy, just take a photo of your screen and use your phone's in-built sharing options."),
+        {id: 'share', class: 'stats'}
+      ) +
+      html(tag('button', '↩️ Restart game'), {id: 'reset'}) +
+      // Note: Volume min is 4 to avoid complete silence which can make the browser tab sleep.
+      html('🔊' + html('', {id: 'vol', type: 'range', min: 4, max: 100, value: _.vol}, 'input', 1), {id: 'volume'}) +
+      html(
+        // Note: Do NOT modify the following all-caps wording without changing the Gulpfile too.
+        span('v1.0.0') + tag('a', 'Github ↗️', {target: '_blank', href: 'https://github.com/antfarmsocial/AntFarmSocial'}), {id: 'credit'}
+      );
+    getEl('vol').addEventListener('click', X => {_.vol = getEl('vol').value; getEl('audio').volume = _.vol / 100; if (fightSong) fightSong.volume = _.vol / 100});
+    getEl('reset').addEventListener('click', (e, el = e.target) => {
       // Restarts app.
-      a[B] = Nj;
-      a[d][m](Kj);
-      a[fe] = 1;
-      h(b => {
-        a[B] = '🛑 <span class=err>Confirm game restart</span>';
-        a.onclick = Q;
-        a[fe] = 0;
-      }, ja);
+      el.innerHTML = span('⌛', {class: 'wait'});
+      el.classList.add('confirm');
+      el.disabled = 1;
+      setTimeout(X => {
+        el.innerHTML = '🛑 ' + span('Confirm game restart', {class: 'err'});
+        el.onclick = Q;
+        el.disabled = 0;
+      }, num1000);
     });
   },
 
 },
 
 // Templates a select form popup.
-ze = (c, a, b, d, e, f = w) => `<h2>${d}</h2><div id=${a}-form class=select-form><form ${f}>${!ma(b)[g] ? '<div class=no-opts>No options available</div>' : Mg(b).map(([b, c]) => `<label><input type=radio name=${a} value=${b}>${c}</label>`)[Ab](w)}</form><button ${ma(b)[g] ? w : fe} onClick="${Ri.name}(${c}, '${a}')">${e}</button></div>`,
+selectForm = (k, select, opts, heading, buttonTxt, formAttr) => tag(2, heading) +
+  html(
+    tag('form', !keys(opts).length ? html('No options available', {class: 'no-opts'}) : mapJoin(entries(opts), ([key, val]) => tag('label', html(val, {type: 'radio', name: select, value: key}, 'input'))), formAttr) +
+    tag('button', buttonTxt, {onClick: xSelect.name + `(${k}, '${select}')`, ...(entries(opts).length ? {} : {disabled: 1})}),
+    {id: select + '-form', class: 'select-form'}
+  ),
 
 // Closes (x) a select form popup and executes whatever code is needed for submitting that particular select form... :/  yeah...
-Ri = (g, o, e = ga(`input[name=${o}]:checked`)?.value, f = b[L][g].k, j) => {
+xSelect = (k, select, val = query(`input[name=${select}]:checked`)?.value, key = _.bag[k].k, farmId) => {
   // Get value.
-  if (e) {
-    if (o == Da) {
-      if (e == Cd) a[t] = f;
-      else if (e == Za) a[Za] = f;
+  if (val) {
+    if (select == 'paint') {
+      if (val == 'farm') F.col = key;
+      else if (val == 'plate') F.plate = key;
       else {
-        eb(a[aa], e)[t] = f;
-        c(qb)[B] = w;
-        _g();
+        getById(F.items, val).col = key;
+        getEl('scenery').innerHTML = '';
+        addItems();
       }
-      Af();
-      Tb();
-      Ta(l[f][Z]);
-      b.arty++;
-      jc(g);
-      fb();
-      gb(1);
+      updateFrame();
+      updateSwitcher();
+      randomMsg(items[key].quip);
+      _.arty++;
+      deleteBagItem(k);
+      closePopup();
+      score(1);
     }
-    else if (o == sa) {La('ren', {k: g, a: e}, 0)}
-    else if (o == bc) {
-      fb();
-      h(i => {
-        xf((k, l = Nb[k], i = c('t-' + l)) => {
-          j = a.id, f = 't' + Ja();
-          a[Aa][n]({[K]: k, id: f, f: e, [Na]: ca(b[L][g], {a: []})});
-          i[ra].id = e;
-          i[d][m](z);
-          h(a => i[d][m](sc), Ac);
-          h(i => {
-            Sc(e);
-            h(e => {
-              xf((i, k = Nb[i], e = c('t-' + k), l = {[K]: i, id: f, f: j, [Na]: ca(b[L][g], {a: [], e: []})}) => {
-                a[Aa][n](l);
-                e[ra].id = j;
-                e[d][m](z);
-                h(a => e[d][m](sc) || c(Bd + k)[d][m](sc), Ac);
-                e[s](G, a => wf(l, e));
-                ah();
-                jc(g);
+    else if (select == 'hat') {popup('ren', {k: k, a: val}, 0)}
+    else if (select == 'tube') {
+      closePopup();
+      setTimeout(X => {
+        nippleSelection((nip, nipId = nipIds[nip], tubeEl = getEl('t-' + nipId)) => {
+          farmId = F.id, key = 't' + getTime();
+          F.nips.push({nip: nip, id: key, f: val, item: assign(_.bag[k], {a: []})});
+          tubeEl.dataset.id = val;
+          tubeEl.classList.add('vis');
+          setTimeout(X => tubeEl.classList.add('on'), num800);
+          setTimeout(X => {
+            switchFarm(val);
+            setTimeout(X => {
+              nippleSelection((nip2, nip2Id = nipIds[nip2], tubeEl2 = getEl('t-' + nip2Id), newNip = {nip: nip2, id: key, f: farmId, item: assign(_.bag[k], {a: [], e: []})}) => {
+                F.nips.push(newNip);
+                tubeEl2.dataset.id = farmId;
+                tubeEl2.classList.add('vis');
+                setTimeout(X => tubeEl2.classList.add('on') || getEl('a-' + nip2Id).classList.add('on'), num800);
+                tubeEl2.addEventListener('click', e => createNipArrows(newNip, tubeEl2));
+                tubeFollowLinks();
+                deleteBagItem(k);
               });
-            }, Ig);
-          }, ua);
+            }, num1500);
+          }, num2000);
         });
-      }, R);
+      }, num500);
     }
-    else if (o == Ed) {
-      j = a.id;
-      Sc(b[P][X](a => j != a.id).id);
-      h((a = e.split('-')) => {
-        b[P] = b[P][k](a => j != a.id);
-        Tb();
-        if (a[0] > 1) for (let b = 0; b < a[0]; b++) td(a[1]);
-        else a[1].split(',')[i](a => td(a));
-        Ta([['A++++ fantastic seller.'], ['Thank you for an easy pleasant transaction.'], ['Fast shipping, good communication. Highly recommended!']]);
-      }, ja);
-      fb();
+    else if (select == 'ebay') {
+      farmId = F.id;
+      switchFarm(_.farms.find(f => farmId != f.id).id);
+      setTimeout((valParts = val.split('-')) => {
+        _.farms = _.farms.filter(f => farmId != f.id);
+        updateSwitcher();
+        if (valParts[0] > 1) for (let i = 0; i < valParts[0]; i++) drop(valParts[1]);
+        else valParts[1].split(',').forEach(v => drop(v));
+        randomMsg([['A++++ fantastic seller.'], ['Thank you for an easy pleasant transaction.'], ['Fast shipping, good communication. Highly recommended!']]);
+      }, num1000);
+      closePopup();
     }
   }
 },
 
 // Opens the modal dialog.
-La = (a, e = 0, b = R) => h(f => {
-  !b && c(_e) && fb(); // If caller sets delay to 0, it implies they want to close/override any existing popup.  That's just how it is.
-  if (E[d][zb](ug) || c(dd)[d][zb](z) ||(c(_e) && c(_e)[d][zb](z)))
+popup = (modalId, param = 0, delay = num500) => setTimeout(X => {
+  !delay && getEl('modal') && closePopup(); // If caller sets delay to 0, it implies they want to close/override any existing popup.  That's just how it is.
+  if (bodyClasses.contains('pik') || getEl('olay').classList.contains('vis') || getEl('modal')?.classList.contains('vis') || pouring)
     // Can't show modal yet.
-    h(c => La(a, e, b), ua);
+    setTimeout(X => popup(modalId, param, delay), num2000);
   else {
-    Wa(c('afs'),
-      `<div id=modal class=modal><div id=modal-close onClick=${fb.name}()></div><div id=modal-content><div id=${a}></div></div></div>`);
-    Qi[a](c(a), e);
-    c(_e)?.[d][m](z);
+    appendHTML(getEl('afs'), html(html('', {id: 'modal-close', onClick: xPop.name + '()'}) + html(html('', {id: modalId}), {id: 'modal-content'}), {id: 'modal', class: 'modal'}));
+    // Reduce chance of accidental immediate close because user was clicking something already.
+    modalCanClose = 0;
+    setTimeout(X => modalCanClose = 1, 400);
+    // Call the modal template function and activate the modal.
+    modal[modalId](getEl(modalId), param);
+    getEl('modal')?.classList.add('vis');
   }
-}, b),
+}, delay),
+
+// Responds to user clicks for closing a modal popup.
+xPop = X => modalCanClose && closePopup(),
 
 // Closes (x) a modal dialog popup.
-fb = a => {
-  c(_e)?.[o]();
-  gh(); // In case a modal changed which buttons should be shown.
-  E[d][o](L);
+closePopup = X => {
+  getEl('modal')?.remove();
+  updateMenuButtons(); // In case a modal changed which buttons should be shown.
+  bodyClasses.remove('bag'); // This is so we can style the bag button differently when the bag modal is open.
 },
 
 // Shows the menu buttons when necessary.  Also handles the dirt bucket drop, but just go with it.
-gh = a => {
+updateMenuButtons = X => {
   // Everyone gets a dirt bucket at first (or show the bag button right away).
-  b[L][g] ? c(Yh)[d][m](z) : h(a => !b[L][g] && td('dirt'), W);
+  _.bag.length ? getEl('a-bag').classList.add('vis') : setTimeout(X => !_.bag.length && drop('dirt'), shortDelay);
   // Handle glass and carousel.
-  b[L][D](a => a.k == 'tg') && c(Zh)[d][m](z);
-  b[L][D](a => a.k == ge) && c($h)[d][m](z);
+  _.bag.some(bi => bi.k == 'tg') && getEl('a-tg').classList.add('vis');
+  _.bag.some(bi => bi.k == 'car') && getEl('a-car').classList.add('vis');
 },
 
 // Removes a bag item by index.
-jc = a => b[L][Dd](a, 1) && xa(),
+deleteBagItem = i => _.bag.splice(i, 1) && save(),
 
 // Updates the color and name of the current ant farm frame.
-Af = (b = c('n'), d = c('base'), e = c(Rj)) => {
-  b.textContent = a.n;
-  d[ra][t] = b[ra][t] = a[Za];
-  d[ra].fx = b[ra].fx = l[a[Za]].fx;
-  e[ra][t] = a[t];
-  e[ra].fx = l[a[t]].fx;
+updateFrame = (signEl = getEl('n'), plateEl = getEl('base'), wrapper = getEl('wrapper')) => {
+  signEl.textContent = F.n;
+  plateEl.dataset.col = signEl.dataset.col = F.plate;
+  plateEl.dataset.fx = signEl.dataset.fx = items[F.plate].fx;
+  wrapper.dataset.col = F.col;
+  wrapper.dataset.fx = items[F.col].fx;
 },
 
 // Chooses a random id for an ant, ensuring uniqueness.
-hh = (e, g, c = 9999, d = 0, a) => {
+newAntId = (type, caste, idHigh = 9999, clashes = 0, id) => {
   do {
-    if (d++ > 5) {c *= 10; d = 0}
-    a = e + g + '-' + (f(c - ja) + ja);
-  } while (b[P][D](b => b.a[D](b => b.id == a)));
-  return a;
+    if (clashes++ > 5) {idHigh *= 10; clashes = 0}
+    id = type + caste + '-' + (randomInt(idHigh - num1000) + num1000);
+  } while (_.farms.some(farm => farm.a.some(existingAnt => existingAnt.id == id)));
+  return id;
 },
 
 // Works out the most common ant type in a farm.
-Si = (b, a = {}, c = b.a[i](b => {za(b) && (a[b.t] = (a[b.t] || 0) + 1)})) => !ma(a)[g] ? w : Mg(a)[yb]((a, b) => b[1] - a[1])[0][0],
+colonyType = (f, tc = {}, X = f.a.forEach(ant => {livesInFarm(ant) && (tc[ant.t] = (tc[ant.t] || 0) + 1)})) => !keys(tc).length ? '' : entries(tc).sort((a, b) => b[1] - a[1])[0][0],
 
 // Checks an ant is not 'dead'.  Also can't be 'free' or 'nip' etc... must be 'cap' which suggests it is in a farm somewhere.
-za = a => a[da] == Pb,
+livesInFarm = ant => ant.state == 'cap',
+
+// Checks an ant is 'dead'.  Also can't be 'free' or 'nip' etc... must be 'dead' which suggests it is in a farm somewhere.
+deadInFarm = ant => ant.state == 'dead',
 
 // Checks if a farm is running (has ants living in it).
-Bf = a => a.a[D](za),
+farmIsRunning = farm => farm.a.some(livesInFarm),
 
 // Checks if a farm is developing (has at least 2 completed cavity chambers).
-Ub = a => a[v][k](a => a.t == pa && a[u] == 100)[g] > 1,
+farmIsDeveloping = farm => farm.tuns.filter(t => t.t == 'cav' && t.dun).length > 1,
+
+// Determines if an act is a carry-related task.
+isCarryTask = act => ['carry', 'get', 'srv'].includes(act),
+
+// Checks if an ant has carry tasks.
+hasCarryTasks = ant => antUniqueActs(ant).some(isCarryTask),
+
+// Checks if a queen ant is awaiting service (carry, get, srv).
+isQueenAwaiting = queen => getFarm(queen).a.some(a => a.q.some(q => isCarryTask(q.act) && q.Q == queen.id)),
 
 // Checks if an ant is a queen.
-Xa = a => a[Cb] == 'Q',
+isQueen = ant => ant.caste == 'Q',
 
 // Checks if an ant is a drone.
-Tc = a => a[Cb] == 'D',
+isDrone = ant => ant.caste == 'D',
 
 // Checks if an ant is a worker.
-Kb = a => a[Cb] == 'W',
+isWorker = ant => ant.caste == 'W',
+
+// Prints an integer with markup, but caps to 4 digits so as to not screw up UI.
+printInt = number => (number = Number(number) || 0, span(number > 9999 ? 'many' : number, {class: 'num'})),
 
 // Prints a numeric count of terms with basic pluralisation.
-Uc = (a, b) => `<span class=num>${a || 0}</span> ${b}` + (a === 1 ? w : sb),
+printCount = (cnt, term) => printInt(cnt || 0) + ' ' + term + (cnt === 1 ? '' : 's'),
 
 // Gets the text description of a farm colony.
-Ae = a => `${a[Ob] ? 'Multispecie' : a.t ? ya[a.t].n + (ya[a.t].n[g] > 10 ? w : ' ant') : 'No ant'}s in ${a[oa] || 'the air'}`,
+getFarmDesc = f => `${f.coex ? 'Multispecie' : f.t ? types[f.t].n + (types[f.t].n.length > 10 ? '' : ' ant') : 'No ant'}s in ${f.fill || 'the air'}`,
 
 // Spawns a "free" ant that roams the screen.
-Cf = (l = 1, i = f(4), c, d, e, j = Gb[li], k = Gb[Re]) => {
-  if (nd) {
-    if (a[oa] && (ta.hasFocus() || b.a[g] < 3)) {// check focus & ant length to prevent flooding when user in another tab.
-      i> 2 ? (c = f(k), d = j + 25, e = 0) : // Bottom edge
-      i > 1 ? (c = k + 25, d = f(j), e = Ld) : // Right edge
-      !i ? (c = -25, d = f(j), e = 90) : // Left edge
-        (c = f(k), d = -25, e = S) // Top edge
+spawnAnt = (autoLoop = 1, randomEdge = randomInt(3), x, y, r, wHeight = window.innerHeight, wWidth = window.innerWidth) => {
+  if (spawner && F.a.length < 25) {
+    if (F.fill && (hasFocus() || _.a.length < 3)) {// check focus & ant length to prevent flooding when user in another tab.
+      randomEdge> 2 ? (x = randomInt(wWidth), y = wHeight + 25, r = deg270) : // Bottom edge
+      randomEdge > 1 ? (x = wWidth + 25, y = randomInt(wHeight), r = deg180) : // Right edge
+      !randomEdge ? (x = -25, y = randomInt(wHeight), r = 0) : // Left edge
+        (x = randomInt(wWidth), y = -25, r = 90) // Top edge
       // Create ant and screenWalk it.
-      Lf(ca(Df(b, c, d, e), {run: 1.2})); // Free ants move faster.
+      screenWalk(assign(createAnt(_, x, y, r), {run: 1.2})); // Free ants move faster.
     }
-    // Spawn fewer ants the more you have.  Make it a bit random.
-    h(a => l && Cf(), a.a[g] * W + f(la));
+    // Spawn fewer ants the more you have (but keep the spawn rate higher if there is no queen).  Make it a bit random.
+    clearTimeout(spawnTimer); // This system prevents multiple loops from executing the next line.
+    spawnTimer = setTimeout(X => autoLoop && spawnAnt(), (farmHasQueen(F) ? F.a.length : 3) * shortDelay + randomInt(standardDelay));
   }
 },
 
 // Creates an ant, stores it in data, and attaches a DOM representation of it.
-Df = (g = a, h, i, j, l = Zd, c = !f(a[oa] == Se ? 12 : 24) ? 'Q' : 'W', d = x(ma(ya)[k](a => !ya[a].p)), e = hh(d, c), b = {
-  id: e,
-  n: e, // Name
-  t: d,
-  x: h,
-  y: i,
-  r: j, // Rotate
-  [da]: l,
-  [Cb]: c,
-  [y]: 1,
-  [I]: Pa,
-  [Ue]: c == 'Q',
-  fd: 80 + f(20), // Food Satisfaction
-  dr: 80 + f(20), // Drink Satisfaction
-  hp: 80 + f(20), // Health Points
-  md: (ya[d].m || 100) - f(20), // Mood
-  [q]: {n: 0, d: 0, t: 0},
-  q: [], // Action Queue,
-  thot: x(["I feel like I'm being watched", "Somebody is watching me!"]),
+createAnt = (data = F, x, y, r, state = 'free', caste = !randomInt(F.fill == 'lube' ? 12 : 24) ? 'Q' : 'W',
+  type = caste == 'Q' && !farmHasQueen(F) && !randomInt(2) && F.t ? F.t : pickRandom(keys(types).filter(t => !types[t].p)), id = newAntId(type, caste), ant = {
+  id: id,
+  n: id, // Name
+  t: type,
+  x: x, // Note: the x/y coords are roughly centered on the ant's body, this is important for various features such as magnification, though some of the physics and practicality of movement may be less than ideal.
+  y: y,
+  r: r, // Rotate
+  state: state,
+  caste: caste,
+  scale: 1,
+  pose: 'prone',
+  alate: caste == 'Q',
+  fd: 80 + randomInt(20), // Food Satisfaction
+  dr: 80 + randomInt(20), // Drink Satisfaction
+  hp: 80 + randomInt(20), // Health Points
+  md: (types[type].m || 100) - randomInt(20), // Mood
+  area: {n: 0, d: 0, t: 0},
+  q: [], // Action Queue.
+  thot: pickRandom(["I feel like I'm being watched", "Somebody is watching me!"]),
   thotD: 8,
-  rm: [], // Body part removal
-}) => g.a[n](b) && (b[da] == Zd ? Ui : Wc)(b) || b,
+  rm: [], // Body part removal.
+}) => data.a.push(ant) &&  _CHECK_DUPE_ID() && (ant.state == 'free' ? freeAntDraw : antDraw)(ant) || ant, /// <---- temp code in here
 
 // Clones a capped ant.
-Ti = (e, b = a.a[X](a => Kb(a) && a[da] == Pb), f = c('fx')) => {
-  bb = 0;
-  pb('zap');
-  f[d][m](Sj);
-  for (let c = 0; c < e;) h((d = hh(b.t, b[Cb]), e = 435 + c * 40) =>
-    Wc(a.a[a.a[n](ca(pd(b), {
-      id: d,
-      x: e, y: Lb({t: b.t, x: e}),
-      q: [{[C]: ie}],
-      r: 90,
-      thot: x(["Who am I?", "What just happened?", "Is that me?", "I am reborn!"]),
-    })) - 1]) || O(Vb(a, d)),
-    c++ * R + R
+clone = (c, donor = F.a.find(a => isWorker(a) && a.state == 'cap'), fx = getEl('fx')) => {
+  switcher = 0;
+  playSound('zap');
+  fx.classList.add('flashit');
+  for (let i = 0; i < c;) setTimeout((id = newAntId(donor.t, donor.caste), xPos = 400 + i * 40) =>
+    antDraw(F.a[F.a.push(assign(cloneData(donor), {
+      id: id,
+      n: id,
+      x: xPos, y: antGroundLevel({f: donor.f, t: donor.t, x: xPos}),
+      q: [{act: 'idle'}],
+      r: antHillAngle({scale: 1, t: donor.t, x: xPos}),
+      scale: 1,
+      thot: pickRandom(["Who am I?", "What just happened?", "Is that me?", "I am reborn!"]),
+      dur: 0,
+      ts: getTimeSec(),
+      h: 0,
+    })) - 1]) || antAction(getAnt(F, id)), i++ * num500 + num500
   );
-  h(a => {f[d][o](Sj); bb = 1; xa()}, e * R + R);
-  Ta(l[Ve][Z]);
+  setTimeout(X => {fx.classList.remove('flashit'); switcher = 1; save()}, c * num500 + num500);
+  randomMsg(items['clonekit'].quip);
 },
 
 // Gets the ant's size, adjusted for infancy and caste.
 // Goal IIRC: Return ant's size as configured, except Queen's are 2 sizes larger (if possible), Drones are one size larger,
 // Infant at larvae stage are small unless the ant type's default is small then they're "baby" size, and infant larval drones are one size larger than the infants.
-Vc = (a, b = ya[a.t].s, c = ['b', sb, Oa, 'l', 'x'], d = c[dc](b)) =>
-  a[Ea] === 1 ? (b == sb ? 'b' : sb) : c[ba(d + (Tc(a) ? 1 : Xa(a) ? (a.t == 'T' ? 1 : 2) : 0), 4)],
+antGetSize = (ant, sz = types[ant.t].s, sizes = ['b', 's', 'm', 'l', 'x'], i = sizes.indexOf(sz)) =>
+  ant['inf'] === 1 ? (sz == 's' ? 'b' : 's') : sizes[min(i + (isDrone(ant) ? 1 : isQueen(ant) ? (ant.t == 'T' ? 1 : 2) : 0), 4)],
 
 // Draws a free ant.
-Ui = a => {
-  Wc(a, c(zd));
+freeAntDraw = ant => {
+  antDraw(ant, getEl('game'));
   // Add picking.
-  let b = Fc(a);
-  [ed, vc][i](a => b[s](a, Ef));
-  [Tj, vc][i](a => b[s](a, lh));
+  let antEl = objGetEl(ant);
+  antEl.addEventListener('pointerdown', pickAnt);
+  ['pointerenter', 'pointerdown'].forEach(ev => antEl.addEventListener(ev, spotAnt));
 },
 
 // Draws an existing ant into the currently displayed farm, or another container.
 // Note: This function cannot protect against ant being drawn into wrong farm or non-existent container as this func is used for various purposes, calling code is responsible.
-Wc = (a, b = c(Cd)) => T(a, b[Ad](ca(qe(Ej), {id: a.id}))),
+antDraw = (ant, cont = getEl('farm')) => antUpdate(ant, cont.appendChild(assign(getTemplate(antTemplate), {id: ant.id}))),
 
 // Gets DOM element from the cache or from query (and store in cache if its part of the current farm).
-Fc = (b, d = Kd[b.id]) => d?.[vg] && d || b.f == a.id && (Kd[b.id] = c(b.id)) || c(b.id),
+objGetEl = (obj, cachedEl = elCache[obj.id]) => cachedEl?.isConnected && cachedEl || obj.f == F.id && (elCache[obj.id] = getEl(obj.id)) || getEl(obj.id),
 
 // Updates the antEl's classes.
-ih = (a, b = Fc(a)) => b && (b[ki] = [
-    'ant', a[Cb], a.t, a[da], a[I], Vc(a), a[Ea] && Ea + a[Ea], // String values.
-    ...[fa, 'jit', $, 'wig', 'h', 'fall', Ba, 'mag', Ue, Oe][k](b => a[b]), // Boolean values.
-    ...a.rm // Body part removal.
-  ][Ab](Hc)),
+antUpdateClasses = (ant, props) => assign(ant, props) && antUpdate(ant),
+
+// Removes all properties for standard animations plus fight from an ant and immediately runs antUpdate().
+antRemAnimUpdate = ant => del(ant, 'walk', 'jit', 'dig', 'wig', 'fight') || antUpdate(ant),
+
+// Sets walk property of an ant.
+antSetWalk = ant => ant.walk = 1,
+
+// Unsets walk property of an ant and returns the ant.
+antGetStill = ant => (ant.walk = 0, ant),
 
 // Handles the event where an ant is being picked up.
-Ef = (e, b = e[Hd], a = Ce(b)) => {
-  e[rg]();
-  if (b[d][zb](Kc)) b[mi](Ff);
+pickAnt = (e, antEl = e.currentTarget, ant = getFreeAnt(antEl)) => {
+  e.preventDefault();
+  pickedAntEl = antEl; // Store currently picked ant so dragAnt and dropAnt can refer to it without any discrepency.
+  if (antEl.classList.contains('pick')) antEl.dispatchEvent(loseAnt);
   else {
     // Handle wing leafing.
-    if (a[Ue]) {
-      let d = Va(b[r][ea]), f = Va(b[r][H]);
-      ['wing-l', 'wing-r'][i](e => {
-        Wa(c(zd), `<div id="${a.id + e}"style=transform:rotate(${a.r}deg);left:${d}px;top:${f}px;width:${b.clientWidth}px;height:${b.clientHeight}px; class="leaf alate ${Vc(a)}"><div style="transform:${getComputedStyle(ga(`#${a.id} .body`))[de]}"class=body><div class=wings><div class="wing ${e}"></div></div></div></div>`);
-        let g = c(a.id + e), h = va(e != 'wing-l'), i = d, k = a.r, j = f, l = Ha(a => {
-          if (N(d - i) < 99) g[r][ea] = (i += h) + Fa;
-          g[r][de] = `rotate(${k += h}deg)`;
-          g[r][H] = (j += .7) + Fa;
-          j> Gb[li] + 99 && (g[o]() || ha(l));
-        }, Ia);
+    if (ant.alate) {
+      let left = parseInt(antEl.style.left), top = parseInt(antEl.style.top);
+      ['wing-l', 'wing-r'].forEach(wing => {
+        appendHTML(
+          getEl('game'),
+          html(
+            html(
+              html(divc('wing ' + wing), {class: 'wings'}),
+              {class: 'body', style: `transform:${getComputedStyle(query('#' + ant.id + ' .body')).transform}`}
+            ),
+            {id: ant.id + wing, style: `transform:rotate(${ant.r}deg);left:${left}px;top:${top}px;width:${antEl.clientWidth}px;height:${antEl.clientHeight}px;`, class: 'leaf alate ' + antGetSize(ant)}
+          )
+        );
+        let leaf = getEl(ant.id + wing), dir = getSign(wing != 'wing-l'), wLeft = left, wRotation = ant.r, wTop = top, leafInterval = setInterval(X => {
+          if (abs(left - wLeft) < 99) leaf.style.left = (wLeft += dir) + 'px';
+          leaf.style.transform = `rotate(${wRotation += dir}deg)`;
+          leaf.style.top = (wTop += .7) + 'px';
+          wTop> window.innerHeight + 99 && (leaf.remove() || stopInterval(leafInterval));
+        }, frameTick);
       });
     }
-    Ca(a, Ue);
+    del(ant, 'alate');
     // Update ant.
-    ca(Ce(e[Hd]), {[I]: Kc, [fa]: 0, [y]: va(f(1)), r: f(30) - 10});
-    T(a);
+    assign(ant, {pose: 'pick', walk: 0, scale: getSign(randomInt(1)), r: randomInt(30) - 99});
+    antUpdate(ant);
     // Handle ant biting.
-    h(b => Vi(a), ec);
+    setTimeout(X => antBite(ant), num200);
     // Add drag and drop.
-    [Lc, fd][i](a => ta[s](a, jh, {[Fd]: 0}));
-    [af, gd, G][i](a => ta[s](a, kh));
-    E[d][m](ug);
+    document.addEventListener('pointermove', dragAnt, {passive: 0});
+    ['pointerup', 'pointercancel'].forEach(ev => document.addEventListener(ev, dropAnt));
+    bodyClasses.add('pik');
   }
 },
 
 // Forces the loss of an ant being picked up.
-Ff = new MouseEvent(af, {bubbles: 1, cancelable: 1}),
+loseAnt = new PointerEvent('pointerup', {bubbles: 1, cancelable: 1}),
 
 // Handles each step of the dragging of an ant.
-jh = (b, a = Ah(b)) => {
-  b[rg]();
-  if (!a || !a[d][zb](Kc) || !f(ua)) ga('.pick')?.[mi](Ff);
+dragAnt = e => {
+  e.preventDefault();
+  if (!pickedAntEl || !pickedAntEl.classList.contains('pick') || !randomInt(num2000)) query('.pick')?.dispatchEvent(loseAnt);
   else {
-    let c = b.type == Lc ? b : b[cc][0], d = a[hb](),
-      f = d[ea] + d[nc] / 2, g = d[H] + d[yd] / 2,
-      h = c[_a] - f, i = c[rb] - g, e = Rc(h, i), j = ba(e, 9);
-    (N(Va(a[r][ea]) - c[_a]) > 25 || N(Va(a[r][H]) - c[rb]) > 25) && a[mi](Ff);
-    a[r][ea] = f + (h / e) * j + Fa;
-    a[r][H] = g + (i / e) * j + Fa;
+    let clientX = e.clientX, clientY = e.clientY,
+      rect = pickedAntEl.getBoundingClientRect(),
+      elX = rect.left + rect.width / 2, elY = rect.top + rect.height / 2,
+      dx = clientX - elX, dy = clientY - elY, dist = hypot(dx, dy), clampDist = min(dist, 30);
+    (abs(parseInt(pickedAntEl.style.left) - clientX) > 25 || abs(parseInt(pickedAntEl.style.top) - clientY) > 25) && pickedAntEl.dispatchEvent(loseAnt);
+    pickedAntEl.style.left = elX + (dx / dist) * clampDist + 'px';
+    pickedAntEl.style.top = elY + (dy / dist) * clampDist + 'px';
   }
 },
 
 // Handles the event of dropping an ant that was picked up.
-kh = (g, e = Ah(g), a = Ce(e), f = c('dropzone')[hb]()) => {
-  if (a && g[_b][ad]('.pick')) {
-    E[d][o](ug);
-    [Lc, fd][i](a => ta[qa](a, jh)),
-    [af, gd, G][i](a => ta[qa](a, kh)),
-    a.x = Va(e[r][ea]);
-    a.y = Va(e[r][H]);
-    !b.bit && a.x >= f[ea] && a.x <= f[Xe] && a.y <= f[Jc] ? Gf(a, b) : mh(a); // Drop in farm or run away.
+dropAnt = (e, ant = getFreeAnt(pickedAntEl), dropzoneRect = getEl('dropzone').getBoundingClientRect()) => {
+  if (ant && e.target.closest('.pick')) {
+    bodyClasses.remove('pik');
+    document.removeEventListener('pointermove', dragAnt, {passive: 0});
+    ['pointerup', 'pointercancel'].forEach(ev => document.removeEventListener(ev, dropAnt)),
+    ant.x = parseInt(pickedAntEl.style.left);
+    ant.y = parseInt(pickedAntEl.style.top);
+    !_.bit && ant.x > dropzoneRect.left && ant.x < dropzoneRect.right && ant.y < dropzoneRect.bottom ? dropAntInFarm(ant, _) : freeAntRun(ant); // Drop in farm or run away.
   }
 },
 
 // Moves an ant into the farm via a falling animation.
 // Note: Any functions calling this should probably book-end their process with switcher=0/switcher=1.
-Gf = (b, e, d = c(Cd)[hb]()) => {
-  b.x -= d[ea];
-  b.y -= d[H];
-  De(a, hd, b, e, a, {f: a.id, fall: 1});
-  yh(b, Lb(b));
+dropAntInFarm = (ant, oldDataset, antFarmRect = getEl('farm').getBoundingClientRect()) => {
+  ant.x -= antFarmRect.left;
+  ant.y -= antFarmRect.top;
+  transferObject(F, 'a', ant, oldDataset, F, {f: F.id, fall: 1});
+  antFall(ant, antGroundLevel(ant));
 },
 
 // Handles the mouseover event for spotting ants.
-lh = (a, b = Ce(a[Hd])) => {
-  [Tj, vc][i](b => a[Hd][qa](b, lh));
-  Ta([[`You've spotted a wild ${ya[b.t].n + ' Ant' + (Xa(b) ? ' QUEEN!!' : w)}!`]]);
+spotAnt = (e, ant = getFreeAnt(e.currentTarget)) => {
+  ['pointerover', 'pointerdown'].forEach(ev => e.currentTarget.removeEventListener(ev, spotAnt));
+  randomMsg([[`You've spotted a wild ${types[ant.t].n + ' Ant' + (isQueen(ant) ? ' QUEEN!!' : '')}!`]]);
 },
 
 // Makes ant run away when dropped.
-mh = a => !a.fall && Lf(ca(a, {[I]: Pa, r: f(fc), [y]: 1, run: 2})),
+freeAntRun = ant => !ant.fall && screenWalk(assign(ant, {pose: 'prone', r: randomInt(deg360), scale: 1, run: 2})),
 
 // Decides whether to do an ant bite and then does it.
 // Note: The force param is for dev.js, infact that's why this code exists as its own function.
-Vi = (a, c) => {
-  if (c || (b[U] > 9 && ya[a.t].b && !f(20))) {
-    b.bit = 1;
-    Ta(vj);
-    nh();
+antBite = (ant, force) => {
+  if (force || (_.score > 9 && types[ant.t].b && !randomInt(20))) {
+    _.bit = 1;
+    randomMsg(biteMsg);
+    doThrob();
     // Ensure ant runs away.
-    a && mh(a);
-    pb('bite');
-    E[d][o](ug);
+    ant && freeAntRun(ant);
+    playSound('bite');
+    bodyClasses.remove('pik');
   }
 },
 
 // Activates the ant bit throbber effect.
-nh = a => {
-  if (b.bit) {
+doThrob = X => {
+  if (_.bit) {
     // Add redThrobber immediately.
-    E[d][m]('bit');
-    c(wg)[d][m](z);
+    bodyClasses.add('bit');
+    getEl('throb').classList.add('vis');
     // After 5s add bite effect for 5m
     // The timers are global and cancellable in-case they take medicine.
     // Reloading will restart the 5 minute counter as punishment.
-    h(a => {
-      E[d][m](wg);
-      ha(hf);
-      hf = Ha(Hf, cb);
-    }, W);
+    setTimeout(X => {
+      bodyClasses.add('throb');
+      stopInterval(throbber);
+      throbber = setInterval(antyvenom, longDelay);
+    }, shortDelay);
   }
-  xa();
+  save();
 },
 
 // Removes the ant bite and throbber.
-Hf = a => {
-  ha(hf);
-  c(wg)[d][o](z);
-  E[d][o](wg, 'bit');
-  b.bit = 0;
+antyvenom = X => {
+  stopInterval(throbber);
+  getEl('throb').classList.remove('vis');
+  bodyClasses.remove('throb', 'bit');
+  _.bit = 0;
 },
 
 // Supports the functionality for enabling superspeed.
-oh = a => {
-  ha(le);
-  ha(jf);
-  if (b.ss) {
-    Ia = 5;
-    od = 50,
-    Hb = ec,
-    W = ja;
-    la = W * 6; // 6 seconds
-    cb = la * 10; // 1 minute
-    jf = Ha(dg, cb);
-    pb('speed', .7);
-    c(je)[d][m](z);
-    c(zd)[d][m](je);
-    h(a => c(zd)[d][o](je), la / 2);
-    ha(le);
-    le = Ha(Wi, la);
+doWarp = X => {
+  stopInterval(warper);
+  stopInterval(warpDirector);
+  if (_.ss) {
+    frameTick = 5;
+    microDelay = 50,
+    pauseDelay = num200,
+    shortDelay = num1000;
+    standardDelay = shortDelay * 6; // 6 seconds
+    longDelay = standardDelay * 10; // 1 minute
+    warpDirector = setInterval(director, longDelay);
+    playSound('speed', .7);
+    getEl('ss').classList.add('vis');
+    getEl('game').classList.add('ss');
+    setTimeout(X => getEl('game').classList.remove('ss'), standardDelay / 2);
+    stopInterval(warper);
+    warper = setInterval(clearWarp, standardDelay);
     // Also try clearing any existing bite sooner.
-    b.bit && h(Hf, cb / 2);
-    xa();
+    _.bit && setTimeout(antyvenom, longDelay / 2);
+    save();
   }
 },
 
 // Supports the functionality for disabling superspeed.
-Wi = a => {
-  if (Date.now() > b.ss) {
-    pb('fizzle', .7);
-    Ia = 20;
-    od = R,
-    Hb = ua,
-    W = 5000;
-    la = W * 6; // 30 seconds
-    cb = la * 10; // 5 minutes
-    ha(le);
-    ha(jf);
-    b.ss = 0;
-    xa();
-    h(a => {
-      c(zd)[d][m](je);
-      h(a => c(zd)[d][o](je), W/2);
-      c(je)[d][o](z);
-    }, ja);
+clearWarp = X => {
+  if (Date.now() > _.ss) {
+    playSound('fizzle', .7);
+    frameTick = 20;
+    microDelay = num500,
+    pauseDelay = num2000,
+    shortDelay = 5000;
+    standardDelay = shortDelay * 6; // 30 seconds
+    longDelay = standardDelay * 10; // 5 minutes
+    stopInterval(warper);
+    stopInterval(warpDirector);
+    _.ss = 0;
+    save();
+    setTimeout(X => {
+      getEl('game').classList.add('ss');
+      setTimeout(X => getEl('game').classList.remove('ss'), shortDelay/2);
+      getEl('ss').classList.remove('vis');
+    }, num1000);
   }
 },
 
 // Increments score.
 // Can be used to decrement score (inc=-1) or enable score display (inc=0), and to set bonuses (which don't trigger drops).
-gb = (e, g = 0, i = b.win ? '<span class=win>🏆</span> ' : w, a = c(U), f = c('bonus')) => {
-  b[U] += Va(e);
-  if (e) {
-    if (g) {
+score = (inc, isBonus = 0, win = _.win ? span('🏆', {class: 'win'}) : '', scoreEl = getEl('score'), bonusEl = getEl('bonus')) => {
+  _.score += parseInt(inc);
+  if (inc) {
+    if (isBonus) {
       // Bonus handling.
-      a[d][m]('bon');
-      h(a => {
-        Wa(f, `<div style=font-size:1.4em;>+${e}</div>bonus`);
-        f[d][m](z);
-      }, Ac);
-      h(c => {
-        a[B] = `<span>${i}${b[U]}</span>`;
-        a[d][o]('bon');
-        h(a =>{f[d][o](z); f[B] = w}, 2610);
-      }, Ac * 3);
+      scoreEl.classList.add('bon');
+      setTimeout(X => {
+        appendHTML(bonusEl, html('+' + inc, {style: 'font-size:1.4em'}) + 'bonus');
+        bonusEl.classList.add('vis');
+      }, num800);
+      setTimeout(X => {
+        scoreEl.innerHTML = span(win + _.score);
+        scoreEl.classList.remove('bon');
+        setTimeout(X =>{bonusEl.classList.remove('vis'); bonusEl.innerHTML = ''}, 2610);
+      }, num800 * 3);
     }
-    else b[U] === 1 ? Ta(xj) : b[U] == 2 ? Ta(yj) : sd(Bc());
-    e > 1 && sd(0); // Force a drop when they scored more than 1 point at once.
-    xa();
+    else _.score === 1 ? randomMsg(firstPoint) : _.score == 2 ? randomMsg(secondPoint) : scoreDrop(random());
+    inc > 1 && scoreDrop(0); // Force a drop when they scored more than 1 point at once.
+    save();
   }
-  if (!e || !g) a[B] = `<span>${i}${b[U]}</span>`;
-  a[ra].neg = b[U] < 0;
-  a[d][m](z);
+  if (!inc || !isBonus) scoreEl.innerHTML = span(win + _.score);
+  scoreEl.dataset.neg = _.score < 0;
+  scoreEl.classList.add('vis');
 },
 
 // Drops an item either according to the random value passed in (0=guaranteed) or when some conditions are met.
-sd = (d, a, c = b[U]> 149 ? .3 : b[U] > 9 ? .4 : .5) => {
-  if (d < c) {
+scoreDrop = (rand, dropItem, scoreCompare = _.score> 149 ? .3 : _.score > 9 ? .4 : .5, i,
+  itemKeys = keys(items).filter(key => items[key].lvl < min(_.score, _.farms.length < 2 ? 50 : _.farms.length < 3 ? 100 : num2000) && !items[key].nodrop && (!items[key].max || _.bag.filter(item => item.k == key).length < items[key].max))
+) => {
+  if (rand < scoreCompare) {
     // Random drops.
-    let f = ma(l)[k](a =>
-      l[a][e] < (b[P][g] < 2 ? 50 : b[P][g] < 3 ? 100 : b[U]) && !l[a][id] && (!l[a].max || b[L][k](b => b.k == a)[g] < l[a].max));
-    if (f[g]> 0) {
-      a = x(f);
-      if (b[L][D](b => b.k == a)) a = x(f); // 2nd chance.
+    if (itemKeys.length) {
+      dropItem = pickRandom(itemKeys);
+      if (_.bag.some(bi => bi.k == dropItem)) dropItem = pickRandom(itemKeys); // 2nd chance.
     }
   }
-  else if (b[U] % 9 < 1 || b[U] == 5) {
+  else if (_.score % 9 < 1 || _.score == 5) {
     // Forced item drops: you get one of the lowest level items that you're
     // missing on every 9th point, and one extra one early in the game.
     // But you don't get it if your random drops gave you everything already.
-    a = ma(l)
-      [k](a => !b[L][D](b => b.k == a) && l[a][e] <= b[U] && !l[a][id])
-      [pc]((a, b) => (!a || l[b][e] < l[a][e] ? b : a), null);
+    dropItem = keys(items)
+      .filter(item => !_.bag.some(bi => bi.k == item) && items[item].lvl <= _.score && !items[item].nodrop)
+      .reduce((lowestItem, currentItem) => (!lowestItem || items[currentItem].lvl < items[lowestItem].lvl ? currentItem : lowestItem), 0);
   }
-  else if (Bc() < c) {
-    let e = Dc(b[P][k](Bf));
-    h(a => Ta(Aj[e < 4 ? e : e == 4 ? 1 : 0]), ja);
+  else if (random() < scoreCompare) {
+    i = _.farms.filter(farmIsRunning).length - 1;
+    setTimeout(X => randomMsg(kudos[i < 4 ? i : i == 4 ? 1 : 0]), num1000);
   }
-  a && td(a);
+  dropItem && drop(dropItem);
 },
 
 // Provides the caste label text for an ant.
-ph = a => Me[a[Cb]],
+casteLabel = ant => castes[ant.caste],
 
 // Provides the caste icon emoji for an ant.
-qh = a => Kb(a) ? '🛠️' : Tc(a) ? '♂️' : '👑',
+casteIcon = ant => isWorker(ant) ? '🛠️' : isDrone(ant) ? '♂️' : '👑',
 
-// Provides ant's thoughts, though thot can be set at opportune times elsewhere.
-rh = (b, c = J(b), e = Xc(b), d = f(3), h, i = [
-    // Thots are ordered from high priority to low priority, only the first valid one is used.  "rand" is used to avoid some thoughts ALWAYS blocking others.
-    a => b[Ea] && ["😘🎮", "✏❓🎨", "🌵📥🍗🍖", "💥👍💥", "🔥🔥👅", "👀👑🌍", "👃💩", "🎨🎾", "🔵🌊", "💪🎀", "👄👄", "💪⚡🐭", "🐛🔜"],
-    a => !f(9) && ["Need. More. Crumbs.", "Who moved my dirt?!", "Don't step on me!", "Lost. Again.", "Why is dirt so heavy?", "Ant gym = life", "Who farted in the nest?", "I should be queen", "I licked it, it's mine",
-      "My back hurts", "Big foot incoming!", "Too many legs, not enough rest", "Keep calm, carry sugar", "I miss leaf duty", "Where's my antenna charger?", "Smells like danger", "Who named us “ants”?",
-      "Why so crumb-y today?", "Dirt in my mandibles", "Smells like home", "Antflix and chill?", "The floor is crumb!", "Dig. Eat. Repeat.", "Antsplain it to me", "Worker of the month (me).", "Mondays… again",
-      "What's my purpose?", "I saw a spider!", "Ant-nxiety rising", "Look at me!", "Don't look at me!"],
-    a => e[0] == Mc && ["Zzzzzz…", "I'm sleeping", "Having a nap"],
-    a => b.hp < 20 && [b.hp < 5 ? "I'm dying" : b.hp < 10 ? "I feel sick" : "I need a break"],
-    a => b.md < 20 && ["I ain't happy", "I'm having a mood", "I am so annoyed"],
-    a => b.t != c.t && !c[Ob] && ["Oops, wrong colony", "I'm so screwed", "I shouldn't be here"],
-    a => !d && !Yd(c) && ["We could really use a Queen", "I wish there was a Queen", "There should be a Queen!"],
-    a => !d && Kb(b) && Yd(c) && ["Queen's watching… act busy", "Just following orders", "I hear the queen gossiping"],
-    a => !d && Xa(b) && ["Who ate my larvae?!", "Carrying? I'm supervising", "It's good to be queen"],
-    a => !d && c.a[g] > 12 && ["Tunnel traffic again", "Our colony is pretty big", "I have so many friends"],
-    a => e[Y]($) && ['Off to work…', 'Busy, busy!', 'Got to dig', 'Is this tunnel crooked?', "I'm basically a builder"],
-    a => e[0] == jd &&
-      (b.md < 50 && !Ke(c) ? ["Not much to see up here", "The scenery is bland", "Could use some scenery"] : // Negative bg scenery feedback.
-      Ke(c)> 1 && d ? ["Enjoying the scenery", "Nice stuff up here"] : // Positive bg scenery feedback.
-        ["I don't mind the view", "What's up here?"]), // Generic crawl thoughts
-    a => e[0] == xc &&
-      (Ub(c) && d ? ["Exploring the surface", "Checking out the area", "Doing a security sweep"] : // Young farm pace thoughts.
-        ["Scoping out the farm", "Surveying the ground", "Hey! I'm walking here"]), // Generic pace thoughts
-    b => [ia, xg, yg][Y](e[0]) &&
-      (a.dun ? ["This nest is sweet", "I love my home", "Our colony is great", "Why so many tunnels?"] : // Farm development completed dive thoughts.
-      Ub(c) && d ? ["Exploring tunnels", "Mapping the nest", "Learning the tunnels"] : // Young farm dive thoughts.
-        ["Planning chambers", "Assessing dig sites"]), // Incomplete farm dive thoughts
-    a => ["Hmm, what to do?", "What shall I do?"], // Last resort for a thot.
-  ]) => (b.thotD = 0) || x(i[X](a => (h = a())) && h),
+// Sets a random ant thought from a supplied array of thoughts, or from the default auto thoughts.
+antThot = (ant, thots, farm = getFarm(ant), uniqueActs = antUniqueActs(ant), thot) => {
+  if (ant.thotD > 1) {// Protect against changing thoughts too quickly.
+    ant.thot = pickRandom(thots || [
+      // Auto thots are ordered from high priority to low priority, only the first valid one is used.
+      X => ant['inf'] && ["😘🎮", "✏❓🎨", "🌵📥🍗🍖", "💥👍💥", "🔥🔥👅", "👀👑🌍", "👃💩", "🎨🎾", "🔵🌊", "💪🎀", "👄👄", "💪⚡🐭", "🐛🔜"],
+      X => ant.fight && ["Why I oughta!", "Put em up! Put em up!", "Tough guy eh?", "Is that all you've got?", "You're going down!", "Take that!", "Come on then!", "En garde!", "Have at you!",
+        "You'll regret that!", "I'm gonna mess you up!", "For my family!", "You're going to pay!", "Don't mess with me!", "This is personal!", "Say your prayers!", "Feel my wrath!",
+        "You asked for it!", "I'm unstoppable!", "For the colony!", "Ant power!"],
+      X => !randomInt(9) && ["Need. More. Crumbs.", "Who moved my dirt?!", "Don't step on me!", "Lost. Again.", "Why is dirt so heavy?", "Ant gym = life", "Who farted in the nest?", "I should be queen", "I licked it, it's mine",
+        "My back hurts", "Big foot incoming!", "Too many legs, not enough rest", "Keep calm, carry sugar", "I miss leaf duty", "Where's my antenna charger?", "Smells like danger", "Who named us “ants”?",
+        "Why so crumb-y today?", "Dirt in my mandibles", "Smells like home", "Antflix and chill?", "The floor is crumb!", "Dig. Eat. Repeat.", "Antsplain it to me", "Worker of the month (me).", "Mondays… again",
+        "What's my purpose?", "I saw a spider!", "Ant-nxiety rising", "Look at me!", "Don't look at me!"],
+      X => uniqueActs[0] == 'rest' && ["Zzzzzz…", "I'm sleeping", "Having a nap"],
+      X => ant.hp < 20 && [ant.hp < 2 ? "I'm dying" : ant.hp < 9 ? "I feel sick" : "I need a break"],
+      X => ant.md < 20 && ["I ain't happy", "I'm having a mood", "I am so annoyed"],
+      X => ant.t != farm.t && !farm.coex && ["Oops, wrong colony", "I'm so screwed", "I shouldn't be here"],
+      X => !randomInt(3) && ant.md < 40 && !farmHasQueen(farm) && ["We could really use a Queen", "I wish there was a Queen", "There should be a Queen!"],
+      X => !randomInt(3) && isWorker(ant) && farmHasQueen(farm) && ["Queen's watching… act busy", "Just following orders", "I hear the queen gossiping"],
+      X => !randomInt(3) && isQueen(ant) && ["Who ate my larvae?!", "Carrying? I'm supervising", "It's good to be queen"],
+      X => !randomInt(3) && farm.a.length > 12 && ["Tunnel traffic again", "Our colony is pretty big", "I have so many friends"],
+      X => uniqueActs.includes('dig') && ['Off to work…', 'Busy, busy!', 'Got to dig', 'Is this tunnel crooked?', "I'm basically a builder"],
+      X => uniqueActs[0] == 'crawl' &&
+        (ant.md < 50 && !farmFlairScore(farm) ? ["Not much to see up here", "The scenery is bland", "Could use some scenery"] : // Negative bg scenery feedback.
+        farmFlairScore(farm)> 1 && randomInt(3) ? ["Enjoying the scenery", "Nice stuff up here"] : // Positive bg scenery feedback.
+          ["I don't mind the view", "What's up here?"]), // Generic crawl thoughts
+      X => uniqueActs[0] == 'pace' &&
+        (farmIsDeveloping(farm) && randomInt(3) ? ["Exploring the surface", "Checking out the area", "Doing a security sweep"] : // Young farm pace thoughts.
+          ["Scoping out the farm", "Surveying the ground", "Hey! I'm walking here"]), // Generic pace thoughts
+      X => ['dive', 'tunWalk', 'rotWalk'].includes(uniqueActs[0]) &&
+        (farm.dun ? ["This nest is sweet", "I love my home", "Our colony is great", "Why so many tunnels?"] : // Farm development completed dive thoughts.
+        farmIsDeveloping(farm) && randomInt(3) ? ["Exploring tunnels", "Mapping the nest", "Learning the tunnels"] : // Young farm dive thoughts.
+          ["Planning chambers", "Assessing dig sites"]), // Incomplete farm dive thoughts
+      X => ["Hmm, what to do?", "What shall I do?"], // Last resort for a thot.
+    ].find(f => (thot = f())) && thot);
+    ant.thotD = 0; // See director() func for where this is incremented and reaching a max value triggers a call to this func.
+  }
+},
 
 // Gets a unique list of acts that are in an ant's queue.
-Xc = a => [...new Set(a.q.map(a => a[C]))],
+antUniqueActs = ant => [...new Set(ant.q.map(a => a?.act))],
 
 // Finds an ant to magnify.
-If = (b, f = 28, e = c('lg')[hb](), g = (e.x + e[Xe]) / 2, h = (e.y + e[Jc]) / 2) => {
-  a.a[k](za)[i](a => {
-    let c = Fc(a);
-    if (c) {
-      let d = c[hb](),
-        e = wa(d.x + d[nc] / 2, d.y + d[yd] / 2, g, h);
-      if (e < f) {
-        f = e;
-        b = a;
-      }
+antMagnify = (middleAnt, a, dist, minDistance = 28, lgRect = getEl('lg').getBoundingClientRect(), isAlive, bar,
+  centerX = ((lgRect.x + lgRect.right) / 2) - wrapperRect.x - 50, centerY = ((lgRect.y + lgRect.bottom) / 2) - wrapperRect.y - 210 + surface) => {
+  for (a of F.a) {
+    dist = calculateDistance(a.x, a.y, centerX, centerY);
+    if (dist < minDistance) {
+      minDistance = dist;
+      middleAnt = a;
     }
-  });
-  a.a[i](a => a != b && (a.mag = a[Oe] = 0, T(a)));
-  c(zg)[d][o](z);
-  if (b) {
-    b.mag ||= 1;
-    T(b);
-    c('l-head')[B] = b.n;
-    ga('#l-t .txt')[B] = ya[b.t].n + ' ant';
-    ga('#l-c .txt')[B] = ph(b);
-    ga('#l-c .emo')[B] = qh(b);
-    let a = (a, b = hc((mb() - a) / 3600), c = hc((mb() - a) / 60) - (b * 60)) => `<span class=num>${b}</span> h <span class=num>${c}</span> m`;
-    ga('#l-d .txt')[B] = a(b.ts);
-    ga('#l-a .txt')[B] = b.hp ? `"<em>${b.thot}</em>"` : a(b[wc]);
-    ['rot', 'decay', 'fd', 'dr', 'md', 'hp'][i](a => {
-      let e = ga(`#l-${a} .bar`);
-      e[r][nc] = `${b[a] / 2}px`;
-      e[d].toggle('hi', b[a] > 50);
-      e[d].toggle('lo', b[a] < 20);
-      c(`l-${a}`).setAttribute('title', `${a[Ze]()}: ${Va(b[a])}%`);
-    });
-    ga('#l-md .emo')[B] = !b.hp ? '💀' : b.md> 50 ? '😃' : b.md > 20 ? '😐' : b.md > 10 ? '☹️' : '😡';
-    ga('#l-hp .emo')[B] = b.hp ? '♥️' : '💔';
-    ga('#l-a .emo')[B] = b.hp ? '💡' : '☠️';
-    c(zg)[ra][da] = b[da];
-    c(zg)[d][m](z);
-    Qc ||= Ha(a => {
-      if (++b.mag > 20) {
-        b[Oe] = 1;
-        T(b);
-        if (b.hp-- <= 0) Qc = ha(Qc);
-      }
-    }, ja);
   }
-  else Qc = ha(Qc);
+  if (prevMagAnt && prevMagAnt.id != middleAnt?.id) {
+    antUpdateClasses(prevMagAnt, {mag: 0, flare: 0});
+    prevMagAnt = 0;
+  }
+  if (middleAnt) {
+    isAlive = livesInFarm(middleAnt);
+    middleAnt.mag ||= 1; // Set to 1 if not already set to some higher value.
+    antUpdate(middleAnt);
+    getEl('l-head').innerHTML = middleAnt.n;
+    query('#l-t .txt').innerHTML = types[middleAnt.t].n + ' ant';
+    query('#l-c .txt').innerHTML = casteLabel(middleAnt);
+    query('#l-c .emo').innerHTML = casteIcon(middleAnt);
+    query('#l-d .txt').innerHTML = formatTime(middleAnt.dur);
+    query('#l-a .txt').innerHTML = isAlive ? `"${tag('em', middleAnt.thot)}"` : formatTime(middleAnt.tsd);
+    ['rot', 'decay', 'fd', 'dr', 'md', 'hp'].forEach(stat => {
+      bar = query(`#l-${stat} .bar`);
+      bar.style.width = `${clamp(middleAnt[stat], 0, 100)}px`;
+      bar.classList.toggle('hi', middleAnt[stat] > 50);
+      bar.classList.toggle('lo', middleAnt[stat] < 20);
+      getEl(`l-${stat}`).setAttribute('title', `${stat.toUpperCase()}: ${parseInt(clamp(middleAnt[stat], 0, 100))}%`);
+    });
+    query('#l-md .emo').innerHTML = middleAnt.md> 50 ? '😃' : middleAnt.md > 20 ? '😐' : middleAnt.md > 10 ? '☹️' : '😡';
+    query('#l-hp .emo').innerHTML = isAlive ? '♥️' : '💔';
+    query('#l-a .emo').innerHTML = isAlive ? '💡' : '☠️';
+    if (!isAlive) query('#l-re .txt').innerHTML = 'Died ' + deathCauses[middleAnt.cause];
+    query('#l-hp .txt').innerHTML = middleAnt.eaten > 1 ? `~${printInt(middleAnt.eaten - 1)}% eaten` : '';
+    getEl('l-a').setAttribute('title', isAlive ? 'THOT' : 'DEATH');
+    getEl('l-inf').dataset.state = middleAnt.state;
+    getEl('l-inf').classList.add('vis');
+    magInterval ||= setInterval(X => {
+      if (!middleAnt?.mag) magInterval = stopInterval(magInterval);
+      else if (isAlive && ++middleAnt.mag > 20) {
+        antUpdateClasses(middleAnt, {flare: 1});
+        if (--middleAnt.hp <= 0) {
+          magInterval = stopInterval(magInterval);
+          middleAnt.q = [{act: 'die', r: 'other'}];
+          antAction(middleAnt);
+        }
+      }
+    }, num1000);
+    prevMagAnt = middleAnt;
+  }
+  else {
+    magInterval = stopInterval(magInterval);
+    getEl('l-inf').classList.remove('vis');
+  }
 },
 
 // Handles dragging the magnifying glass around the farm.
-sh = (a, b = c(Rj)[hb]()) => {
-  c('l-wrap')[r][de] =
-    `translate(${Ib((a[_a] || a[cc]?.[0][_a]) - 55 - b.x, -8, b[nc] - 85)}px, ${Ib((a[rb] || a[cc]?.[0][rb]) - 90 - b.y, -33, b[yd] - 68)}px)`;
-  If();
-},
+dragGlass = e => {glassDragX = e.clientX; glassDragY = e.clientY},
 
 // Adds dragging functionality to the magnifying glass.
-th = a => [Lc, fd][i](a => ta[s](a, sh)),
+glassAddDrag = e => document.addEventListener('pointermove', dragGlass),
 
 // Removes dragging from the magnifying glass.
-uh = a => [Lc, fd][i](a => ta[qa](a, sh)),
+glassRemDrag = e => document.removeEventListener('pointermove', dragGlass),
 
 // Toggles the display of the magnifying glass.
-Xi = (e, b = c('l-wrap')) => {
-  if (E[d][zb]($d)) {
-    E[d][o]($d);
-    [ed, vc][i](a => b[qa](a, th)),
-    [af, gd][i](a => ta[qa](a, uh)),
-    ha(Dg);
+toggleGlass = (e, lWrap = getEl('l-wrap')) => {
+  if (bodyClasses.contains('glass')) {
+    bodyClasses.remove('glass');
+    lWrap.removeEventListener('pointerdown', glassAddDrag);
+    document.removeEventListener('pointerup', glassRemDrag);
+    stopInterval(magnifier);
+    stopInterval(glassDragInterval);
     // Remove magnification when turning off.
-    a.a[i](a => {a.mag = a[Oe] = 0; T(a); Qc = ha(Qc)});
-    c(zg)[d][o](z);
+    F.a.forEach(a => {antUpdateClasses(a, {mag: 0, flare: 0}); magInterval = stopInterval(magInterval)});
+    getEl('l-inf').classList.remove('vis');
   }
   else {
-    E[d][m]($d);
-    [ed, vc][i](a => b[s](a, th)),
-    [af, gd][i](a => ta[s](a, uh)),
-    Dg = Ha(If, 40);
-    If(); // Immediately magnify the ant when turning on
+    wrapperRect = getEl('wrapper').getBoundingClientRect();
+    bodyClasses.add('glass');
+    lWrap.addEventListener('pointerdown', glassAddDrag);
+    document.addEventListener('pointerup', glassRemDrag);
+    magnifier = setInterval(antMagnify, 200);
+    glassDragInterval = setInterval(X => {
+      getEl('l-wrap').style.transform =
+        `translate3d(${clamp(glassDragX - 55 - wrapperRect.x, -8, wrapperRect.width - 85)}px, ${clamp(glassDragY - 90 - wrapperRect.y, -33, wrapperRect.height - 68)}px,0)`;
+    }, 30);
   }
 },
 
 // Toggles the carousel functionality.
-Jf = (e, a = c(dd)) => {
-  if (E[d][zb](ge)) {
+toggleCarousel = (e, olay = getEl('olay')) => {
+  if (bodyClasses.contains('car')) {
     // Turn off carousel.
-    a[qa](G, Jf);
-    a[d][o](z);
-    ha(Eg);
-    E[d][o](ge);
+    olay.removeEventListener('click', toggleCarousel);
+    olay.classList.remove('vis');
+    stopInterval(carInterval);
+    bodyClasses.remove('car');
   }
-  else if (b[P][g] > 1) {
-    if (bb) {
+  else if (_.farms.length > 1) {
+    if (switcher) {
       // Turn on carousel.
-      a[d][m](z);
-      a[s](G, Jf);
-      Eg = Ha(vh, la);
-      E[d][m](ge);
-      vh(); // Switch immediately for confirmation.
-      ck.userAgent[dc]('Mac') > -1 && xb("Press Shift-CMD-F for full screen.", Zb);
-      ck.userAgent[dc]('Win') > -1 && xb("Press F11 for full screen.", Zb);
+      olay.classList.add('vis');
+      olay.addEventListener('click', toggleCarousel);
+      carInterval = setInterval(carousel, standardDelay);
+      bodyClasses.add('car');
+      carousel(); // Switch immediately for confirmation.
+      navigator.userAgent.indexOf('Mac') > -1 && msg("Press Shift-CMD-F for full screen.", 'warn');
+      navigator.userAgent.indexOf('Win') > -1 && msg("Press F11 for full screen.", 'warn');
     }
-    else Kf(c($h));
+    else denyClick(getEl('a-car'));
   }
 },
 
 // Executes one carousel rotation.
-vh = a => Sc(b[P][(b[P][ig](Sb) + 1) % b[P][g]].id),
+carousel = X => switchFarm(_.farms[(_.farms.findIndex(currentFarm) + 1) % _.farms.length].id),
 
 // Adds deny class to an element for a short time.
-Kf = a => {
-  a[d][m]('deny');
-  h(b => a[d][o]('deny'), W);
+denyClick = el => {
+  el.classList.add('deny');
+  setTimeout(X => el.classList.remove('deny'), shortDelay);
 },
 
 // Drops an item.
-td = (a, c = l[a].t) => {
-  a = {k: a}; // At this point the item becomes an object because it can take on other attributes.
+drop = (dropItem, itemType = items[dropItem].t) => {
+  dropItem = {k: dropItem}; // At this point the item becomes an object because it can take on other attributes.
   // Choose arbitrary colour - get a list of paints, but randomly cap the list at some level so low level paints are more common.
-  [qb, tc][Y](c) && (a[t] = x(ma(l)[k](a => l[a].t == Da && l[a][e] < f(70) + 21)));
-  c == Te && (a.r = f(40) - 20);
-  b[L][n](a) && La(Qb, a);
+  ['scenery', 'decor'].includes(itemType) && (dropItem.col = pickRandom(keys(items).filter(k => items[k].t == 'paint' && items[k].lvl < randomInt(70) + 21)));
+  itemType == 'sticker' && (dropItem.r = randomInt(40) - 20);
+  _.bag.push(dropItem) && popup('drop', dropItem);
 },
 
 // Walks a free ant around the screen, and mainly checks if the ant has walked past the edge.
-Lf = (a, b = 0) =>
-  a.x < -40 || a.x> Gb[Re] + 40 || a.y < -40 || a.y> Gb[li] + 40 ? Rd(a) :
-    T(a) || h(b => nd && a[I] != Kc && xh(a, Lf), b),
+// In addition to initiating a screenwalk, this is used as the continue callback in antMoveDefault() which sets frameDelay to the frame tick or pause value.
+screenWalk = (ant, frameDelay = 0) =>
+  ant.x < -40 || ant.x> window.innerWidth + 40 || ant.y < -40 || ant.y> window.innerHeight + 40 ? antDelete(ant) :
+    antUpdate(ant) || setTimeout(X => spawner && ant.pose != 'pick' && antMoveDefault(ant, screenWalk), frameDelay),
 
-// Determines if an ant is both captive and passive.
-wh = a => za(a) && J(a)[Ob],
+// Determines if two ants are peaceful towards each other.
+antsPassive = (ant, ant2) => ant2.t == ant.t || getFarm(ant)?.coex,
 
 // Determines if ants should not avoid each other (used when walking in prone pose).
-Mf = (a, b, c = 0) =>
-  a[_] && a[_].Q == b.id || // Check if this is an ant serving a queen situation.
-  !c && Mf(b, a, 1), // Check with roles-reversed.
+antsCoTarget = (ant, ant2, recip = 0) =>
+  ant.carry && ant.carry.Q == ant2.id || // Check if this is an ant serving a queen situation.
+  !recip && antsCoTarget(ant2, ant, 1), // Check with roles-reversed
 
-// Handles random direction prone walking, with collision handling for both modes this is used in.
-xh = (a, d, e = 0, g = 1, h = 1, c = Bc(), b = Gh(a)) => {
-  a[fa] = 1;
-  if (b) {
-    let k = b.ant;
-    if (a[da] == k[da] && a[q].n == k[q].n && !Mf(a, k)) {
-      if (a[da] == Zd || k.t == a.t || wh(a)) {
-        // Avoid this ant.
-        let m = Rb(k.x, k.y, a.x, a.y), l = a[q].n == jb && Nf(a, 1);
-        // Extra checks here avoid adjusting the ant into the boundary.
-        if (!l) a.r = ka(a.r - b.dir * f(20));
-        if (!l || m.x > 0 && l[0] != 90 || m.x < 0 && l[0] != Ld) a.x += m.x;
-        if (!l || m.y> 0 && !l[0] || m.y < 0 && l[0] != S) a.y += m.y;
-      }
-      else Of(a, k); // Fight!
-    }
-  }
-  else if (c < .2 && !a.redir) a.r = ka(a.r + x([-2, -1, 1, 2]) * h); // Randomly select an angle for direction change.
-  let i = ub(a.r - 90), j = Fe(a) * g
-  a.x += db(i) * j;
-  a.y += lb(i) * j;
-  d(a, e && c < .001 ? (a[fa] = 0, Ia + f(Hb)) : Ia); //@todo apply this pausing technique to pace and tunWalk too?
+// Tracks ant avoidance.
+antTrackAvoidance = ant => {
+  ant.avoid ||= 0;
+  ant.avoid++;
+  setTimeout(X => del(ant, 'avoid'), num2000);
+  antUpdate(antGetStill(ant)); // Note: antGetStill() slipped into this code to prevent treadmill while in avoidance.
 },
 
-// Tests if ant is about to cross a boundary in the bg area and reports which boundary (0 - top, 90 - right, 180 - bottom, 270 - left).
-Nf = (a, d = 0, c = Eh(a), b = Sa(a) * 2) =>
-  [[0, c < -185], [90, a.x> 960 - b], [S, c > -b], [Ld, a.x < b]][X](b => b[1] && (d || (N(Ka(a.r - b[0])) < 90))),
+// Checks ant avoidance tracker.
+antCheckAvoidance = ant => !ant.avoid || ant.avoid < 29,
+
+// Handles random direction prone walking, with collision handling for both modes this is used in.
+antMoveDefault = (ant, callback, allowPause = 0, speedMult = 1, rotMult = 1, rand = random(), collision = antCollision(ant), ant2 = collision?.ant, dist, near) => {
+  antSetWalk(ant);
+  if (collision) {
+    if (ant.state == 'free' || antsPassive(ant, ant2)) {// Too much trouble to handle collisions near the boundary.
+      if (!(near = ant.area.n == 'bg' && antBgNear(ant, 1)) && antCheckAvoidance(antGetStill(ant))) {
+        dist = calcDistComponents(ant2.x, ant2.y, ant.x, ant.y);
+        ant.r = normalize360(ant.r + collision.dir * randomInt(20));
+        ant.x += dist.x;
+        ant.y += dist.y;
+        // Track ant avoidance duration so we can stop doing it if it gets too insane.
+        antTrackAvoidance(ant);
+      }
+    }
+    else antFight(ant, ant2); // Fight!
+  }
+  else if (rand < .2) ant.r = normalize360(ant.r + pickRandom([-2, -1, 1, 2]) * rotMult); // Randomly select an angle for direction change.
+  antTakeProneStep(ant, speedMult);
+  callback(ant, allowPause && rand < .001 ? (antUpdate(antGetStill(ant)), frameTick + randomInt(pauseDelay)) : frameTick);
+},
+
+// Moves ant by one step in an assumed prone position.
+antTakeProneStep = (ant, speedMult = 1, angleInRadians = degToRad(ant.r), mult = antGetStep(ant) * speedMult) => {
+  ant.x += cos(angleInRadians) * mult;
+  ant.y += sin(angleInRadians) * mult;
+},
+
+// Tests if ant is about to cross a boundary in the bg area and reports which boundary (270 - top, 0 - right, 90 - bottom, 180 - left).
+antBgNear = (ant, ignoreAngle = 0, margin = antOffsetX(ant) * 2) =>
+  [[deg270, ant.y < 322], [0, ant.x> 960 - margin], [90, ant.y > antGroundLevel(ant, 0) - margin], [deg180, ant.x < margin]].find(b => b[1] && (ignoreAngle || (abs(normalize180(ant.r - b[0])) < 90))),
 
 // Moves ant to the middle of #F.
-yh = (a, b, c = Fc(a), d = 1.2) => {
-  a.y < b && (a.y += 1);
-  a.x += a.x < 450 ? d : a.x> 490 ? -d : 0;
-  if (rf(a.r) < 90) a.r += 1.2;
-  T(a, c);
-  a.y < b && h(e => yh(a, b, c, Qa(0, d - .02)), Ia / 2) || zh(a, c);
+antFall = (ant, target, antEl = objGetEl(ant), move = 1.2) => {
+  ant.y < target && (ant.y += 1);
+  ant.x += ant.x < 450 ? move : ant.x> 490 ? -move : 0;
+  if (round(ant.r) < 0) ant.r += 1.2;
+  antUpdate(ant, antEl);
+  ant.y < target && setTimeout(X => antFall(ant, target, antEl, max(0, move - .02)), frameTick / 2) || antCap(ant, antEl);
 },
 
 // Captures an ant into the farm.
-zh = (a, b) => {
-  b[qa](ed, Ef);
-  b[qa](vc, Ef)
-  if (a[da] != Pb) J(a)[Xb][Pb]++;
-  a[da] = Pb;
-  a.ts = mb();
-  Je(J(a));
-  gb(Xa(a) ? 3 : 1);
-  a.thot = x(["Don't touch me!", "Am I kidnapped?", "WTF is going on?", "I'm confused!"]);
-  Be(a);
+antCap = (ant, antEl) => {
+  antEl.removeEventListener('pointerdown', pickAnt);
+  if (ant.state != 'cap') getFarm(ant).stats['cap']++;
+  ant.state = 'cap';
+  ant.dur = 0;
+  ant.ts = getTimeSec();
+  setColonyAndFoe(getFarm(ant));
+  score(isQueen(ant) ? 3 : 1);
+  antThot(ant, ["Don't touch me!", "Am I kidnapped?", "WTF is going on?", "I'm confused!"]);
+  antSurface(ant);
 },
 
 // Sets up a fight between two ants.
-Of = (b, a) => !b[_] && !a[_] && Vf(b, {[C]: Ba, ant: a.id}) && a[da] != Ba && Vf(a, {[C]: Ba, ant: b.id}),
-
-// Handles the rotation display of an ant.
-Yi = (a, b) => b[r][de] = `scaleX(${a[y]}) rotate(${a.r}deg)`,
+antFight = (ant, ant2) => !ant.carry && !ant2.carry && antInstaQ(ant, {act: 'fight', ant: ant2.id}) && !ant2.fight && antInstaQ(ant2, {act: 'fight', ant: ant.id}),
 
 // Resets an ant to sit properly on the surface level and executes the next item in the queue.
 // Note: For newly captured ants this is how the ant's queue is "activated".
 // Note: This calls antNext() and should be considered an alternative to calling antNext() in some situations.
-Be = (a, b = va(a.r < S), c = ka(a.r)) => {
-  Yc(a, H);
-  A(ca(a, {r: 90, y: Lb(a), [y]: b, [I]: Db, fall: 0, [fa]: 0, run: 0}));
+antSurface = ant => {
+  antArea(ant, 'top');
+  antNext(assign(ant, {r: antHillAngle(ant), y: antGroundLevel(ant), scale: ant.scale * getSign(ant.r < 90), pose: 'side', fall: 0, walk: 0, run: 0}));
 },
 
-// Gets the ant element that was the target of an event attached to the document (whereas events on the antEl use e.currentTarget instead).
-Ah = a => a[_b][ad]('.ant'),
-
 // Gets a free ant object given the ant element or some object with an id.
-Ce = a => eb(b.a, a?.id),
+getFreeAnt = antEl => getAnt(_, antEl?.id),
 
-// Gets an object by ID.
-Vb = (a, b) => eb(a.a, b),
-
-// Searches farms to find a farm ant object given the ant DOM element, or some object with an id, or even just an id.
-dk = (c, d, a) => {for (d of b[P]) for (a of d.a) if (a.id == c.id || a.id == c) return a},
+// Gets an ant object by ID.
+getAnt = (farm, id) => getById(farm.a, id),
 
 // Removes an object (must have .id) from a data set in the array at the subscript property, and remove the corresponding DOM element including its cache. Done in a timer, so it doesn't mess up any loops that call this.
-Pf = (d, e = hd, f = J(d) || b, a = d.id, g = c(a)) => h(b => {f[e] = f[e]?.[k](b => b.id != a); g && (g[o]() || Ca(Kd, a))}, 0),
+deleteDataAndEl = (obj, key = 'a', dataSet = getFarm(obj) || _, id = obj.id, el = getEl(id)) => setTimeout(X => {dataSet[key] = dataSet[key]?.filter(d => d.id != id); el && (el.remove() || del(elCache, id))}, 0),
 
 // Deletes an ant element.
-Rd = a => Pf(a),
+// Important! This is NOT just a handy alias, by having only one param it allows deleting ants via ".forEach(antDelete)" without overwriting the default params in deleteDataAndEl().
+antDelete = ant => deleteDataAndEl(ant),
 
 // Updates the antEl to reflect the state of the object, if possible.
-T = (a, b = Fc(a)) => {
+antUpdate = (ant, antEl = objGetEl(ant)) => {
 
-  if (isNaN(a.x) || isNaN(a.y) || isNaN(a.r))
-    Cg[Zb]("ant is nanned", a);
+  if (isNaN(ant.x) || isNaN(ant.y) || isNaN(ant.r)) console.warn("ant is nanned", ant);
 
-  if (b && b[vg]) {
-    ih(a, b);
-    b[r][ea] = a.x + Fa;
-    b[r][H] = a.y + Fa;
-    Yi(a, b);
-  }
+  requestAnimationFrame(() => {
+    if (antEl?.isConnected) {
+      antEl.className = [
+        'ant', ant.caste, ant.t, ant.state, ant.pose, antGetSize(ant), ant['inf'] && 'inf' + ant['inf'], // String values.
+        ...['walk', 'jit', 'dig', 'wig', 'h', 'fall', 'fight', 'mag', 'alate', 'flare', 'rot', 'rot1', 'rot2', 'decay', 'decay1'].filter(f => ant[f]), // Boolean values.
+        ...ant.rm // Body part removal.
+      ].join(' ');
+      antEl.style.left = ant.x + 'px';
+      antEl.style.top = ant.y + 'px';
+      antEl.style.transform = `scaleX(${ant.scale}) rotate(${ant.r + 90}deg)`; // +90 because the ant was built facing north instead of east in CSS.
+    }
+  });
 },
 
 // Gets an egg.
-Sd = (a, b) => eb(a.e, b),
+getEgg = (farm, id) => getById(farm.e, id),
 
 // Removes an egg from data and visually remove, either because it hatched or died.
-Qf = a => Pf(a, 'e'),
+eggDelete = egg => deleteDataAndEl(egg, 'e'),
 
 // Updates the display of an egg element.
-Rf = (a, b = Fc(a)) => {
-  if (b && b[vg]) {
-    a[p] && ca(a, He(na(a[p]), a.pc)); // Egg is in a tunnel, update the x/y coords from the tunnel.
-    b[ki] = 'egg lvl' + a[e];
-    b[r][ea] = a.x + Fa;
-    b[r][H] = a.y + Fa;
-    b[r][de] = `scaleX(${a[y]}) rotate(${a.r}deg)`
+eggUpdate = (egg, eggEl = objGetEl(egg)) => {
+  if (eggEl && eggEl.isConnected) {
+    egg.tun && assign(egg, cavFloor(getTun(egg.tun), egg.pc)); // Egg is in a tunnel, update the x/y coords from the tunnel.
+    eggEl.className = 'egg lvl' + egg.lvl;
+    eggEl.style.left = egg.x + 'px';
+    eggEl.style.top = egg.y + 'px';
+    eggEl.style.transform = `scaleX(${egg.scale}) rotate(${egg.r}deg)`
   }
 },
 
 // Draws an egg.
-Sf = (b, d = c(Cd)) => {
-  if (b.f == a.id) {
-    Wa(d, `<div id=${b.id}></div>`);
-    Rf(b);
+eggDraw = (egg, cont = getEl('farm')) => {
+  if (egg.f == F.id) {
+    appendHTML(cont, html('', {id: egg.id}));
+    eggUpdate(egg);
   }
 },
 
 // Gets a carried item.
-Zi = (b, a) => a.t == kd ? Sd(b, a.id) : [Ea, yc][Y](a.t) ? Vb(b, a.id) : a,
+getCarry = (farm, carry) => carry.t == 'egg' ? getEgg(farm, carry.id) : ['inf', 'dead'].includes(carry.t) ? getAnt(farm, carry.id) : carry,
 
 // Gets the key of the data array where a carried item would be stored in a dataset.
-$i = a => a.t == kd ? 'e' : [Ea, yc][Y](a.t) ? hd : 'c',
+carryKey = carry => carry.t == 'egg' ? 'e' : ['inf', 'dead'].includes(carry.t) ? 'a' : 'c',
 
 // Determines if a carry object is either an egg or ant (and therefore they should exist before/after they are being carried).
-Bh = a => $i(a) != 'c',
+carryIsEggOrAnt = carry => carryKey(carry) != 'c',
 
 // Draws a carried item, or moves it from the farm container to the ant element.
-Tf = (b, e, d = ga(`#${e.id} .c`)) => {
-  if (b.f == a.id) {
-    if (Bh(b)) {
+carryDraw = (carry, ant, cEl = query(`#${ant.id} .c`), carryEl) => {
+  if (carry?.f == F.id) {
+    if (carryIsEggOrAnt(carry)) {
       // This assumes the object was already drawn prior to this function running.
-      let a = c(b.id);
-      a[o]();
-      Ca(Kd, b.id);
-      d[Ad](a);
+      carryEl = getEl(carry.id);
+      carryEl.remove();
+      del(elCache, carry.id);
+      cEl.appendChild(carryEl);
     }
-    else Wa(d, `<div id=${b.id} class="carry C${b.t} ${b.k}"></div>`);
+    else appendHTML(cEl, divc(`carry C${carry.t} ` + carry.k, {id: carry.id}));
   }
 },
 
 // Undraws a carried item, or moves it from the ant element into the farm container.
-Ch = (b, d = J(b), a = c(b)) => {
-  if (a && a[vg]) {
-    a[o]();
-    Bh(b) && d[Ad](a);
+carryUndraw = (carry, carryEl = getEl(carry?.id)) => {
+  if (carryEl && carryEl.isConnected) {
+    carryEl.remove();
+    carryIsEggOrAnt(carry) && getFarm(carry).appendChild(carryEl);
   }
 },
 // @TODO how does drop a carry in a nip work?  hint: it doesn't yet.
 
 // Transfers an object from one data set to another and removes/draws the DOM elements as well.
-De = (d, b, a, c, e, f, g) => {// Note: newCont defaults to #farm container if undefined.
-  e[b][n](ca(a.id ? a : eb(c[b], a), f));
-  Pf(a, b, c);
-  Sb(d) && (b == hd ? Wc : Sf)(a, g);
+transferObject = (farm, key, obj, oldSet, newSet, newVals, newCont) => {// Note: newCont defaults to #farm container if undefined.
+  newSet[key].push(assign(obj.id ? obj : getById(oldSet[key], obj), newVals));
+  deleteDataAndEl(obj, key, oldSet);
+  currentFarm(farm) && (key == 'a' ? antDraw : eggDraw)(obj, newCont);
 },
 
 // Gets the X offset of "where" an ant is at based on its size.
-Sa = (a, b = {b: 4, s: 6, m: 9, l: 11, x: 11}) => b[Vc(a)],
+antOffsetX = (ant, map = {b: 4, s: 6, m: 9, l: 11, x: 11}) => map[antGetSize(ant)],
 
 // Gets the Y offset of "where" an ant is at based on its size.
 // Note: because of tunnel widths it would be a bad idea to ever return >=7 from here.
-kc = (a, b = {b: 1, s: 2, m: 4, l: 5, x: 6}) => b[Vc(a)],
-
-// Gets the Waypoint offset for an ant based on its size.
-Dh = (a, b = {b: 1, s: 2, m: 3, l: 5, x: 5}) => b[Vc(a)],
+antOffsetY = (ant, map = {b: 1, s: 2, m: 4, l: 5, x: 6}) => map[antGetSize(ant)],
 
 // Computes the X value we'll use for some decision making.
-Ee = a => a.x + Sa(a) * a[y],
-
-// Computes the Y value we'll use for some decision making - adjusted so that 0 is surface level.
-Eh = a => Ma(a) - kc(a),
+// Note: This is not as thorough as antHeadPoint() which may be more suitable if a proper rotational coordinate is required.
+antFaceX = ant => ant.x + antOffsetX(ant) * ant.scale,
 
 // Computes the ant's Y value for a lot of underground related calculations.
-Ma = a => a.y - gc,
+antDiveY = ant => ant.y - surface,
 
 // Gets a more accurate x/y coordinate of where the ant's head is with respect to its rotation.
-Uf = (a, b = Sa(a), c = ub((a.r - 90) * a[y])) => ({x: a.x + db(c) * b, y: a.y + lb(c) * b}),
+// Note: When ant is known to be facing roughly east or west in side-position it may be sufficient to just use antFaceX() instead.
+antHeadPoint = (ant, offset = antOffsetX(ant), rad = degToRad(ant.r * ant.scale)) => ({x: ant.x + cos(rad) * offset, y: ant.y + sin(rad) * offset}),
 
-// Figures out the distance from the surface an ant on a hill would be.
-// Note: the divisor for h caps the height, and the outer power sets the steepness of the hill for fine-tuning.
-_i = (a, b, d, c, e = (a + b) / 2, f = (b - a) / 2, g = (c - e) / f) => c < a || c> b ? 0 : d / 2.6 * pf(1 - qf(qf(g, 2), .6)),
+// Gets a more accurate x/y coordinate of where the ant's feet are with respect to its rotation.
+// This is just antHeadPoint() with different default params.
+// Note: Intended for finding closest waypoint of a rotated ant, where ant.y + antOffsetY(ant) is insufficient.
+antFootPoint = (ant, offset = antOffsetY(ant), rad = degToRad(ant.r * ant.scale + 90)) => antHeadPoint(ant, offset, rad),
+
+// Computes the vertical offset (y) of the upper half of a horizontally stretched ellipse for a given position (x).
+// Note: the divisor for h caps the height, and the steepness of the hill for fine-tuning can be changed by turning the last part into sqrt(1 - pow(pow(xNorm, 2), 1)) and tweaking the 1.
+getHillNudge = (l, r, h, x, c = (l + r) / 2, w = (r - l) / 2, xNorm = (x - c) / w) => x < l || x> r ? 0 : h / 2 * sqrt(1 - pow(xNorm, 2)),
 
 // Gets the height of a hill at an x-position.
-ud = (c, d = a, b = d[oc][X](a => a.l < c && a.r> c)) => b ? _i(b.l, b.r, ba(50, b.h), c) : 0,
+getHillHeight = (x, farm = F, hill = farm.hills.find(h => h.l < x && h.r> x), h = min(50, hill?.h)) => hill ? getHillNudge(hill.l, hill.r, h, x) - h * .13 : 0, // The "- h *.13" because our hills are positioned at 63% not 50%.
 
 // Figures out the ant's "ground" level.
-Lb = a => gc - kc(a) - ud(a.x, J(a)),
+antGroundLevel = (ant, applyAntOffset = 1) => surface - (applyAntOffset && antOffsetY(ant)) - getHillHeight(ant.x, getFarm(ant)),
 
 // Figures out the angle an ant would be due to the sides of hills being steep.
-// Note: the actual angle has been divided as the ant would lean unnaturally.
-Td = (a, b = J(a)[oc][X](b => b.l < a.x && b.r> a.x), d = b && b.l, e = b && b.r, f = (d + e) / 2, c = (e - d) / 2) =>
-  !b ? 90 : 90 + (Ng(ab.atan(-ba(50, b.h) / 3 * ((a.x - f) / (c * c)) / pf(1 - qf((a.x - f) / c, 2)))) * -a[y] / 3),
+// Note: The actual angle has been divided as the ant would lean unnaturally by trying to follow the curve too accurately.
+antHillAngle = (ant, offset = ant.scale * antOffsetX(ant)) => radToDeg(Math.atan((getHillHeight(ant.x + offset) - getHillHeight(ant.x - offset)) / (2 * offset))) * -ant.scale / 2,
 
 // Adds to finna queue.
-F = (b, c, a) => b && c && b.q[n](ca({[C]: c}, !a ? {} : typeof a != 'object' ? {tx: a} : a)),
+antFinna = (ant, act, args = {}) => ant?.q.push(assign(args, {act: act})),
 
-// Adds to finna queue, but checks if ant needs to transition via the surface level first by either uncrawling or climbing.
-// Only use this for actions that can be triggered from the top area (see acts.top), even if they won't go via the top.
-// If ant is allowed to short-cut without going to the top first then use the n argument to set the destination's area.
-// See goToLocation() for a more robust method of moving ants between areas.
-nb = (a, c, b) => {
-  if (!b?.n || a[q].n != b.n) {
-    a[q].t && F(a, bf);
-    a[q].n == jb && F(a, 'uncrawl');
-  }
-  F(a, c, b);
-},
+// Adds a via action to finna queue which will have to transition to the appropriate area to do them first.
+// Use the 'n' argument to specify the area name, will assume 'top' by default, can also pass in a 1 to execute anywhere (intended for the 'rest' action).
+// See goToLocation() for a more robust method of moving ants to a specific location.
+antFinnaVia = (ant, act, args = {}) => antFinna(ant, 'via', assign(args, {via: act})),
 
-// Chooses a random action for the ant to perform based on where it is.
-aj = (a, b, c = {Q: [$, Mc], D: [$]}) =>
-  F(a, x(ma(xd[a[q].n])[k]((d, e) => xd[a[q].n][d] && (!b || e > 0) && !c[a[Cb]]?.[Y](d)))),
+// Adds to finna queue only if the 'act' does not already exist there.  Uses antFinnaVia() for safety so do be careful that is the desired behaviour.
+antFinnaUnique = (ant, act, args) => !ant?.q.some(q => q.act == act) && antFinnaVia(ant, act, args),
 
 // Prepends a custom queue or queue item to finna queue.
-vb = (a, b, c = 1) => a.q = [...c ? [a.q[Ic]()] : [], ...(ff.isArray(b) ? b : [b]), ...a.q],
-
-// Replaces queue.
-Vf = (a, b) => a.q = vb({q: []}, b, 0),
+antInstaQ = (ant, queueItems, keepFirst = 1) => ant.q = [...keepFirst ? [ant.q.shift()] : [], ...(Array.isArray(queueItems) ? queueItems : [queueItems]), ...ant.q],
 
 // Delegates an ant action.  Importantly; calls an antUpdate() so that anything that calls antAction doesn't have to first do an antUpdate().
 // Done in a timer to prevent exceeding callstack and handle framerate speed by default.
-O = (a, c = Ia, b = a.q[0]?.[C] || ie) => T(a) || !si && (za(a) || b == 'die') && h(c => nj[b](a), c),
+antAction = (ant, timeout = frameTick, action = ant.q[0]?.act || 'idle') => antUpdate(ant) || /* START-DEV */!stopAnts &&/* END-DEV */ (livesInFarm(ant) || action == 'die') && setTimeout(X => act[action](ant), timeout),
 
 // Does next action in finna queue.
 // Most notably this calls antAction() and is often the logical alternative to calling antAction() directly.
-A = (a, b) => {a.q[Ic](); O(a, b); if (a.thotD) a.thot = rh(a)},
+antNext = (ant, timeout) => {ant.q.shift(); antAction(ant, timeout); antThot(ant)},
+
+// Combines antGetStill() and antAction(). Use instead of antAction() to unset walk prop before executing the next loop of the action.
+antActionStill = (ant, timeout) => antAction(antGetStill(ant), timeout),
+
+// Combines antGetStill() and antNext(). Use instead of antNext() to unset walk prop before executing the next action.
+antNextStill = (ant, timeout) => antNext(antGetStill(ant), timeout),
 
 // Adds a tracker to quickly determine where ant is. Includes a duration used in some areas, or a tunnel ID for the bottom.
-Yc = (a, b, c) => a[q].n == b && a[q].t == c ? a[q].d++ : a[q] = {n: b, d: 0, t: c},
+antArea = (ant, area, tun) => {
+  ant.area.n == area && ant.area.t == tun ? ant.area.d++ : ant.area = {n: area, d: 0, t: tun};
+  ['dead', 'inf'].includes(ant.carry?.t) && antArea(getAnt(getFarm(ant), ant.carry.id), area, tun); // Update dead ants and infants it is carrying.
+},
 
 // Calculates the size of an ant step with impediments and lethargy.
-Fe = a => a[y] * (
-  ya[a.t].v
-  - (a.hp < 10 ? .12 : a.hp < 20 ? .06 : a.hp < 40 ? .03 : 0)
-  - (a.md < 10 ? .24 : a.md < 20 ? .12 : a.md < 40 ? .06 : 0)
-  - (a.q[g] < 2 ? .2 : 0)
-  - (Xa(a) ? .4 : 0)
-) * (a.run || 1), // ant.run is independent of and cumulative to other speed multipliers and can be 0/1/undefined for normal speed, <1 for slow, or>1 for fast.
+antGetStep = ant => ant.scale * (
+  types[ant.t].v
+  - (ant.hp < 10 ? .12 : ant.hp < 20 ? .06 : ant.hp < 40 ? .03 : 0)
+  - (ant.md < 10 ? .24 : ant.md < 20 ? .12 : ant.md < 40 ? .06 : 0)
+  - (ant.q.length < 2 ? .2 : 0)
+  - (isQueen(ant) ? .4 : 0)
+) * (ant.run || 1), // ant.run is independent of and cumulative to other speed multipliers and can be 0/1/undefined for normal speed, <1 for slow, or>1 for fast.
 
 // Calculates the step size in a tunnel.
-Wf = a => N(Fe(a)) / 2,
+// An absolute value is returned because we don't care about negative scale.
+antGetTunnelStep = ant => abs(antGetStep(ant)) / 2,
 
-// Ant takes one step along the surface.
-Xf = a => {
-  a.x += Fe(a);
-  a.y = Lb(a);
-  a.r = Td(a);
+// Makes an ant take one step along the surface.
+antMoveSurface = ant => {
+  ant.x += antGetStep(ant);
+  ant.y = antGroundLevel(ant);
+  ant.r = antHillAngle(ant);
 },
 
 // Gets the next spot to step to in the tunnel.
-Ud = (a, b = Wf(a), c = ub((a[y] < 0 ? qd(a.r) : a.r) - 90)) => {
-  a.x += db(c) * b;
-  a.y += lb(c) * b;
+antMoveTunnel = (ant, step = antGetTunnelStep(ant), ang = degToRad((ant.scale < 0 ? mirrorAngle(ant.r) : ant.r))) => {
+  ant.x += cos(ang) * step;
+  ant.y += sin(ang) * step;
 },
 
-// Works out the ant step size on 2-axis when travelling at an angle between two points.
-bj = (c, d, e, f, a, b = Rb(c, d, e, f)) => ({x: b.x * a, y: b.y * a}),
-
 // Get the entrance point of a tunnel.
-cj = (a, e = 0, f = 0, g = 6, b = Rb(a.x1, a.y1, a.x2, a.y2),
-  c = ba(g, b.d * (a[u] / 100)), d = (a.h / 2 - e) * -f) =>
-  ({x: a.x1 + b.x * c - b.y * d, y: a.y1 + b.y * c + b.x * d}),
+getEntrancePoint = (tun, margin = 0, pos = 0, distance = 6, distComp = calcDistComponents(tun.x1, tun.y1, tun.x2, tun.y2),
+  actualDistance = min(distance, distComp.d * (tun.prog / 100)), offset = (tun.h / 2 - margin) * -pos) =>
+  ({x: tun.x1 + distComp.x * actualDistance - distComp.y * offset, y: tun.y1 + distComp.y * actualDistance + distComp.x * offset}),
 
 // Find where con overlaps with nextTun along nextTun's middle line.
-dj = (b, a, c = Rb(a.x1, a.y1, a.x2, a.y2), d = 1 + b.w / 2,
-  [f, g, e] = b.x1 == a.x1 && b.y1 == a.y1 ? [a.x1, a.y1, d] : [a.x2, a.y2, -d]) =>
-  ({x: f + c.x * e, y: g + c.y * e}),
+getConnectionPoint = (con, nextTun, dist = calcDistComponents(nextTun.x1, nextTun.y1, nextTun.x2, nextTun.y2), offset = 1 + con.w / 2,
+  [x0, y0, s] = con.x1 == nextTun.x1 && con.y1 == nextTun.y1 ? [nextTun.x1, nextTun.y1, offset] : [nextTun.x2, nextTun.y2, -offset]) =>
+  ({x: x0 + dist.x * s, y: y0 + dist.y * s}),
 
-// Gets the index of the closest waypoint to an ant or a previous waypoint.
-Zc = (d, a, b = tb[d.id], e = 10, c = b?.[dc](a)) =>
-  c < 0 ? b[pc]((c, d, f, g, b = wa(a.x, a.y - (a.r ? gc : 0), d.x, d.y)) => (b < c.d && b < e) ? {b, f} : c, {d: Infinity, i: -1}).i : c,
+// Gets the index of the closest waypoint to an ant or a previous waypoint.  If ant is detected, will adjust to antFootPoint() [when there is a .q] and antDiveY() [when there is a .t].
+// Note: We could improve performance by passing a nearby known waypoint index from which to begin search (in both directions), once results start getting worse we know to stop.
+getWaypointIndex = (farm, obj, coord = obj.q ? antFootPoint(obj) : obj, wps = wayPoints[farm.id], threshold = 10, exact = wps?.indexOf(coord)) =>
+  exact < 0 ? wps.reduce((best, wp, i, a, d = calculateDistance(coord.x, obj.t ? antDiveY(coord) : coord.y, wp.x, wp.y)) => (d < best.d && d < threshold) ? {d, i} : best, {d: Infinity, i: -1}).i : exact,
 
-// Gets the next waypoint relative to the current one.
-Yf = (a, c, d = 1, e = Zc(a, c), b = e + d) =>
-  b >= 0 && b < tb[a.id][g] && wa(c.x, c.y, tb[a.id][b].x, tb[a.id][b].y) < 8 ? tb[a.id][b] : 0,
+// Gets the next waypoint relative to the current one.  Returns 0 if there is a problem such as the found wp being too far away.
+getNextWaypoint = (farm, curr, dir = 1, wps = wayPoints[farm.id], nextIndex = curr.i + dir) =>
+  dir && nextIndex >= 0 && nextIndex < wps.length && calculateDistance(curr.x, curr.y, wps[nextIndex].x, wps[nextIndex].y) < 8 ? wps[nextIndex] : 0,
+
+// Gets the indices of the rear and front waypoints for an ant.  Returns null if either is not found.
+// Note: This has to search the entire waypoint set (twice!) which is not ideal!!!  We could optimise performance by tracking ant's previous wp results to limit search segment?
+getAntWpIndices = (ant, farm = getFarm(ant), antShim = {r: ant.r, scale: ant.scale, t: ant.t},
+  r = getWaypointIndex(farm, assign(antFootPoint(assign(antHeadPoint(ant, -antOffsetX(ant)), antShim)), antShim)),
+  f = getWaypointIndex(farm, assign(antFootPoint(assign(antHeadPoint(ant), antShim)), antShim))
+) => r < 0 || f < 0 ? null : {r, f},
 
 // Gets the waypoint direction vector for the ant.
-Fh = (b, a, c = {x: a.x, y: a.y, [y]: a[y], r: a.r}) =>
-  Ud(c, 8) || va(Zc(b, c) > Zc(b, a)),
+getAntWaypointDirection = (ant, ind = getAntWpIndices(ant)) => ind && getSign(ind.r < ind.f),
 
-// Gets average angle of a set of waypoints.
-ej = (a, c = 0, d = 0, b = 0) => {
-  for (; b < a[g] - 1;) {
-    let e = a[b], f = a[++b], g = Kg(e.y - f.y, f.x - e.x);
-    c += db(g);
-    d += lb(g);
+// Gets the waypoint set for an ant.
+getAntWaypoints = (ant, ind = getAntWpIndices(ant), wps = wayPoints[getFarm(ant).id]) => ind ? ind.r < ind.f ? wps.slice(ind.r, ind.f + 1) : wps.slice(ind.f, ind.r + 1).reverse() : [],
+
+// Gets average angle of a set of waypoints.  Returns null if not enough waypoints found.
+getWaypointAngle = (ant, points = getAntWaypoints(ant), sumX = 0, sumY = 0, i = 0) => {
+  for (; i < points.length - 1;) {
+    let p1 = points[i], p2 = points[++i], a = atan2(p2.y - p1.y, p2.x - p1.x);
+    sumX += cos(a);
+    sumY += sin(a);
   }
-  return ka(90 - Ec(c, d));
+  return points.length> 1 ? normalize360(angleFromDelta(sumX, sumY)) : null;
 },
 
 // Determines if ant will collide with a waypoint in front of it.
-fj = (d, a, b, c) => {
-  for (b of tb[d.id]) {
-    if (wa(a.x, Ma(a), b.x, b.y) < 30) {
-      c = Ec(b.x - a.x, b.y - Ma(a), 90 - a.r);
-      if (c < 10 || c> 350) return 1; // Waypoint is within the forward "cone" tolerance.
+antWaypointCollision = (farm, ant, wp, angle) => {
+  for (wp of wayPoints[farm.id]) {
+    if (calculateDistance(ant.x, antDiveY(ant), wp.x, wp.y) < 30) {
+      angle = angleFromDelta(wp.x - ant.x, wp.y - antDiveY(ant), ant.r);
+      return angle < 10 || angle> 350; // Waypoint is within the forward "cone" tolerance.
     }
   }
 },
 
-// Calculates if two specific ants are in proximity.
-Gc = (a, b, c) => a.id != b.id && wa(a.x, a.y, b.x, b.y) < c,
-
-// Finds an ant that is within proximity of supplied ant.
-//@TODO this is only used once so far, and it is used as a .some not a .find.
-gj = (a, b, c = 20) => b.a[X](b => Gc(b, a, c)),
+// Calculates if an ant and target (such as another ant) are in proximity.
+// Note: Also checks the target is not the ant itself so that .find() and .filter() operations of ant sets do not need to specify this.
+antInTargetProximity = (ant, target, prox) => ant.id != target.id && calculateDistance(ant.x, ant.y, target.x, target.y) < prox,
 
 // Determines if ant will collide with any others.  Optionally pass in an ant array to only check that group of ants.
-Gh = (a, e = a.f ? J(a).a : b.a, c, d) => {
-  for (c of e[k](b => !a[q] && !b[q] || a[q].n == b[q].n)) {
-    if (Gc(c, a, 25)) {
-      d = Ge(a, c);
-      return d < 30 || d> qd(30) ? {ant: c, dir: va(d < S)} : 0;
+antCollision = (ant, cone = 30, a, angle) => {
+  for (a of ant.f ? getFarm(ant)?.a : _.a) {
+    if (!deadInFarm(a) && (!ant.area && !a.area || ant.area.n == a.area.n) && !antsCoTarget(ant, a) && antInTargetProximity(a, ant, 30)) {
+      angle = antToTargetAngle(ant, a);
+      if (angle < cone || angle> mirrorAngle(cone)) return {ant: a, dir: sign(angle)};
     }
   }
 },
 
-// Determines if an ant in a tunnel is nearby an enemy ant.
-hj = (b, c, d, a) => {
-  if (d.foe)
-    for (a of d.a[k](a => b.t != a.t && (c.id == a[q].id || c.co[Y](a[q].n))))
-      if (Gc(a, b, 60)) return {ant: a, ang: Ge(b, a), dir: va(Ge(b, a) > S)};
+// Determines if an ant is near a rotten corpse and applies hp penalties.
+antCorpseProximity = (ant, farm = getFarm(ant), nearestCorpse = farm.a.find(a => a.rot && antInTargetProximity(a, ant, 20))) => {
+  if (nearestCorpse && ant.area.t == nearestCorpse.area.t) {
+    antStats(ant, {hp: (nearestCorpse.decay - nearestCorpse.rot) / num1000}); // Penalty increases as rot increases, but decreases as decay increases.
+    playerHint(farm, ["Ants are getting sick from rotting corpses."]);
+    if (ant.hp <= 0) {
+      ant.wig = 1;
+      setTimeout(X => {ant.q = [{act: 'die', r: 'sick'}]; ant.wig = 0; antNext(ant)}, num2000);
+    }
+  }
 },
 
-// Determines the angle of one ant to another.
-Ge = (a, b) => Ka(rd(a, b, -a.r - 90)),
-
-// Determines if ant is in proximity of any placed items.
-//@TODO this is only used once so far, and it is used as a .some not a .find.
-ij = (a, b, c = 20) => b[aa][X](b => wa(a.x, a.y, b.x, b.y + b.h / 2) < b.w / 2 + c),
+// Determines the angle of an ant to a target such as another ant.
+antToTargetAngle = (ant, target) => normalize180(getAngle(ant, target)),
 
 // Inverts an ant's angle if it has a negative scale.
-vd = a => {
-  if (a[y] < 0) {
-    a[y] = 1;
-    a.r = qd(a.r);
+antProneCorrection = ant => {
+  if (ant.scale < 0) {
+    ant.scale = 1;
+    ant.r = mirrorAngle(ant.r);
   }
 },
 
 // Determines the side of a tunnel a point is at.  Not reliable if point is in the middle of the tunnel.
-Zf = (a, b) => va((a.x2 - a.x1) * (b.y - a.y1) - (a.y2 - a.y1) * (b.x - a.x1) < 0),
+tunGetSide = (tun, point) => getSign((tun.x2 - tun.x1) * (point.y - tun.y1) - (tun.y2 - tun.y1) * (point.x - tun.x1) < 0),
 
 // Corrects an ant's orientation based on which side of a tunnel it is on.
 // Important: wp is frequently passed in and not calculated here - an easy thing to forget when debugging!
-$f = (a, b, d = tb[a.f][Zc(J(a), a)], c = a.q[0]) => {
-  // Note: You'd think we'd use tun.r to snap the ant to the exact angle, but no, that's just as troublesome.
-  if (a[y] != Zf(b, d || {x: a.x, y: Ma(a)}) * va(c.rev)) {
-    a[y] *= -1;
-    a.r = Og(a.r);
-    if (_f(a, b) == c.rev) a.r = ic(a.r);
+antSideCorrection = (ant, tun, wp = wayPoints[ant.f][getWaypointIndex(getFarm(ant), ant)], action = ant.q[0]) => {
+  if (ant.scale != tunGetSide(tun, wp || {x: ant.x, y: antDiveY(ant)}) * getSign(action.rev)) {
+    ant.scale *= -1;
+    ant.r = mirrorAngle(ant.r);
+    if (antDir(ant, tun) == action.rev) ant.r = oppositeAngle(ant.r);
   }
 },
 
 // Returns true if ant is facing forward along the tunnel, false if backward.
-_f = (b, a, c = ub(b.r - 90)) => (db(c) * b[y] * (a.x2 - a.x1) + lb(c) * (a.y2 - a.y1)) > 0,
+antDir = (ant, tun, antAngle = degToRad(ant.r)) => (cos(antAngle) * ant.scale * (tun.x2 - tun.x1) + sin(antAngle) * (tun.y2 - tun.y1)) > 0,
 
 // Nudges an ant toward the middle line of a tunnel.
-jj = (b, a, i, c = Rb(a.x1, a.y1, a.x2, a.y2), e = Ib((b.x - a.x1) * c.x + (Ma(b) - a.y1) * c.y, 0, c.d),
-  f = a.x1 + c.x * e - b.x, g = a.y1 + c.y * e - Ma(b), d = Rc(f, g), h = ba(i, d)
+antNudgeToMid = (ant, tun, nudge, dist = calcDistComponents(tun.x1, tun.y1, tun.x2, tun.y2), t = clamp((ant.x - tun.x1) * dist.x + (antDiveY(ant) - tun.y1) * dist.y, 0, dist.d),
+  dx = tun.x1 + dist.x * t - ant.x, dy = tun.y1 + dist.y * t - antDiveY(ant), d = hypot(dx, dy), move = min(nudge, d)
   ) => {
   if (d > 2) {
-    b.x += (f / d) * h;
-    b.y += (g / d) * h;
+    ant.x += (dx / d) * move;
+    ant.y += (dy / d) * move;
   }
 },
 
 // Nudges an ant toward the supplied waypoint.
-Hh = (a, d, h, e = d.x - a.x, f = d.y - Ma(a), b = Rc(e, f), c = b - Dh(a), g = oe(c) * ba(N(c), h * (c < 0 ? 2 : 1))) => {
-  if (b) {
-    a.x += (e / b) * g;
-    a.y += (f / b) * g;
+antNudgeToWP = (ant, wp, nudge = antGetTunnelStep(ant) / 4, dx = wp.x - ant.x, dy = wp.y - antDiveY(ant),
+  dist = hypot(dx, dy), diff = dist - antOffsetY(ant), step = sign(diff) * min(abs(diff), nudge * (diff < 0 ? 2 : 1))) => {
+  if (dist) {
+    ant.x += (dx / dist) * step;
+    ant.y += (dy / dist) * step;
   }
 },
 
 // Nudges an ant to middle of tunnel, changes to prone pose, and performs correction.
-lc = (a, b) => {jj(a, b, Dh(a)); a[I] = Pa; vd(a)},
+antToProneWithCorrection = (ant, tun) => {antNudgeToMid(ant, tun, antOffsetY(ant) / 2); ant.pose = 'prone'; antProneCorrection(ant)},
 
 // Nudges an ant to waypoint along tunnel, changes to side pose, and performs correction.
-Ih = (a, c, b) => {Hh(a, b, 2); a[I] = Db; $f(a, c, b)},
+antToSideWithCorrection = (ant, tun, wp) => {antNudgeToWP(ant, wp, antOffsetY(ant) / 2); ant.pose = 'side'; antSideCorrection(ant, tun, wp)},
 
 // Determines if an ant is within range of a waypoint to make landings, etc...
-ag = (a, b, c = 1) => b && wa(b.x, b.y, a.x, Ma(a)) < Sa(a) * c, // Note: antOffsetX() just happens to be a nice amount.
+antWaypointRange = (ant, wp, mult = 1) => wp && calculateDistance(wp.x, wp.y, ant.x, antDiveY(ant)) < antOffsetX(ant) * mult, // Note: antOffsetX() just happens to be a nice amount.
 
 // Determines whether a tunnel is of a centered rotation type.
-wb = a => a.t == $b || a.t == M,
+isRotationTunnel = tun => tun.t == 'con' || tun.t == 'ent',
 
 // Determines which tun we should consider the ant to be in and roughly at what percent along.  Optionally pass a tun in to limit searches to that one and directly connected tuns.
-ob = (b, e = 0, c = 0, d = 0, f = 2,
+getTunPosition = (ant, ignoreTun = 0, limitTun = 0, desire = 0, margin = 2,
   // Helper to check if a point is inside a convex quadrilateral.
-  h = (d, e, b = 0, a, c) => {
-    for (; b < 4;) {
-      a = e[b], c = e[(++b) % 4];
-      if ((c.x - a.x) * (d.y - a.y) - (c.y - a.y) * (d.x - a.x) < 0) return 0;
+  pointInQuad = (p, quad, i = 0, a, b) => {
+    for (; i < 4;) {
+      a = quad[i], b = quad[(++i) % 4];
+      if ((b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x) < 0) return 0;
     }
     return 1;
-  }, g, a) => {
-  for (g of [...(d ? [d] : []), ...[M, $b, pa, p][k](a => a != d)]) {// 'Desire' moves the expected next tunnel type to the front of the types array.
-    for (a of J(b)[v][k](a => (!c || c.id == a.id || c.co[Y](a.id)) && a.t == g && a.id != e && a[u] >= Wb(a, 8))) {
-      let i = a.w / 2 + f, j = a.h / 2 + f, k = ub(a.r - (a.t == pa ? 0 : 90)), l = db(k), m = lb(k);
+  }, type, tun) => {
+  for (type of [...(desire ? [desire] : []), ...['ent', 'con', 'cav', 'tun'].filter(t => t != desire)]) {// 'Desire' moves the expected next tunnel type to the front of the types array.
+    for (tun of getFarm(ant).tuns.filter(t => (!limitTun || limitTun.id == t.id || limitTun.co.includes(t.id)) && t.t == type && t.id != ignoreTun && t.prog >= tunPercent(t, 8))) {
+      let hw = tun.w / 2 + margin, hh = tun.h / 2 + margin, rad = degToRad(tun.r), cosA = cos(rad), sinA = sin(rad);
       // Check if ant is inside the rotated rectangle.
-      if (h({x: b.x, y: Ma(b)}, [{x: -i, y: -j}, {x: i,  y: -j}, {x: i,  y: j}, {x: -i, y: j}].map(b => ({x: (a.x1 + a.x2) / 2 + b.x * l - b.y * m, y: (a.y1 + a.y2) / 2 + b.x * m + b.y * l})))) {
-        let n = a.x2 - a.x1, o = a.y2 - a.y1;
-        return {a, pc: Ib(((b.x - a.x1) * n + (Ma(b) - a.y1) * o) / (n * n + o * o), 0, 1) * 100};
+      if (pointInQuad({x: ant.x, y: antDiveY(ant)}, [{x: -hw, y: -hh}, {x: hw,  y: -hh}, {x: hw,  y: hh}, {x: -hw, y: hh}].map(c => ({x: (tun.x1 + tun.x2) / 2 + c.x * cosA - c.y * sinA, y: (tun.y1 + tun.y2) / 2 + c.x * sinA + c.y * cosA})))) {
+        let dxLine = tun.x2 - tun.x1, dyLine = tun.y2 - tun.y1;
+        return {tun, pc: clamp(((ant.x - tun.x1) * dxLine + (antDiveY(ant) - tun.y1) * dyLine) / (dxLine * dxLine + dyLine * dyLine), 0, 1) * 100};
       }
     }
   }
-  // If at this point in the function and didn't find a tun and limitTun was passed in, try again without limitTun or desire.
-  return c ? ob(b, e) : 0;
+  // If at this point in the function and didn't find a tun and ignoreTun or limitTun was passed in, try again without any restrictions.
+  return ignoreTun || limitTun ? getTunPosition(ant) : 0;
+},
+
+// Determines which tunnel a waypoint is in, and stores the value with the waypoint for future reference, as well as returning it.
+getWpTunnel = (farm, wp, tunHint, tunPos) => {
+  if (!wp.t && (tunPos = getTunPosition({x: wp.x, y: wp.y + surface, f: farm.id}, 0, tunHint))) {
+    wp.t = tunPos?.tun.id;
+  }
+  return wp.t;
 },
 
 // Safely flips an ant's direction when in a tunnel.
-Jh = (a, b) => {
-  !f(9) && (a[I] = Pa); // Switching to prone first here is more reliable, and sometimes a side ant gets stuck flipping in a loop, this could resolve the issue?
-  if (a[I] == Db) {
-    a[y] *= -1;
-    $f(a, b);
+antChangeTunDir = (ant, tun) => {
+  !randomInt(9) && (ant.pose = 'prone'); // Switching to prone first here is more reliable, and sometimes a side ant gets stuck flipping in a loop, this could resolve the issue?
+  if (ant.pose == 'side') {
+    ant.scale *= -1;
+    antSideCorrection(ant, tun);
   }
   else {
-    a.r = ic(a.r);
-    vd(a);
+    ant.r = oppositeAngle(ant.r);
+    antProneCorrection(ant);
   }
 },
 
 // Reformats action data into a valid dive stub that can be used with queue functions.
-Vd = a => ({[C]: ia, n: Eb, [p]: a.id || a[p], pc: a.pc, pos: a.pos}),
+makeDiveStub = obj => ({act: 'dive', n: 'bot', tun: obj.id || obj.tun, pc: obj.pc, pos: obj.pos}),
 
 // Converts a pixel length into the percentage of the tunnel that is represents.
-Wb = (a, b) => b / a.w * 100,
+tunPercent = (tun, px) => px / tun.w * 100,
 
 // Converts a percentage length into pixels of the tunnel that is represents.
-kj = (a, b) => b / 100 * a.w,
+tunPixels = (tun, percent) => percent / 100 * tun.w,
 
 // Gets the coordinates of the cavity floor.
-He = (a, b, d = 0, c = ub(a.r)) =>
-  ({x: (a.x1 + (a.x2 - a.x1) * (b / 100)) - lb(c) * (a.h / 2), y: (a.y1 + (a.y2 - a.y1) * (b / 100)) + db(c) * (a.h / 2) - d}),
-
-// This is a test function and has no been confirmed to work
-// Potential problems: doesn't account for tun.r orientation of different types of tunnels.
-// not refactored yet.
-ek = (a, b, c = 0) => {
-  const d = ub(a.r);
-  const f = a.x1 + (a.x2 - a.x1) * (b / 100);
-  const g = a.y1 + (a.y2 - a.y1) * (b / 100);
-  const e = db(d) >= 0 ? 1 : -1; // choose which side is "down" in world coords
-  return {
-    x: f - lb(d) * (a.h / 2) * e,
-    y: g + db(d) * (a.h / 2) * e - c
-  };
-},
+cavFloor = (tun, pc, yOffset = 0, r = degToRad(tun.r)) =>
+  ({x: (tun.x1 + (tun.x2 - tun.x1) * (pc / 100)) - sin(r) * (tun.h / 2), y: (tun.y1 + (tun.y2 - tun.y1) * (pc / 100)) + cos(r) * (tun.h / 2) - yOffset}),
 
 // Slips an ant off the bg area.
-Ie = a => Vf(a, {[C]: 'slip'}) && O(a),
+// It is generally OK to call this function directly (note: it will clear the ant's finna queue).
+antSlip = ant => {ant.q = [{act: 'slip'}]; antNext(ant)},
 
 // Handles an ant's end of life transition.
-bg = (c, b, a = J(ca(c, {
-    cause: b,
-    [da]: yc,
-    [wc]: mb(), // Use this to decompose the ant.
+// Call this function for instant death, but it is often better to queue a 'die' action which will prepare the ant nicely first.
+antDeath = (ant, cause, farm = getFarm(assign(ant, {
+    cause: cause,
+    state: 'dead',
+    tsd: 0, // Track time-since-death.
+    dts: getTimeSec(), // Mark timestamp of last tsd update.
+    pose: 'pick',
     rot: 0,
     decay: 0,
-    eaten: 0,
-    [fa]: 0,
+    walk: 0,
     jit: 0,
-    [$]: 0,
+    dig: 0,
+    hp: 0,
+    md: 0,
+    q: [],
   }))) => {
-  a[Xb][wc][b]++;
-  xb(c.n + ` died in "${a.n}" ${Cj[b]}.`, 'err');
-  Je(a);
-  if (b == Ba && a.a[g] === 1 && Xa(a.a[0])) a.sweep = 1;
-  xa();
+  farm.stats.death[cause]++;
+  msg(ant.n + ` died in "${farm.n}" ${deathCauses[cause]}.`, 'err');
+  setColonyAndFoe(farm);
+  if (cause == 'fight' && farm.a.length === 1 && isQueen(farm.a[0])) farm.sweep = 1;
+  antUpdate(ant);
+  save();
+  addLidFunc(); // Allow plucking dead ants.
 },
 
-// Returns a random worker, or failing that - a queen.  Must be in OK health.
-Kh = a => x(a.a[k](a => Kb(a) && za(a) && a.hp > 50) || a.a[k](a => Xa(a) && za(a) && a.hp > 50)),
+// Updates the decomposition state of a corpse and handles ant removal.
+updateCorpseState = (ant, twoHours = 7200) => {
+  timeLog(ant, 'tsd', 'dts'); // Update time-since-death duration.
+  if (ant.tsd > twoHours) {// Wait time before corpse gets nasty.
+    if (ant.tsd < twoHours * 3) ant.rot = ((ant.tsd - twoHours) / (twoHours * 2)) * 100; // Rotting phase (2h to 6h).
+    else if (ant.tsd < twoHours * 4) {
+      // Decaying / shrinking phase (6h to 8h).
+      ant.rot = 100;
+      ant.decay = ((ant.tsd - twoHours * 3) / twoHours) * 100;
+    }
+    else antDelete(ant); // Fully decomposed.
+  }
+  // Extra properties are added for the sake of CSS classes/styles. (note 'rot' and 'decay' also have styles)
+  antUpdateClasses(ant, {rot1: ant.rot> 20, rot2: ant.rot > 80, decay1: ant.decay > 60});
+},
+
+// Returns a random worker, or failing that - a queen.  Must be in OK health and not carrying.
+getWorkerOrQueen = farm => pickRandom(farm.a.filter(a => !a.carry && (isWorker(a) && livesInFarm(a) && a.hp > 50) || farm.a.filter(a => isQueen(a) && livesInFarm(a) && a.hp > 50))),
 
 // Determines what, if anything, needs to be carried by a random worker.
-lj = (a, b = a[v][X](a => a[Id]), d = a[v][k](a => a.t == pa && !a[K] && a.co[g] < 2 && a[u] == 100),
-  c = Kh(a),
-  f = a.a[X](a => a[da] == yc && !na(ob(a)?.[p])?.[Id]), h = a.a[X](a => a[ld]), i = a.e[k](b => {
-    let c = a.a[X](a => a.id == b.Q && za(a));
-    return c && c[Nc] && b[p] != c[Nc] || b[ld]; // No need to check if egg is in morgue because queen will move her nest soon if that's the case.
-  })[yb]((a, b) => b[e] - a[e])[0]) => {
+trySetCarryTask = (farm, morgue = farm.tuns.find(t => t.morgue), morgueCandidates = farm.tuns.filter(t => t.t == 'cav' && !t.nip && t.co.filter(co => getTun(farm, co).dun).length < 2 && t.dun),
+  carrierAnt = getWorkerOrQueen(farm), queen, itemToMove,
+  deadAnt = farm.a.find(a => deadInFarm(a) && !getTun(getTunPosition(a)?.tun)?.morgue), infant = farm.a.find(a => a.moveTo), egg = farm.e.filter(e =>
+    queen = farm.a.find(a => a.id == e.Q && livesInFarm(a)) && queen.nest && e.tun != queen.nest || e.moveTo // No need to check if egg is in morgue because queen will move her nest soon if that's the case.  'moveTo' was set if queen left farm.
+  ).sort((a, b) => b.lvl - a.lvl)[0]) => {
 
   // Recalculate where the morgue should be.
-  if (!b || !d[Y](b)) {
+  if (!morgue || !morgueCandidates.includes(morgue)) {
     // Pick a new morgue.
-    if (b) b[Id] = 0;
-    if (!d) d = a[v][k](a => a.t == pa && a[u] == 100); // Loosen requirements.
-    if (d) {
-      b = x(d);
-      b && (b[Id] = 1);
+    if (morgue) morgue.morgue = 0; // Unmorgue existing morgue.
+    if (morgueCandidates || (morgueCandidates = farm.tuns.filter(t => t.t == 'cav' && t.dun))) {// Loosen morgue requirements if needed.
+      if (morgue = pickRandom(morgueCandidates)) morgue.morgue = 1;
     }
   }
-  if (c && !Xc(c)[D](a => [_, md][Y](a))) {
+
+  if (carrierAnt && !hasCarryTasks(carrierAnt)) {
+    // Find the first item that is available to move and not already assigned.
+    if (itemToMove = [[deadAnt, 'dead', morgue], [infant, 'inf', 1], [egg, 'egg', 1]].find(([variable, type, param]) =>
+      variable && param && farm.a.every(a => a.carry?.t != type || a.carry.id != variable.id)
+    )) antFinna(carrierAnt, 'carry', {t: itemToMove[1], id: itemToMove[0].id});
+    /*
+    // If the id of the deadAnt, infant, or egg has already been assigned to another ant, zero it.
+    [[deadAnt, 'dead'], [infant, 'inf'], [egg, 'egg']].forEach(([variable, type]) => {
+      if (variable && farm.a.some(a => a.carry?.t == type && a.carry.id == variable.id)) variable = 0;
+    });
     // Move a dead ant not in the current morgue.
-    if (f && b) F(c, _, {t: yc, id: f.id}); // A dead ant needs to be moved!
+    if (deadAnt && morgue) antFinna(carrierAnt, 'carry', {t: 'dead', id: deadAnt.id}); // A dead ant needs to be moved!
     // Move the egg with the highest lvl that is not in its queen's nest.
-    else if (h) F(c, _, {t: Ea, id: h.id}); // An infant needs to be moved!
-    else if (i) F(c, _, {t: kd, id: i.id}); // An egg needs to be moved!
+    else if (infant) antFinna(carrierAnt, 'carry', {t: 'inf', id: infant.id}); // An infant needs to be moved!
+    else if (egg) antFinna(carrierAnt, 'carry', {t: 'egg', id: egg.id}); // An egg needs to be moved!
+    */
   }
   else {
     // We found no ant to perform the carry task.  Last chance: If there's a worker in a vial, call them back out so there's a shot at giving them the task on the next pass.
     // Note: queen is never called back?  If we want her called back then update getWorkerOrQueen with respect to the data storage and state check to support selecting nip ants.
-    c = Wd(a)?.[Na].a[X](a => Kb(a)) && mj(c);
+    if (carrierAnt = getVial(farm)?.item.a.find(isWorker)) exitVial(carrierAnt);
   }
 },
 
 // Sends an ant to care for an egg or larvae.
-cg = (b, c = Kh(b),
-    a = x([b.e[yb]((a, b) => a.hp - b.hp)[0], b.a[k](a => a[Ea])[yb]((a, b) => a.hp - b.hp)[0]][k](Boolean)), // Randomly pick either a low hp egg or infant.
-    d = a?.[Ea]) => {
-  if (a) {
-    d ? Xd(c, a) : $c(c, Vd({[p]: a[p], pc: a.pc, pos: qc}));
-    F(c, 'care', {t: d ? Ea : kd, id: a.id});
+care4kids = (farm, carerAnt = getWorkerOrQueen(farm),
+    target = pickRandom([farm.e.sort((a, b) => a.hp - b.hp)[0], farm.a.filter(a => a['inf']).sort((a, b) => a.hp - b.hp)[0]].filter(Boolean)), // Randomly pick either a low hp egg or infant.
+    isInf = target?.inf) => {
+  // Ensure target exists and that no ant is already caring for an egg/infant.
+  if (target && !farm.a.some(a => antUniqueActs(a).includes('care'))) {
+    isInf ? antGoToAnt(carerAnt, target) : goToLocation(carerAnt, makeDiveStub({tun: target.tun, pc: target.pc, pos: 'dn'}));
+    antFinna(carerAnt, 'care', {t: isInf ? 'inf' : 'egg', id: target.id});
   }
 },
 
 // Sets the colony and foe values for the current farm.
-Je = a => {a.t = !a[Ob] && Si(a); a.foe = !a[Ob] && a.a[D](b => za(b) && b.t != a.t)},
+setColonyAndFoe = farm => {farm.t = !farm.coex && colonyType(farm); farm.foe = !farm.coex && farm.a.some(a => livesInFarm(a) && a.t != farm.t)},
 
 // Gets the vial stuff from the nipples.
-Wd = a => a[Aa][X](a => a[Na].k == rc),
+getVial = farm => farm.nips.find(n => n.item.k == 'vial'),
 
 // Tells an ant to exit a vial.
-mj = (a, b = J(a), c = Wd(b)) => {
-  // Perform a phase 3 nipWalk.
-  wd(a, -25, 3);
-  // Repeatedly check the nipWalk moved the ant to phase 5 and then deNip() it.
-  let d = Ha(e => {
-    if (a[$a] == 5) {
-      Nh(a, c, b);
-      ha(d);
+// Perform a phase 3 nipWalk, while repeatedly checking if it reached phase 5.
+exitVial = (ant, farm = getFarm(ant), exitInterval = setInterval(X => {
+    // Repeatedly check the nipWalk moved the ant to phase 5 and then deNip() it.
+    if (ant.nipPh == 5) {
+      deNip(ant, getVial(farm), farm);
+      stopInterval(exitInterval);
     }
-  }, od);
-},
+  }, microDelay)) => antNipWalk(ant, -25, 3),
 
 // Handles ant walking into an item attached to a nip, to a certain destination.
-wd = (a, b, c = 0, d = Ha(e => {
-  ca(a, {
-    [$a]: 1 + c, // Flag that walk is happening.
-    [fa]: 1,
-    [y]: va(b > a.x),
-    r: a.x < 20 || a.x> 32 ? 90 : 90 + a[y] * rd({x: 20, y: 32}, {x: 32, y: 38}) * .5, // Actual angle nerfed to half because it looked too intense.
-    x: a.x + Fe(a) / 2,
-    y: (a.x < 20 ? 28 : a.x> 32 ? 38 : 32 + 6 * (N(a.x - 20) / 24)) - kc(a),
-    [cf]: Ja()
+antNipWalk = (ant, dest, basePhase = 0, animLoop = setInterval(X => {
+  assign(ant, {
+    nipPh: 1 + basePhase, // Flag that walk is happening.
+    walk: 1,
+    scale: getSign(dest > ant.x),
+    r: ant.x < 20 || ant.x> 32 ? 90 : 90 + ant.scale * getAngle({x: 20, y: 32}, {x: 32, y: 38}) * .5, // Actual angle nerfed to half because it looked too intense.
+    x: ant.x + antGetStep(ant) / 2,
+    y: (ant.x < 20 ? 28 : ant.x> 32 ? 38 : 32 + 6 * (abs(ant.x - 20) / 24)) - antOffsetY(ant),
+    nipTs: getTime()
   });
-  if (N(a.x - b) < Sa(a)) {
-    a[fa] = 0;
-    a[$a] = 2 + c; // Flag ant is ready for next phase.
-    Ca(a, cf);
-    ha(d);
+  if (abs(ant.x - dest) < antOffsetX(ant)) {
+    ant.nipPh = 2 + basePhase; // Flag ant is ready for next phase.
+    del(antGetStill(ant), 'nipTs'); // Note: antGetStill() slipped in here to avoid setting walk=0 in this same block of code.
+    stopInterval(animLoop);
   }
-  T(a);
-}, Ia)) => 1,
+  antUpdate(ant);
+}, frameTick)) => 1,
 
 // Provides the vial animation activity. Makes ants walk into the vial and then randomly do random things.
 // Curiously this code has no need to know which vial or farm the ant is in.
-Lh = a => {
-  !a[$a] && wd(a, 40 + f(170)); // Ant has not begun their vial walk yet.
-  a[$a] === 1 && Ja() - a[cf] > cb && wd(a, 40 + f(170)); // Ant was stuck in nipPh 1.
-  Ca(a, _);
-  if (!f(3)) {
-    let b = f(6);
-    if (a[$a] > 1) {
-      if (b > 1) {
+vialActivity = (ant, rand = randomInt(6)) => {
+  !ant.nipPh && antNipWalk(ant, 40 + randomInt(170)); // Ant has not begun their vial walk yet.
+  ant.nipPh === 1 && getTime() - ant.nipTs > longDelay && antNipWalk(ant, 40 + randomInt(170)); // Ant was stuck in nipPh 1.
+  del(ant, 'carry');
+  if (!randomInt(3)) {
+    if (ant.nipPh > 1) {
+      if (rand > 1) {
         // Location change.
-        a.r = 90;
-        a[$a] = 0; // Blocks other animations.
-        wd(a, 40 + f(170));
+        ant.r = 0;
+        ant.nipPh = 0; // Blocks other animations.
+        antNipWalk(ant, 40 + randomInt(170));
       }
-      else if (b) a[I] == Db ? a[y] *= -1 : a.r = ic(a.r);
+      else if (rand) ant.pose == 'side' ? ant.scale *= -1 : ant.r = oppositeAngle(ant.r);
       else {
         // Pose change.
-        if (a[I] == Db) {
-          a[I] = Pa;
-          vd(a);
-          a.r += f(20) - 10;
-          a.y = 36 - 2 * kc(a);
+        if (ant.pose == 'side') {
+          ant.pose = 'prone';
+          antProneCorrection(ant);
+          ant.r += randomInt(20) - 10;
+          ant.y = 36 - 2 * antOffsetY(ant);
         }
-        else {
-          a[I] = Db;
-          a[y] = va(a.r < S);
-          a.r = 90;
-          a.y = 36 - kc(a);
-        }
+        else assign(ant, {pose: 'side', scale: getSign(ant.r < deg180), r: 0, y: 36 - antOffsetY(ant)}); // To a side pose.
       }
-      T(a);
+      antUpdate(ant);
     }
   }
 },
 
 // Starts a vial animation loop if it isn't running already.  Also activates an antNipWalk() into the vial when first run.
-Mh = a => mf ||= Ha((a = 0) => {
-  b[P][i](b => Wd(b)?.[Na].a[i](b => {a = 1; !b[Ea] && Lh(b)}));
-  if (!a) mf = ha(mf);
-}, Hb + f(W)),
+vialLoop = X => vialInterval ||= setInterval((hasAnts = 0) => {
+  _.farms.forEach(farm => getVial(farm)?.item.a.forEach(a => {hasAnts = 1; !a['inf'] && currentFarm(farm) && vialActivity(a)}));
+  if (!hasAnts) vialInterval = stopInterval(vialInterval);
+}, pauseDelay + randomInt(shortDelay)),
 
 // Handles a phase 5 tube walk to insert an ant into a farm.
-Nh = (a, c, b) => {
-  eg(a, b);
+deNip = (ant, nipData, farm) => {
+  checkExpatQueen(ant, farm);
   // Move ant into the farm.
-  De(b, hd, a, c[Na], b, {
-    thot: x(["That was a long walk!", "I've travelled to another world", "I'm a neighbor", "Moving in!"]),
-    [$a]: 0, [da]: Pb, f: b.id, x: c[K] % 2 > 0 ? -25 : 985, y: Lb(a), [y]: 1
+  transferObject(farm, 'a', ant, nipData.item, farm, {
+    thot: pickRandom(["That was a long walk!", "I've travelled to another world", "I'm a neighbor", "Moving in!"]),
+    nipPh: 0, state: 'cap', f: farm.id, x: nipData.nip % 2 > 0 ? -25 : 985, y: antGroundLevel(ant), scale: 1
   });
-  Je(b);
-  F(a, K, {[K]: c[K], rev: 1});
+  setColonyAndFoe(farm);
+  antFinna(ant, 'nip', {nip: nipData.nip, rev: 1});
   // Activate.
-  O(a);
+  antAction(ant);
 },
 
 // Provides the tube walking process for ants moving between farms.
@@ -3069,1215 +3359,1182 @@ Nh = (a, c, b) => {
  * nipPh=5 - Ant has completed nipWalk and reached their new farm.
  * nipPh=0 (again) - Ant is no longer part of this process. [ant stored with farm]
  */
-Oh = (f, b, a, g = b[Na], d = J(b.f),
-  e = d?.[Aa][X](a => a.id == b.id), h = c(Bd + Nb[e[K]])) => {
-  if (!a[$a] || a[$a] === 1 && Ja() - a[cf] > cb) wd(a, 600); // Phase 0.
-  else if (a[$a] == 2) {
-    // Phase 2.
-    // Move ant to other half of tube.
-    De(d, hd, a, g, e[Na], {[$a]: 3}, h);
-  }
-  else if (a[$a] == 3 || a[$a] == 4 && Ja() - a[cf] > cb) wd(a, -25, 3); // Phase 3.
-  else if (a[$a] == 5) Nh(a, b, f); // Phase 5.
+tubeWalker = (farm, nipData, ant, nipItem = nipData.item, otherFarm = getFarm(nipData.f),
+  otherData = otherFarm?.nips.find(n => n.id == nipData.id), otherNipEl = getEl('a-' + nipIds[otherData.nip])) => {
+  antUpdate(antGetStill(ant));
+  if (!ant.nipPh || ant.nipPh === 1 && getTime() - ant.nipTs > longDelay) antNipWalk(ant, 600); // Phase 0.
+  else if (ant.nipPh == 2) transferObject(otherFarm, 'a', ant, nipItem, otherData.item, {nipPh: 3}, otherNipEl); // Phase 2. Move ant to other half of tube.
+  else if (ant.nipPh == 3 || ant.nipPh == 4 && getTime() - ant.nipTs > longDelay) antNipWalk(ant, -25, 3); // Phase 3.
+  else if (ant.nipPh == 5) deNip(ant, nipData, farm); // Phase 5.
 },
 
 // Starts a tube animation loop if it isn't running already.
-Ph = a => nf ||= Ha((a = 0) => {
-  b[P][i](b => b[Aa][i](c => c[Na].k == bc && c[Na].a[i](d => {a = 1; !d[Ea] && Oh(b, c, d)})));
-  if (!a) nf = ha(nf);
-}, od),
+tubeLoop = X => tubeInterval ||= setInterval((hasAnts = 0) => {
+  _.farms.forEach(farm => farm.nips.forEach(nipData => nipData.item.k == 'tube' && nipData.item.a.forEach(a => {hasAnts = 1; !a['inf'] && tubeWalker(farm, nipData, a)})));
+  if (!hasAnts) tubeInterval = stopInterval(tubeInterval);
+}, microDelay),
 
 // Ant actions come in a namespaced package so that the action names can be compared to strings.
 // Also includes things that the ants "do" to support actions.
-nj = {
+act = {
 
   // Ant is stunned while it chooses what to do next.
-  [ie]: a => {
+  idle: ant => {
     // Queue default action.
-    a.q[g] < 2 && F(a, ma(xd[a[q].n])[0]);
-    (a.q[0][C] == ie || a.q[1] ? A : O)(a, f(W)); // Note: sometimes idle is a "phantom" action with no corresponding queue item, so this handles that.
-    xa();
+    ant.q.length < 2 && antFinna(ant, acts[ant.area.n][0]);
+    (ant.q[0]?.act == 'idle' || ant.q[1] ? antNext : antAction)(ant, randomInt(shortDelay)); // Note: sometimes idle is a "phantom" action with no corresponding queue item, so this handles that.
+    save();
   },
 
   // Ant explores the ground level of the ant farm (default activity).
-  // @TODO handle bumping into foreign ants / fighting / corpses. --- normally ants just pass each other but if farm.foe is truthy it is possible they are an enemy.
-  [xc]: (a, c = Ee(a), d = a.q[0], b = a.q[1], e = Sa(a), g = c < e || c> 960 - e ? 0 : Bc()) => {
-    a[fa] = 1;
-    a[I] = Db;
-    Yc(a, H);
+  pace: (ant, antX = antFaceX(ant), action = ant.q[0], nextAction = ant.q[1], xOffset = antOffsetX(ant), rand = ant.scale < 0 && antX < xOffset || ant.scale> 0 && antX > 960 - xOffset ? 0 : random(),
+    collision = antCollision(ant), ant2 = collision?.ant) => {
+    antSetWalk(ant);
+    ant.pose = 'side';
+    antArea(ant, 'top');
+    if (collision && !antsPassive(ant, ant2)) antFight(ant, ant2); // Fight, or check if a drop target is nearby.
     // Main loop.
     // Check if the ant is set to reach a certain target and hand it off to another action.
     // Note: This code assumes .tx is never set to 0.
-    if (!d.for && b && (!b.tx || N(b.tx - c) < Sa(a))) {
-      a[fa] = 0;
-      A(a, f(od));
-    }
+    if (!action.for && nextAction && (!nextAction.tx || abs(nextAction.tx - antX) < xOffset)) antNextStill(ant, randomInt(microDelay));
     else {
       // Move ant.
-      d.for && d.for--;
-      Xf(a);
-      if (!b && g < .0002 || b?.tx && (b.tx - (c + a[y] * Sa(a))) * a[y] < 0) {// Random or heading the wrong way.
+      action.for && action.for--;
+      antMoveSurface(ant);
+      if (!rand || !nextAction && rand < .0002 || nextAction?.tx && (nextAction.tx - (antX + ant.scale * xOffset)) * ant.scale < 0) {// Random or heading the wrong way.
         // Flip direction (with brief pause).
-        a[fa] = 0;
-        O(a, f(od));
-        a[y] *= -1; // <-- Yes, this has to be here after antAction() to set up the next loopback, rather than do it right away.  Looks better.
+        antActionStill(ant, randomInt(microDelay));
+        ant.scale *= -1; // <-- Yes, this has to be here after antAction() to set up the next loopback, rather than do it right away.  Looks better.
+        ant.r = antHillAngle(ant); // <-- And yes, thanks to setting the scale here we gotta do this too on a flip'n'pause or it looks silly.
       }
-      else if (g < .001) {
-        // Pause.
-        a[fa] = 0;
-        O(a, f(Hb));
-      }
-      else O(a);
+      else if (rand < .001) antActionStill(ant, randomInt(pauseDelay)) // Pause.
+      else antAction(ant);
+      // Apply corpse proximity penalty.
+      antCorpseProximity(ant);
     }
   },
 
+  // Ant needs to go to an area before executing the desired act.  See antFinnaVia() for how this is currently used.
+  via: (ant, action = ant.q[0], queue = []) => {
+    if (!action?.n || ant.area.n != action.n && action.n !== 1) {
+      if (action.n == 'bg') {
+        ant.area.t && queue.push({act: 'climb'});
+        queue.push({act: 'crawl'});
+      }
+      else if (action.n == 'bot') {
+        ant.area.n == 'bg' && queue.push({act: 'uncrawl'});
+        queue.push({act: 'dive'}); // Note: dive automatically does a 'pace' to the entrance.
+      }
+      else {
+        // Default 'top' area.
+        ant.area.t && queue.push({act: 'climb'});
+        ant.area.n == 'bg' && queue.push({act: 'uncrawl'});
+      }
+    }
+    queue.push(assign(action, {act: action.via}));
+    antInstaQ(ant, queue);
+    antNext(ant);
+  },
+
   // Start or continue digging.
-  [$]: (a, c = J(a), d = eb(c[$], a.digT) || x(c[$]), j = a.q[0], b = na(c, j.id), r = ya[a.t],
-    l = r.v * .2, e,
-    m = (a, b) => e = Ha(c => {
-      // This could be improved by having the ant dip into the tunnel when it is deep enough ?
-      a.x += va(Ee(a) < b.x1) * Bc();
-      a.y = Lb(a) + 2;
-      a.r = Td(a) + b[u] / 9 + f(5);
-      T(a);
-    }, ec),
-    o = (a, b, g = 0, h = 0, d, j) => {
+  dig: (ant, farm = getFarm(ant), currentDig = getById(farm.dig, ant.digT) || pickRandom(farm.dig), action = ant.q[0], tun = getTun(farm, action.id), antType = types[ant.t],
+    digAmt = antType.v * .2, nudger, path,
+    entNudge = (ant, tun) => nudger = setInterval(X => {
+      ant.x += getSign(antFaceX(ant) < tun.x1) * random();
+      ant.y = antGroundLevel(ant) + 2;
+      ant.r = antHillAngle(ant) + tun.prog / 9 + randomInt(5);
+      antUpdate(ant);
+    }, num200),
+    conNudge = (ant, tun, sumX = 0, sumY = 0, rad, finalAngle) => {
       // Turn ant towards a random point that is roughly facing away from the already-dug tunnels.
-      c[v][k](a => a[u] == 100 && a.co[Y](b.id)).map(a => rd(b, (a.x1 == b.x && a.y1 == b.y) ? {x: a.x2, y: a.y2} : {x: a.x1, y: a.y1}))[i](a => {
-        d = ub(a - 90);
-        g -= db(d);
-        h -= lb(d);
+      farm.tuns.filter(t => t.dun && t.co.includes(tun.id)).map(ct => getAngle(tun, (ct.x1 == tun.x && ct.y1 == tun.y) ? {x: ct.x2, y: ct.y2} : {x: ct.x1, y: ct.y1})).forEach(a => {
+        rad = degToRad(a);
+        sumX -= cos(rad);
+        sumY -= sin(rad);
       });
-      j = ba(Ka(Ec(g, h) + f(90) - a.r), f(15));
-      e = Ha(c => {
-        let d = Rb(a.x, Ma(a), b.x1, b.y1);
-        if (d.d > .2) {
-          a.x += d.x * .2;
-          a.y += d.y * .2;
-          T(a);
+      finalAngle = normalize180(angleFromDelta(sumX, sumY) + randomInt(60) - 30) + 45;
+      nudger = setInterval(X => {
+        let distComp = calcDistComponents(ant.x, antDiveY(ant), tun.x1, tun.y1);
+        if (distComp.d > .2) {
+          ant.x += distComp.x * .2;
+          ant.y += distComp.y * .2;
+          antUpdate(ant);
         }
         else {
-          a.r += j;
-          ha(e);
+          ant.r += getSign(normalize180(finalAngle - ant.r));
+          stopInterval(nudger);
         }
-        T(a);
-      }, Ia);
+        antUpdate(ant);
+      }, frameTick);
     }) => {
-    if (c.dun || Tc(a)) A(a); // No digging required.
-    else if (a.digD && b) {
-      a.digT = b.id;
-      a[fa] = 0;
-      h(b => {a[$] = a.jit = 1; T(a)}, f(ja)); // Random delay added so ants aren't synch'd on page load.
-      b.rwip = !wb(b) && c[v][D](a => a[u] == 100 && a.x1 == b.x2 && a.y2 == b.y2); // Mark tunnels that are being build backwards.
+    if (farm.dun || isDrone(ant)) antNext(ant); // No digging required.
+    else if (ant.digD && tun) {
+      ant.digT = tun.id;
+      antRemAnimUpdate(ant); // Reset animations.
+      setTimeout(X => antUpdateClasses(ant, {dig: 1, jit: 1}), randomInt(num1000)); // Random delay added so ants aren't synch'd on page load.
+      tun.rwip = !isRotationTunnel(tun) && farm.tuns.some(t => t.dun && t.x1 == tun.x2 && t.y2 == tun.y2); // Mark tunnels that are being built backwards.
       // Digging movement and animations.
-      if (!Ub(c) && Yd(c)) l *= 1.5; // Ants dig faster if there is a Queen and farm is undeveloped.
-      if (Xa(a)) l *= 3; // Queens only dig when there are no workers, but do it much faster.
-      if (!wb(b)) {
-        l *= (b.t == pa ? .1 : .3); // Long tunnels are dug slow, with cav chambers the slowest of all.
-        if (b[u] < Wb(b, 8)) {
+      if (!farmIsDeveloping(farm) && farmHasQueen(farm)) digAmt *= 1.5; // Ants dig faster if there is a Queen and farm is undeveloped.
+      if (isQueen(ant)) digAmt *= 3; // Queens only dig when there are no workers, but do it much faster.
+      if (!isRotationTunnel(tun)) {
+        digAmt *= (tun.t == 'cav' ? .1 : .3); // Long tunnels are dug slow, with cav chambers the slowest of all.
+        if (tun.prog < tunPercent(tun, 8)) {
           // Ant would have been blocked from entering tunnel by the dive action, so continue to act like it's digging an entrance or con.
-          b.co[Y](j[M]) ? m(a, na(c, j[M])) : o(a, c[v][X](a => b.co[Y](a.id) && a.t == $b && a[u] == 100));
+          tun.co.includes(action.ent) ? entNudge(ant, getTun(farm, action.ent)) : conNudge(ant, farm.tuns.find(t => tun.co.includes(t.id) && t.t == 'con' && t.dun));
         }
         else {
           // Default nudger; just brings the ant closer to the edge of the dig area every 2 seconds if needed.
-          e = Ha(c => {
-            let d = ob(a, 0, b);
-            if (d && d.pc + kc(a) < (b.rwip ? 100 - b[u] : b[u])) Ud(a);
-            T(a);
-          }, ua);
+          nudger = setInterval(X => {
+            let antTunPos = getTunPosition(ant, 0, tun);
+            if (antTunPos && antTunPos.pc + antOffsetX(ant) < (tun.rwip ? 100 - tun.prog : tun.prog)) antMoveTunnel(ant);
+            antUpdate(ant);
+          }, num2000);
         }
       }
-      else if (b.t == M) m(a, b); // Entrance tunnel.
-      else o(a, b); // Con tunnel.
+      else if (tun.t == 'ent') entNudge(ant, tun); // Entrance tunnel.
+      else conNudge(ant, tun); // Con tunnel.
       // Everything from now on happens after a significant delay.
       // This makes the digging slow, and prevents an exploit where reloading skips the wait-time in digging.
-      h(d => {
+      setTimeout(X => {
         // Incremement progress based on the size of the tunnel.
-        b[u] = ba(100, b[u] + l);
-        b.t == M && b.co[i](a => a[u] = Wb(a, kj(b, b[u] / 2))); // For entrances also increment the connected tunnels like they've been dug a little too, or it takes too long.
-        Sb(c) && ue(b);
-        if (b.t == p || b.t == pa) {
+        tun.t == 'ent' && tun.co.forEach(t => t.prog = tunPercent(t, tunPixels(tun, tun.prog / 2))); // For entrances also increment the connected tunnels like they've been dug a little too, or it takes too long.
+        tun.t == 'cav' && (tun.prog < tunPercent(tun, 15) || tun.prog> tunPercent(tun, 85)) && (tun.prog += digAmt); // For the first and last 15px of cavities, double the build progress, because this part looks goofy.
+        tun.prog = min(100, tun.prog + digAmt);
+        currentFarm(farm) && tunProgDraw(tun);
+        if (tun.t == 'tun' || tun.t == 'cav') {
           // Pick an adjacent hill and increase its height slightly.
           // To know it is adjacent; the hill should have the same index as the current tunnel system, or one higher.
-          let a = c[oc][c[v][ig](a => a.id == j[M]) + f(1)];
-          a.h += .005;
-          h(b => Sb(c) && Yg(a), la);
+          let hill = farm.hills[farm.tuns.findIndex(t => t.id == action.ent) + randomInt(1)];
+          hill.h = min((hill.r - hill.l) / 4, hill.h + .005); // Cap hill heights at a quarter their width.
+          setTimeout(X => currentFarm(farm) && hillProgDraw(hill), standardDelay);
         }
         // Track how long ant has been digging.
-        a.digD++;
+        ant.digD++;
         // Digging depletes ant's stats.
-        Ya(a, {fd: -.005, dr: -.003, hp: -.01});
+        antStats(ant, {fd: -.005, dr: -.003, hp: -.01});
         // Remove digging behaviour here, it'll be reapplied if a loopback via antAction() occurs.
-        ha(e);
-        a.jit = a[$] = 0;
+        stopInterval(nudger);
+        antRemAnimUpdate(ant);
         // The ant will stop digging if...
         // There was no tunnel found to dig, or the current tunnel piece is finished.
         // On a RANDOM chance when one of the following conditions is met: Dig duration is high, or queue exists.
+        // Or the ant is low on hp.
         // Or there are at least 3 ants working on the same tunnel.
-        if (b[u] == 100 || ((a.digD > 5 || a.q[1]) && !f(5)) || c.a[k](b => b.digD && b.digT == a.digT) > 3) {
-          if (b[u] == 100) {
+        if (tun.prog == 100 || ((ant.digD > 5 || ant.q[1]) && !randomInt(5)) || ant.hp < 20 || farm.a.filter(a => a.digD && a.digT == ant.digT) > 3) {
+          if (tun.prog == 100 && !tun.dun) {
             // Remove this tunnel piece from the dig list.
-            c[$] = c[$][k](a => a.id != b.id);
-            Ca(a, 'digT');
-            if (b.t == M) {
-              Mb(c, [`Ants have dug a tunnel entrance in "${c.n}"`]);
-              gb(1);
+            farm.dig = farm.dig.filter(d => d.id != tun.id);
+            del(ant, 'digT');
+            if (tun.t == 'ent') {
+              msg(`Ants have dug a tunnel entrance in "${farm.n}"`);
+              score(1);
             }
-            else if (b.t == p) {
-              Mb(c, [`A connection tunnel has been completed in "${c.n}"`]);
-              gb(2);
+            else if (tun.t == 'tun') {
+              msg(`A connector tunnel has been completed in "${farm.n}"`);
+              score(2);
             }
-            else if (b.t == pa) {
-              Mb(c, [`A new chamber cavity has been finished in "${c.n}"`]);
-              gb(5);
+            else if (tun.t == 'cav') {
+              msg(`A new chamber cavity has been finished in "${farm.n}"`);
+              score(5);
             }
+            tun.dun = 1; // Mark as 'dun' so we don't rerun this block of code, and so there is a nice way to test for finished tunnels.
           }
           // Dig end.
-          Wg(c);
-          a[q].n == Eb && vb(a, {[C]: bf});
-          Ca(a, 'digD');
-          a[q].t && Jh(a, b);
-          A(a);
+          updateWaypoints(farm);
+          ant.area.n == 'bot' && antInstaQ(ant, {act: 'climb'});
+          del(ant, 'digD');
+          ant.area.t && antChangeTunDir(ant, tun);
+          antNext(ant);
         }
-        else O(a);
-      }, la);
+        else antAction(ant);
+      }, standardDelay);
     }
     else {
       // Setup.
-      a.digD = 1;
-      // Pick the tunnel the ant will dig, preferring the last tunnel it was digging, otherwise choose one another ant was digging.
+      ant.digD = 1;
+      // Pick the tunnel the ant will dig, preferring the last tunnel it was digging, otherwise choose one that another ant was digging.
       // If none was picked, or there is only one to choose from plus random chance, find where ant could dig.
-      if (!d || c[$][g] < 2 && !f(25)) {
+      if (!currentDig || farm.dig.length < 2 && !randomInt(25)) {
         // Pick a random entrance and find an unstarted tunnel that it leads to.
-        let h = x(c[v][k](a => a.t == M && a[u] == 100)); // Inverted match.
-        if (path = h && f(9) && Jb(c, h, {[u]: 100, t: M}, [], 1, 1)) c[$][n](d = path[g] ? {n: Eb, id: Dc(path), [M]: h.id} : {n: H, tx: h.x1, id: h.id, [M]: h.id});
+        tun = pickRandom(farm.tuns.filter(t => t.t == 'ent' && t.dun));
+        if (path = tun && randomInt(9) && findPath(farm, tun, {dun: 1, t: 'ent'}, [], 1, 1, tun.id)) {// Inverted match.
+          currentDig = path.length ? {n: 'bot', id: last(path), ent: tun.id} : {n: 'top', tx: tun.x1, id: tun.id, ent: tun.id};
+          // Detect duplicate dig jobs before storing data.
+          getById(farm.dig, currentDig.id) ? currentDig = 0 : farm.dig.push(currentDig);
+        }
         else {
           // Dig a new entrance.
-          let f = x(c[v][k](a => a.t == M && a[u] < 100));
-          if (f) c[$][n](d = {n: H, tx: f.x1, id: f.id, [M]: f.id});
-          else if (!c[v][D](a => a[u] < 100)) c.dun = 1; // Nothing more to do.
+          tun = pickRandom(farm.tuns.filter(t => t.t == 'ent' && !t.dun));
+          if (tun) farm.dig.push(currentDig = {n: 'top', tx: tun.x1, id: tun.id, ent: tun.id});
+          else if (farm.tuns.every(t => t.dun)) farm.dun = 1; // Nothing more to do.
         }
       }
-      if (d) {
-        let f = na(c, d.id);
-        d.pc = f[u];
-        $c(a, Vd(d));
-        F(a, $, d);
+      if (currentDig) {
+        tun = getTun(farm, currentDig.id);
+        currentDig.pc = tun.rwip ? 100 - tun.prog : tun.prog;
+        goToLocation(ant, makeDiveStub(currentDig));
+        antFinna(ant, 'dig', currentDig);
       }
-      xa();
-      A(a);
+      save();
+      antNext(ant);
     }
   },
 
   // Climb sets up a dive path to the surface.
-  [bf]: (a, b = J(a), c = []) => {
-    if (a[q].t) {// Sometimes climb is in an ant's queue erroneously :/
-      let d = na(b, a[q].t), e = Jb(b, d, {t: M}, [], 0, 1);
+  climb: (ant, farm = getFarm(ant), climbQ = [], tunPos) => {
+    if (ant.area.t) {// Sometimes climb is in an ant's queue erroneously :/
+      let tun = getTun(farm, ant.area.t), path = findPath(farm, tun, {dun: 1, t: 'ent'}, [], 0, 1);
       // Create a custom queue.
-      if (!e && d.t == $b && d[u] <= 15) { // Sometimes the ant is wrongly pinpointed to be in an unbuilt con from which the path finder fails.
-        let f = ob(a, a[q].t);
-        Yc(a, Eb, f[p].id);
-        e = Jb(b, f[p], {t: M}, [], 0, 1);
+      if (!path && tun.t == 'con' && tun.prog <= 15) {// Sometimes the ant is wrongly pinpointed to be in an unbuilt con from which the path finder fails.
+        tunPos = getTunPosition(ant, ant.area.t);
+        antArea(ant, 'bot', tunPos.tun.id);
+        path = findPath(farm, tunPos.tun, {dun: 1, t: 'ent'}, [], 0, 1);
       }
-      a[q].t && c[n](Vd({id: Dc(e)}));
-      c[n]({[C]: xc, for: 9 + f(99)});
+      ant.area.t && climbQ.push(makeDiveStub({id: last(path)}));
+      climbQ.push({act: 'pace', for: 9 + randomInt(99)});
       // Prepend the climb queue to the main queue.
-      vb(a, c);
+      antInstaQ(ant, climbQ);
     }
-    A(a);
+    antNext(ant);
   },
 
   // Burrowing action.
-  [ia]: (b, e = J(b),
-      a = b.q[0],
-      c = na(e, a.id),
-      o = b.q[1],
-      d = o?.[C] == ia && na(e, o.id), l = tb[e.id] && tb[e.id][Zc(e, b)], m,
-      r = 1, j = d ? d.r : 0, g = pd(b),
-      s = (b[y] * (d?.r - S))> 90
+  dive: (ant, farm = getFarm(ant),
+      action = ant.q[0],
+      tun = getTun(farm, action.id),
+      nextAction = ant.q[1],
+      nextTun = nextAction?.act == 'dive' && getTun(farm, nextAction.id),
+      wp = wayPoints[farm.id][getWaypointIndex(farm, ant)],
+      previousTun = getTun(farm, action.pt), step = antGetTunnelStep(ant), executeAction = 1, nextTunAngle = nextTun?.r || 0,
+      badAngle = ant.scale * (nextTun?.r - 90)> 0,
+      data = [], dest, dir, temp
   ) => {
-    if (a.id && c) {// Sometimes tun is invalid, haven't looked into it.
+    if (tun) {
       // This is a fully expanded dive queue; determine destinations.
-      if (!wb(c) && c[u] < Wb(c, 8) || wb(c) && (d?.[u] < Wb(d, 8) || c[u] < 100)) return A(b); // Protect against entering underbuilt tunnels.
-      if (c.t == M) {
-        if (b[q].n == H) a[kb] = cj(d, kc(b), s ? 0 : -b[y]); // Entering from surface.
+      if (!isRotationTunnel(tun) && tun.prog < tunPercent(tun, 8) || isRotationTunnel(tun) && nextTun && (nextTun.prog < tunPercent(nextTun, 8) || !tun.dun)) return antNext(ant); // Protect against entering underbuilt tunnels.
+      if (tun.t == 'ent') {
+        if (ant.area.n == 'top') dest = getEntrancePoint(nextTun, antOffsetY(ant), badAngle ? 0 : -ant.scale); // Entering from surface.
         else {
           // Ant is about to surface; predict how it should end up.
-          !a.pt && lc(b, c, a.rev);
-          g[y] = b[I] == Pa ? Cc() : Zf(na(e, a.pt), Zc(e, b)) * -1;
-          g.x = (g[y]> 0 ? Qa : ba)(b.x, c.x1) + 7 * g[y];
-          g.y = Lb(g);
-          a[kb] = {x: g.x, y: Ma(g)};
-          j = Td(g);
-          if (g[y] < 0) j = ka(j + S);
-          a.sc = g[y];
+          //
+          // Note: This code feels clumsy. It creates a "fake ant" so we can change its properties and pump it through ant functions to predict where the real ant will end up after the climb,
+          // and then uses that to set a fake "nextTunAngle" for the dive action and a scale for the 'rotWalk' surface correction.
+          // Plus we wound up switching to using a random ant scale, the original tried to be cleverer with tunGetSide() and getWaypointIndex() to pick the more natural direction in side pose.
+          // Now the ants can back flip out of tunnels, which looks silly, but maybe that's OK.
+          !action.pt && antToProneWithCorrection(ant, tun, action.rev); // Can't remember what this is for, maybe digging?
+          data = cloneData(ant); // Set data variable to a fake ant so we can test it out.
+          data.scale = randomSign();///
+          data.scale = ant.pose == 'prone' ? randomSign() : tunGetSide(getTun(farm, action.pt), getWaypointIndex(farm, ant)) * -1;
+          data.x = (data.scale> 0 ? max : min)(ant.x, tun.x1) + 7 * data.scale;
+          data.y = antGroundLevel(data);
+          dest = {x: data.x, y: antDiveY(data)};
+          nextTunAngle = antHillAngle(data);
+          if (data.scale < 0) nextTunAngle = oppositeAngle(nextTunAngle);
+          action.sc = data.scale;
         }
         // Flag a rotWalk.
-        r = 2;
+        executeAction = 2;
       }
-      else if (c.t == $b) {
-        if (b[I] == Pa) {
+      else if (tun.t == 'con') {
+        if (ant.pose == 'prone') {
           // Just rotWalk to the next tunnel.
-          a[kb] = dj(c, d);
-          if (d.t == pa) a[kb].y += f(8) - 4; // Randomize it a bit for cavities.
+          dest = getConnectionPoint(tun, nextTun);
+          if (nextTun.t == 'cav') dest.y += randomInt(8) - 4; // Randomize it a bit for cavities.
           // Flag a rotWalk.
-          r = 2;
+          executeAction = 2;
         }
-        else if (d) {
+        else if (nextTun) {
           // Figure out where the ant will wind up if it continues in side pose.
+          dir = getAntWaypointDirection(ant); // Precalculate this as it is too hefty to do in the do-loop.
+          console.log("# Initial dir:", dir);
           do {
-            l &&= Yf(e, l, Fh(e, b));
-            m = l && ob({x: l.x, y: l.y + gc, f: e.id}, 0, c);
-          } while (m && (m[p].id == c.id || m[p].id == a.pt));
-          if (m?.[p].id != d.id) {
+            console.log("Get next waypoint to:",JSON.stringify( wp),dir);
+            wp &&= getNextWaypoint(farm, wp, dir);
+            temp = wp && getWpTunnel(farm, wp, tun);
+          } while (temp && (temp == tun.id || temp == action.pt));
+          // Check if next tunnel is not the one ant is heading to, or any other action's tunnel after that.
+          // Note: This assumes there isn't some OTHER kind of act wedged in between expanded future dive actions.
+          if (ant.q.some(action => action?.act == 'dive' && action.id == temp)) {
+            console.log("Ant is heading towards:", temp, "instead of:", nextTun.id);
             // Ant is creeping toward wrong tunnel - switch to prone to make a proper turn, and loopback to this function.
-            lc(b, c, a.rev);
-            return O(b);
+            antToProneWithCorrection(ant, tun, action.rev);
+            return antActionStill(ant);
           }
-          // NOTE: At this point the execution should fall through to the "if (executeAction> 1) {" part of the code.
+          // NOTE: At this point the execution should fall through to the "if (executeAction > 1) {" part of the code.
         }
       }
-      if (d) o.pt = c.id; // Notify the next action of the previous tunnel.
-      if (r > 1) {
+      if (nextTun) nextAction.pt = tun.id; // Notify the next action of the previous tunnel.
+      if (executeAction > 1) {
         // Rot Walk execution.
         // Work out step (step size) and dist (num steps / frames).
-        a.step = bj(b.x, b.y, a[kb].x, a[kb].y, Wf(b));
-        a[Fb] = rf(Rc(a[kb].x - b.x, a[kb].y - (a.r ? b.y : Eh(b))) / Rc(a.step.x, a.step.y));
+        temp = calcDistComponents(ant.x, ant.y, dest.x, dest.y);
+        action.dist = round(hypot(dest.x - ant.x, dest.y - (action.r ? ant.y : antDiveY(ant))) / hypot(temp.x * step, temp.y * step));
         // Switch to prone when entering tunnel from surface at a badAngle.
-        s && h(a => {b[I] = Pa}, a[Fb] / 2 * Ia);
-        if (d?.t == pa) j += 90; // Cav chambers use a different coordinate system :/
-        if (b[q].n == H) b.r = 90; // Normalize angle of surface level ants to prevent over-rotation.
-        if (c.t == M) a[Fb] *= .8; // Speed up entry transitions.
-        if (c.x1 == d?.x2 && c.y1 == d?.y2) j = ic(j); // Correct for going the other way through tunnels.
-        ca(a, {
-          r: Ka(b.r), // Initial angle.
-          td: a[Fb], // Initial total distance.
-          ang: Ka(Ec(a[kb].x - b.x, a[kb].y - b.y + gc, 90)), // Travel angle.  Orient to connection point.
-          rot: Ka(j), // Final angle.  Orient to tunnel.
+        badAngle && setTimeout(X => {ant.pose = 'prone'}, action.dist / frameTick * 2);
+        if (tun.t == 'ent') action.dist *= .8; // Speed up entry transitions.
+        if (tun.x1 == nextTun?.x2 && tun.y1 == nextTun?.y2) nextTunAngle = oppositeAngle(nextTunAngle); // Correct for going the other way through tunnels.
+        assign(action, {
+          r: normalize180(ant.r), // Initial angle.
+          td: action.dist, // Initial total distance.
+          ang: normalize180(angleFromDelta(dest.x - ant.x, dest.y - antDiveY(ant))), // Travel angle.  Orient to connection point.
+          rot: normalize180(nextTunAngle), // Final angle.  Orient to tunnel.
           // Step sizes.
-          sX: (a[kb].x - b.x) / a[Fb],
-          sY: (a[kb].y - b.y + gc) / a[Fb],
+          sX: (dest.x - ant.x) / action.dist,
+          sY: (dest.y - antDiveY(ant)) / action.dist,
           // Override 'dive' with the relevant walking action and execute.
-          [C]: yg
+          act: 'rotWalk'
         });
-        if (b[y] < 0) {
-          a.ang = Ka(qd(a.ang));
-          a.rot = Ka(qd(a.rot));
+        if (ant.scale < 0) {
+          action.ang = normalize180(mirrorAngle(action.ang));
+          action.rot = normalize180(mirrorAngle(action.rot));
         }
-        Yc(b, Eb, c.id);
-        O(b);
+        antArea(ant, 'bot', tun.id);
+        antAction(ant);
       }
       else {
         // Tun Walk execution.
-        a.pc = a.pc || 100;
-        if (d) a.rev = c.x1 == d.x1 && c.y1 == d.y1; // Tun is connected backwards.
-        else a.rev = ob(b, a.pt, c).pc> a.pc; // This is the final tunnel, use a secondary method to determine the 'rev' flag.
-        a[kb] = a.rev ? 100 - a.pc : a.pc;
-        a[Fb] = a.rev ? 100 : 0;
-        if (!wb(c) && _f(b, c) == a.rev) b[I] == Db ? $f(b, c) : (b.r = ic(b.r));
+        // Work out whether the ant is meant to be walking in reverse (towards the 0% point of the tunnel).
+        if (nextTun) action.rev = tun.x1 == nextTun.x1 && tun.y1 == nextTun.y1; // If there's a nextTun use it's connection to this tunnel to judge whether we're doing a reverse walk.
+        else if (previousTun) action.rev = tun.x2 == previousTun.x2 && tun.y2 == previousTun.y2; // No next tun, but if there's a prevTun use it's connection to this tunnel to judge whether we're doing a reverse walk.
+        else if ('pc' in action) {
+          // We're probably going to another spot within the exact same tunnel, so judge whether we're doing a reverse walk based on the relative position of the ant to the supplied target percentage.
+          temp = getTunPosition(ant, action.pt, tun);
+          action.rev = temp.tun.id == tun.id ? temp.pc> action.pc : calculateDistance(ant.x, antDiveY(ant), tun.x1, tun.y1) > calculateDistance(ant.x, antDiveY(ant), tun.x2, tun.y2);
+        }
+        // Work out a default target percentage if one isn't supplied.
+        if (typeof action.pc != 'number') action.pc = action.rev ? 0 : 100;
+        // Track the current position (in percentage) of the ant.
+        action.dist = action.rev ? 100 : 0; // This is wrong if the ant starts inside the target tunnel but it will be corrected after one step in tunWalk.
+        if (!isRotationTunnel(tun) && antDir(ant, tun) == action.rev) ant.pose == 'side' ? antSideCorrection(ant, tun, wp) : (ant.r = oppositeAngle(ant.r));
         // Override 'dive' with the relevant walking action and execute.
-        a[C] = xg;
-        Yc(b, Eb, c.id);
-        O(b);
+        action.act = 'tunWalk';
+        antArea(ant, 'bot', tun.id);
+        antAction(ant);
       }
     }
     else {
       // No dive queue - select tunnels and create queue.
-      let h = a[p] ? na(e, a[p]) : x(e[v][k](a => a.t == pa && a[u] == 100)), t = [];
-      if (h) {
-        let k = Jb(e, h, b[q].n == H ? {t: M} : {id: b[q].t}, [], 0, 1);
-        if (b[q].n == H) {
-          let f = h.t == M ? h : na(e, k.pop());
-          t[n]({[C]: xc});
-          t[n]({[C]: ia, tx: f.x1, id: f.id});
+      tun = action.tun ? getTun(farm, action.tun) : pickRandom(farm.tuns.filter(t => t.t == 'cav' && t.dun && !t.morgue));
+      if (tun) {
+        // Calculate a temp path in reverse for consideration in assembling queue data.
+        temp = findPath(farm, tun, ant.area.n == 'top' ? {dun: 1, t: 'ent'} : {id: ant.area.t}, [], 0, 1);
+        if (ant.area.n == 'top') {
+          // On the top level, need to pace to the tunnel entrance first.
+          dest = tun.t == 'ent' ? tun : getTun(farm, temp.pop()); // Get the entrance tun.
+          data.push({act: 'pace'});
+          data.push({act: 'dive', tx: dest.x1, id: dest.id});
         }
-        if (b[q].t && !k) {
-          // Different tunnel system.
-          t[n]({[C]: bf});
-          t[n]({[C]: ia, [p]: h.id});
+        if (ant.area.t && !temp) {
+          // Different tunnel system, need to climb out of the current system.
+          data.push({act: 'climb'});
+          data.push({act: 'dive', tun: tun.id});
         }
         else {
-          k.reverse()[i](a => t[n]({[C]: ia, id: a}));
+          temp?.reverse().forEach(tunId => data.push({act: 'dive', id: tunId}));
           // Rebuild the current action into the final destination action.
-          a.id ||= h.id;
-          a.pc ||= !wb(h) && ba(h[u], 20 + f(60));
-          t[n](a);
+          action.id ||= tun.id;
+          action.pc ||= !isRotationTunnel(tun) && min(tun.prog, 20 + randomInt(60));
+          data.push(action);
         }
-        vb(b, t);
+        // Add the queue data to the front of the finna queue for instant execution.
+        antInstaQ(ant, data);
       }
       // Execute queue.
-      A(b);
+      antNext(ant);
     }
   },
 
   // Rotational walk for tunnel entrances and tunnel 'con' pieces.
-  [yg]: (a, d = J(a), b = a.q[0], g = na(d, b.id), e = a.q[1],
-    h = e?.[C] == ia && na(d, e.id), c = .6) => {
-    a[fa] = a.jit = 1; // Add a class to CSS 'jitter' the ant, because rotWalks are awkwardly "smooth" compared to other ant walking.
-    if (--b[Fb] > 0) {
+  rotWalk: (ant, farm = getFarm(ant), action = ant.q[0], tun = getTun(farm, action.id), nextAction = ant.q[1],
+    nextTun = nextAction?.act == 'dive' && getTun(farm, nextAction.id), phaseCutoff = .6, progress = 1 - action.dist / action.td) => {
+    ant.walk = ant.jit = 1; // Add a class to CSS 'jitter' the ant, because rotWalks are awkwardly "smooth" compared to other ant walking.
+    if (--action.dist > 0) {
       // One step of rotation.
-      let i = 1 - b[Fb] / b.td; // Whether it's before or after the cutoff to phase 2.
-      a.r = i < c ? Pg(b.r, b.ang, vi(i / c)) : // Phase 1: Orient to point.
-        Pg(b.ang, b.rot, Qg((i - c) / (1 - c))); // Phase 2: Orient to final angle.
-      a.x += b.sX;
-      a.y += b.sY;
-      O(a, Ia + f(Ia / 2)); // Extra random frame delay added to prevent animation looking too "smooth".
+      ant.r = progress < phaseCutoff ? lerpAngle(action.r, action.ang, easeOutQuad(progress / phaseCutoff)) : // Phase 1: Orient to point.
+        lerpAngle(action.ang, action.rot, easeInQuad((progress - phaseCutoff) / (1 - phaseCutoff))); // Phase 2: Orient to final angle.
+      ant.x += action.sX;
+      ant.y += action.sY;
+      antAction(ant, frameTick + randomInt(frameTick / 2)); // Extra random frame delay added to prevent animation looking too "smooth".
     }
     else {
       // Rotation complete.
-      a.jit = a[fa] = 0;
-      if (!h && g.t == M) Be(a, b.sc); // Special case for ants that have just surfaced.
+      antRemAnimUpdate(ant);
+      if (!nextTun && tun.t == 'ent') antSurface(ant, action.sc); // Special case for ants that have just surfaced.
       else {
-        a[I] == Pa && vd(a);
-        A(a);
+        ant.pose == 'prone' && antProneCorrection(ant);
+        antNext(ant);
       }
     }
+    // Apply corpse proximity penalty.
+    antCorpseProximity(ant);
   },
 
   // Burrowing walk-along action.
-  // @TODO handle encountering ant corpse.
-  [xg]: (a, d = J(a), c = a.q[0], b = na(d, c.id), m = a.q[1],
-      j = m?.[C] == ia && na(d, m.id),
-      o = (30 / b.w * (b[u] / 100)) * 100,
-      r = c.rev ? c[Fb] < o : c[Fb]> (b[u] - o),
-      t = Wf(a) / 4, k = Gh(a),
-      i = tb[d.id] && tb[d.id][Zc(d, a)], e = [i], l, s) => {
-    a[fa] = 1;
+  tunWalk: (ant, farm = getFarm(ant), action = ant.q[0], tun = getTun(farm, action.id), nextAction = ant.q[1],
+      nextTun = nextAction?.act == 'dive' && getTun(farm, nextAction.id),
+      wp = wayPoints[farm.id][getWaypointIndex(farm, ant)],
+      temp1, temp2, temp3 // Reuse temp vars as various values and bits of data are juggled here, and this saves declaring a whole bunch.
+    ) => {
+    antSetWalk(ant);
     // Move along in tunnel.
-    if (a[I] == Db) {
-      if (i) {
-        let h = Fh(d, a);
-        // Nudge ant closer to wp if needed.
-        Hh(a, i, t);
-        // Get the nearest waypoints to align the ant to.
-        while (e[0] && e[g] < 3 && (l = Yf(d, e[0], -h))) e.unshift(l);
-        let q = e[g] + 3;
-        while (e[g] < q && (l = Yf(d, Dc(e), h))) e[n](l);
-        // Determine ant's new angle.
-        let f = ej(e);
-        if (a[y] < 0) f = Og(f);
-        let p = Ka(f - a.r);
+    if (ant.pose == 'side') {
+      // Determine the average angle of the nearest waypoints.
+      temp1 = getWaypointAngle(ant);
+      if (temp1 == null) {
+        // Lost waypoints?
+        antToProneWithCorrection(ant, tun, action.rev);
+        action.ns = 1; // Mark this action as "no switch" to prevent random pose switching.
+      }
+      else {
         // Update the ant's rotation, but cap it at 5 degrees per frame, and snap if over 99 deg.
-        a.r = N(p)> 99 ? ic(f) : ka(a.r + Ib(p, -5, 5));
-      }
-      if (!i || !Dc(e)) {
-        // Lost waypoint.
-        lc(a, b, c.rev);
-        c.ns = 1; // Mark this action as "no switch" to prevent random pose switching.
+        temp2 = normalize180(temp1 - ant.r); // Angle diff.
+        ant.r = abs(temp2) > 99 ? oppositeAngle(temp2) : normalize360(ant.r + clamp(temp2, -5, 5));
+        // Nudge ant closer to wp if needed.
+        antNudgeToWP(ant, wp);
       }
     }
-    else if (!r) {
+    else {
       // Prone walk roughly towards the destination with collision corrections.
-      if (!f(5)) a.r = ka(a.r + Cc()); // Add a little random wobble to the angle.
-      if (k) {
+      if (!randomInt(4)) ant.r = normalize360(ant.r + randomSign()); // Add a little random wobble to the angle.
+      if (temp3 = antCollision(ant, 4)) {
         // Ant is going to collide with another ant.
-        let f = k.ant;
-        if (a[da] == f[da] && a[q].n == f[q].n && !Mf(a, f)) {
-          if ((f.t == a.t || wh(a)) && a[I] == Pa && f[I] == Pa) {
-            if (b.t == pa && !a[df] || a[df] < 49) {
-              // Avoid this ant.
-              let g = Rb(f.x, Ma(f), a.x, Ma(a));
-              ka(a.r - k.dir * 6);
-              a.x += g.x;
-              a.y += g.y;
-              // Track ant avoidance duration so we can stop doing it if it gets too insane.
-              a[df] ||= 0;
-              a[df]++;
-              h(b => Ca(a, df), 5000);
-            }
-            // No other situations are handled in terms of collision avoidance, because it would be too annoying.
+        temp2 = temp3.ant;
+        if (antsPassive(ant, temp2)) {
+          if (ant.pose == 'prone' && temp2.pose == 'prone' && tun.t == 'cav' && antCheckAvoidance(antGetStill(ant))) {// Note: antGetStill() slipped in here so the ant doesn't treadmill in place when halted by collision.
+            // Avoid this ant.
+            temp1 = calcDistComponents(temp2.x, antDiveY(temp2), ant.x, antDiveY(ant));
+            ant.r = normalize360(ant.r + temp3.dir * 2);
+            ant.x += temp1.x / 2;
+            ant.y += temp1.y / 3;
+            // Track ant avoidance duration so we can stop doing it if it gets too insane.
+            antTrackAvoidance(ant);
           }
-          else if (f.t != a.t && !d[Ob]) Of(a, f); // Fight!
         }
+        else antFight(ant, temp2); // Fight!
       }
-      // Partial correction for prone ants in a 'tun' that have a weird trajectory.
-      if (b.t == p) {
-        let f = Ka(a.r - b.r), g = N(f) < 90 ? f : Ka(ic(f));
-        if (N(g)> 3) a.r = Ka(a.r - oe(g));
-      }
-      // Determine if we're on a collision course with a waypoint and turn ant towards tunnel centreline by 2 degrees.
-      // Don't check this at tunnel ends, but there is a secondary alignment method for that area at the end of this function, as well as the antTunPos contingency check.
-      if ((s = fj(d, a))) {
-        if (k && !f(3)) vb(a, {[C]: ie}, 0); // Ant is dealing with an ant collision as well, give it some hesitation.
-        else a.r = ka(a.r + oe([0, S].map(c => Ka(b.r - (b.t == pa ? 90 : 0) + c - a.r))[yb]((a, b) => N(a) - N(b))[0]) * 2);
-        // Check if ant is stuck on the midline at the end of a tunnel.
-        let g = ka(a.r - 90);
-        if ((N(g) < 3 || N(g - S) < 3) && (wa(a.x, Ma(a), b.x1, b.y1) < 3 || wa(a.x, Ma(a), b.x2, b.y2) < 3)) {
-          a.r = ic(a.r);
-          Cg[Zb]("ant got stuck on midline at end of tunnel");
-        }
+      // Partial correction for prone ants that have a weird trajectory.
+      temp1 = normalize180(tun.r - (action.rev && deg180) - ant.r);
+      if (tun.t == 'tun' && abs(temp1) > 3) ant.r = normalize360(ant.r + sign(temp1) * 3);
+      if (tun.t == 'cav' && abs(temp1) > 60) ant.r = normalize360(ant.r + sign(temp1) * 9);
+      // Determine if we're on a collision course with a waypoint and then align the ant with the waypoint angle by 2 degrees to minimise the collision.
+      if (antWaypointCollision(farm, ant)) {
+        antProneCorrection(ant);
+        temp3 && randomInt(3) ? antInstaQ(ant, {act: 'idle'}, 0) : // Ant is dealing with an ant collision as well, give it some hesitation.
+          ant.r = normalize360(ant.r + sign([0, deg180].map(a => normalize180(tun.r + a - ant.r)).sort((a, b) => abs(a) - abs(b))[0]) * 2);
       }
     }
-    // When there is no collision emergency check for more things.
-    if (!s && !k) {
-      let g = hj(a, b, d);
-      if (g) Of(a, g.a); // Ant is near an enemy ant.
-      else if (c.pos) {
-        // Position encourager feature.  Coaxes ant to walk towards the side of the tunnel it is supposed to be on, but there is no guarantee it'll get there.
-        // NOTE: This only works for 'cav' tunnels which are roughly horizontal, that isn't checked here, it is assumed the calling code will only use this feature for cavs.
-        if (a[I] == Pa) {
-          if (ag(a, i)) Ih(a, b, i); // Ant is in landing range, so land it.
-          else if (ag(a, i, 2)) {
-            // Ant is getting close to landing range, but is probably coming in too steep.
-            // Straighten up to 90 or 275, 15deg at a time.
-            if (a.r < S) {
-              // Goal is ~90.
-              if (a.r < 75) a.r += 2;
-              if (a.r> 105) a.r -= 2;
-            }
-            else {
-              // Goal is ~275.
-              if (a.r < 260) a.r += 2;
-              if (a.r> 290) a.r -= 2;
-            }
-            a.y += c.pos == 'u' ? 2 : -2; // Bump ant even closer.
+    // Check for nearby enemies (even without collision).
+    if (temp1 = farm.foe && farm.a.find(a => ant.area.t == a.area.t && !antsPassive(ant, a) && antInTargetProximity(ant, a, 30))) antFight(ant, temp1); // Ant is near an enemy ant.
+    if (action.pos) {
+      console.log("position feature");
+      // Position encourager feature.  Coaxes ant to walk towards the side of the tunnel it is supposed to be on, but there is no guarantee it'll get there.
+      // NOTE: This only works for 'cav' tunnels which are roughly horizontal, that isn't checked here, it is assumed the calling code will only use this feature for cavs.
+      if (ant.pose == 'prone') {
+        if (antWaypointRange(ant, wp)) antToSideWithCorrection(ant, tun, wp); // Ant is in landing range, so land it.
+        else if (antWaypointRange(ant, wp, 2)) {
+          // Ant is getting close to landing range, but is probably coming in too steep.
+          // Straighten up to with 9deg of 0 or 180, 2deg at a time.
+
+          /*
+          if (ant.r < deg180) {
+            // Goal is ~90.
+            if (ant.r < 75) ant.r += 2;
+            if (ant.r> 105) ant.r -= 2;
           }
           else {
-            // Ant is too far away from tunnel wall and needs to be angled there.
-            let f = N(c[Fb] - c[kb]) < 20; // Determine if ant is very close to the destination.
-            if (c.pos == 'u') {
-              if (a.r < S) if (a.r> 50 || f && a.r > 15) a.r -= 9; // Limits are 45 and 10.
-              else if (a.r < 310 || f && a.r < 345) a.r += 9; // Limits are 315 and 350.
-            }
-            if (c.pos == 'd') {
-              if (a.r < S) if (a.r < 130 || f && a.r < 165) a.r += 9; // Limits are 135 and 170.
-              else if (a.r> 235 || f && a.r > 195) a.r -= 9; // Limits are 230 and 190.
-            }
+            // Goal is ~275.
+            if (ant.r < 260) ant.r += 2;
+            if (ant.r> 290) ant.r -= 2;
           }
+          */
+          temp1 = normalize180((ant.r < 90 ? 0 : deg180) - ant.r);
+          if (abs(temp1)> 9) ant.r = normalize360(ant.r + (temp1 < 0 ? -2 : 2));
+          ant.y += action.pos == 'u' ? 2 : -2; // Bump ant even closer.
+
         }
         else {
-          let f = Zf(b, {x: a.x, y: Ma(a)});
-          if (c.pos == 'u' && f < 0 || c.pos == 'd' && f> 0) c.ns = 1; // Already correct position, flag "no switch" to prevent random pose switching.
-          else {
-            // Wrong side of the tunnel, switch to prone.
-            lc(a, b, c.rev);
-            c.ns = c.pos == Oa; // Disable random switching for 'm' position.
+          // Ant is too far away from tunnel wall and needs to be angled there.
+          /*
+          let closeDest = abs(action.dist - action.pc) < 30; // Determine if ant is very close to the destination.
+          if (action.pos == 'u') {
+            if (ant.r < deg180) if (ant.r> 50 || closeDest && ant.r > 15) ant.r -= 9; // Limits are 45 and 10.
+            else if (ant.r < 310 || closeDest && ant.r < 345) ant.r += 9; // Limits are 315 and 350.
           }
+          if (action.pos == 'd') {
+            if (ant.r < deg180) if (ant.r < 130 || closeDest && ant.r < 165) ant.r += 9; // Limits are 135 and 170.
+            else if (ant.r> 235 || closeDest && ant.r > 195) ant.r -= 9; // Limits are 230 and 190.
+          }
+            */
+          temp1 = normalize180((action.pos == 'u' ? 300 : action.pos == 'd' ? 60 : ant.r) - ant.r);
+          abs(temp1) < (abs(action.dist - action.pc) < 30 ? 20 : 40) ? ant.r : normalize360(ant.r + (temp1 < 0 ? -9 : 9));
+
+          /*
+          frankly i don't understand what the code above is doing, it might be better to make it something like this:
+          let target = (action.pos == 'u' ? 0 : 180); // always aim up or down
+          let diff = normalize180(target - ant.r);
+          if (abs(diff)> maxStep) diff = (diff < 0 ? -maxStep : maxStep);
+          ant.r = normalize360(ant.r + diff);
+          */
         }
       }
-      // Random ant pose switching feature.
-      if (!c.ns) {
-        if (!wb(b) && ag(a, i) && !f(a[I] == Pa ? ec : R)) {
-          c.ns = 1; // Don't randomly switch again in this tunnel.
-          if (a[I] == Pa) Ih(a, b, i);
-          else lc(a, b, c.rev);
+      else {
+        temp1 = tunGetSide(tun, {x: ant.x, y: antDiveY(ant)});
+        if (action.pos == 'u' && temp1 < 0 || action.pos == 'd' && temp1> 0) action.ns = 1; // Already correct position, flag "no switch" to prevent random pose switching.
+        else {
+          // Wrong side of the tunnel, switch to prone.
+          antToProneWithCorrection(ant, tun, action.rev);
+          action.ns = action.pos == 'm'; // Disable random switching for 'm' position.
         }
-        else if (r) c.ns = 1; // Ant is near the end of this tunnel, disable the random switcher.
       }
+    }
+    // Random ant pose switching feature.
+    temp1 = tun.prog / 100 * tunPercent(tun, 30); // Percentage representing 30px of the tunnel taking the current dig progress into account.
+    // Ensure we're not at the end of the tunnel or have flagged the no-switch.
+    if (!action.ns && !(action.rev ? action.dist < temp1 : action.dist> (tun.prog - temp1)) && !isRotationTunnel(tun) && antWaypointRange(ant, wp) && !randomInt(ant.pose == 'prone' ? num200 : num500)) {
+      action.ns = 1; // Don't randomly switch again in this tunnel.
+      ant.pose == 'prone' ? antToSideWithCorrection(ant, tun, wp) : antToProneWithCorrection(ant, tun, action.rev);
     }
     // Walk along tunnel.
-    Ud(a);
+    antMoveTunnel(ant);
     // Now check where the ant actually is.
-    let w = ob(a, c.pt, b, j?.t);
-    if (!w && b[u] < 15) w = {[p]: d[v][X](a => a.co[Y](b.id) && a[u] == 100)}; // If we're working on an underbuilt tunnel, let's just say we're in the previous tunnel.
-    while (!w) {
-      // Ant is detected to be not in a tunnel at this point. That's a bug and would ideally be fixed. For now, shuffle the ant back into the tunnel.
-      lc(a, b, c.rev);
-      w = ob(a, c.pt, b);
-      // This could get it out of a pickle.
-      if (wb(b)) {
-        a[fa] = 0;
-        c[C] = ia;
-        return O(a);
+    temp3 = getTunPosition(ant, action.pt, tun, nextTun?.t);
+    // Note: If doing getTunPosition() on every frame is too expensive for performance, be aware that getWpTunnel() caches the result and it might be a better system to upgrade that functionality for use here?
+    if (!temp3) {
+      // If we're working on an underbuilt tunnel, let's just say we're in the previous tunnel.
+      if (tun.prog < 15) temp3 = {tun: farm.tuns.find(t => t.co.includes(tun.id) && t.dun)};
+      while (!temp3) {
+        antToProneWithCorrection(ant, tun, action.rev); // Shuffle the ant back into the tunnel.
+        temp3 = getTunPosition(ant); // Recalculate with no ignores/limits/desires.
       }
-      if (!f(19)) a.r = ka(a.r + 9); // Random chance to bump the ant's rotation, that might help sometimes.
     }
-    if (w[p].id != b.id) {
+    // Check skipped tunnels.
+    if (temp3 && temp3.tun.id != tun.id) {// antTunPos MUST exist at this point.
       // Ant is in a different tunnel than the one it is supposed to be in.
       // This could be normal in which case antNext() will continue the journey, but there are some cases to check first.
-      if (w[p].id != j?.id) {
+      if (nextTun && temp3.tun.id != nextTun?.id) {
         // Ant's current actual position is not in the nextTun in the queue.  This code will investigate the problem.
-        Yc(a, Eb, w[p].id);
-        // Check if a tunnel was skipped over (it happens).
-        let g = a.q[2], f = g?.[C] == ia && na(d, g.id);
-        if (a[I] == Db && f?.id && w[p].id == f.id) a.q[Ic](); // Ant has probably shimmied past a 'con' so it didn't register, it can skip an action.
-        else if (w[p].co[X](a => b.co[Y](a)) == j.id) {
+        antArea(ant, 'bot', temp3.tun.id);
+        // Check if a tunnel was skipped over (it happens), and we should be further along in the queue.
+        // Note: We are ignoring any non-dive actions that are wedged in between dive actions that have an id.  Seems unlikely this would occur!
+        temp1 = ant.q.findIndex(a => a.act == 'dive' && a.id == temp3.tun.id);
+        if (temp1 > 0) ant.q.splice(0, temp1);
+        else if (temp3.tun.co.find(id => tun.co.includes(id)) == nextTun.id)
           // Ant has wandered into an adjacent tunnel at a juncture, switch to prone to complete an awkward course correction on the next pass.
-          a[I] = Pa;
-          vd(a);
-        }
+          antToProneWithCorrection(ant, tun);
         else {
-          // Consider where the ant's head might be.
-          w = ob(ca(pd(a), Uf(a)), 0, b);
-          if (w && [j.id, f.id][Y](w[p].id)) {
-            // Ant's head is actually in an upcoming tun, so they're not really off course and looping back to antAction or antNext might be OK.
-            // But does this situation ever arise?
-            Cg[Zb]("Made a decision to not course-correct based on position of ant's head coordinates.");
-          }
-          else {
-            // Severe course correction.  Ant is lost, so set up a new path to the original destination (the last dive action in the queue).
-            let h = Qa(0, a.q.map(a => a[C]).lastIndexOf(ia)), n = a.q[h];
-            a.q[Dd](0, h + 1); // Remove the dive queue, but keep anything after the final dive.
-            vb(a, Vd(n), 0);
-            return O(a);
-          }
+          antToProneWithCorrection(ant, tun);
+          // Severe course correction.  Ant is lost, so set up a new path to the original destination (the last dive action in the queue).
+          temp1 = max(0, ant.q.findLastIndex(a => a.act == 'dive' && a.tun)); // Calculate the index of the final dive action.
+          temp2 = ant.q[temp1]; // Store the final action itself because we're about to delete it.
+          ant.q.splice(0, temp1 + 1); // Remove the dive queue, but keep anything after the final dive.
+          antInstaQ(ant, makeDiveStub(temp2));
         }
       }
       // Execute queue.
-      // Note: Don't allow antNext() into non-rotational tunnels that ant is not roughly aligned with or ant can glitch out on a subsequent pass because its rotation makes antDir() in the 'dive' action wrong.
-      !wb(j) && N(a.r - j.r - (j.t == pa ? 90 : 0)) > 45 ? O(a) : A(a);
+      antNextStill(ant);
     }
-    else if (wb(b)) O(a); // Special case for rotation tunnels.  Just loopback to this action without doing further checks.
-    else if (_f(a, b) == c.rev) {
+    else if (isRotationTunnel(tun)) {
+      // Side pose walking can take an ant along the waypoints through a rotational tunnel, so the ant needs to just keep going.
+      antAction(ant); // Special case for rotation tunnels.  Just loopback to this action without doing further checks.
+    }
+    else if (antDir(ant, tun) == action.rev) {
       // Wrong way!  Ant needs to be flipped around safely.
-      Jh(a, b);
-      a[fa] = 0;
-      c[C] = ia;
-      O(a, f(Hb));
+      antChangeTunDir(ant, tun);
+      action.act = 'dive';
+      antActionStill(ant, randomInt(pauseDelay));
     }
-    else if ((w.pc - Wb(b, Sa(a)) * va(c.rev) - c[kb]) * va(c.rev) < 0) {
-      // Ant reached action.dest
-      a[fa] = 0;
-      A(a);
+    else if (abs(temp3.pc - action.pc) < tunPercent(tun, antOffsetX(ant)) && !ant.frz) {
+      antNextStill(ant); // Ant reached action.pc
     }
     else {
       // Not there yet - loop back to this function.
-      c[Fb] = w.pc;
-      if (f(ec)) O(a); // Normal loopback.
-      else {
-        // Loopback with brief pause.
-        a[fa] = 0;
-        O(a, Ia + f(Hb));
-      }
+      action.dist = temp3.pc;
+      randomInt(num200) && !ant.frz ? antAction(ant) : // Normal loopback.
+        antActionStill(ant, frameTick + randomInt(pauseDelay)); // Loopback with brief pause.
+      ant.frz> 0 ? ant.frz-- : del(ant, 'frz'); // Decrement or cleanup the freeze flag which is used by tunOrient to force the pauseDelay to trigger on an ant here.
     }
+    // Apply corpse proximity penalty.
+    antCorpseProximity(ant);
   },
 
   // Prone walks an ant to exactly a target.
-  // target can be another ant's head, or midpoint, or it can be an x/y coordinate.
-  //getAntHeadPoint() and antToAntAngle()
-  // If pickup/dropoffs look stupid, we could create something that if ant is prone in mid of a cavity they can briefly use moveAntDefault()
-  // to orient themselves to a target, that would be useful in fights too.   Needs a lot of waypoint checking though!
-  tunOrient: (a, b = J(a), c = a.q[0], d = na(b, c.id)) => {
-    // we can use tunWalk to take one step towards the target and come back to this.
-    A(a);
+  // Note: action.target (required) is any object/shim with x/y coords, and action.ant (if set) is just the id of an ant if temporary freeze of an ant target is desired.
+  // Important: This assumes the ant is already in the same cavity as the target, so nothing too funky happens.
+  tunOrient: (ant, action = ant.q[0]) => {
+    antToProneWithCorrection(ant, getTun(getFarm(ant), ant.area.t));
+    ant.r = oppositeAngle(ant.r + antToTargetAngle(ant, action.target)); // Snap to orientation so as not to do a rotational walk that might take ant out-of-bounds.
+    if (!antInTargetProximity(ant, action.target, antOffsetX(ant) + 2)) {
+       // Freezes the target if it is an ant (for a non-guaranteed amount of time up to 4 seconds).  Chance of target escaping from current tunnel is negligible.
+       // Note: Currently only implemented for ants doing a 'tunWalk' using the pause mechanism there.
+      if (action.ant) getAnt(getFarm(ant), action.ant).frz = 2;
+      // Get closer.
+      antSetWalk(ant);
+      antMoveTunnel(ant);
+      antAction(ant);
+    }
+    else antNextStill(ant);
   },
 
   // Slip off the bg scenery/glass.
-  slip: (a, b = Lb(a)) => {
-    a[I] = Kc;
-    if (b - a.y > 1.2) {
-      a.y += 1.2;
-      if (a.r < 90) a.r += 1.2;
-      O(a, Ia / 2);
+  slip: (ant, target = antGroundLevel(ant)) => {
+    ant.pose = 'pick';
+    if (target - ant.y > 1.2) {
+      ant.y += 1.2;
+      if (ant.r < 0) ant.r += 1.2;
+      antAction(ant);
     }
     else {
       // Target reached.
-      a.q = []; // Clear the queue because the ant now has a concussion and it's complicated to consider which queue items are still valid.
-      Be(a);
+      ant.q = []; // Clear the queue because the ant now has a concussion and it's complicated to consider which queue items are still valid.
+      antSurface(ant);
     }
   },
 
-  // Slip to the floor of a cavity.
-  tunSlip: (a, b = J(a), c = a.q[0], d = na(b, a[q].t)) => {
-    a[I] = Kc;
-
-    // Don't use cavFloor!  Unless it would work??  maybe!   Perhaps it can be re-adapted...
-    // Update: we have a new func called tunFloor() but it is expected to have problems!   Might not work in con/ent at all?  We'll have to use antGetTunPos and request 'cav' and 'tun' types preferentially?  or recall them ignoring 'con' and 'ent'
-    //      otherwise we just skip the slipping perhaps?
-    // What we really need here is a loop that moves the ant down by 1.2px until they hit a bottom waypoint??
-    // @TODO!!!
-    if (1 /* has not hit the floor*/) {
-
-      // ant should rotate to match tun.r or 180-tun.r whichever is closer!  //mirrorAngle ? --> similar to 'land:' function
-
-      O(a, Ia / 2);
+  // Slip an ant to the floor of a tunnel.
+  // This does not use cavFloor() as the ant might be in another type of tunnel and not aligned with a cavity.  Also using waypoints would be too involved.
+  tunSlip: ant => {
+    ant.pose = 'pick'; // Note: We never reset the pose back to what it was before, that can change later if needed perhaps by passing a param in the action.
+    if (getTunPosition(ant)) {// Ant still "in" the tunnel.
+      // Move downwards. Note: We don't rotate the ant here to land on its feet, that can be added later if needed.
+      ant.y += .7; // This occurs slower than the 'slip' action because everything in tunnels is slower.
+      antAction(ant);
     }
-    if (0/*has hit the floor*/) {
-      // Mark the ant as slipped is requested to by the caller (for death reasons).
-      if (c.mark) a.slip = 1;
-
-      // call antNext()
+    else {
+      // Hit past the edge of the tunnel. Note: We don't readjust it back into the tunnel here, that can be added later if needed.
+      // Leave the ant in a horizontal position with random flip & scale - if this proves unacceptable consider trying getWaypointAngle() of the 3 closest waypoints.
+      ant.r = pickRandom[0, deg180];
+      ant.scale = randomSign();
+      antNext(ant);
     }
-
-    A(a);
   },
 
   // Land an ant near the surface onto the surface.
-  land: (a, b = Lb(a)) => {
-    if (b - a.y > 1) {
-      a.y += 1;
-      a.r += a.r > S && a.r < 255 ? 15 : a.r> 105 ? -15 : 0; // We know ant is heading downwards (~180deg) now adjust orient towards horizontal.
-      O(a);
+  land: (ant, target = antGroundLevel(ant)) => {
+    antSetWalk(ant);
+    if (target - ant.y > antOffsetX(ant)) {
+      ant.y += antGetStep(ant);
+      ant.r += sign(deg180 - ant.r) * 2; // We know ant is heading downwards (~90deg) now adjust orient towards horizontal.
+      antActionStill(ant);
     }
-    else Be(a);
+    else antSurface(antGetStill(ant));
   },
 
   // Uncrawl action.
-  uncrawl: a => {
-    vb(a, [{[C]: jd, [H]: 1}, {[C]: xc}]);
-    A(a);
+  uncrawl: ant => {
+    antInstaQ(ant, [{act: 'crawl', top: 1}, {act: 'pace'}]);
+    antNext(ant);
   },
 
   // Prone walk on the scenery/bg inside the farm.
-  [jd]: (a, b = a.q[0], e = a.q[1], d = Nf(a), c, g) => {
-    Yc(a, jb);
-    if (!a[q].d && (a.x < 30 && a[y] < 0 || a.x> 930 && a[y] > 0)) a[y] *= -1; // Ant is about to walk into the edge of the farm, let's flip it first.
-    a[I] = Pa;
-    vd(a);
-    if (!b || (!b.x && a.y < -460 && !f(la))) Ie(a); // Slip off.
-    else if (!b.x && d && d[0] == S && (!b.for || b.for < 1) && (e && !xd[jb][e[C]] || b[H] || a[q].d> la && !f(3))) {
+  crawl: (ant, action = ant.q[0], nextAction = ant.q[1], near = antBgNear(ant), diff, targetAngle, clearance = antGroundLevel(ant) - 20) => {
+    antArea(ant, 'bg');
+    if (!ant.area.d && (ant.x < 30 && ant.scale < 0 || ant.x> 930 && ant.scale > 0)) ant.scale *= -1; // Ant is about to walk into the edge of the farm, let's flip it first.
+    ant.pose = 'prone';
+    antProneCorrection(ant);
+    if (!action || (!action.x && ant.y < clearance && !randomInt(num2000))) antSlip(ant); // Slip off.
+    else if (!action.x && near && near[0] == 90 && (!action.for || action.for < 1) && (nextAction && !acts.bg.includes(nextAction.act) || action.top || ant.area.d> standardDelay && !randomInt(3))) {
       // At the bottom boundary, land the ant.
-      vb(a, {[C]: 'land'});
-      A(a);
+      antInstaQ(ant, {act: 'land'});
+      antNext(ant);
     }
-    else if (!b.x && !b.for && e && xd[jb][e[C]] || b.x && wa(a.x, a.y, b.x, b.y) < Sa(a)) {
-      // Ant has crawled for long enough or reached the destination, move on to the next action.
-      a[fa] = 0;
-      A(a);
-    }
+    else if (!action.x && !action.for && nextAction && acts.bg.includes(nextAction.act) || action.x && calculateDistance(ant.x, ant.y, action.x, action.y) < antOffsetX(ant))
+      antNextStill(ant); // Ant has crawled for long enough or reached the destination, move on to the next action.
     else {
-      if (a[q].d < 49 && d && d[0] == S) a.r = ka(a.r + f(5) * va(a.r> S)); // Ant is starting the crawl; ignore the "near" collision and orient it slightly upwards.
-      else if (d) {
+      if (ant.area.d < 49 && near && near[0] == 90) ant.r = normalize360(ant.r + randomInt(5) * getSign(90 + ant.r> deg180)); // Ant is starting the crawl; ignore the "near" collision and orient it slightly upwards.
+      else if (near) {
         // Redirect ant from boundary.
-        c = Ka(a.r - d[0]);
-        a.r = N(c) < 10 && !f(ec) ? ic(a.r) : ka(a.r + va(c> 0) * 9); // Occasionally just flip the ant on shallow angles to prevent stuck-in-corner forever situation.
+        diff = normalize180(ant.r - near[0]);
+        ant.r = abs(diff) < 10 && !randomInt(num200) ? oppositeAngle(ant.r) : normalize360(ant.r + getSign(diff> 0) * 9); // Occasionally just flip the ant on shallow angles to prevent stuck-in-corner forever situation.
       }
-      else if (a[q].d > 99 && b.x) {
+      else if (ant.area.d > 99 && action.x) {
         // We want this ant to head to a particular spot.
-        g = rd(a, b) + 90;
-        c = Ka(g - a.r);
-        a.r = ka(N(c) < 3 ? g : a.r + oe(c) * ((N(c)> 90 && wa(a.x, a.y, b.x, b.y) < 20) ? 10 : 2));
+        targetAngle = getAngle(ant, action);
+        diff = normalize180(targetAngle - ant.r);
+        ant.r = normalize360(abs(diff) < 3 ? targetAngle : ant.r + sign(diff) * ((abs(diff)> 90 && calculateDistance(ant.x, ant.y, action.x, action.y) < 20) ? 10 : 2));
       }
-      else if (!f(W)) a.r = ka(a.r + f(20) - 10); // Random direction bump.
-      else if (b[H] && a.x < Lb(a) - 20) {// Ensure ant is well above surface level before enforcing the following rules.
-        // Prevent ant walking upwards. (Reoriented normalization so upward maps to 0..160)
-        if (ka(a.r + 80) < 160) a.r += S;
+      else if (!randomInt(shortDelay)) ant.r = normalize360(ant.r + randomInt(20) - 10); // Random direction bump.
+      else if (action.top && ant.y < clearance) {// Ensure ant is well above surface level before enforcing the following rules.
+        // Prevent ant walking upwards.
+        if (abs(normalize180(ant.r - deg270)) < 90) ant.r = oppositeAngle(ant.r);
         else {
           // Turn ant in a generally downward direction.
-          c = Ka(S - a.r);
-          if (N(c)> 30) a.r = ka(a.r + (c < 0 ? -5 : 5));
+          diff = normalize180(90 - ant.r);
+          if (abs(diff)> 30) ant.r = normalize360(ant.r + (diff < 0 ? -5 : 5));
         }
       }
       // Track time spent.
-      b.for && b.for--;
+      action.for && action.for--;
       // Continue crawl.
-      xh(a, O, 1, .5, 2);
+      antMoveDefault(ant, antActionStill, 1, .5, 2);
+      // Apply corpse proximity penalty.
+      antCorpseProximity(ant);
     }
   },
 
   // Ant stops and regenerates hp and mood.
-  [Mc]: (a, b = J(a)) => {
+  rest: (ant, farm = getFarm(ant)) => {
     // Ant needs to find a spot away from other ants, food, and water.
-    if (gj(a, b) || ij(a, b)) {
-      if (a[q].n == Eb) {
-        F(a, ia, {[p]: f(9) && a[q].t});
-        F(a, Mc);
+    if (farm.a.find(a => antInTargetProximity(a, ant, 30)) || ant.area.n == 'top' && farm.items.some(i => ['food', 'drink'].includes(i.t) && abs(ant.x - i.x) < 30)) {
+      if (ant.area.n == 'bot') {
+        if (ant.q.length < 9) {// Only try again if the queue isn't getting too long.
+          // Attempt a dive to the same tunnel they're already in, or random chance to pick a random tunnel.
+          antFinna(ant, 'dive', {tun: randomInt(9) && ant.area.t});
+          antFinna(ant, 'rest');
+        }
+        antNext(ant);
       }
-      else vb(a, {[C]: ma(xd[a[q].n])[0], for: 5}, 0); // For top and bg we just need to move a little and try again.
-      O(a);
+      else {
+        antInstaQ(ant, {act: acts[ant.area.n][0], for: randomInt(9)}, 0); // For top and bg we just need to move a little and try again.
+        antAction(ant);
+      }
     }
     else {
       // After wait time, increment ant's stats, and check whether to wake up.
-      h(b => {
-        Ya(a, {hp: .3, md: .15});
-        a.hp > 10 && !f(120) || a.hp > 90 && !f(60) || a.hp > 99 ? A(a) : O(a);
-      }, W);
+      setTimeout(X => {
+        antStats(ant, {hp: .5, md: .1});
+        // Ensure it is not a queen awaiting service, and then decide whether to continue resting or wake up based on the hp level.
+        !(isQueen(ant) && isQueenAwaiting(ant)) && (ant.dr < 9 || ant.fd < 9 || ant.hp> 99 || ant.hp > 90 && !randomInt(9) || ant.hp > 20 && !randomInt(90)) ? antNext(ant) : antAction(ant);
+      }, standardDelay);
     }
   },
 
   // Ant eat action.
-  [Jd]: (a, e = J(a), c = a.q[0], i, j = c.t == ni, d = eb(j ? e.a : e[aa], c.id)) => {
-    if (c.id && d) {
+  eat: (ant, farm = getFarm(ant), action = ant.q[0], isFlesh = action.t == 'flesh', food = getById(isFlesh ? farm.a : farm.items, action.id), ate) => {
+    if (action.id && food) {
       // Ant has reached the target food.
-      i = Ha(b => a[$] = a[$] ? 0 : !f(3), R + f(R)); // Randomly toggle dig style on and off.
-      ih(a);
-      h(h => {
-        if (d) {// Check food still exists at this point before going through with calculations.
-          if (j) {
-            Mb(e, ["Your ants are turning to cannibalism.", "The ants are resorting to eating their enemies!"]);
-            if (!d.eaten) {
-              // Mark this ant's corpse as being for eatin, and increment the fed stat for achievement.
-              d.eaten = 1;
-              b.sac++;
-            }
-            // Increment how much of the ant was eaten and then decide whether to remove it entirely or just remove a body part.
-            (d.eaten += 20) > 99 ? Rd(d) : d.eaten > 40 && d.rm[n](x(['rmlegs', 'rmhead', 'rmrear'][k](a => !d.rm[Y](a))));
+      antUpdateClasses(ant, {dig: 1});
+      setTimeout(X => {
+        if (isFlesh && deadInFarm(food)) {// Check food still exists at this point in case it was removed/eaten.
+          playerHint(farm, ["Your ants are turning to cannibalism!", "The ants are resorting to eating other ants!"]);
+          if (!food.eaten) {
+            // Mark this ant's corpse as being for eatin, and increment the fed stat for achievement.
+            food.eaten = 1;
+            _.sac++;
           }
-          else {
-            d.sz -= .5;
-            let b = l[d.k];
-            if (!f(5)) {
-              a.thot = b.sweet ? x(["Breadcrumb jackpot!", "Sugar high!", "Someone touched my crumb", "New crumb dropped!"]):
-              x["Is this edible?", "Mmm… mystery flavor", "Meat sweats… achieved", "Smells dead - tastes worse"];
-            }
+          // Increment how much of the ant was eaten and then decide whether to remove it entirely or just remove a body part.
+          (food.eaten += 20) > 99 ? antDelete(food) : food.eaten > 40 && food.rm.push(pickRandom(['rmlegs', 'rmhead', 'rmrear'].filter(rm => !food.rm.includes(rm))));
+          ate = 1;
+        }
+        else if (food = farm.items.find(i => i.id == action.id && i.sz > 0)) {// Check food still exists at this point in case it was removed/eaten.
+          food.sz -= .4;
+          !randomInt(5) && antThot(ant, items[food.k].sweet ?
+            ["Breadcrumb jackpot!", "Sugar high!", "Someone touched my crumb", "New crumb dropped!"] :
+            ["Is this edible?", "Mmm… mystery flavor", "Meat sweats… achieved", "Smells dead - tastes worse"]);
+          ate = 1;
+        }
+        if (ate) {
+          !action.Q && antStats(ant, {fd: isFlesh ? 60 : action.pref ? 12 : 3, md: action.pref ? 4 : 0, hp: 1});
+          ant.dig = 0;
+          if (!action.pref && !randomInt(3)) {
+            playerHint(farm, ["Some of your ants are complaining about the food.", "The food does not meet the needs of some ants."]);
+            antThot(ant, ["I can't find any food I like", "This isn't my kind of food!", "Ewww, gross food!"]);
           }
-          !c.Q && Ya(a, {fd: j ? 60 : c.pref ? 10 : 3, md: c.pref ? 5 : 0, hp: 1});
-          ha(i);
-          a[$] = 0;
-          if (!c.pref && !f(3)) {
-            Mb(e, ["Some of your ants are complaining about the food.", "The food does not meet the needs of some ants."]);
-            a.thot = x(["I can't find any food I like", "This isn't my kind of food!", "Ewww, gross food!"]);
-          }
-          (a.fd < 80 && !c.Q && a.q[g] < 2 && !f(1) ? O : A)(a); // Whether to go again or move on.
+          (ant.fd < 80 && !action.Q && ant.q.length < 2 && !randomInt(1) ? antAction : antNext)(ant); // Whether to go again or move on.
         }
         else {
           // Cancel.
-          ha(i);
-          a[$] = 0;
-          A(a);
+          ant.dig = 0;
+          antNext(ant);
         }
-      }, la + f(cb));
+      }, longDelay / 2 + randomInt(standardDelay));
     }
     else {
-      if (a.fd < 90 || c.Q) {
+      if (ant.fd < 90 || action.Q) {
         // No target selected yet.
-        let m = e[aa][k](a => a.t == Ua),
-          h = ya[a.t],
-          g = 1,
-          n = (a, c, b = l[c.k]) => !a.d || a.d < 2 && b.sweet || a.d> 1 && b.meat,
-          b = pe(m)[X](a => n(h, a)) || x(m);
-        if (!b || !n(h, b)) {
+        let foods = farm.items.filter(i => i.t == 'food' && i.sz > 0),
+          antType = types[ant.t],
+          pref = 1,
+          isPreference = (antType, food, foodItem = items[food.k]) => !antType.d || antType.d < 2 && foodItem.sweet || antType.d> 1 && foodItem.meat,
+          deadAnts = farm.a.filter(a => deadInFarm(a) && !a.rot), // Find dead ants that are not rotten yet.
+          chosenFood = shuffle(foods).find(f => isPreference(antType, f)) || pickRandom(foods);
+        if (!chosenFood || !isPreference(antType, chosenFood)) {
           // Either there is no food, or the food is not in the ant's dietary requirements.
-          let f = e.a[X](b => b[da] == yc && !a.rot && b.t != a.t); // Find dead enemy ants that are not rotten yet.
-          if (h.d > 1 && a.fd < 50 && f) {
-            b = x(f);
-            a.thot = x(["I can survive on ant flesh", "I'm going to eat Bob", "I will devour my nemesis!"]);
+          if (antType.d > 1 && ant.fd < 50 && deadAnts.length) {
+            chosenFood = pickRandom(deadAnts);
+            antThot(ant, ["I can survive on ant flesh", "I'm going to eat " + chosenFood.n, "I will devour my nemesis!"]);
           }
-          else if (!b && a.fd < 50) {
+          else if (!chosenFood && ant.fd < 50) {
             // No food available, and ant's food stat is dropping.
-            a.thot = x(["Why is there no food?", "Someone is trying to starve us!", "Where is the lovely buffet?"]);
-            Mb(e, ["There is no food available for your ants.", "Your ants need something to eat!"]);
-            return A(a); // Nothing can be done about this.
+            antThot(ant, ["Why is there no food?", "Someone is trying to starve us!", "Where is the lovely buffet?"]);
+            // Warn the user about this situation, unless it is the case where meat eaters have a potential enemy/dead ant food source.
+            types[farm.t].d < 2 || !farm.foe && !farm.a.some(deadInFarm) && playerHint(farm, ["There is no food available for your ants.", "Your ants need something to eat!", "The ants are getting hungry."]);
+            return antNext(ant); // Nothing can be done about this.
           }
-          else g = 0; // There is food, but not ideal.
+          else pref = 0; // There is food, but not ideal.
         }
-        if (b) {
+        if (chosenFood) {
           // Now calculate where to go.
-          if (b.t == Ua || b[q].n == H) {
-            nb(a, Jd, {
-              n: H,
-              id: b.id,
-              t: b.t != Ua ? ni : b.t,
-              pref: g,
-              Q: c.Q,
-              tx: b.t == Ua ? 25 + Va(b.x) + Cc(23) * f(b.sz) / 100 : b.x + Cc() * f(Sa(b)) //@TODO I think this is wrong, ant stands too far away from food, and drink uses offsetX but so does pace target matching :/
-            });
+          let type = chosenFood.t != 'food' ? 'flesh' : chosenFood.t;
+          if (chosenFood.t == 'food' || chosenFood.area.n == 'top') {
+            goToLocation(ant, {n: 'top'});
+            antFinna(ant, 'eat', {id: chosenFood.id, t: type, pref: pref, Q: action.Q, tx: chosenFood.t == 'food' ? 25 + parseInt(chosenFood.x) + randomSign(23) * randomInt(chosenFood.sz) / 100 : chosenFood.x});
           }
           else {
-            let k = ob(b);
-            if (k) {
-              $c(a, {n: Eb, [p]: k[p].id, pc: k.pc, pos: qc});
-              F(a, Jd, {id: b.id, t: ni, pref: g, Q: c.Q, tx: b.x + (k.pc < 20 ? 1 : k.pc> 80 ? -1 : Cc()) * f(Sa(b))});
+            let tunPos = getTunPosition(chosenFood);
+            if (tunPos) {
+              goToLocation(ant, {n: 'bot', tun: tunPos.tun.id, pc: tunPos.pc, pos: 'dn'});
+              antFinna(ant, 'eat', {id: chosenFood.id, t: 'flesh', pref: pref, Q: action.Q});
             }
           }
-          c.Q && F(a, zc, {...b, Q: c.Q, pref: g, id: b.id + a.id});
+          action.Q && antFinna(ant, 'get', {...chosenFood, id: chosenFood.id + ant.id, Q:action.Q, pref: pref});
         }
       }
-      A(a);
+      antNext(ant);
     }
   },
 
   // Ant drink action.
-  [Ga]: (a, d = J(a), b = a.q[0], c = d[aa][X](a => a.t == Ga && a.sz > 0)) => {
-    if (b.id && c) {
+  drink: (ant, farm = getFarm(ant), action = ant.q[0], drink = farm.items.find(i => i.t == 'drink' && i.sz > 0)) => {
+    if (action.id && drink) {
       // Ant has reached the target drink.
-      h(e => {
-        if (c = d[aa][X](a => a.id == b.id && a.sz > 0)) { // Got to recheck here incase the drink got removed.
-          c.sz -= .2;
-          !b.Q && Ya(a, {dr: 9, md: 2, hp: .5});
-          (a.dr < 80 && !b.Q && a.q[g] < 2 && !f(1) ? O : A)(a); // Whether to go again or move on.
+      setTimeout(X => {
+        if (drink = farm.items.find(i => i.id == action.id && i.sz > 0)) {// Got to recheck here incase the drink got removed/exhausted.
+          drink.sz -= .2;
+          !action.Q && antStats(ant, {dr: 9, md: .5, hp: .5});
+          (ant.dr < 80 && !action.Q && ant.q.length < 2 && !randomInt(1) ? antAction : antNext)(ant); // Whether to go again or move on.
         }
-        else A(a);
-      }, la + f(la));
+        else antNext(ant);
+      }, standardDelay + randomInt(standardDelay));
     }
     else {
-      if ((a.dr < 90 || b.Q) && c) {
-        nb(a, Ga, {n: H, id: c.id, Q: b.Q, tx: Va(c.x) + 2 + f(46)});
-        b.Q && F(a, zc, {...c, Q: b.Q, id: c.id + a.id});
+      if ((ant.dr < 90 || action.Q) && drink) {
+        goToLocation(ant, {n: 'top'});
+        antFinna(ant, 'drink', {id: drink.id, Q: action.Q, tx: parseInt(drink.x) + 2 + randomInt(46)});
+        action.Q && antFinna(ant, 'get', {...drink, id: drink.id + ant.id, Q: action.Q});
       }
-      else if (a.dr < 50) {
+      else if (ant.dr < 50) {
         // No drink available, and ant's drink stat is dropping.
-        a.thot = x(["There is nothing to drink here!", "Somebody bring me some water!", "Where is the drinking fountain?"]);
-        Mb(d, ["There are no drinks in the farm for your ants.", "Your ants are going to get thirsty!"]);
+        antThot(ant, ["There is nothing to drink here!", "Somebody bring me some water!", "Where is the drinking fountain?"]);
+        playerHint(farm, ["There are no drinks in the farm for your ants.", "Your ants are going to get thirsty!"]);
       }
-      A(a);
+      antNext(ant);
     }
   },
 
   // Ant picks up a bit of food or drink for the queen, or an infant or a dead ant, this assumes the ant is already in a location where they can do a pick-up.
-  [zc]: (a, c = J(a.f), b = a.q[0]) => {
-    b.f = a.f;
-    a[_] = b;
-    b.t == kd && Ca(Sd(c, b.id), p); // Remove tun prop for carried eggs.
-    Tf(b, a);
-    if (b.Q) {
+  //@tODO use the logic from 'srv' to get closer.
+  get: (ant, farm = getFarm(ant), action = ant.q[0], queen = action.Q && getAnt(farm, action.Q)) => {
+    action.f = ant.f;
+    ant.carry = action;
+    action.t == 'egg' && del(getEgg(farm, action.id), 'tun'); // Remove tun prop for carried eggs.
+    carryDraw(action, ant);
+    if (queen) {
       // Feed a queen.
-      Xd(a, Vb(c, b.Q));
-      nb(a, md, b);
+      antGoToAnt(ant, assign(antHeadPoint(queen), {f: queen.f, area: queen.area}))
+      antFinna(ant, 'srv', action);
     }
-    else b.q[i](b => a.q[n](a, b)); // Must be an egg, inf, or dead ant.
-    T(a); // Update ant immediately so they can visually 'grab' the object.
-    a.run = .6;
-    A(a, Hb);
+    else action.q.forEach(q => ant.q.push(ant, q)); // Must be an egg, inf, or dead ant.
+    antUpdate(ant); // Update ant immediately so they can visually 'grab' the object.
+    ant.run = .6;
+    antNext(ant, pauseDelay);
   },
 
   // Ant goes on a mission to feed the queen.
-  [md]: (a, d = J(a), c = a.q[0], b = Vb(d, c.Q)) => {
-    if (c.Q) {
+  srv: (ant, farm = getFarm(ant), action = ant.q[0], queen = getAnt(farm, action.Q)) => {
+    if (queen) {
       // Q selected; confirm queen is alive.
-      if (b && za(b)) {
-        // Has ant really reached the queen?
-        if (!Gc(a, b, Sa(a))) {
-          // Ant too far from queen.
-          Xd(a, b);
-          nb(a, md, c);
-          return A(a);
+      if (livesInFarm(queen)) {
+        // Has ant really reached the queen's head?
+        if (!antInTargetProximity(ant, antHeadPoint(queen), antOffsetX(ant) + 2)) {
+          // Ant too far from queen's face.
+          ant.area.t == queen.area.t && getTun(farm, ant.area.t)?.t == 'cav' ?
+            antInstaQ(ant, {act: 'tunOrient', target: antHeadPoint(queen), ant: queen.id}) : antGoToAnt(ant, assign(antHeadPoint(queen), {area: queen.area, f: queen.f}));
+          antFinna(ant, 'srv', action);
+          return antNext(ant);
         }
-        // @TODO Ant will now drop off their load near the queen - if this is not good enough create a function using getAntHeadPoint() and antToAntAngle() to get them closer.
         // Reached the queen.
-        if (a[_]) {
-          vb(b, {[C]: Oc, [Oc]: 2}); // Freeze the queen for a 2 count (~10 seconds).
+        if (ant.carry) {
           // Update stats based on what the queen is probably being given.
-          let e = eb(d[aa], c.id);
-          !e || e.t == Ua ? Ya(b, {fd: !e ? 60 : c.pref ? 10 : 3, md: c.pref ? 9 : 4, hp: 1}) : // !item suggests it was an ant corpse.
-            Ya(b, {dr: 9, md: 4, hp: .5}); // The remaining possibility is that it is a drink.
+          // The 'md' boost is a bit higher than in 'eat' and 'drink' actions because queen has servants.
+          action.t == 'drink' ? antStats(queen, {dr: 9, md: 2, hp: .5}) : antStats(queen, {fd: action.t == 'flesh' ? 60 : action.pref ? 12 : 3, md: action.pref ? 6 : 2, hp: 1});
           // Worker ant is happier.
-          Ya(a, {md: 9});
+          antStats(ant, {md: 9});
         }
         // Animate the exchange.
-        [b, a][i](a => {
-          a[$] = 1;
-          T(a);
-          h(b => {a[$] = 0; T(a)}, Hb);
+        [queen, ant].forEach(a => {
+          antUpdateClasses(a, {dig: 1});
+          setTimeout(X => antUpdateClasses(a, {dig: 0}), pauseDelay);
         });
       }
-      // Pause here for a bit.
-      Ch(a[_], a);
-      Ca(a, _); // Delete this regardless of whether the queen was fed, otherwise ant could carry forever.
-      A(a, Hb + f(W));
+      // Delete this regardless of whether the queen was fed, otherwise ant could carry forever.
+      carryUndraw(ant.carry);
+      del(ant, 'carry');
+      // Pause here for a bit (slightly longer than the animation above).
+      antNext(ant, pauseDelay + randomInt(shortDelay));
     }
     else {
-      // No queen selected yet.
-      if (!Xc(a)[D](a => [md, zc][Y](a)) && (b = x(d.a[k](a => Xa(a) && za(a))))) nb(a, b.fd < b.dr ? Jd : Ga, {Q: b.id}); // Go to the appropriate item.
-      A(a);
+      // No queen selected yet.  Pick the one with the lowest stats.
+      if (!antUniqueActs(ant).includes('get') && (queen = farm.a.filter(a => isQueen(a) && livesInFarm(a)).sort((a, b) => (a.fd + a.dr) - (b.fd + b.dr))[0])) antFinnaVia(ant, queen.fd < queen.dr ? 'eat' : 'drink', {Q: queen.id}); // Go to the appropriate item.
+      antNext(ant);
     }
   },
 
   // Queen's special rest function - queen goes to her favourite spot first.  Also initiates egg-laying.
-  kip: (a, b = J(a), c = [...new Set(b.a[k](a => a[Nc]).map(a => a[Nc]))]) => {
+  kip: (ant, farm = getFarm(ant), nests = [...new Set(farm.a.filter(a => a.nest).map(a => a.nest))], antCount = farm.a.length) => {
     // Try pick a nest if there's a suitable one and/or send to the nest.
-    (a[Nc] ||= x(b[v][k](a => a.t == pa && a[u] == 100 && !a[K] && !a[Id] && a.co[g] < 2 && !c[Y](a.id)))?.id)
-      && $c(a, Vd({[p]: a[Nc], pc: 20 + f(60), pos: qc}));
-    F(a, Mc);
-    // Queue egg laying if no eggs in the nest, and random chance passed with respect to various factors.
-    !b.e[g] && !Bc(ja * ab.ceil(b.a[g] / 30) - (b[oa] == Se ? fc : 0) - (b.a[D](a => Tc(a) && za(a)) || b.a[g] < 9 ? R : 0)) && F(a, Pc);
-    A(a);
+    if (getTun(farm, ant.nest)?.morgue) ant.nest = 0;
+    (ant.nest ||= pickRandom(farm.tuns.filter(t => t.t == 'cav' && t.dun && !t.nip && !t.morgue && t.co.length < 2 && !nests.includes(t.id)))?.id)
+      && goToLocation(ant, makeDiveStub({tun: ant.nest, pc: 20 + randomInt(60), pos: 'dn'}));
+    antFinna(ant, 'rest');
+    // Queue egg laying if no eggs in the nest, not overpopulated, and random chance passed with respect to various factors.
+    // Note: The 'lay' action will protect from laying if something went wrong in the queue and she's not in a cav, and actually has a high chance of requeueing another dive/lay cycle.
+    ant.hp> 40 && !farm.e.length && antCount < 40 && !random(num1000 * Math.ceil(antCount / 30) - (farm.fill == 'lube' ? deg360 : 0) - (farm.a.some(a => isDrone(a) && livesInFarm(a)) || antCount < 9 ? deg360 : 0)) && antFinna(ant, 'lay');
+    antCount> 39 && playerHint(farm, ["Queen won't lay eggs due to overpopulation."]);
+    // Note: free ant spawning stops at 25 ants, ant vials disallow use at 30, and laying stops at 40.  This seems like a decent progression allowance.
+    antNext(ant);
   },
 
   // Queen lays eggs.
-  [Pc]: (a, i = J(a), o = a.q[0], c = o[e] || 0, j = o.laid || 0, b = ob(a), q = i.e[k](a => a[e] == c && a[p] == b[p])[g],
-    d = b?.[p], l = Wb(d, 5), m = {
-      id: a.id + Ja(),
-      Q: a.id,
-      t: a.t,
-      f: a.f,
-      [Cb]: f(6) ? 'W' : 'D',
-      ts: mb(),
-      [p]: b?.[p],
-      pc: b?.pc,
-      r: f(S),
+  lay: (ant, farm = getFarm(ant), action = ant.q[0], lvl = action.lvl || 0, laid = action.laid || 0, tunPos = getTunPosition(ant), eggLvlCount = farm.e.filter(e => e.lvl == lvl && e.tun == tunPos.tun).length,
+    tun = tunPos?.tun, eggSize = tunPercent(tun, 5), egg = {
+      id: ant.id + getTime(),
+      Q: ant.id,
+      t: ant.t,
+      f: ant.f,
+      caste: randomInt(6) ? 'W' : 'D',
+      dur: 0,
+      ts: getTimeSec(),
+      tun: tunPos?.tun,
+      pc: tunPos?.pc,
+      r: randomInt(deg180),
       hp: 99,
-      [y]: Cc()
+      scale: randomSign()
     }) => {
-    if (b && d.t == pa && !d[K] && !d[Id] && a[I] == Db && Gc(a, He(d, b.pc), 2 * kc(a))) { // Layable tunnel and position.
-      if (b.pc < 20 || b.pc> 80 || i.e[D](a => a[p] == d.id && a[e] == c && N(a.pc - b.pc) < l) // Check there is no egg occupying current space
-        || (i.e[D](a => a[p] == d.id && a[e] == c) && !i.e[D](a => a[p] == d.id && a[e] == c && N(a.pc - b.pc) < l * 1.4)) // Check it is right next to an existing egg or there is no other egg
-        || c && i.e[k](a => a[p] == d.id && a[e] == c - 1 && N(a.pc - b.pc) < l)[g] < 2) { // Check there are two supporting eggs to stack an egg on.
+    if (ant.hp < 50) {
+      antFinna(ant, 'kip');
+      antFinna(ant, 'lay');
+    }
+    if (tunPos && tun.t == 'cav' && !tun.nip && !tun.morgue && ant.pose == 'side' && antInTargetProximity(ant, cavFloor(tun, tunPos.pc), 2 * antOffsetY(ant))) {// Layable tunnel and position.
+      if (tunPos.pc < 20 || tunPos.pc> 80 || farm.e.some(e => e.tun == tun.id && e.lvl == lvl && abs(e.pc - tunPos.pc) < eggSize) // Check there is no egg occupying current space
+        || (farm.e.some(e => e.tun == tun.id && e.lvl == lvl) && !farm.e.some(e => e.tun == tun.id && e.lvl == lvl && abs(e.pc - tunPos.pc) < eggSize * 1.4)) // Check it is right next to an existing egg or there is no other egg
+        || lvl && farm.e.filter(e => e.tun == tun.id && e.lvl == lvl - 1 && abs(e.pc - tunPos.pc) < eggSize).length < 2) {// Check there are two supporting eggs to stack an egg on.
         // Can't lay here, walk a bit and try again.
-        F(a, ia, {[p]: d.id, pc: b.pc + f(l) * (b.pc < 20 ? 1 : b.pc> 80 ? -1 : Cc()), pos: qc});
-        f(R) && F(a, Pc, {laid: j, [e]: c}); // There's also a random small chance (about once every 4 hours) that she'll give up laying here altogether to avoid permanent deadlock.
+        antFinna(ant, 'dive', {tun: tun.id, pc: tunPos.pc + randomInt(eggSize) * (tunPos.pc < 20 ? 1 : tunPos.pc> 80 ? -1 : randomSign()), pos: 'dn'});
+        randomInt(num500) && antFinna(ant, 'lay', {laid: laid, lvl: lvl}); // There's also a random small chance (about once every 4 hours) that she'll give up laying here altogether to avoid permanent deadlock.
       }
       else {
-        while ((q > 6 - (c * 2) || f(4)) && q < 16 - (c * 2)) c++; // Go up a level when there are lots of eggs on the current level.
-        m[e] = c;
+        while ((eggLvlCount > 6 - (lvl * 2) || randomInt(4)) && eggLvlCount < 16 - (lvl * 2)) lvl++; // Go up a level when there are lots of eggs on the current level.
+        egg.lvl = lvl;
         // Animate.
-        a[I] = Kc;
-        a.jit = 1;
-        T(a);
-        h(b => {
-          a[I] = Db;
-          a.jit = 0;
-          T(a);
+        antUpdateClasses(ant, {pose: 'pick', jit: 1});
+        setTimeout(X => {
+          ant.pose = 'side'; // Note: Don't need antToSideWithCorrection() here because this is just resetting to 'pose' from 'pick', and NOT from 'prone' pose.
+          antRemAnimUpdate(ant);
           // Lay an egg.
-          i.e[n](m);
-          Sf(m);
-          Ya(a, {hp: -20, fd: 2, dr: 2, md: 2}); // Increase chance of queen being forced to sleep between eggs.  Queens self-feed during this time.
-          (j < 8 || f(8)) && j < 26 && c < 4 && F(a, Pc, {laid: ++j, [e]: c}); // If eggs aren't stacked too high, loopback to laying.
-        }, Hb);
+          farm.e.push(egg);
+          eggDraw(egg);
+          antStats(ant, {hp: -9, fd: 2, dr: 2, md: 2}); // Increase chance of queen being forced to sleep between eggs.  Queens self-feed during this time.
+          (laid < 8 || randomInt(8)) && laid < 26 && lvl < 4 && antFinna(ant, 'lay', {laid: ++laid, lvl: lvl}); // If eggs aren't stacked too high, loopback to laying.
+        }, pauseDelay);
       }
     }
-    if (j < 10 && Ub(i) && !Xc(a)[Y](Pc) && f(2)) {
+    if (laid < 10 && farmIsDeveloping(farm) && !antUniqueActs(ant).includes('lay') && randomInt(2)) {
       // Queen did not lay eggs or not enough eggs, and the logic above did not queue up any more laying.  Take a high chance to remind her to pop a few more out, even elsewhere.
-      nb(a, ia, {pos: qc});
-      F(a, Pc, {laid: j});
+      antFinnaVia(ant, 'dive', {pos: 'dn', n: 'bot'});
+      antFinna(ant, 'lay', {laid: laid});
     }
-    A(a, W + f(la));
+    antNext(ant, shortDelay + randomInt(standardDelay));
   },
 
   // Ant carries an egg, infant, or a dead ant to another location.
-  [_]: (a, d = J(a), b = a.q[0], c = (b.t == kd ? Sd : Vb)(d, b.id), e = c && eb(d[Aa], c[ld])) => {
-    if (c && Gc(Uf(a), c, Sa(a)) && !d.a[D](a => a[_] == b.id)) {
-      if (b.t == yc) {
-        Xd(a, c);
-        F(a, zc, ca(b, {q: [{[C]: ia, [p]: d[v][X](a => a[Id])}, {...{b}, [C]: Qb}]})); // @TODO we might want to make sure it goes to the far end of the tunnel!
+  carry: (ant, farm = getFarm(ant), action = ant.q[0], pkg = (action.t == 'egg' ? getEgg : getAnt)(farm, action.id), nipData = pkg && getById(farm.nips, pkg.moveTo)) => {
+    if (pkg && antInTargetProximity(antHeadPoint(ant), pkg, antOffsetX(ant)) && !farm.a.some(a => a.id != ant.id && a.carry == action.id)) {
+      if (action.t == 'dead') {
+        antGoToAnt(ant, pkg);
+        let morgueTun = farm.tuns.find(t => t.morgue),
+          morguePos = morgueTun.rwip ? 95 - randomInt(15) : 80 + randomInt(15);
+        antFinna(ant, 'get', assign(action, {q: [{act: 'dive', tun: morgueTun, pc: morguePos}, {...{action}, act: 'drop'}]}));
       }
-      else if (c[ld]) {
-        e ? F(a, zc, ca(b, {q: [{[C]: K, [K]: e[K]}, {...{b}, [C]: Qb}]})) : Ca(c, ld); // Pass in a nip action or remove stale flag.
-      }
+      else if (pkg.moveTo)
+        nipData ? antFinna(ant, 'get', assign(action, {q: [{act: 'nip', nip: nipData.nip}, {...{action}, act: 'drop'}]})) : del(pkg, 'moveTo'); // Pass in a nip action or remove stale flag.
       else {
-        nb(a, ia, {[p]: c.id, pc: c.pc, pos: qc});
-        F(a, zc, ca(b, {q: [{[C]: ia, [p]: eb(d.a, c.Q)[Nc]}, {...{b}, [C]: Qb}]}));
+        antFinnaVia(ant, 'dive', {tun: pkg.id, pc: pkg.pc, pos: 'dn'});
+        antFinna(ant, 'get', assign(action, {q: [{act: 'dive', tun: getById(farm.a, pkg.Q).nest}, {...{action}, act: 'drop'}]}));
       }
     }
-    A(a);
+    antNext(ant);
   },
 
   // Drop a carried item.  Carefully though.
-  [Qb]: (b, c = J(b), d = b.q[0], i = d.t == kd, f = (i ? Sd : Vb)(c, d.id), h = ob(b), a = h?.[p]) => {
-    if (a) {
-      if (i) T(ca(f, {[p]: a.id, pc: d.pc, ...He(a, d.pc)}));
+  drop: (ant, farm = getFarm(ant), action = ant.q[0], isEgg = action.t == 'egg', pkg = (isEgg ? getEgg : getAnt)(farm, action.id), tunPos = getTunPosition(ant), tun = tunPos?.tun) => {
+    if (tun) {
+      if (isEgg) antUpdate(assign(pkg, {tun: tun.id, pc: action.pc, ...cavFloor(tun, action.pc)}));
       else {
-        let j = Wb(a, 5),
-          m = (d = 0, f, h, i, b) => {
-            for (; d < 4; d++) {
-              f = c.e[k](b => b[p] == a.id && b[e] === d)[yb]((a, b) => a.pc - b.pc);
-              for (h of f) {
-                for (i of [-j, j]) {
-                  b = h.pc + i;
-                  if (b > 20 && b < 80 && !c.e[D](c => c[p] == a.id && N(b - c.pc) < j) &&
-                    (!d || c.e[k](b => b[p] == a.id && b[e] === d - 1)[k](a => N(b - a.pc) < j)[g]> 1) &&
-                    (!f[g] || f[D](a => N(b - a.pc) < j))) return {b, d};
+        let eggSize = tunPercent(tun, 5),
+          spotFinder = (lvl = 0, levelEggs, egg, offset, pc) => {
+            for (; lvl < 4; lvl++) {
+              levelEggs = farm.e.filter(e => e.tun == tun.id && e.lvl === lvl).sort((a, b) => a.pc - b.pc);
+              for (egg of levelEggs) {
+                for (offset of [-eggSize, eggSize]) {
+                  pc = egg.pc + offset;
+                  if (pc > 20 && pc < 80 && !farm.e.some(e => e.tun == tun.id && abs(pc - e.pc) < eggSize) &&
+                    (!lvl || farm.e.filter(e => e.tun == tun.id && e.lvl === lvl - 1).filter(e => abs(pc - e.pc) < eggSize).length> 1) &&
+                    (!levelEggs.length || levelEggs.some(e => abs(pc - e.pc) < eggSize))) return {pc, lvl};
                 }
               }
             }
           },
           // spotFinder() is different from how the queen picks a spot to lay, as she uses a slow trial-and-error approach, whereas spotFinder() works out a good spot to drop.
-          l = m();
-          if (l) {
+          newSpot = spotFinder();
+          if (newSpot) {
             // Found a spot.
-            if (N(h.pc - l)> Wb(a, Sa(b))) {
+            if (abs(tunPos.pc - newSpot)> tunPercent(tun, antOffsetX(ant))) {
               // Too far away!
-              F(b, ia, {[p]: a.id, pc: l.pc, pos: qc});
-              F(b, Qb, d);
-              return A(b);
+              antFinna(ant, 'dive', {tun: tun.id, pc: newSpot.pc, pos: 'dn'});
+              antFinna(ant, 'drop', action);
+              return antNext(ant);
             }
-            else Rf(c, ca(f, {[p]: a.id, pc: l.pc, [e]: l[e]}));
+            else eggUpdate(farm, assign(pkg, {tun: tun.id, pc: newSpot.pc, lvl: newSpot.lvl}));
           }
           else {
             // No spots.  Egg will be dropped here anyway, but we'll tell the queen her nest sucks.  This may cause ants to keep moving nest, fun!
-            Vb(c, f.Q)[Nc] = 0;
-            Rf(c, ca(f, {[p]: a.id, pc: h.pc, [e]: 0}));
+            getAnt(farm, pkg.Q).nest = 0;
+            eggUpdate(farm, assign(pkg, {tun: tun.id, pc: tunPos.pc, lvl: 0}));
           }
       }
     }
     // Note: If it's not in a tun I suppose they'll just leave it where it is.  Add more code here if that looks silly!
-    Ch(b[_]);
-    Ca(f, ld);
-    Ca(b, _, 'run');
-    A(b);
+    carryUndraw(ant.carry);
+    del(pkg, 'moveTo');
+    del(ant, 'carry', 'run');
+    antNext(ant);
   },
 
   // Ant goes on a mission to care for an egg or infant.
-  care: (a, c = J(a), d = a.q[0], e = d.t == kd, b = (e ? Sd : Vb)(c, d.id)) => {
-    if (b && Gc(Uf(a), b, Sa(a))) {
+  care: (ant, farm = getFarm(ant), action = ant.q[0], isEgg = action.t == 'egg', pkg = (isEgg ? getEgg : getAnt)(farm, action.id)) => {
+    if (pkg && antInTargetProximity(antHeadPoint(ant), pkg, antOffsetX(ant))) {
       // At the target.
-      e ? b.hp += 2 : Ya(b, {hp: 2, fd: 2, dr: 2, md: 2});
-      a[$] = 1;
-      T(a);
-      h(b => a[$] = 0 || T(a), W);
-      return A(a, W + f(W));
+      isEgg ? pkg.hp += 2 : antStats(pkg, {hp: 2, fd: 2, dr: 2, md: 2});
+      antUpdateClasses(ant, {dig: 1});
+      setTimeout(X => antUpdateClasses(ant, {dig: 0}), shortDelay);
+      return antNext(ant, shortDelay + randomInt(shortDelay));
     }
-    else if (a.q[g] < 2) cg(c, a); // Try again if ant has nothing to do.
-    A(a);
+    else if (ant.q.length < 2) care4kids(farm, ant); // Try again if ant has nothing to do.
+    antNext(ant);
   },
 
   // Ant nips off to a nip.
-  [K]: (a, d = J(a), j = a.q[0], h = j.id, l = j[K], o = h || l, b = h ? na(d, j[p]) : d[v][X](a => a[K] == l),
-    q = d[Aa][X](a => a[K] == o), g = q?.[Na], m = o > 2, e = o % 2 > 0, n = Ee(a), r = j.rev, s = Sb(d)) => {
-    if (g && r) {
+  nip: (ant, farm = getFarm(ant), action = ant.q[0], id = action.id, nip = action.nip, idOrNip = id || nip, tun = id ? getTun(farm, action.tun) : farm.tuns.find(t => t.nip == nip),
+    nipData = farm.nips.find(n => n.nip == idOrNip), nipItem = nipData?.item, isTop = idOrNip > 2, isLeftSide = idOrNip % 2 > 0, antX = antFaceX(ant), rev = action.rev) => {
+    if (nipItem && rev) {
       // Entering farm from a nip area.
-      if (e ? n < 20 : n> 940) {
-        a[fa] = 1;
-        if (a[_]) {
-          T(a); // Correct x/y pos of carried items.
+      if (isLeftSide ? antX < 20 : antX> 940) {
+        antSetWalk(ant);
+        if (ant.carry) {
+          antUpdate(ant); // Correct x/y pos of carried items.
           // Walk to a random spot and drop.
-          F(a, m ? xc : ia, {for: f(R)});
-          F(a, Qb, a[_]);
+          antFinna(ant, isTop ? 'pace' : 'dive', {for: randomInt(num500)});
+          antFinna(ant, 'drop', ant.carry);
         }
-        if (m) {
-          a[y] = va(e);
-          Xf(a); // Top area.
+        if (isTop) {
+          ant.scale = getSign(isLeftSide);
+          antMoveSurface(ant); // Top area.
         }
         else {
           // Tunnel
-          lc(a, b);
+          antToProneWithCorrection(ant, tun);
           // This actually calculates a tunPoint 20px from the end.
-          let c = e ? {x: b.x1, y: b.y1} : {x: b.x2, y: b.y2},
-            f = Rb(b.x1, b.y1, b.x2, b.y2),
-            i = va(e) * 20;
-          a.r = rd(a, {x: c.x + f.x * i, y: c.y + f.y * i});
-          Ud(a);
+          let tunPoint = isLeftSide ? {x: tun.x1, y: tun.y1} : {x: tun.x2, y: tun.y2},
+            dist = calcDistComponents(tun.x1, tun.y1, tun.x2, tun.y2),
+            offset = getSign(isLeftSide) * 20;
+          ant.r = getAngle(ant, {x: tunPoint.x + dist.x * offset, y: tunPoint.y + dist.y * offset});
+          antMoveTunnel(ant);
         }
-        O(a);
+        antAction(ant);
       }
-      else {
-        // All done.
-        a[fa] = 0;
-        A(a);
-      }
+      else antNextStill(ant); // All done.
     }
-    else if (g && h && !g.a[D](b => b.t != a.t)) {
+    else if (nipItem && id && !nipItem.a.some(a => a.t != ant.t)) {
       // Exiting farm into a nip area.
-      if (e ? n > -25 : n < 985) {
-        a[fa] = 1;
-        if (m) Xf(a); // Top area.
+      if (isLeftSide ? antX > -25 : antX < 985) {
+        antSetWalk(ant);
+        if (isTop) antMoveSurface(ant); // Top area.
         else {
           // Tunnel
-          lc(a, b); // It's a copout, but I'm not going through the whole waypoint saga here.
-          a.r = rd(a, e ? {x: b.x1, y: b.y1} : {x: b.x2, y: b.y2}); // Ant hasn't reached the tunPoint yet, so force the angle.
-          Ud(a);
+          antToProneWithCorrection(ant, tun); // It's a copout, but I'm not going through the whole waypoint saga here.
+          ant.r = getAngle(ant, isLeftSide ? {x: tun.x1, y: tun.y1} : {x: tun.x2, y: tun.y2}); // Ant hasn't reached the tunPoint yet, so force the angle.
+          antMoveTunnel(ant);
         }
-        O(a);
+        antAction(ant);
       }
       else {
         // Done! Move ant into "nip item space".
-        let f = c(Bd + Nb[h]);
-        De(d, hd, a, d, g, {x: -25, y: 28 - kc(a), [da]: g.k, f: d.id, q: []}, f);
-        Je(d);
-        if (Xa(a)) {Ca(a, Nc); [...d.e[k](b => b.Q == a.id), ...d.a[k](b => b.Q == a.id)][i](a => a[ld] = h)};
-        xa();
-        g.k == rc ? Lh(a) || Mh() : Oh(d, q, a) || Ph();
+        let nipEl = getEl('a-' + nipIds[id]);
+        transferObject(farm, 'a', ant, farm, nipItem, {x: -25, y: 28 - antOffsetY(ant), state: nipItem.k, f: farm.id, q: []}, nipEl);
+        setColonyAndFoe(farm);
+        if (isQueen(ant)) {del(ant, 'nest'); [...farm.e.filter(e => e.Q == ant.id), ...farm.a.filter(a => a.Q == ant.id)].forEach(b => b.moveTo = id)};
+        save();
+        nipItem.k == 'vial' ? vialActivity(ant) || vialLoop() : tubeWalker(farm, nipData, ant) || tubeLoop();
       }
     }
     else {
       // Setup.
-      if (g && l) {
-        if (!a[_] || ![Ua, Ga, 'ant'][Y](Zi(d, a[_]).t)) {
-          m ? $c(a, {n: H}) : $c(a, {n: Eb, [p]: b.id, pc: 100 * !e + va(e) * Wb(b, 25 - f(20))});
-          F(a, K, {id: l, [p]: b?.id, tx: e ? 1 : 959}); // note: tx and tun are only used in their own respective areas.
+      if (nipItem && nip) {
+        if (!ant.carry || !['food', 'drink', 'ant'].includes(getCarry(farm, ant.carry).t)) {
+          isTop ? goToLocation(ant, {n: 'top'}) : goToLocation(ant, {n: 'bot', tun: tun.id, pc: 100 * !isLeftSide + getSign(isLeftSide) * tunPercent(tun, 25 - randomInt(20))});
+          antFinna(ant, 'nip', {id: nip, tun: tun?.id, tx: isLeftSide ? 1 : 959}); // note: tx and tun are only used in their own respective areas.
         }
       }
-      else if (a[_]) F(a, Qb, a[_]); // Ant was carrying something to a nip, but it is not there.
-      A(a);
+      else if (ant.carry) antFinna(ant, 'drop', ant.carry); // Ant was carrying something to a nip, but nip is not there.
+      antNext(ant);
     }
   },
 
-  // Freeze an ant for x-number of 5 second periods.
-  [Oc]: (a, b = a.q[0]) => {
-    a[fa] = a[$] = a.jit = 0;
-    b[Oc] ||= 1;
-    if (!--b[Oc]) {
-      Ca(a, Oc);
-      A(a, W);
-    }
-    else O(a, W);
-  },
-
-  // Dying is an ant action that goes for several hours while the corpse remains in the farm.
-  // @TODO ant should become more "hazardous" the more it rots - depletes ants hp when within proximity.
-  die: (a, b = J(a), c = a.q[0], d = na(b, a[q].t)) => {
-
-
-
-
-    if (a[q].n == jb) vb(a, {[C]: 'slip'}) && A(a); // Ant is on the bg, let's have it drop off first.  Can't use antSlip() here because it will forget to die.
-    else if (a[q].t && a[I] == Pa && !a.slip) vb(a, {[C]: 'tunSlip', mark: 1}) && A(a);
-    else {
-      if (a[da] != yc) bg(a, a.q[0].r);
-      else {
-        // Decompose loop
-        let e = Ja() - a[wc], f = 7200000;
-        if (e > f) {// Wait time before corpse gets nasty.
-          if (e < f * 3) a.rot++; // Slightly make the ant more fuzzy (1%).
-          else if (e < f * 4) a.decay++; // Shrink the ant 2% at a time.
-          else return Rd(a); // Totally rotted - undraw the ant and delete the ant from the array.
-        }
-      }
-      a.q = [a.q[0]]; // Remove remainder of queue.
-      O(a, 144000); // 2.4 minutes
-    }
-  },
-
-  // Fight is not a real ant action but works in a similar way.  Each ant is
-  // "ant" in it's own loop, and it is the "ant2" for one or more other ants.
-  [Ba]: (a, c = J(a), b = Vb(c, a.q[0].ant), d = !b || b[da] == yc || a[q].n != b[q].n || !Gc(a, b, 64) || c[Ob]) => {
-    // ant2's ID is an arg in the finna queue.
-    if (a[I] == Db) a[q].n == Eb ? lc(a, tun) : (a[I] = Pa); // Fight in prone pose?
-    // Weak ant might slip off the bg if the fight is there.
-    if (a.hp < 10 && a[q].n == jb && !f(3)) {
-      // Quit fighting for now.
-      a[Ba] = a.jit = a[$] = 0;
-      Ie(a);
-    }
-    else if (d) {
-      // Cancel fight.
-      a[Ba] = a.jit = a[$] = 0;
-      A(a);
-    }
-    else if (a.hp <= 0) {
-      a.wig = 1;
-      F(a, 'die', {r: Ba});
-      h(b => {a[Ba] = a.wig = 0; A(a)}, la);
+  // Prepare ant for antDeath().
+  die: (ant, action = ant.q[0]) => {
+    if (ant.carry || ant.nipPh) {
+      // This is no time to die. Requeue this action.
+      antFinna('die', action);
+      antNext(ant);
     }
     else {
-      a[Ba] = 1;
+      if (ant.area.n == 'top') ant.y = antGroundLevel(ant, 0); // Ant is at the top, need to adjust it to ground level.
+      if (ant.area.n == 'bg') antInstaQ(ant, [{act: 'slip'}, action]) && antNext(ant); // Ant is on the bg, let's have it drop off first.  Can't use antSlip() here because it will forget to die.
+      else if (ant.area.t && ant.pose == 'prone' && !ant.slip) antInstaQ(ant, [{act: 'tunSlip'}, action]) && antNext(ant);
+      else antDeath(ant, action.r);
+    }
+  },
+
+  // Fight.
+  // Ant is "ant" in it's own loop, and it is the "ant2" for one or more other ants.
+  fight: (ant, farm = getFarm(ant), ant2 = getAnt(farm, ant.q[0].ant),
+    cancelFight = !ant2 || deadInFarm(ant2) || !antUniqueActs(ant2).includes('fight') || ant.area.n != ant2.area.n || !antInTargetProximity(ant, ant2, 64) || farm.coex,
+    endFight = X => antRemAnimUpdate(ant) && fightSongCheckAndStop()) => {
+    // Fight in prone pose.  Note: antGetStill() slipped in here to avoid setting walk=0 in this block of code.
+    if (antGetStill(ant).pose == 'side') ant.area.t ? antToProneWithCorrection(ant, getTun(farm, ant.area.t)) : (ant.pose = 'prone', antProneCorrection(ant));
+    // Make ant point at foe.  Don't worry about animating this rotation.
+    if (!cancelFight) ant.r = normalize360(antToTargetAngle(ant, ant2));
+    // Weak ant might slip off the bg if the fight is there.  Or cancelFight is set.
+    if (cancelFight || ant.hp < 10 && ant.area.n == 'bg' && !randomInt(3)) {
+      // Quit fighting.
+      endFight();
+      cancelFight ? antNext(ant) : antSlip(ant);
+    }
+    else if (ant.hp <= 0) {
+      endFight();
+      ant.wig = 1;
+      antFinna(ant, 'die', {r: 'fight'});
+      setTimeout(X => {ant.wig = 0; antNext(ant)}, standardDelay);
+    }
+    else if (!antInTargetProximity(ant, ant2, antOffsetX(ant) + antOffsetX(ant2))) {
+      // Get closer to foe.
+      antTakeProneStep(ant);
+      antAction(ant);
+    }
+    else {
+      !fightSong && currentFarm(farm) && fightSongPlay(); // Play fight music if not already playing.
+      ant.fight = ant.dig = ant.jit = 1;
+      ant.thotD = ant.thotD < 7 ? 7 : ant.thotD + 1; // Change thoughts faster.
       // Ant strength is determined by a combo of factors.
-
       // Decrease foe ant's hp by the strength.
-      b.hp -= Ib(a.hp / 100, 0.5, 0.8) // Base strength is health, but doesn't drop below 50 or go above 80 to keep it fairer.
-        * (Vc(a) == sb ? .8 : (Vc(a) == 'l' ? 1.2 : 1))  // Adjust strength by size.
-        * (a.b ? 1.3 : 1) // Biters have extra oomph.
-        * ya[a.t].v // Adjust strength by speed.
-        * (Tc(a) ? 3 : Xa(a) ? 5 : 1) // Drones and Queens fair much better.
-        + Qa(1 / a.md, .2); // Low mood can add slightly to aggression.
-
-
-      // Ants may circle each other on the background.
-      if (!f(6) && a[q].n == jb) {
-        let i = Nf(a),
-          f = Ge(a, b);
-        if (!i && !a[oi]) {
-          a[fa] = b[fa] = b[oi] = 1;
-          let j = qd(va(f < S) * 15),
-            k = Ha(c => {a.r = ka(a.r + j); T(a); b.r = ka(b.r + j); T(b)}, Ia);
-          h(c => {ha(k); a[fa] = b[fa] = 0; b[oi] = 0}, W);
-        }
-        // Turn towards foe.
-        h(b => {a.r = ka(a.r + va(f > S) * (f > 15 ? 15 : f)); T(a)}, W + Ia);
-      }
-
-      let g = wa(a.x, a.y, b.x, b.y);
-      let e = Ee(a);
-      if (g < 5) {
-        // Step backwards by 2.
-        // @TODO will depend on whether they're top or bot side, and whether there is room behind them.
-        // @TODO need a function to determine how much room is behind an ant.
-        // Don't forget to use crawl class.
-        let f = 0;
-        if (a[q].n == H) f = a[y] ? e - 10 : 950 - e;
-        else if (a[q].n == Eb) {
-          //???????
-          // @TODO not handled properly, if they're 10+ away from any tun x1/y1 or x2/y2 coordinate, there is 2 space??
-          // Do fights take place on a single plane here???  What pose are the ants in ?
-          f = 0
-        }
-        else if (a[q].n == jb && e> 10 && e < 950 && antY> -195 && antY < 12) {
-          f = 2;
-        }
-      }
-      if (g> 10) {
-        // Step forwards by 2.
-        // @TODO will depend on whether they're top or bot side,
-      }
-
-      // @TODO ants should still frequently move backwards and forwards to simulate attacking.
-
-      // @TODO - the ants should move slightly towards the attacked/weaker ant if there's room so they're not in the same spot the whole time.
-      // This may mean a nearby ant that is also in the fight may be further away, it will need to move towards the foe on it's turn as well.
-      // If it's too far from the foe, it should revert back to pacing/burrowing but towards the foe, instead of attacking.
-
-      // Wait 10-15 seconds for another blow, this randomness makes the fight less predictable.
-      O(a, W + f(W * 2));
+      ant2.hp -= clamp(ant.hp / 100, .5, .8) // Base strength is health, but doesn't drop below 50 or go above 80 to keep it fairer.
+        * (antGetSize(ant) == 's' ? .8 : (['l', 'x'].includes(antGetSize(ant)) ? 1.2 : 1))  // Adjust strength by size.
+        * (ant.b ? 1.3 : 1) // Biters have extra oomph.
+        * types[ant.t].v // Adjust strength by speed.
+        * (isDrone(ant) ? 3 : isQueen(ant) ? 5 : 1) // Drones and Queens fair much better.
+        + max(1 / ant.md, .2); // Low mood can add slightly to aggression.
+      // Wait 5-15 seconds for another blow, this randomness makes the fight less predictable.
+      antAction(ant, shortDelay + randomInt(shortDelay * 2));
     }
   },
 
@@ -4291,274 +4548,297 @@ nj = {
 // - tun : (bot) optional tunnel id.
 // - pc  : (bot+t) optional percent along tunnel (0–100).
 // - pos : (bot+t) optional final tunnel placement: 'u' (up), 'd' (down), 'm' (mid).
-// Note: For actions that can be triggered directly from the surface level, using antFinnaVia in a one-liner is preferable.
-$c = (b, a) => nb(b, a.n == jb ? jd : a.n == H ? xc : ia, a),
+goToLocation = (ant, location) => antFinnaVia(ant, location.n == 'bg' ? 'crawl' : location.n == 'top' ? 'pace' : 'dive', location),
 
 // Requests an ant to walk to where another ant was at the time of the request.  Nothing is guaranteed.
 // Should silently fail when 'ant' is missing.
-Xd = (c, b, a = {n: b[q].n}) => {
-  if (a.n == jb) {
-    a.x = b.x;
-    a.y = b.y;
+antGoToAnt = (ant, destAnt, location = {n: destAnt.area.n}) => {
+  if (location.n == 'bg') {
+    location.x = destAnt.x;
+    location.y = destAnt.y;
   }
-  if (a[p] = b[q].t) a.pc = ob(b)?.pc; // Note: assignment in condition on purpose.
-  $c(c, a);
-  a.n == H && F(c, xc, {tx: b.x});
+  if (location.tun = destAnt.area.t) location.pc = getTunPosition(destAnt)?.pc; // Note: assignment in condition on purpose.
+  goToLocation(ant, location);
+  location.n == 'top' && antFinna(ant, 'pace', {tx: destAnt.x});
 },
 
 // Rates the current farm as to whether it is styling.
 // Returns 0 on fail, and a positive integer with the score on pass.  Never demand players to score more than a 2 to get full benefits.
-Ke = a => Qa(0, a[aa][k](a => a.t == qb)[g] + a[be][g] / 2 + (a[V] ? .5 : 0) - 1),
+farmFlairScore = farm => max(0, farm.items.filter(i => i.t == 'scenery').length + farm.decals.length / 2 + (farm.card ? .5 : 0) - 1),
 
 // Applies ant stat adjustments.
-Ya = (a, b) => ma(b)[i](c => a[c] = Ib(a[c] + b[c], 0, 100)),
+antStats = (ant, stats) => keys(stats).forEach(key => ant[key] = clamp(ant[key] + stats[key], 0, 100)),
 
 // Attempts to restore some ant stats based on the substrate fill.
-oj = (a, b = {
+fillRefectory = (ant, fillMap = {
   'gel': {fd: .011, dr: .021},
   'beer': {fd: .005, dr: .01, hp: -.005, md: .03},
   'ooze': {fd: .005, dr: .01, hp: .3, md: -.02},
   'product': {fd: .011, dr: .021, hp: .01, md: .01},
-  [Se]: {fd: .01, dr: .02},
+  'lube': {fd: .01, dr: .02},
   'slime': {fd: .011, dr: .021, hp: .011}
-}) => Ya(a, b[J(a)[oa]] || {}),
+}) => antStats(ant, fillMap[getFarm(ant).fill] || {}),
 
 // Determines if the current farm has any queens.
-Yd = a => a.a[D](a => Xa(a) && za(a)),
+farmHasQueen = farm => farm.a.some(a => isQueen(a) && livesInFarm(a)),
 
 // Determines if an egg or infant can upgrade to the next phase.
-Qh = (a, b = 1) => a[p] && a.hp > 90 && !f(mb() - a.ts > 8640 * (1 + b) ? 50 : R) && mb() - a.ts > 8640 * b,
+canUpgrade = (pkg, day = 1) => pkg.tun && pkg.hp > 90 && !randomInt(pkg.dur > 8640 * (1 + day) ? 50 : num500) && pkg.dur > 8640 * day,
 
 // Directs farms by running checks every 30 seconds.
 // Adds deliberate tasks to the ants' finna queues so the action loops aren't responsible for checking everything.
 // Also updates ants stats, autosaves, updates food & drink display, checks achievements, updates ant thoughts.
-dg = a => {
-  b[P][i](a => {
-    h(c => a.a[k](za)[i](c => {
-      h(b => { // Perform a chunk of this without overloading the main thread with heaps of these at once.
+director = X => {
+  _.farms.forEach(farm => {
+    timeLog(farm); // Update duration.
+    setTimeout(X => farm.a.forEach(ant => {
+      timeLog(ant); // Update duration.
+      // Update corpse or handle living ant.
+      deadInFarm(ant) ? updateCorpseState(ant) : setTimeout(X => {// Perform a chunk of this without overloading the main thread with heaps of these at once.
         // Decrement stats.
-        Ya(c, {fd: -.05, dr: -.1, md: -.05, hp: -.1});
-        !c[q].t && Ya(c, {md: Ke(a) / 20}); // Boost mood stat based on presence of scenery (when not in tunnels).
+        antStats(ant, {fd: -.05, dr: -.1, md: -.05, hp: -.1});
+        !ant.area.t && antStats(ant, {md: farmFlairScore(farm) / 20}); // Boost mood stat based on presence of scenery (when not in tunnels).
         // Decrement hp stats based on other stats.
-        Ya(c, c.fd <= 0 || c.dr <= 0 ? {hp: -1, md: -.5} : c.fd < 10 || c.dr < 10 ? {hp: -.05, md: -.05} : {hp: c.md < 10 ? -.05 : -.01});
-        c.hp <= 0 && F(c, 'die', {r: c.fd <= 0 ? sg : c.dr <= 0 ? tg : c.q[0][C] == Ba ? Ba : Gd});
+        antStats(ant, ant.fd <= 0 || ant.dr <= 0 ? {hp: -9, md: -2} : ant.fd < 9 || ant.dr < 9 ? {hp: -.05, md: -.05} : {hp: ant.md < 9 ? -.05 : -.01});
+        // Detect hunger/thirst deaths.
+        if (ant.hp <= 0 && !ant.fight) {
+          if (ant.fd <= 0) antFinna(ant, 'die', {r: 'hunger'});
+          else if (ant.dr <= 0) antFinna(ant, 'die', {r: 'thirst'});
+          // Note: 'fight' and 'other' deaths should be handled elsewhere.
+        }
         // Ant tries to nourish from fill material if they are in a tunnel.
-        c[q].t && oj(c);
+        ant.area.t && fillRefectory(ant);
         // Cap ant's mood at the maximum its ant type can have.
-        c.md = ba(c.md, ya[c.t].m || 100);
-        // In a fight, random chance to pick another random ant to help out, available workers will always help, other types of ant are less likely to join.
-        c[da] == Ba && !f(2) && Xd(x(a.a[k](a => za(a) && a[da] != Ba && (Kb(a) || !f(4)))), c);
-        if (c.q[g] < 9) {
-          // Curb major problems.
-          if (c.dr < 10) nb(c, Ga);
-          else if (c.fd < 10) nb(c, Jd);
-          else if (c.hp < 10) F(c, Mc);
-          else if (Xc(c).every(a => [jd, xc, ia, xg, yg, ie][Y](a))) {
-            // Ant is "defaulting"; give them something better to do.
-            if (Kb(c) && !f(3) && !Ub(a) && Yd(a) && a.a[k](a => a.digD)[g] < 3) nb(c, $); // Curb slack workers problem.
-            else if (!f(5)) aj(c, 1); // Randomly pick a non-default action.
-            else if (!f(5)) nb(c, ia); // Increase chance of ants diving.
-            else if (!f(9)) nb(c, jd); // Increase chance of ants crawling.
-            // Hints for player.
-            c.md < 25 && !Yd(a) && Mb(a, ['Comrade, the workers are restless. They have no queen.', 'The absence of a queen is going to become a problem.']);
-            c.md < 20 && !Ke(a) && Mb(a, ['Some of your ants are complaining about the lack of scenery and decor.', "This farm doesn't have flair, the ants would like some decorations."]);
-            // Randomly go to vial.
-            let d = x(a[Aa]);
-            if (d && !a.foe && !f((a.dun ? 90 : Ub(a) ? 120 : S) - (a[aa][D](a => a.t == Ua && a.sz > 0) ? 0 : 30) - (a[aa][D](a => a.t == Ga && a.sz > 0) ? 0 : 40))
-              && !a.a[D](a => Xc(a)[Y](K)) && F(c, K, {[K]: d[K]}));
-          }
+        ant.md = min(ant.md, types[ant.t].m || 100);
+        //
+        if (ant.fight) {
+          let reinforcementAnt = pickRandom(farm.a.filter(a => livesInFarm(a) && !a.fight && (isWorker(a) || !randomInt(4))));
+          reinforcementAnt && !randomInt(2) && antGoToAnt(reinforcementAnt, ant);
         }
-
+        // Curb major problems.
+        ant.dr < 9 && antFinnaUnique(ant, 'drink');
+        ant.fd < 9 && antFinnaUnique(ant, 'eat');
+        ant.hp < 9 && antFinnaUnique(ant, 'rest', {n: 1}); // n:1 means "do it anywhere" since antFinnaUnique() passes through to antFinnaVia().
+        if (antUniqueActs(ant).every(a => ['crawl', 'pace', 'dive', 'tunWalk', 'rotWalk'].includes(a))) {
+          // Ant is "defaulting".
+          setTimeout(X => {// This is a random timeout because it looks super sus if several ants make a decision at the same time.
+            if (isWorker(ant) && !randomInt(3) && (!farmIsDeveloping(farm) || farmHasQueen(farm)) && farm.a.filter(a => a.digD).length < 3) antFinnaVia(ant, 'dig'); // Curb slack workers problem.
+            else if (!randomInt(5)) antFinnaVia(ant, pickRandom(acts[ant.area.n].filter((task, i) => i > 0 && !{Q: ['dig', 'rest'], D: ['dig']}[ant.caste]?.includes(task))), {n: ant.area.n}); // Randomly pick a non-default action.
+            else if (!randomInt(5)) antFinnaUnique(ant, 'dive'); // Increase chance of ants diving.
+            else if (!randomInt(5)) antFinnaUnique(ant, 'crawl'); // Increase chance of ants crawling.
+          }, randomInt(shortDelay * 2));
+          // Hints for player.
+          ant.md < 25 && !farmHasQueen(farm) && playerHint(farm, ['Comrade, the workers are restless. They have no queen.', 'The absence of a queen is going to become a problem.']);
+          ant.md < 20 && !farmFlairScore(farm) && playerHint(farm, ['Some of your ants are complaining about the lack of scenery and decor.', "This farm doesn't have flair, the ants would like some decorations."]);
+          // Randomly go to vial.
+          let randomNip = pickRandom(farm.nips);
+          if (randomNip && !farm.foe && !randomInt((farm.dun ? 90 : farmIsDeveloping(farm) ? 120 : deg180) - (farm.items.some(i => i.t == 'food' && i.sz > 0) ? 0 : 30) - (farm.items.some(i => i.t == 'drink' && i.sz > 0) ? 0 : 40))
+            && antFinnaUnique(ant, 'nip', {nip: randomNip.nip}));
+        }
       }, 1);
-      h(e => { // Delay a chunk so the director function doesn't intefere with the displayed farm too much.
-        if (c[Ea] && Qh(c, c[Ea])) {
+      setTimeout(X => {// Delay a chunk so the director function doesn't intefere with the displayed farm too much.
+        if (ant['inf'] && canUpgrade(ant, ant['inf'])) {
           // Infant upgrader.
-          let a = Fc(c)[d], g = ['a1', 'a2', 'a3'];
-          if (++c[Ea] > 4) {
-            Ca(c, Ea, ld);
-            c[da] = Pb;
-            !f(9) && (c[y] *= -1);
-            a[o](...g);
-            O(c);
-            Tc(c) && b.man++;
+          let infantClasses = objGetEl(ant).classList, infantAnims = ['a1', 'a2', 'a3'];
+          if (++ant['inf'] > 4) {
+            del(ant, 'inf', 'moveTo');
+            ant.state = 'cap';
+            !randomInt(9) && (ant.scale *= -1);
+            infantClasses.remove(...infantAnims);
+            antAction(ant);
+            isDrone(ant) && _.man++;
           }
-          else a[x([m, o])](x(g));
-          T(c);
+          else infantClasses[pickRandom(['add', 'remove'])](pickRandom(infantAnims));
+          antUpdate(ant);
         }
-        else if (Xa(c)) {
+        else if (isQueen(ant)) {
           // Extra handling for Queens.
-          if (!Ub(a) && !a.a[k](a => Kb(a))[g] && c.q[g] < 2 && f(3) < 1) F(c, $); // A queen without workers may dig a nest to start a colony.
-          else if (c.fd < 90 || c.dr < 90) F(x(a.a[k](a => Kb(a) && a.q[g] < 9 && !Xc(c)[Y](md))), md, {[zc]: c.fd < c.dr ? 'fd' : 'dr'}); // Reduces the possibility of a queen having to eat or drink by herself.
-          else if (c.hp < 95 && c.q[g] < 2 || c.hp < 80) F(c, 'kip');
+          if (!farmIsDeveloping(farm) && !farm.a.filter(a => isWorker(a)).length && ant.q.length < 2 && !randomInt(3)) antFinnaUnique(ant, 'dig'); // A queen without workers may dig a nest to start a colony.
+          else if (!isQueenAwaiting(ant) && ant.fd < 90 || ant.dr < 90)
+            antFinnaUnique(pickRandom(farm.a.filter(a => isWorker(a) && !a.carry && a.q.length < 9 && !hasCarryTasks(a))), 'srv'); // Reduces the possibility of a queen having to eat or drink by herself.
+          else if (ant.hp < 95 && ant.q.length < 2 || ant.hp < 80) antFinna(ant, 'kip');
           // Being a queen takes an extra toll.
-          Ya(c, {fd: -.05, dr: -.1, hp: -.02, md: -.05});
+          antStats(ant, {fd: -.05, dr: -.05, hp: -.1, md: -.05});
           // Queen's presence boosts moodiest ant's MD.
-          let b = a.a[k](a => a[Cb] != 'Q')[pc]((a, b) => b.md < a.md ? b : a, 0);
-          if (b) b.md += .3;
-          f(2) && a.a[k](a => Kb(a))[g] < 3 && cg(a, c); // Farm with not enough workers?  Queen maybe performs an extra care task per cycle.
+          let sadAnt = farm.a.filter(a => a.caste != 'Q').reduce((min, a) => a.md < min.md ? a : min, 0);
+          if (sadAnt) antStats(sadAnt, {md: .3});
+          randomInt(2) && farm.a.filter(a => isWorker(a)).length < 3 && care4kids(farm, ant); // Farm with not enough workers?  Queen maybe performs an extra care task per cycle.
         }
-        else if (Tc(c)) {
+        else if (isDrone(ant)) {
           // Being a drone takes an extra toll.
-          Ya(c, {fd: -.02, dr: -.02, hp: -.02, md: -.02});
+          antStats(ant, {fd: -.02, dr: -.02, hp: -.02, md: -.02});
           // Cap drone's HP lower and lower over time, making it harder to stay alive.
-          c.maxhp = c.maxhp ? Ib(c.maxhp - .01, 1, 99) : 99;
-          c.hp = ba(c.hp, c.maxhp);
+          ant.maxhp = ant.maxhp ? clamp(ant.maxhp - .01, 1, 99) : 99;
+          ant.hp = min(ant.hp, ant.maxhp);
         }
-      }, R);
+      }, num500);
       // Update the ant's thoughts, but limit it to changing every 10th loop (~5 minutes) so as not to override thoughts, particularly those set within other functions, too soon.
-      c.thotD> 9 ? (c.thot = rh(c)) : c.thotD++;
+      ant.thotD> 9 ? antThot(ant) : ant.thotD++;
     }, 0));
-    h(b => { // Delay these extra bits to not perform everything all at the same time.
-      Th(a);
-      a.e[i](b => {
+    setTimeout(X => {// Delay these extra bits to not perform everything all at the same time.
+      farm.e.forEach(e => {
         // Decrease egg stats.
-        b.hp -= .3;
-        if (b.hp <= 0) Qf(b); // Remove dead egg.
-        else if (Qh(b)) {
+        e.hp -= .3;
+        timeLog(e); // Update duration.
+        if (e.hp <= 0) eggDelete(e); // Remove dead egg.
+        else if (canUpgrade(e)) {
           // Egg can upgrade.
-          let c = He(na(tun), b.pc), d = ca(Df(a, c.x, c.y, b.r, Ea, b[Cb], b.t), {
-            Q: b.Q, // Mark the infant's mother.
-            [y]: Cc(),
-            f: a.id,
-            ts: mb(),
-            thot: x(["🧩🔒⏳", "🙂💡🚫", "🐢✨🚗", "🎎💁🍛"]),
+          // @TODO look into eggs and infants and make sure they have a ".area" property that gets properly updated!
+          let floorCoord = cavFloor(getTun(farm, e.area.t), e.pc), infant = assign(createAnt(farm, floorCoord.x, floorCoord.y, e.r, 'inf', e.caste, e.t), {
+            Q: e.Q, // Mark the infant's mother.
+            scale: randomSign(),
+            f: farm.id,
+            dur: 0,
+            ts: getTimeSec(),
+            thot: pickRandom(["🧩🔒⏳", "🙂💡🚫", "🐢✨🚗", "🎎💁🍛"]),
             thotD: 1,
-            [Ea]: 1,
+            inf: 1,
           });
-          Qf(b);
-          Sb(a) && Wc(d);
+          eggDelete(e);
+          currentFarm(farm) && antDraw(infant);
         }
       });
       // Look for dead ants or eggs and see if any need to be carried somewhere.
-      if (a.a[D](a => a[da] == yc) || a.e[g]) lj(a);
+      if (farm.a.some(deadInFarm) || farm.e.length) trySetCarryTask(farm);
       // Look for infants and eggs and see which one needs to be cared for next.
-      if (a.a[D](a => a[Ea]) || a.e[g]) cg(a);
-    }, ua);
+      if (farm.a.some(a => a['inf']) || farm.e.length) care4kids(farm);
+    }, num2000);
   });
-  xa();
-  Rh(1); // Check if game is almost in a winning state.
+  updateFoodAndDrink();
+  save();
+  checkAchievements(1); // Check if game is almost in a winning state.
 },
 
 // Checks if an achievement has been reached.
 // Note: Some achievements only check the currently focused farm, that's fine it makes more sense that way.
-Rh = (h, d = 0,
+checkAchievements = (countWins, count = 0,
     // Define three-level achievement funtions, these return the current count of whatever we're counting.
-    e = {
-      blood: b => Qa(...Lg(a.a[k](za)[pc]((a, b) => (a[b.t] = (a[b.t] || 0) + 1, a), {}))),
-      sac: a => b.sac,
-      scene: a => ma(b.scene)[g],
-      arty: a => b.arty,
-      man: a => b.man,
+    multiAch = {
+      blood: X => max(...values(F.a.filter(livesInFarm).reduce((acc, ant) => (acc[ant.t] = (acc[ant.t] || 0) + 1, acc), {}))),
+      sac: X => _.sac,
+      scene: X => keys(_.scene).length,
+      arty: X => _.arty,
+      man: X => _.man,
     },
     // Define one-level achievement functions, these return true or false if the condition is currently met or not.
-    f = {
-      fac: a => b[P][k](Ub)[g] > 3,
-      tri: a => new Set(b[P][k](Bf).map(a => a[oa])).size > 2,
-      sweep: b => a.sweep,
-      kweens: b => a.a[k](b => Xa(b) && za(b) && (b.t == a.t || a[Ob]))[g] > 1,
-      progeny: b => Ub(a) && !a[Xb][Pb],
-      [$e]: a => b.dq,
-      hb: b => a[Xb][wc][Gd] > 9,
-      day: b => (mb() - a.ts) > 86400,
-      weak: b => (mb() - a.ts) > 604800,
-      [cd]: a => b.win,
+    singleAch = {
+      fac: X => _.farms.filter(farmIsDeveloping).length > 3,
+      tri: X => new Set(_.farms.filter(farmIsRunning).map(f => f.fill)).size > 2,
+      sweep: X => F.sweep,
+      kweens: X => F.a.filter(a => isQueen(a) && livesInFarm(a) && (a.t == F.t || F.coex)).length > 1,
+      progeny: X => farmIsDeveloping(F) && !F.stats['cap'],
+      drag: X => _.dq,
+      hb: X => F.stats.death.other > 9,
+      day: X => F.dur > 86400,
+      weak: X => F.dur > 604800,
+      mom: X => _.win,
     },
-    c
+    achKey
   ) => {
-  if (h) {
+  if (countWins) {
     // Checks if game is almost in a winning state.
-    for (c in e) if (!b.ach[c] || b.ach[c].l != 3) d++;
-    for (c in f) if (!b.ach[c]) d++;
-    if (d === 1) td(cd);
-    else if (!d && !b.dmb) La('win');
+    for (achKey in multiAch) if (!_.ach[achKey] || _.ach[achKey].l != 3) count++;
+    for (achKey in singleAch) if (!_.ach[achKey]) count++;
+    if (count === 1) drop('mom');
+    else if (!count && !_.dmb) popup('win');
   }
   else {
-    for (c in e)
-      if (!b.ach[c] || b.ach[c].l < 3) {
-        b.ach[c] = b.ach[c] || {l: 0, v: 0};
-        let a = ba(9, e[c]()), g = ba(3, hc(a / 3));
-        if (a> b.ach[c].v) {
-          b.ach[c].v = a;
-          if (g > b.ach[c].l) {
-            b.ach[c].l = g;
-            Sh(c);
+    for (achKey in multiAch)
+      if (!_.ach[achKey] || _.ach[achKey].l < 3) {
+        _.ach[achKey] = _.ach[achKey] || {l: 0, v: 0};
+        let newCount = min(9, multiAch[achKey]()), newLvl = min(3, floor(newCount / 3));
+        if (newCount> _.ach[achKey].v) {
+          _.ach[achKey].v = newCount;
+          if (newLvl > _.ach[achKey].l) {
+            _.ach[achKey].l = newLvl;
+            queueAch(achKey);
           }
         }
       }
-    for (c in f)
-      if (!b.ach[c] && f[c]()) {
-        b.ach[c] = 1;
-         Sh(c);
+    for (achKey in singleAch)
+      if (!_.ach[achKey] && singleAch[achKey]()) {
+        _.ach[achKey] = 1;
+         queueAch(achKey);
       }
   }
   // Display first pending achievement.
-  b.achQ && La('ach', 0, W);
+  _.achQ.length && popup('ach', 0, shortDelay);
 },
 
 // Queues an achievement.
-Sh = (d, c = b.ach[d].l || 0, a = {a: d, l: c, b: !c || c == 3 ? 20 : 10}) => {
-  !b.achQ[D](b => b.a == a.a && b.l === a.l && b.b == a.b) && b.achQ[n](a);
-  xa();
+queueAch = (achKey, lvl = _.ach[achKey].l || 0, newAch = {a: achKey, l: lvl, b: !lvl || lvl == 3 ? 20 : 10}) => {
+  !_.achQ.some(e => e.a == newAch.a && e.l === newAch.l && e.b == newAch.b) && _.achQ.push(newAch);
+  save();
 },
 
 // Updates the display of food and drinks so they reflect the current size.
-Th = a => {
+// Note: Only works on current farm.
+updateFoodAndDrink = temp => {
   // Food items have to be regularly updated to reflect being eaten and hill heights, as well as being deleted when exhausted.
-  a[aa] = a[aa][k](b => (b.t != Ua) || (b.sz > 0 ? (Sb(a) && (c(b.id)[B] = vf(b)), 1) : (c(b.id)?.[o](), 0)));
-  // Update drink height.  This only affects the currently displayed farm.
-  let b = a[aa][X](a => a.t == Ga);
-  if (Sb(a) && b) ga(`#${b.id} .drink > *`)[r][yd] = ba(46, b.sz / 2) + Fa;
+  F.items = F.items.filter(i => i.t != 'food' || (
+      temp = getEl(i.id), i.sz > 0 ?
+        (temp.innerHTML = foodCode(i), temp.style.bottom = getHillHeight(parseInt(i.x) + 25) + 'px', temp.style.transform = `rotate(${antHillAngle({x: i.x, scale: 1, f: F.id})}deg)`) :
+        (deleteDataAndEl(i, 'items', F), 0)
+    )
+  );
+  // Update drink height.
+  if (temp = F.items.find(i => i.t == 'drink')) {
+    getEl(temp.id).style.bottom = getDrinkHillHeight(temp.x);
+    query(`#${temp.id} .drink > *`).style.height = min(46, temp.sz / 2) + 'px';
+  }
 },
 
 // Checks if an ant is an expat queen for the sake of the "Dragged Queen" achievement.
-eg = (a, c) => {Xa(a) && a.f != c.id && (b.dq = 1)},
+checkExpatQueen = (a, farm) => isQueen(a) && a.f != farm.id && (_.dq = 1),
 
 // Checks and... displays messages.
-fg = a => {
-  if (Md[g]) {
-    ke = 1;
-    let b = Md[Ic](), e = c(pi);
-    e[B] += `<div data-ts=${Ja()} class="msg ${b.t}"><p>${b.msg}</p></div>`;
-    e.lastChild[d][m](z);
-    b.t != 'bonus' && me[n](b);
-    me[g] > 10 && me[Ic]();
-    h(fg, 4000);
+displayMessage = X => {
+  if (messages.length) {
+    if (hasFocus()) {
+      showMsgs = 1;
+      let message = messages.shift(), msgDiv = getEl('messages');
+      msgDiv.innerHTML += html(p(message.msg), {'data-ts': getTime(), class: 'msg ' + message.t});
+      msgDiv.lastChild.classList.add('vis');
+      message.t != 'bonus' && messageLog.push(message);
+      messageLog.length > 10 && messageLog.shift();
+    }
+    setTimeout(displayMessage, 4000);
   }
-  else ke = 0;
-  gf ||= Ha(qj, ua);
+  else showMsgs = 0;
+  scroller ||= setInterval(scrollMessages, num2000);
 },
 
 // Removes the oldest message.
-pj = (a = c(pi)) => {
-  a[Ne][d][m]('rm');
-  h(b => {a[Ne] && a.removeChild(a[Ne]); !ke && fg()}, R);
-  if (!Md[g]) gf = ha(gf);
+removeMessage = (msgEl = getEl('messages')) => {
+  msgEl.firstChild.classList.add('rm');
+  setTimeout(X => {msgEl.firstChild && msgEl.removeChild(msgEl.firstChild); !showMsgs && displayMessage()}, num500);
+  if (!messages.length) scroller = stopInterval(scroller);
 },
 
 // Keeps the messages scrolling.
-qj = (a = c(pi)[Ne]) => a && Ja() - Va(a[ra].ts) > 12000 && pj(),
+scrollMessages = (lastmsgEl = getEl('messages').firstChild) => hasFocus() && lastmsgEl && getTime() - parseInt(lastmsgEl.dataset.ts) > 12000 && removeMessage(),
 
 // Adds a message to the array.
-xb = (a, b = 'status') => !of && Md[n]({msg: a, t: b}) && !ke && fg(),
+msg = (txt, type = 'status') => messages.push({msg: txt, t: type}) && !showMsgs && displayMessage(),
 
 // Displays random messages, with message flood protection.
-Ta = (b, c = 0, d = 0, a) => {
-  if (Md[g] || !ta.hasFocus())
+randomMsg = (msgs, isJoke = 0, i = 0, randMsg) => {
+  if (messages.length || !hasFocus())
     // There are already messages waiting in the queue, or the player is not watching, wait a bit and try again.
     // Except if it's a joke, just give that a miss.
-    !of && !c && h(a => Ta(b), ua);
-  else if (b)
+    !isJoke && setTimeout(X => randomMsg(msgs), num2000);
+  else if (msgs)
     // Make 3 attempts to choose a unique message.
-    for (; d++ < 3;) {
-      a = x(b);
+    for (; i++ < 3;) {
+      randMsg = pickRandom(msgs);
       // Check if the message is not in the last chosen messages.
-      if (!ne[Y](a[Ab](';'))) {
+      if (!randomMsgs.includes(randMsg.join(';'))) {
         // Call msg() with the random message
-        for (let [,e] of a.entries()) xb(e);
+        for (let [,rm] of randMsg.entries()) msg(rm);
         // Add the message to the last chosen messages array.
-        ne[n](a[Ab](';'));
+        randomMsgs.push(randMsg.join(';'));
         // Keep the last chosen messages array limited to 10 elements.
-        ne[g]> 10 && ne[Ic]();
+        randomMsgs.length> 10 && randomMsgs.shift();
         // Break as a message has been successfully chosen.
         break;
       }
@@ -4567,54 +4847,75 @@ Ta = (b, c = 0, d = 0, a) => {
 },
 
 // Randomly shows a joke message.
-Uh = (a = Dc(b[P][k](Bf))) => {// @todo this needs to be tested (whether joke type gets changed based on number of farms).
-  Ta(Bj[a < 5 ? Qa(0, a) : 0], 1);
-  !of && h(Uh, f(cb) + cb);
+joker = (i = _.farms.filter(farmIsRunning).length - 1) => {
+  randomMsg(jokes[i < 5 ? max(0, i) : 0], 1);
+  setTimeout(joker, randomInt(longDelay) + longDelay);
 },
 
 // Outputs a warning msg, but only if one from the same set hasn't been shown recently, and only if it's for the current farm.
-Mb = (b, c) => {
-  while (Nd[0] && Nd[0][1] < Ja() - cb) Nd[Ic]();
-  if (!Nd[D](a => a[0] == c[Ab](';'))) {
-    if (Sb(b)) {
-      xb(x(c), Zb);
-      Nd[n]([c[Ab](';'), Ja()]);
+playerHint = (farm, msgs) => {
+  while (warnings[0] && warnings[0][1] < getTime() - longDelay) warnings.shift();
+  if (hasFocus() && !warnings.some(w => w[0] == msgs.join(';'))) {
+    if (currentFarm(farm)) {
+      msg(pickRandom(msgs), 'warn');
+      warnings.push([msgs.join(';'), getTime()]);
     }
     else {
-      Mb(a, [`"${b.n}" (${Ae(b)}) needs attention!`]);
-      h(a => Mb(b, c), W);
+      playerHint(F, [`"${farm.n}" (${getFarmDesc(farm)}) needs attention!`]);
+      setTimeout(X => playerHint(farm, msgs), shortDelay);
     }
   }
 },
 
-// Handles the common audio playing functionality between ambience and ambienceOverride.
-Vh = (d, e, f, a = c('audio')) => {
-  ha(kf);
-  a[he] = 0;
-  c('audioSrc').src = `audio/${d}.opus`;
-  a.load();
-  a.play();
-  kf = Ha(c => {a[he] < b.vol / 100 ? a[he] = ba(a[he] + e, 1) : ha(kf)}, f);
-  return a;
+// Handles the common audio playing functionality between ambience() and ambienceOverride().
+bgAudioPlay = (audioFile, volInc, delay, audio = getEl('audio')) => {
+  stopInterval(volumeUp);
+  audio.volume = 0;
+  audio.src = `audio/${audioFile}.opus`;
+  audio.play();
+  // Fade in to prevent jarring start.
+  volumeUp = setInterval(X => {audio.volume < _.vol / 100 ? audio.volume = min(audio.volume + volInc, 1) : stopInterval(volumeUp)}, delay);
+  return audio;
 },
 
 // Starts playing bg audio.  This is a click-event handler, because browsers don't like playing audio without user interaction first.
-Le = a => {
-  Gg = 1;
-  Vh(b.au || 'wind', .01, R);
-  ta[qa](G, Le);
+ambience = e => {
+  userClicked = 1;
+  bgAudioPlay(_.au || 'wind', .01, num500);
+  document.removeEventListener('click', ambience);
 },
 
 // Override the bg audio.  This code assumes it is being run in response to user interaction and does not check that.
 // Calling code is responsible for resuming normal ambience() when done with this.
-rj = a => Vh(a, 5, 3),
+ambienceOverride = audioFile => bgAudioPlay(audioFile, .1, 5),
+
+// Starts the fight song (if required).
+fightSongPlay = X => {
+  if (userClicked && !fightVolume) {
+    fightSong = new Audio('audio/fight.opus');
+    fightSong.volume = .001; // Don't start at zero so as to block successive calls to this func.
+    fightSong.loop = 1;
+    // Fade in, but try to keep the volume of fight song 10% lower than global volume so it is hardly audible at lowest volume setting.
+    fightVolume = setInterval(X => {fightSong.volume + .1 < _.vol / 100 ? fightSong.volume = min(fightSong.volume + .01, 1) : stopInterval(fightVolume)}, 5);
+    fightSong.play();
+    randomMsg([['Two rival ants are fighting!'], ['Ants are having a fight!'], ['An ant is fighting an enemy!'], ['A fight has broken out!'], ['One of your ants is battling a foe!']]);
+  }
+},
+
+// Stops the fight song (if required).
+fightSongCheckAndStop = X => {
+  if (fightSong && F.a.every(ant => !ant.fight)) {
+    stopInterval(fightVolume);
+    fightVolume = setInterval(X => {fightSong.volume > 0 ? fightSong.volume = max(0, fightSong.volume - .01) : (fightSong.pause(), fightSong = 0, stopInterval(fightVolume))}, frameTick);
+  }
+},
 
 // Plays a sound effect.
-pb = (a, c = 1) => {
-  if (Gg) {
-    let d = new Audio(`audio/${a}.opus`);
-    d[he] = ba(1, (b.vol / 100) * c);
-    d.play();
+playSound = (snd, v = 1) => {
+  if (userClicked) {
+    let audio = new Audio(`audio/${snd}.opus`);
+    audio.volume = min(1, (_.vol / 100) * v);
+    audio.play();
   }
 }; // <--- Note the semi-colon here: end of main 'let' statement.
 
@@ -4625,22 +4926,44 @@ pb = (a, c = 1) => {
 
 // Restarts game.
 // Note: Short name because it is a global function expression that must not have a name mangled by terser.
-Q = a => {ri.removeItem('_'); location.reload()};
+Q = X => {quitting = 1; localStorage.removeItem('_'); location.reload()};
 
 
 ///////////////////
 // Load the app. //
 ///////////////////
-Gb[s]('load', xi);
+window.addEventListener('load', antFarmSocial);
 
 ///////////////////
 // Fix ants pos. //
 ///////////////////
-Gb[s]('focus', b => {
-  a.a[i](T);
-  a[Aa][i](a => a[Na].a[i](T));
+window.addEventListener('focus', X => {
+  F.a.forEach(antUpdate);
+  F.nips.forEach(n => n.item.a.forEach(antUpdate));
 });
 
+///////////////////
+// Resize trigs. //
+///////////////////
+window.addEventListener('resize', X => {
+  getEl('wrapper').getBoundingClientRect(); // For the magnifier.
+  tubeFollowLinkPosition(); // For the tube follow links.
+});
+
+///////////////////
+// Save on exit. //
+///////////////////
+window.addEventListener('pagehide', save);
+
+///////////////////
+// Save predict. //
+///////////////////
+document.addEventListener('mousemove', e => {
+  !e.clientY && save();
+});
+
+
+//@TODO anywhere that subtracts like - (something ? blah : 0)  can be - (something && blah)
 /*
  * Ant Farm Social
  * afsData.js (Configuration and content)
@@ -4649,18 +4972,18 @@ Gb[s]('focus', b => {
  *
  */
 
-let ya = {  // Note: Don't use keys "D", "Q", or "W" for these - they are reserved CSS identifiers for drone/queen/worker!
+let types = {  // Note: Don't use keys "D", "Q", or "W" for these - they are reserved CSS identifiers for drone/queen/worker!
   N: {
     n: 'Black',
     v: 1, // speed
-    s: Oa, // size
+    s: 'm', // size
     d: 2, // 2 = meat/protein preference.
     t: "A common basic ant that could not be more plain if it tried, which it won't."
   },
   T: {
     n: 'Tiny',
     v: .8, // speed
-    s: sb, // size
+    s: 's', // size
     d: 1, // 1 = sugar/carb/sweet eater.
     t: "The pesky little critter that gets stuck to your bottle of sweet chilli sauce."
   },
@@ -4677,7 +5000,7 @@ let ya = {  // Note: Don't use keys "D", "Q", or "W" for these - they are reserv
     n: 'Green',
     v: 1.1, // speed
     b: 1, // This ant bites.
-    s: Oa, // size
+    s: 'm', // size
     d: 1, // 1 = sugar/carb/sweet eater.
     m: 75, // maxmood
     t: "This type of ant gets really mad if you pick it up and throw it at someone's neck."
@@ -4686,7 +5009,7 @@ let ya = {  // Note: Don't use keys "D", "Q", or "W" for these - they are reserv
     n: 'Fire',
     v: .9, // speed
     b: 1, // This ant bites.
-    s: sb, // size
+    s: 's', // size
     d: 2, // 2 = meat/protein preference.
     m: 75, // maxmood
     t: "Fire ants are a severe invasive species and impact the quality of human life."
@@ -4702,7 +5025,7 @@ let ya = {  // Note: Don't use keys "D", "Q", or "W" for these - they are reserv
   J: {
     n: 'Ghost',
     v: .7, // speed
-    s: sb, // size
+    s: 's', // size
     d: 2, // 2 = meat/protein preference.
     p: 1, // pro-level (don't autospawn)
     t: "The spookiest of all the ants, these tiny critters are quite the spectre-cle."
@@ -4711,7 +5034,7 @@ let ya = {  // Note: Don't use keys "D", "Q", or "W" for these - they are reserv
     n: 'Pharaoh',
     v: .7, // speed
     b: 1, // This ant bites.
-    s: Oa, // size
+    s: 'm', // size
     d: 2, // 2 = meat/protein preference.
     p: 1, // pro-level (don't autospawn)
     t: "This type of ant will completely rely on a poor man to do everything for them."
@@ -4719,7 +5042,7 @@ let ya = {  // Note: Don't use keys "D", "Q", or "W" for these - they are reserv
   M: {
     n: 'Chimera',
     v: .6, // speed
-    s: sb, // size
+    s: 's', // size
     d: 0, // 0 - no food preference
     p: 1, // pro-level (don't autospawn)
     t: "This impossibly blue critter is slow, can adapt to different diets, and is illusory."
@@ -4727,7 +5050,7 @@ let ya = {  // Note: Don't use keys "D", "Q", or "W" for these - they are reserv
   Z: {
     n: 'Sugar',
     v: .6, // speed
-    s: Oa, // size
+    s: 'm', // size
     d: 1, // 1 = sugar/carb/sweet eater.
     p: 1, // pro-level (don't autospawn)
     t: "An ant that has so much diabetes it can barely walk and always feels tingly."
@@ -4735,7 +5058,7 @@ let ya = {  // Note: Don't use keys "D", "Q", or "W" for these - they are reserv
   K: {
     n: 'Carpenter',
     v: .6, // speed
-    s: Oa, // size
+    s: 'm', // size
     d: 1, // 1 = sugar/carb/sweet eater.
     p: 1, // pro-level (don't autospawn)
     t: "Fantastic at construction, but always slowed down from lugging a tool belt."
@@ -4744,26 +5067,26 @@ let ya = {  // Note: Don't use keys "D", "Q", or "W" for these - they are reserv
     n: 'Red Harvester',
     v: .7, // speed
     b: 1, // This ant bites.
-    s: Oa, // size
+    s: 'm', // size
     d: 1, // 1 = sugar/carb/sweet eater.
     p: 1, // pro-level (don't autospawn)
     t: "This type of ant reaps the benefits of the strange places it just fell into."
   },
 },
 
-Me = {Q: 'Queen', D: 'Drone', W: 'Worker'},
+castes = {Q: 'Queen', D: 'Drone', W: 'Worker'},
 
-l = {
+items = {
 
   // BASIC ITEMS
   dirt: {
     n: 'Dirt Bucket',
-    [j]: "When you need to collect, bring a bucket!<br>For no reason in particular this one is full of dirt.",
-    [e]: 0, // Default level.
-    t: ac,
+    desc: "When you need to collect, bring a bucket!<br>For no reason in particular this one is full of dirt.",
+    lvl: 0, // Default level.
+    t: 'filler',
     max: 1,
     keep: 1,
-    [Z]: [
+    quip: [
       ["Here's your dirt, enjoy!", "Enjoy. Your. Dirt."],
       ["It's gonna get DIRRTY"],
       ["Dirty Diana? No…"],
@@ -4774,12 +5097,12 @@ l = {
   },
   trash: {
     n: 'Trash Bag',
-    [j]: "You buy it.<br>You deal with it.",
-    [e]: 0,
+    desc: "You buy it.<br>You deal with it.",
+    lvl: 0,
     max: 1,
-    t: ng,
+    t: 'sanitation',
     keep: 1,
-    [Z]: [
+    quip: [
       ["Off to the Staten Island dump"],
       ["You coulda probably recycled that"],
       ["What a waste"],
@@ -4791,15 +5114,15 @@ l = {
   },
   tg: {
     n: 'The Glass',
-    [j]: "Want to know what your ants are up to?<br>Take a closer look.",
-    [e]: 2,
+    desc: "Want to know what your ants are up to?<br>Take a closer look.",
+    lvl: 2,
     max: 1,
     keep: 1
   },
-  [ge]: {
+  car: {
     n: 'Carousel',
-    [j]: "Cycle through your farms automatically.<br>Like a screen saver but with ants.",
-    [e]: 80,
+    desc: "Cycle through your farms automatically.<br>Like a screen saver but with ants.",
+    lvl: 80,
     max: 1,
     keep: 1
   },
@@ -4807,16 +5130,12 @@ l = {
   // ANT MAINTENANCE ITEMS
   cola: {
     n: 'Cola',
-    [j]: "You're like 99% parched here.<br>You could really use a cola.",
-    [e]: 0,
+    desc: "You're like 99% parched here.<br>You could really use a cola.",
+    lvl: 0,
+    t: 'hydration',
     max: 1,
-    t: og,
-    dr: 10,
-    fd: 2,
-    health: 1,
-    sweet: 1,
     keep: 1,
-    [Z]: [
+    quip: [
       ["Why you never drink water, fatty?"],
       ["She shoot Coca-Cola"],
       ["Oy Scarface, settle down with the coke"],
@@ -4827,13 +5146,13 @@ l = {
   },
   bread: {
     n: 'Artesano Bread',
-    [j]: "With artisan hands, it is crafted with care.<br>Each crumb a masterpiece, beyond compare.",
-    [e]: 2,
-    t: ce,
-    fd: 10,
+    desc: "With artisan hands, it is crafted with care.<br>Each crumb a masterpiece, beyond compare.",
+    lvl: 2,
+    t: 'nutrition',
+    sweet: 1,
     max: 1,
     keep: 1,
-    [Z]: [
+    quip: [
       ['A culinary delight, Artesano bread, a heavenly sight.'],
       ['Texture divine, a tender embrace, symphony of flavor, a delicate grace.'],
       ['Crust golden-brown, a whispering crunch. Gateway to taste, a lovely munch.'],
@@ -4842,14 +5161,13 @@ l = {
   },
   danish: {
     n: 'Cheese Danish',
-    [j]: "Nothing compares to a cheese danish.<br>This one has been stepped on though.",
-    [e]: 5,
-    t: ce,
-    fd: 12,
+    desc: "Nothing compares to a cheese danish.<br>This one has been stepped on though.",
+    lvl: 5,
+    t: 'nutrition',
     sweet: 1,
     max: 1,
     keep: 1,
-    [Z]: [
+    quip: [
       ['Let them eat crumbs!'],
       ["Happiness is a warm Cheese Danish."],
       ['Sweet cheese wrapped in dough,', 'A burst of warmth in each bite,', 'Mornings taste so right.'],
@@ -4857,14 +5175,13 @@ l = {
   },
   saltpork: {
     n: 'Salt Pork!',
-    [j]: "I want some Salt Pork!<br>I need halp!!!",
-    [e]: 5,
-    t: ce,
-    fd: 12,
+    desc: "I want some Salt Pork!<br>I need halp!!!",
+    lvl: 5,
+    t: 'nutrition',
     meat: 1,
     max: 1,
     keep: 1,
-    [Z]: [
+    quip: [
       ['You could have just used bacon.'],
       ['I never eat a pig, cos a pig is a cop.'],
       ['Get some pork on your fork.'],
@@ -4872,16 +5189,12 @@ l = {
   },
   asti: {
     n: 'Asti Spumante',
-    [j]: "When you've got good taste it shows.<br>The celebration grows!",
-    [e]: 5,
+    desc: "When you've got good taste it shows.<br>The celebration grows!",
+    lvl: 5,
+    t: 'hydration',
     max: 1,
-    t: og,
-    dr: 12,
-    fd: 0,
-    //md: -3,
-    health: -1,
     keep: 1,
-    [Z]: [
+    quip: [
       ['When my bottle pop.'],
       ['When my bottle pop, shake me.'],
       ["Throw 'em back till I lose count…"],
@@ -4894,14 +5207,13 @@ l = {
   },
   hotdog: {
     n: 'Microwaved Hot Dog',
-    [j]: "That's the only way I cook my wieners.<br>(An ALDI in-house brand)",
-    [e]: 8,
-    t: ce,
-    fd: 12,
+    desc: "That's the only way I cook my wieners.<br>(An ALDI in-house brand)",
+    lvl: 8,
+    t: 'nutrition',
     meat: 1,
     max: 1,
     keep: 1,
-    [Z]: [
+    quip: [
       ['A scent comes wafting...'],
       ['Packaging said, "Warning: Do not recycle this plastic."'],
       ["Ooh, it's hot dog time."],
@@ -4914,11 +5226,11 @@ l = {
   // PLAYER POWER-UPS
   cologne: {
     n: 'Antaeus Cologney',
-    [j]: "Smother yourself with it and the ants come marching in.<br>This is actually a real product.",
+    desc: "Smother yourself with it and the ants come marching in.<br>This is actually a real product.",
     max: 3,
     t: 'pheremone',
-    [e]: 12,
-    [Z]: [
+    lvl: 12,
+    quip: [
       ['Smell like a man, man.'],
       ['Find Your Magic.'],
       ['Between Love and Madness Lies Obsession.'],
@@ -4930,12 +5242,12 @@ l = {
       ['You just cologney brother, when you need a hand.'],
     ]
   },
-  [gi]: {
+  antyvenom: {
     n: 'Anty Venom',
-    [j]: "A challenging tonic from a mystical northern land.<br>Not sure how to pronounce the brand, but it relieves pain, and definitely exists for a reason.",
+    desc: "A challenging tonic from a mystical northern land.<br>Not sure how to pronounce the brand, but it relieves pain, and definitely exists for a reason.",
     max: 6,
-    [e]: 40,
-    [Z]: [
+    lvl: 40,
+    quip: [
       ['Not sure that was worth it.'],
       ['Eww.'],
       ['The drink is punishment in itself.'],
@@ -4947,13 +5259,13 @@ l = {
       ['Because your taste buds hate you.'],
     ]
   },
-  [Ve]: {
+  clonekit: {
     n: 'Cloning Kit',
-    [j]: "Clones one of your worker ants three times.<br> ",
-    [e]: 25,
+    desc: "Clones one of your worker ants three times.<br> ",
+    lvl: 25,
     max: 1,
-    t: Uj,
-    [Z]: [
+    t: 'science gizmo',
+    quip: [
       ["The best way to predict the future is to create it."],
       ['We have not only the ability, but', 'the responsibility to guide our own evolution.'],
       ['Cloning is the sincerest form of flattery.'],
@@ -4961,13 +5273,13 @@ l = {
       ["Genetic power is the most awesome force the planet's ever seen,", "but you wield it like a kid who's found his dad's gun."],
     ]
   },
-  [We]: {
+  speedo: {
     n: 'Speedo',
-    [j]: "Warp time with this radio controller to speed up your farm.<br>(burns out after a few minutes)",
-    [e]: 45,
+    desc: "Warp time with this radio controller to speed up your farm.<br>(burns out after a few minutes)",
+    lvl: 45,
     max: 1,
-    t: Uj,
-    [Z]: [
+    t: 'science gizmo',
+    quip: [
       ['Engage!'], ['Punch it!'], ["Let's light this candle!"], ['Taking the leap!'], ['Warp factor 9 now!'], ['Full burn'], ['Max thrust!'], ['Jumping ahead now!'],
     ]
   },
@@ -4975,185 +5287,185 @@ l = {
   // HATS
   spadoni: {
     n: 'Spa Doné Hat',
-    [j]: "I don't think that's the right spelling.<br>But you can call it whatever you like.",
-    t: sa,
-    [e]: 30,
+    desc: "I don't think that's the right spelling.<br>But you can call it whatever you like.",
+    t: 'hat',
+    lvl: 30,
     max: 1
   },
   spy: {
     n: 'Spy Hat',
-    [j]: "Sometimes ants need to go undercover.<br>And they usually use an alias.",
-    t: sa,
-    [e]: 40,
+    desc: "Sometimes ants need to go undercover.<br>And they usually use an alias.",
+    t: 'hat',
+    lvl: 40,
     max: 1
   },
   gangster: {
     n: 'Gangster Hat',
-    [j]: "Johnny Salami and Tony the Baker got ones just like it.<br>Those aren't even their real names.",
-    t: sa,
-    [e]: 40,
+    desc: "Johnny Salami and Tony the Baker got ones just like it.<br>Those aren't even their real names.",
+    t: 'hat',
+    lvl: 40,
     max: 1
   },
   gangster: {
     n: 'Jazz Hat',
-    [j]: 'What do you call someone wearing a "Make Jazz Great Again" hat?<br>A Trumpet Supporter.',
-    t: sa,
-    [e]: 40,
+    desc: 'What do you call someone wearing a "Make Jazz Great Again" hat?<br>A Trumpet Supporter.',
+    t: 'hat',
+    lvl: 40,
     max: 1
   },
   landry: {
     n: 'Tom Landry Hat',
-    [j]: "It's officially known as the Tom Landry hat.<br>But you can call it a Cowboy hat for all I care.",
-    t: sa,
-    [e]: 40,
+    desc: "It's officially known as the Tom Landry hat.<br>But you can call it a Cowboy hat for all I care.",
+    t: 'hat',
+    lvl: 40,
     max: 1
   },
   rhi: {
     n: 'Rhianna Hat',
-    [j]: "Ooh na na, what's my name?<br>Ooh na na, what's my name?",
-    t: sa,
-    [e]: 60,
+    desc: "Ooh na na, what's my name?<br>Ooh na na, what's my name?",
+    t: 'hat',
+    lvl: 60,
     max: 1
   },
   bogart: {
     n: 'Humphrey Bogart Hat',
-    [j]: "Of all the ant farms in all the towns in all the world…<br>She walks into mine.",
-    t: sa,
-    [e]: 60,
+    desc: "Of all the ant farms in all the towns in all the world…<br>She walks into mine.",
+    t: 'hat',
+    lvl: 60,
     max: 1
   },
   jt: {
     n: 'Justin Timberlake Hat',
-    [j]: "What did you expect?<br>A Suit & Tie?",
-    t: sa,
-    [e]: 60,
+    desc: "What did you expect?<br>A Suit & Tie?",
+    t: 'hat',
+    lvl: 60,
     max: 1
   },
   sinatra: {
     n: 'Frank Sinatra Hat',
-    [j]: "Something stupid:<br>The way you look tonight.",
-    t: sa,
-    [e]: 60,
+    desc: "Something stupid:<br>The way you look tonight.",
+    t: 'hat',
+    lvl: 60,
     max: 1
   },
   cohen: {
     n: 'Leonard Cohen Hat',
-    [j]: "You say I took the name in vain,<br>I don't even know the name.",
-    t: sa,
-    [e]: 60,
+    desc: "You say I took the name in vain,<br>I don't even know the name.",
+    t: 'hat',
+    lvl: 60,
     max: 1
   },
   mj: {
     n: 'Michael Jackson Hat',
-    [j]: "Who?<br>He!",
-    t: sa,
-    [e]: 80,
+    desc: "Who?<br>He!",
+    t: 'hat',
+    lvl: 80,
     max: 1
   },
   depp: {
     n: 'Johnny Depp Hat',
-    [j]: "The Mad Hatter's very own<br> ",
-    t: sa,
-    [e]: 80,
+    desc: "The Mad Hatter's very own<br> ",
+    t: 'hat',
+    lvl: 80,
     max: 1
   },
   pitt: {
     n: 'Brad Pitt Hat',
-    [j]: "So you're Brad Pitt.<br>That don't impress me much.",
-    t: sa,
-    [e]: 80,
+    desc: "So you're Brad Pitt.<br>That don't impress me much.",
+    t: 'hat',
+    lvl: 80,
     max: 1
   },
   walt: {
     n: 'Walt Disney Hat',
-    [j]: "Put it right on top of<br>the most magical place on Earth.",
-    t: sa,
-    [e]: 80,
+    desc: "Put it right on top of<br>the most magical place on Earth.",
+    t: 'hat',
+    lvl: 80,
     max: 1
   },
 
   // PAINTS
-  [hg]: {
+  green: {
     n: "Juicy Green",
-    [j]: 'Nothing says natural like a vibrant green.<br>So paint your plastics with this copper, arsenic, and cadmium blend.',
-    t: Da,
-    [e]: 20,
-    [t]: '#64bc41',
+    desc: 'Nothing says natural like a vibrant green.<br>So paint your plastics with this copper, arsenic, and cadmium blend.',
+    t: 'paint',
+    lvl: 20,
+    col: '#64bc41',
     max: 3
   },
   red: {
     n: 'Reddy Rich',
-    [j]: "You know what it is.<br>You Reddy?",
-    t: Da,
-    [e]: 30,
-    [t]: '#d83030',
+    desc: "You know what it is.<br>You Reddy?",
+    t: 'paint',
+    lvl: 30,
+    col: '#d83030',
     max: 3
   },
   blue: {
     n: 'Bright Blue',
-    [j]: "The shade of brilliant blue.<br>It's sure to catch every eye.",
-    t: Da,
-    [e]: 30,
-    [t]: '#3fa1ec',
+    desc: "The shade of brilliant blue.<br>It's sure to catch every eye.",
+    t: 'paint',
+    lvl: 30,
+    col: '#3fa1ec',
     max: 3
   },
   yellow: {
     n: 'Yellow',
-    [j]: 'Look at this paint, look how it shines for you.<br>And it was called "Yellow".',
-    t: Da,
-    [e]: 40,
-    [t]: '#ffca46',
+    desc: 'Look at this paint, look how it shines for you.<br>And it was called "Yellow".',
+    t: 'paint',
+    lvl: 40,
+    col: '#ffca46',
     max: 3
   },
   orchid: {
     n: "Owens' Orchid",
-    [j]: "It's the paint with<br>a helluva nice taint.",
-    t: Da,
+    desc: "It's the paint with<br>a helluva nice taint.",
+    t: 'paint',
     max: 3,
-    [e]: 50,
-    [t]: '#9932CC'
+    lvl: 50,
+    col: '#9932CC'
   },
   orange: {
     n: "Orange Groove",
-    [j]: "Marmalade, juice, or chicken.<br>This paint has a lot of… versatility.",
-    t: Da,
+    desc: "Marmalade, juice, or chicken.<br>This paint has a lot of… versatility.",
+    t: 'paint',
     max: 3,
-    [e]: 60,
-    [t]: '#fb8500'
+    lvl: 60,
+    col: '#fb8500'
   },
   white: {
     n: "Titanium",
-    [j]: "I'm bull**it proof.  Nothing to lose.<br>Fire-A-Way! Fire-A-Way!",
-    t: Da,
+    desc: "I'm bulls hit proof.  Nothing to lose.<br>Fire-A-Way! Fire-A-Way!",
+    t: 'paint',
     max: 3,
-    [e]: 80,
-    [t]: '#efefef'
+    lvl: 80,
+    col: '#efefef'
   },
   pink: {
     n: "P!nk",
-    [j]: "Out of paints that are most like a color type, this is one of the two in the pink.<br>So what?",
-    t: Da,
+    desc: "Out of paints that are most like a color type, this is one of the two in the pink.<br>So what?",
+    t: 'paint',
     max: 3,
-    [e]: 80,
-    [t]: '#FF69B4'
+    lvl: 80,
+    col: '#FF69B4'
   },
   black: {
     n: "Midnight",
-    [j]: "It's not exactly midnight.<br>It's close to midnight.",
-    t: Da,
+    desc: "It's not exactly midnight.<br>It's close to midnight.",
+    t: 'paint',
     max: 3,
-    [e]: 80,
-    [t]: '#333333'
+    lvl: 80,
+    col: '#333333'
   },
   silver: {
     n: "Ardent Argent",
-    [j]: "That is silver.<br> ",
-    t: Da,
+    desc: "That is silver.<br> ",
+    t: 'paint',
     max: 2,
-    [e]: 100,
-    [t]: '#dcdddf',
-    fx: Oa, // metallic
-    [Z]: [
+    lvl: 100,
+    col: '#dcdddf',
+    fx: 'm', // metallic
+    quip: [
       ["Don't cry for me."],
       ['Ardent Argent is an arduous agent.'],
       ['The silver spoon is the hardest to remove from the mouth.'],
@@ -5163,13 +5475,13 @@ l = {
   },
   gold: {
     n: "Comedy Gold",
-    [j]: "It's gold. It's gold.<br> ",
-    t: Da,
+    desc: "It's gold. It's gold.<br> ",
+    t: 'paint',
     max: 2,
-    [e]: 120,
-    [t]: '#e6b510',
-    fx: Oa, // metallic
-    [Z]: [
+    lvl: 120,
+    col: '#e6b510',
+    fx: 'm', // metallic
+    quip: [
       ['Solid gold...'],
       ['I got the Midas touch'],
       ["I ain't saying she's a gold digger..."],
@@ -5178,90 +5490,89 @@ l = {
   },
   // Dummy item for crucible burnt farms.
   metal: {
-    [id]: 1,
-    fx: Oa
+    nodrop: 1
   },
 
   // ANT TUBES
   harv: {
     n: "The Red Queen",
-    [j]: "There are worse lives to live.<br>Don't feel sorry for me.",
-    t: ib,
+    desc: "There are worse lives to live.<br>Don't feel sorry for me.",
+    t: 'ants',
     max: 1,
-    [e]: 120,
-    [t]: 'red',
+    lvl: 120,
+    col: 'red',
     ant: 'H'
   },
   carp: {
     n: "The Carpenters",
-    [j]: "Look what Mr Postman has delivered!<br>Oh yes, wait a minute.",
-    t: ib,
+    desc: "Look what Mr Postman has delivered!<br>Oh yes, wait a minute.",
+    t: 'ants',
     max: 1,
-    [e]: 120,
-    [t]: 'orange',
+    lvl: 120,
+    col: 'orange',
     ant: 'K',
     W: 5 // Gives 5 workers.
   },
   sug: {
     n: "Sugar Mama",
-    [j]: "An older, more experienced, Queen.<br>She'll get things going for you.",
-    t: ib,
+    desc: "An older, more experienced, Queen.<br>She'll get things going for you.",
+    t: 'ants',
     max: 1,
-    [e]: 140,
-    [t]: 'yellow',
+    lvl: 140,
+    col: 'yellow',
     ant: 'Z'
   },
   chi: {
     n: "Lady Chimera",
-    [j]: "It's pronounced <em>chimera</em>.<br>But, go on…",
-    t: ib,
+    desc: `It's pronounced <em>chimera</em>.<br>But, go on…`,
+    t: 'ants',
     max: 1,
-    [e]: 140,
-    [t]: 'blue',
+    lvl: 140,
+    col: 'blue',
     ant: 'M'
   },
   phar: {
     n: "Queen Of The Nile",
-    [j]: "Mother of Pharaohs.<br>She'll light the darkness that threatens the land.",
-    t: ib,
+    desc: "Mother of Pharaohs.<br>She'll light the darkness that threatens the land.",
+    t: 'ants',
     max: 1,
-    [e]: 160,
-    [t]: 'orchid',
+    lvl: 160,
+    col: 'orchid',
     ant: 'P'
   },
   ghst: {
     n: "The Ghost Crew",
-    [j]: "I ain't afraid of no ghost.<br> ",
-    t: ib,
+    desc: "I ain't afraid of no ghost.<br> ",
+    t: 'ants',
     max: 1,
-    [e]: 160,
-    [t]: 'silver',
+    lvl: 160,
+    col: 'silver',
     ant: 'J',
     W: 7 // Gives 7 workers.
   },
-  [rc]: {
+  vial: {
     n: "Ant Collection Vial",
-    [j]: "Ants love getting into these<br>and can survive in them forever.",
-    [e]: 0,
-    t: ib,
-    [id]: 1
+    desc: "Ants love getting into these<br>and can survive in them forever.",
+    lvl: 0,
+    t: 'ants',
+    nodrop: 1
   },
-  [fi]: {
+  collected: {
     n: "Collected Ants",
-    [j]: w,
-    [e]: 0,
-    t: ib,
-    [id]: 1
+    desc: "",
+    lvl: 0,
+    t: 'ants',
+    nodrop: 1
   },
 
   // EXPANSION ITEMS
-  [Za]: {
+  plate: {
     n: 'Plate',
-    [j]: "For the bottom, the flared base...<br>plate.",
-    [e]: 10,
+    desc: "For the bottom, the flared base...<br>plate.",
+    lvl: 10,
     max: 2,
     t: 'name plaque',
-    [Z]: [
+    quip: [
       ['Nice name!'],
       ['Why did you choose that?'],
       ['Interesting choice!'],
@@ -5269,37 +5580,37 @@ l = {
     ],
     keep: 1
   },
-  [Qe]: {
+  antFarm: {
     n: 'Ant Farm',
-    [j]: "Set up a new Ant Farm.<br>100% SCIENTIFICALLY ACCURATE",
-    [e]: 20,
+    desc: "Set up a new Ant Farm.<br>100% SCIENTIFICALLY ACCURATE",
+    lvl: 20,
     max: 2,
     t: 'expansion pack',
-    [Z]: [
+    quip: [
       ['Alright! Here is a new farm.'],
       ['New farm for you.'],
       ['Here is your unboxed ant farm.'],
       ['A clean slate.'],
       ["You just wanna be startin' something."],
-      [Vj],
+      ["Enter HEYSCOOPS at checkout!"],
     ]
   },
-  [bc]: {
+  tube: {
     n: 'ToobWay™ Connector',
-    [j]: "DO YOU KNOW DA WAY™<br>YOU DO NOT KNOW DA WAY™",
-    [e]: 40,
+    desc: "DO YOU KNOW DA WAY™<br>YOU DO NOT KNOW DA WAY™",
+    lvl: 40,
     max: 2,
     t: 'expansion accessory',
     keep: 1,
   },
   sand: {
     n: 'Sand Bag',
-    [j]: "The town provides free sand for flooding.<br>You could use this for ants or something.",
-    [e]: 10,
-    t: ac,
+    desc: "The town provides free sand for flooding.<br>You could use this for ants or something.",
+    lvl: 10,
+    t: 'filler',
     max: 1,
     keep: 1,
-    [Z]: [
+    quip: [
       ['These are the days of our lives.'],
       ['Like sands through an ant farm glass…'],
       ['Enter the sand, man.'],
@@ -5309,13 +5620,13 @@ l = {
   },
   gel: {
     n: 'NASA Gel',
-    [j]: "Ant habitat gel that ants can get some food and water from too.<br>Not exactly natural for ants, but I wonder what else we could put ants into?",
-    [e]: 20,
-    t: ac,
+    desc: "Ant habitat gel that ants can get some food and water from too.<br>Not exactly natural for ants, but I wonder what else we could put ants into?",
+    lvl: 20,
+    t: 'filler',
     max: 2,
-    [Z]: [
-      [Wj],
-      [Xj],
+    quip: [
+      ["I don't think you're ready for this."],
+      ['Can you dig it? (Yes)'],
       ["That's one small step for an ant"]
       ["Failure is not an option"],
       ["Do the other things, not because they are easy, but because they are hard."],
@@ -5324,12 +5635,12 @@ l = {
   },
   beer: {
     n: 'Beer Jell-O',
-    [j]: "Ant habitat jell-O that provides some food/water<br>and improves ant mood a lot.",
-    [e]: 50,
-    t: ac,
+    desc: "Ant habitat jell-O that provides some food/water<br>and improves ant mood a lot.",
+    lvl: 50,
+    t: 'filler',
     max: 1,
-    [Z]: [
-      [Xj],
+    quip: [
+      ['Can you dig it? (Yes)'],
       ['Open your world'],
       ['Stay thirsty, my friends'],
       ['This is the original'],
@@ -5342,11 +5653,11 @@ l = {
   },
   product: {
     n: 'Professional Wet-Look Product',
-    [j]: 'Ant habitat product that provides some food/water,<br>as well as a little mood and health boost.',
-    [e]: 60,
-    t: ac,
+    desc: 'Ant habitat product that provides some food/water,<br>as well as a little mood and health boost.',
+    lvl: 60,
+    t: 'filler',
     max: 1,
-    [Z]: [
+    quip: [
       ['For all ant types'],
       ['For flip, bounce, and hold'],
       ['Shape your style!'],
@@ -5354,14 +5665,14 @@ l = {
       ['Salon proven'],
     ]
   },
-  [Se]: {
+  lube: {
     n: 'Expired Bulk Personal Lubricant',
-    [j]: 'Ant habitat filth that provides some food/water,<br>attracts queens, and encourages laying.',
-    [e]: 69,
-    t: ac,
+    desc: 'Ant habitat filth that provides some food/water,<br>attracts queens, and encourages laying.',
+    lvl: 69,
+    t: 'filler',
     max: 1,
-    [Z]: [
-      [Wj],
+    quip: [
+      ["I don't think you're ready for this."],
       ['Lube glorious lube'],
       ['This fkn town…'],
       ['Keeps love going'],
@@ -5371,11 +5682,11 @@ l = {
   },
   slime: {
     n: 'Slime',
-    [j]: "Ant habitat slime that provides a decent amount of food/water, and some health.<br>* grape flavored",
-    [e]: 76,
-    t: ac,
+    desc: "Ant habitat slime that provides a decent amount of food/water, and some health.<br>* grape flavored",
+    lvl: 76,
+    t: 'filler',
     max: 1,
-    [Z]: [
+    quip: [
       ['Slime… anyone?'],
       ["I don't know about this"],
       ["What is slime made of? I don't know!"],
@@ -5386,11 +5697,11 @@ l = {
   },
   ooze: {
     n: 'The Secret Ooze',
-    [j]: "Ant habitat ooze that provides some food/water<br>and gives a lot of health but decreases mood.",
-    [e]: 84,
-    t: ac,
+    desc: "Ant habitat ooze that provides some food/water<br>and gives a lot of health but decreases mood.",
+    lvl: 84,
+    t: 'filler',
     max: 1,
-    [Z]: [
+    quip: [
       ['Get ready to ooze with excitement'],
       ["That's no ordinary ooze… it's the secret of our past!"],
       ["The mutagen is unstable. If we're not careful, it could mutate us even further!"],
@@ -5400,8 +5711,8 @@ l = {
   },
   feng: {
     n: 'Mystical Feng Shui Pack',
-    [j]: "For ants who crave better energy flow. Includes suspiciously scented incense.<br>Reorder your farms to achieve inner ant-peace.",
-    [e]: 168,
+    desc: "For ants who crave better energy flow. Includes suspiciously scented incense.<br>Reorder your farms to achieve inner ant-peace.",
+    lvl: 168,
     t: 'farm-sorter',
     max: 1,
     keep: 1
@@ -5410,116 +5721,116 @@ l = {
   // SCENERY ITEMS
   mountains: {
     n: 'Mountains',
-    [j]: "Mountains rise tall like ant hills, their grandeur the landscape fulfills.<br>Ain't no mountain too high, for the ants or the sky. Both conquer with tiny, strong wills.",
-    t: qb,
-    [e]: 5,
+    desc: "Mountains rise tall like ant hills, their grandeur the landscape fulfills.<br>Ain't no mountain too high, for the ants or the sky. Both conquer with tiny, strong wills.",
+    t: 'scenery',
+    lvl: 5,
     max: 2
   },
   liberty: {
     n: 'French Statue',
-    [j]: "Your huddled colonies yearning to breathe free.<br>Yet captive they will remain.",
-    t: tc,
-    [e]: 10,
+    desc: "Your huddled colonies yearning to breathe free.<br>Yet captive they will remain.",
+    t: 'decor',
+    lvl: 10,
     max: 2
   },
   pyramids: {
     n: 'Pyramids',
-    [j]: "The pyramids house kings of old, in chambers with tunnels untold.<br>Like ants in their nest, the Pharaohs find rest, in a labyrinth of treasure and gold.",
-    t: qb,
-    [e]: 30,
+    desc: "The pyramids house kings of old, in chambers with tunnels untold.<br>Like ants in their nest, the Pharaohs find rest, in a labyrinth of treasure and gold.",
+    t: 'scenery',
+    lvl: 30,
     max: 2
   },
   obelisk: {
     n: 'Obelisk',
-    [j]: "You may tell one person about your ant farm.<br>(we don't talk about the tiny pyramid at the top)",
-    t: tc,
+    desc: "You may tell one person about your ant farm.<br>(we don't talk about the tiny pyramid at the top)",
+    t: 'decor',
     max: 1,
-    [e]: 30
+    lvl: 30
   },
   barn: {
     n: 'Barn',
-    [j]: "Ants have sophisticated ways to store food.<br>A barn is not one of those ways.",
-    t: tc,
+    desc: "Ants have sophisticated ways to store food.<br>A barn is not one of those ways.",
+    t: 'decor',
     max: 2,
-    [e]: 30
+    lvl: 30
   },
   piff: {
     n: 'Piff',
-    [j]: "Best show I've seen in ages.<br>(chairs were uncomfortable - one star)",
-    t: tc,
+    desc: "Best show I've seen in ages.<br>(chairs were uncomfortable - one star)",
+    t: 'decor',
     max: 1,
-    [e]: 60
+    lvl: 60
   },
   jesus: {
     n: 'Jesus',
-    [j]: "The Ant Christ<br>Not to be confused with the other guy.",
-    t: tc,
+    desc: "The Ant Christ<br>Not to be confused with the other guy.",
+    t: 'decor',
     max: 1,
-    [e]: 70
+    lvl: 70
   },
 
   // BACKGROUND CARD ITEMS
   clouds: {
     n: 'Cloudy Days',
-    [j]: "Add some immersive realism to your farm<br>with this high-quality printed card.",
-    t: V,
+    desc: "Add some immersive realism to your farm<br>with this high-quality printed card.",
+    t: 'card',
     max: 1,
-    [e]: 20
+    lvl: 20
   },
   canada: {
     n: 'Canada',
-    [j]: "<br>It's somewhere above…",
-    t: V,
+    desc: "<br>It's somewhere above…",
+    t: 'card',
     max: 1,
-    [e]: 50
+    lvl: 50
   },
   vegas: {
     n: 'Vegas',
-    [j]: "<br>(note: ants may become preoccupied with parking and weather)",
-    t: V,
-    [e]: 60,
+    desc: "<br>(note: ants may become preoccupied with parking and weather)",
+    t: 'card',
+    lvl: 60,
     max: 1
   },
   desert: {
     n: 'Desolation',
-    [j]: "A printed card so realistic that you can feel the despair and hopelessness<br>just like if you really drove to Arizona.",
-    t: V,
+    desc: "A printed card so realistic that you can feel the despair and hopelessness<br>just like if you really drove to Arizona.",
+    t: 'card',
     max: 1,
-    [e]: 60
+    lvl: 60
   },
   space: {
     n: 'The Final Frontier',
-    [j]: "I hear it's not as good as Star Trek: The Experience<br>I wanted to go to that. Who was in that, anyway?",
-    t: V,
+    desc: "I hear it's not as good as Star Trek: The Experience<br>I wanted to go to that. Who was in that, anyway?",
+    t: 'card',
     max: 1,
-    [e]: 80
+    lvl: 80
   },
 
   // SPECIAL ITEMS
-  [bd]: {
+  antfax: {
     n: 'ANT FAX',
-    [j]: "THE ant fact organizer<br>of the nineties.",
-    t: Yj,
+    desc: "THE ant fact organizer<br>of the nineties.",
+    t: 'educational fun',
     max: 1,
-    [e]: 20,
+    lvl: 20,
     keep: 1
   },
   antfaxpro: {
     n: 'ANT FAX PRO',
-    [j]: "Even more fun ant facts<br>for the brightest of learners.",
-    t: Yj,
+    desc: "Even more fun ant facts<br>for the brightest of learners.",
+    t: 'educational fun',
     max: 1,
-    [e]: 120,
+    lvl: 120,
     keep: 1
   },
   box: {
     n: 'Nerd Box',
-    [j]: "Whatever's in there might fill the empty void in your soul.<br>Just like the crate that housed the ark of the covenant.",
+    desc: "Whatever's in there might fill the empty void in your soul.<br>Just like the crate that housed the ark of the covenant.",
     t: 'gift',
-    [e]: 17,
+    lvl: 17,
     max: 3,
-    [Z]: [
-      [Vj],
+    quip: [
+      ['Enter HEYSCOOPS at checkout!'],
       ['From the nerd community as a whole.'],
       ['Any of the items that you crave'],
       ['It really is about the experience'],
@@ -5531,11 +5842,11 @@ l = {
   },
   bus: {
     n: 'Ticket 2 Ride',
-    [j]: "Mystical pass to a whole new backdrop, doubles as an unspoken confession of mid-life crisis…<br>…admits one man/child.",
+    desc: "Mystical pass to a whole new backdrop, doubles as an unspoken confession of mid-life crisis…<br>…admits one man/child.",
     t: 'location swapper',
     max: 2,
-    [e]: 25,
-    [Z]: [
+    lvl: 25,
+    quip: [
       ["You wanna go for a ride?"],
       ['Jump in!'],
       ['Jump on board!'],
@@ -5546,11 +5857,11 @@ l = {
   },
   backdrop: {
     n: 'Low Key Backdrop',
-    [j]: "This backdrop has been scientifically proven to make your ex wish they hadn't dumped you.<br> ",
+    desc: "This backdrop has been scientifically proven to make your ex wish they hadn't dumped you.<br> ",
     t: 'location enhancer',
     max: 2,
-    [e]: 75,
-    [Z]: [
+    lvl: 75,
+    quip: [
       ["Introducing the backdrop that's more exciting than my last family dinner!"],
       ["Get ready for a backdrop so beautiful, even your selfies will be jealous."],
       ["I've finally found the perfect backdrop!"],
@@ -5563,59 +5874,66 @@ l = {
   },
   crucible: {
     n: 'The Crucible',
-    [j]: "Liquid metal<br> ",
+    desc: "Liquid metal<br> ",
     t: 'bad idea',
     max: 2,
-    [e]: 200,
-    [Z]: [
+    lvl: 200,
+    quip: [
       ["Tsssssssssssssss..."],
       ["Yeowwwww"],
       ["Aaaaaaargghhhhhh"],
     ]
   },
-  [Ed]: {
+  ebay: {
     n: 'eBay',
-    [j]: "A digital garage sale for old ant farms.<br>The highest bid will be a serving of disappointment.",
+    desc: "A digital garage sale for old ant farms.<br>The highest bid will be a serving of disappointment.",
     t: 'app',
     max: 1,
     keep: 1,
-    [e]: 200
+    lvl: 200
   },
   coexist: {
     n: '☪︎☮︎é✡︎ì࿊✞',
-    [j]: "Advocates that ants of different faiths and belief systems can live together peacefully.",
-    t: Te,
+    desc: "Advocates that ants of different faiths and belief systems can live together peacefully.",
+    t: 'sticker',
     max: 1,
-    [e]: 222
+    lvl: 222
   },
-  [cd]: {
+  sculpt: {
+    n: 'Metal Sculpture',
+    desc: "",
+    t: 'sculpt',
+    lvl: 333,
+    nodrop: 1
+  },
+  mom: {
     n: 'Mom',
-    [j]: "Bucket to mop, you've done it all.<br>You cleaned up.",
+    desc: "Bucket to mop, you've done it all.<br>You cleaned up.",
     t: 'percent DAT UGLY BITCH',
     max: 1,
     keep: 1,
-    [e]: 100,
-    [id]: 1 // Don't randomly drop this item.
+    lvl: 100,
+    nodrop: 1 // Don't randomly drop this item.
   },
 
 },
 
 // Button labels.
-Wh = ['Yeah OK', 'Alrighty', 'Rightio', 'Huh', 'What', 'k', 'Mmm Hmm', 'Yup', 'Got it', 'OK whatever', 'Sweet', 'Thanks I guess'],
-sj = ['Yes', 'I did', 'Cheers', 'Woohoo', 'Bam', 'Boom', 'Nice', 'Yay', 'Right?', 'There it is', 'Click this', 'Awesome'],
+dropOK = ['Yeah OK', 'Alrighty', 'Rightio', 'Huh', 'What', 'k', 'Mmm Hmm', 'Yup', 'Got it', 'OK whatever', 'Sweet', 'Thanks I guess'],
+achOK = ['Yes', 'I did', 'Cheers', 'Woohoo', 'Bam', 'Boom', 'Nice', 'Yay', 'Right?', 'There it is', 'Click this', 'Awesome'],
 
 // Pools of random messages for specific occasions.
-tj = [['Welcome to Ant Farm Social.', "We're preaching ants."],['Hey Johnny, do you wanna go to an Ant Farm Social?']],
-uj = [['Here is your new Ant Farm. You need to get you some ants.', 'You may notice some free ants roaming your screen.']],
-vj = [["You've been bit!", "You can't collect ants until you're better"], ["Ouch! You were bitten!", "You'll need to wait until this passes"]],
-wj = [["They don't like that"], ['Stop that'], ["Tappa-Tappa-Tappa"], ['Shh! This is the listening side of the plexiglass'], ['This is supposed to be a quiet activity']],
-xj = [['You scored your first point! 🏆'], ['🎉🎉🎉 1 point! 🎉🎉🎉'], ['You caught your first ant! 🐜'], ["Well done, there's your first one. 1️⃣"]],
-yj = [['You scored your second point! You go you! 😉'], ['Two points!!! 🥇🥇'], ["Two's company!"], ['Oh the number one is not my favourite number.', "Because one means there's just me and there's no you."]],
-zj = [['Check your openings for papers'], ["It's ALWAYS open"], ["It's like a sweathouse in there"], ["I lifted the lid, and now I have questions."], ["Lift the lid of curiosity"],
+welcome = [['Welcome to Ant Farm Social.', "We're preaching ants."],['Hey Johnny, do you wanna go to an Ant Farm Social?']],
+newFarm = [['Here is your new Ant Farm. You need to get you some ants.', 'You may notice some free ants roaming your screen.']],
+biteMsg = [["You've been bit!", "You can't collect ants until you're better"], ["Ouch! You were bitten!", "You'll need to wait until this passes"]],
+tapMsg = [["They don't like that"], ['Stop that'], ["Tappa-Tappa-Tappa"], ['Shh! This is the listening side of the plexiglass'], ['This is supposed to be a quiet activity']],
+firstPoint = [['You scored your first point! 🏆'], ['🎉🎉🎉 1 point! 🎉🎉🎉'], ['You caught your first ant! 🐜'], ["Well done, there's your first one. 1️⃣"]],
+secondPoint = [['You scored your second point! You go you! 😉'], ['Two points!!! 🥇🥇'], ["Two's company!"], ['Oh the number one is not my favourite number.', "Because one means there's just me and there's no you."]],
+lidLift = [['Check your openings for papers'], ["It's ALWAYS open"], ["It's like a sweathouse in there"], ["I lifted the lid, and now I have questions."], ["Lift the lid of curiosity"],
 ["Some secrets are best left untouched"], ["You might regret this"], ["Get back in your hole!"], ["The mystery beneath is revealed!"], ["Dealing with what's inside? That's the real challenge."],
 ["What are you looking in there for?"], ["Why do that?"], ["Hey put that back!"], ["Leave it on buddy"], ["What if they escape?"]],
 
-Aj = [
+kudos = [
   // Silly congratulatory messages.
   [
     ["Ain't nobody catch ants 🐜 like you"],
@@ -5759,9 +6077,9 @@ Aj = [
     ["One more ant."],
     ["You scored again."],
     ["Another ant down."],
-    [Zj],
+    ["You got one."],
     ["One more for you."],
-    [$j],
+    ["You got another."],
     ["You did it again."],
     ["Captured one more."],
     ["Another capture."],
@@ -5771,7 +6089,7 @@ Aj = [
     ["You took another."],
     ["Another one caught."],
     ["Scored again."],
-    [_j],
+    ["You got it."],
     ["Another one for you."],
     ["You took one."],
     ["Another taken."],
@@ -5819,11 +6137,11 @@ Aj = [
     ["Another one. Wow."],
     ["Big deal."],
     ["Yay, another."],
-    [Zj],
+    ["You got one."],
     ["Great, another."],
     ["Another. Cool."],
     ["Oh, another."],
-    [_j],
+    ["You got it."],
     ["Another. Nice."],
     ["One more. Yay."],
     ["You did it."],
@@ -5831,11 +6149,11 @@ Aj = [
     ["Oh look, another."],
     ["Yet another. Whatever."],
     ["Wow. Another."],
-    [$j],
+    ["You got another."],
   ],
 ],
 
-Bj = [
+jokes = [
   // Terrible ants jokes / limericks / triple-threats.
   [
     // Terrible jokes
@@ -5868,6 +6186,7 @@ Bj = [
     ["Having a queen is better than ant-archy"],
     ["This farm should have its own national ant-hem"],
     ["Ant nothin but a G thang"],
+    ["How do you determine the gender of an ant?", "If it sinks: girl ant.", "If it floats…"],
 
     // Limericks
     ["There once was an ant with great charm,", "Living in an ant farm, so warm.", "With tunnels so neat,", "It couldn't be beat,", "In its tiny ant-sized farm!"],
@@ -5893,27 +6212,27 @@ Bj = [
     ["Marching in a line,", "Ants on a mission for food,", "Where's the GPS?"],
 
     // Triple threat 1
-    [qi, "The bartender says 'We don't serve ants here.'", "The ants reply 'We just came for the ant-tastic drinks!'"],
-    [qi, "The bartender says 'We don't serve ants in here!'", "One ant goes 'We're just looking for a tiny sip!'"],
-    [qi, "The bartender says 'We don't serve ants.'", "One ant replies 'That's quite ant-agonizing!'"],
+    ["185 ants walk into a bar…", "The bartender says 'We don't serve ants here.'", "The ants reply 'We just came for the ant-tastic drinks!'"],
+    ["185 ants walk into a bar…", "The bartender says 'We don't serve ants in here!'", "One ant goes 'We're just looking for a tiny sip!'"],
+    ["185 ants walk into a bar…", "The bartender says 'We don't serve ants.'", "One ant replies 'That's quite ant-agonizing!'"],
     ["185 ants walk into a casino bar…", "The bartender says 'Hey, we've got a strict no-ants policy.'", "The ants say 'We just wanted to raise the ant-te!'"],
 
     // Triple threat 2
-    [ef, "Carrying more than their own weight."],
-    [Ag, "Communicating without saying a word."],
-    [ak, "Full of tunnels."],
+    ["I like my women like I like my ants:", "Carrying more than their own weight."],
+    ["I like my men like I like my ant colonies:", "Communicating without saying a word."],
+    ["I like my women like I like my ant farms:", "Full of tunnels."],
     ["I like my men like I like my ant simulator:", "Always challenging."],
     ["I like my men like I like my ants:", "Knowing who's queen."],
-    [ef, "All over my picnic."],
-    [Ag, "Swarming around me."],
-    [Ag, "Easily squashed."],
-    [ak, "Behind glass I can peep through."],
+    ["I like my women like I like my ants:", "All over my picnic."],
+    ["I like my men like I like my ant colonies:", "Swarming around me."],
+    ["I like my men like I like my ant colonies:", "Easily squashed."],
+    ["I like my women like I like my ant farms:", "Behind glass I can peep through."],
     ["I like my women like I like my ant simulator:", "Easy to quit."],
-    [ef, "In my pants."],
+    ["I like my women like I like my ants:", "In my pants."],
     ["I like my men like I like my ant farms:", "Digging deep."],
-    [ef, "Small."],
-    [ef, "Always finding a way into my house."],
-    [Ag, "Coming in hundreds."],
+    ["I like my women like I like my ants:", "Small."],
+    ["I like my women like I like my ants:", "Always finding a way into my house."],
+    ["I like my men like I like my ant colonies:", "Coming in hundreds."],
 
     // Triple threat 3
     ["They call me the ant farm,", "Because I'm very dirty."],
@@ -5924,10 +6243,10 @@ Bj = [
     ["They call me the glitch,", "Because I can mess up your simulation in ways you never expected."],
 
     // Ant trivia that keeps mentioning Israel
-    ["In Israel, the Cataglyphis niger ant has been studied extensively","due to its remarkable navigational abilities.","These ants live in harsh desert environments","and have adapted to find their way back to their nests","over long distances using the position of the sun and internal step-counting.","Israeli researchers have been fascinated by their precise homing skills","in the extreme heat of the southern Israeli Negev desert.","This ability to navigate in seemingly featureless landscapes…","has drawn parallels to modern robotic navigation techniques.",Hc,"In fact, the research conducted in Israel on desert ants…","has contributed to the understanding of biological navigation systems","which in turn has inspired improvements in robotics","and Israeli autonomous vehicle guidance systems."],
-    ["In Israel, scientists discovered a unique species of blind subterranean ants","called Aphaenogaster phillipsi, which thrive in caves in the Galilee region.","These ants have adapted to their dark, underground environment","by losing their eyesight completely and relying on chemical signals","and vibrations to communicate and navigate.","This discovery is quite significant because it highlights","the extreme adaptations organisms can develop","in response to their specific environments.",Hc,"Additionally, these Israeli cave ants have attracted interest from biologists","studying evolutionary processes and how creatures adapt over time","to isolated and challenging Israeli habitats."],
-    ["In Israel's Hula Valley there is an ant species called Crematogaster scutellaris","and it plays a surprising role in local agriculture.","These ants have a symbiotic relationship with fig trees.","The ants protect the fig trees from herbivorous insects and pests","in exchange for the sugary secretions produced by the tree's fig wasps.", "This mutualistic interaction has been observed to significantly benefit the fig trees","resulting in healthier plants and higher fruit yields for Israelis.",Hc,"This ant-fig partnership garnered attention from agricultural researchers in Israel","as they study natural methods of pest control","that reduce the need for chemical pesticides","contributing to more sustainable farming practices in that region of Israel."],
-    ["In Israel, researchers have studied the Tapinoma israele.","These ants are known for their highly efficient recruitment behavior.","When they discover a food source, they quickly recruit other members of their colony", "using chemical trails to lead them directly to the food.","What makes Tapinoma israele particularly interesting is their speed and coordination","with which they mobilize their colony compared to other ant species.",Hc,"This behavior has implications for the study of collective intelligence and swarm behavior","areas that are of great interest in fields like computer science and robotics.","Israeli researchers are exploring how ant foraging can inspire algorithms","for solving problems like optimizing routes in networks or coordinating robot swarms."],
+    ["In Israel, the Cataglyphis niger ant has been studied extensively","due to its remarkable navigational abilities.","These ants live in harsh desert environments","and have adapted to find their way back to their nests","over long distances using the position of the sun and internal step-counting.","Israeli researchers have been fascinated by their precise homing skills","in the extreme heat of the southern Israeli Negev desert.","This ability to navigate in seemingly featureless landscapes…","has drawn parallels to modern robotic navigation techniques."," ","In fact, the research conducted in Israel on desert ants…","has contributed to the understanding of biological navigation systems","which in turn has inspired improvements in robotics","and Israeli autonomous vehicle guidance systems."],
+    ["In Israel, scientists discovered a unique species of blind subterranean ants","called Aphaenogaster phillipsi, which thrive in caves in the Galilee region.","These ants have adapted to their dark, underground environment","by losing their eyesight completely and relying on chemical signals","and vibrations to communicate and navigate.","This discovery is quite significant because it highlights","the extreme adaptations organisms can develop","in response to their specific environments."," ","Additionally, these Israeli cave ants have attracted interest from biologists","studying evolutionary processes and how creatures adapt over time","to isolated and challenging Israeli habitats."],
+    ["In Israel's Hula Valley there is an ant species called Crematogaster scutellaris","and it plays a surprising role in local agriculture.","These ants have a symbiotic relationship with fig trees.","The ants protect the fig trees from herbivorous insects and pests","in exchange for the sugary secretions produced by the tree's fig wasps.", "This mutualistic interaction has been observed to significantly benefit the fig trees","resulting in healthier plants and higher fruit yields for Israelis."," ","This ant-fig partnership garnered attention from agricultural researchers in Israel","as they study natural methods of pest control","that reduce the need for chemical pesticides","contributing to more sustainable farming practices in that region of Israel."],
+    ["In Israel, researchers have studied the Tapinoma israele.","These ants are known for their highly efficient recruitment behavior.","When they discover a food source, they quickly recruit other members of their colony", "using chemical trails to lead them directly to the food.","What makes Tapinoma israele particularly interesting is their speed and coordination","with which they mobilize their colony compared to other ant species."," ","This has implications for the study of collective intelligence and swarm behavior","areas that are of great interest in fields like computer science and robotics.","Israeli researchers are exploring how ant foraging can inspire algorithms","for solving problems like optimizing routes in networks or coordinating robot swarms."],
   ],
 
   // Philosophical ant puns and jokes.
@@ -5940,8 +6259,8 @@ Bj = [
     ["When ants gather for deep conversations…", '…do they form an "ant-hology" of thoughts?'],
     ["Can an ant change its destiny…", '…or is it stuck in an "ant-ernal" cycle?'],
     ["If an ant has an existential crisis…", '…is it called an "ant-xiety" attack?'],
-    ['Do ants ponder the "ant-oropy" of their universe…', "…and their place within it?"],
-    ["Is an ant that seeks knowledge on the meaning of life…", '…a true "ant-seeker"?'],
+    ['Do ants ponder the "ant-ropy" of their universe…', "…and their place within it?"],
+    ["Is an ant that looks for knowledge on the meaning of life…", '…a true "ant-swer seeker"?'],
     ["If ants had a concept of ethics…", '…would they follow an "ant-ics" code?'],
     ["Do ants ever wonder if their tiny actions create…", '…"ant-icipated" consequences in the grand scheme of life?'],
     ["Can an ant ever escape its predetermined role…", '…or is it bound by "ant-tuition"?'],
@@ -5949,15 +6268,15 @@ Bj = [
     ['Is there an ultimate "ant-cestor"…', "…that all ants revere as the origin of their species?"],
     ["Do ants believe in the concept of free will…", '…or do they accept their "ant-omated" existence?'],
     ["If an ant philosopher wrote about love…", '…would it call it "ant-icipation"?'],
-    ["Do ants have their own version of…", '…the "ant-iest" argument for the existence of a higher power?'],
-    ["If an ant achieves great things…", '…does it ponder if it has fulfilled its "ant-ential"?'],
+    ["Do ants have their own version of…", '…the "ant-theist" argument for the existence of a higher power?'],
+    ["If an ant achieves great things…", '…does it ponder if it has fulfilled its "dest-anty"?'],
     ["When ants gather to discuss the mysteries of the universe…", '…do they hold an "ant-cient" symposium?'],
     ["Can an ant's search for knowledge…", '…be considered an "ant-ellectual" journey?'],
     ["If an ant believes in multiple lives…", '…does it wonder about its "ant-carnation"?'],
     ["Is an ant's journey through life…", '…guided by "ant-uition" or random chance?'],
     ["If ants had their own version of existential dread…", '…would they call it "ant-nihilation"?'],
     ["When an ant faces a moral dilemma…", '…does it seek advice from an "ant-agonist"?'],
-    ["We're a microcosm of life in general and the co-dependency of all life."],
+    ["Ants are a microcosm of life in general and the co-dependency of all."],
   ],
 
   // Philosophical questions referring to ants.
@@ -6040,14 +6359,14 @@ Bj = [
     ["The sacrificial acts of ants for their colony reveal the beauty of selflessness…", "…inspiring me to live with compassion and purpose."],
     ["The simple, instinctual life of an ant teaches me to embrace the present…", "…finding joy in the here and now."],
     ["In the cycle of an ant's life, I see the natural ebb and flow of existence…", "…finding peace in the inevitability of my own journey."],
-    ["The small but mighty ant teaches me that every action…", bk, "…has value and significance."],
+    ["The small but mighty ant teaches me that every action…", "…no matter how small…", "…has value and significance."],
     ["Watching ants…", "…I find solace in the realization that life's meaning is found in the journey…", "…not the destination."],
     ["The collaborative spirit of ants reminds me that together…", "…we can achieve greatness, and this unity brings me joy."],
     ["The industrious ant shows me that a life of purpose…", "…however modest…", "…is a life well-lived."],
     ["Watching ants work with purpose…", "…I realize that even in fleeting moments…", "…there is profound beauty in existence."],
     ["The brief life of an ant teaches me to cherish every moment…", "…finding joy in the simplicity of being."],
     ["In the intricate dance of ants…", "…I see a reflection of life's delicate balance…", "…embracing my own journey with newfound serenity."],
-    ["The relentless march of ants reminds me that each step…", bk, "…contributes to the grand tapestry of life."],
+    ["The relentless march of ants reminds me that each step…", "…no matter how small…", "…contributes to the grand tapestry of life."],
     ["As ants build and thrive, I understand that my efforts…", "…however transient…", "…create ripples of meaning in the universe."],
     ["The unity of an ant colony reveals the power of connection and purpose…", "…inspiring me to live harmoniously and fully."],
     ["Each ant's sacrifice for the colony illuminates the beauty of selflessness…", "…filling me with a sense of peace and fulfillment."],
@@ -6113,181 +6432,275 @@ Bj = [
 ],
 
 // Achievements list.
-mc = {
+ach = {
   'blood': {
     n: "Blood Type",
-    [j]: "Have one kind of ant in a farm.",
+    desc: "Have one kind of ant in a farm.",
     lvls: 1,
     sub: "of a kind",
     ico: "🩸",
-    [e]: 3,
+    lvl: 3,
   },
   'sac': {
     n: "Sacrifices",
-    [j]: "Feed rival ants to meat eaters.",
+    desc: "Feed rival ants to starved meat eaters.",
     lvls: 1,
     sub: "ants sacrificed",
     ico: "🤼‍♂️",
-    [e]: 5,
+    lvl: 5,
   },
   'scene': {
     n: "Be Scene",
-    [j]: "Place scenery items.",
+    desc: "Place scenery items.",
     lvls: 1,
     sub: "items placed",
     ico: "⛰️",
-    [e]: 20,
+    lvl: 20,
   },
   'fac': {
     n: "Factory Fourm",
-    [j]: "Have four farms developing.",
-    sub: P,
+    desc: "Have four farms developing.",
+    sub: "farms",
     ico: "🏭",
-    [e]: 25,
+    lvl: 25,
   },
   'tri': {
     n: "Tri-fill-cta",
-    [j]: "Have 3 fill types used at the same time.",
+    desc: "Have 3 fill types used at the same time.",
     ico: "3️⃣",
-    [e]: 30,
+    lvl: 30,
   },
   'arty': {
     n: "Arty Farty",
-    [j]: "Paint several items.",
+    desc: "Paint several items.",
     lvls: 1,
     sub: "items painted",
     ico: "🎨",
-    [e]: 32,
+    lvl: 32,
   },
   'sweep': {
     n: "Queen Sweep",
-    [j]: "A single queen wipes out a colony.",
+    desc: "A single queen wipes out an entire colony.",
     ico: "👸🏾",
-    [e]: 35,
+    lvl: 35,
   },
   'kweens': {
     n: "Kweens",
-    [j]: "Have multiple queens in a colony.",
+    desc: "Have multiple queens in a colony.",
     ico: "👑",
-    [e]: 40,
+    lvl: 40,
   },
   'progeny': {
     n: "Progeny",
-    [j]: "Start a farm without capturing free ants.",
+    desc: "Start a farm without capturing free ants.",
     ico: "🐜",
-    [e]: 45,
+    lvl: 45,
   },
   'man': {
     n: "Man Fairies",
-    [j]: "Nurse drone ants to adulthood.",
+    desc: "Nurse drone ants to adulthood.",
     lvls: 1,
     sub: "drones",
     ico: "🧚‍♂️",
-    [e]: 50,
+    lvl: 50,
   },
-  [$e]: {
+  'drag': {
     n: "Dragged Queen",
-    [j]: "Insert a queen taken from another farm.",
+    desc: "Insert a queen taken from another farm.",
     ico: "💃",
-    [e]: 55,
+    lvl: 55,
   },
   'hb': {
     n: "Heartbreaker",
-    [j]: 'Have a nest with 10 "other" causes of death.',
+    desc: 'Have a nest with 10 "other" causes of death.',
     ico: "💔",
-    [e]: 60,
+    lvl: 60,
   },
   'day': {
     n: "Twinny Faux",
-    [j]: "Keep a farm going at least a day.",
+    desc: "Keep a farm going for at least a day.",
     ico: "🌗",
-    [e]: 65,
+    lvl: 65,
   },
   'weak': {
     n: "The Weak End",
-    [j]: "Keep a farm going for 7 days.",
+    desc: "Keep a farm going for 7 days.",
     ico: "📅",
-    [e]: 80,
+    lvl: 80,
   },
-  [cd]: {
+  'mom': {
     n: "Get Mom",
-    [j]: "What the heck???",
+    desc: "What the heck???",
     ico: "🤔",
-    [e]: 100,
+    lvl: 100,
   },
 },
 
 // The blank data structure of a farm object.
-Xh = {
-  [Xb]: {
-    [wc]: {
-      [sg]: 0,
-      [tg]: 0,
-      [Ba]: 0,
-      [Gd]: 0,
+farmDefault = {
+  stats: {
+    death: {
+      hunger: 0,
+      thirst: 0,
+      fight: 0,
+      sick: 0,
+      other: 0,
     },
-    [Pb]: 0,
+    cap: 0,
   },
   a: [], // ants
   e: [], // eggs
   c: [], // carry
-  [v]: [],
-  [oc]: [],
-  [aa]: [],
-  [be]: [],
-  [Aa]: [],
-  [$]: [],
+  tuns: [],
+  hills: [],
+  items: [],
+  decals: [],
+  nips: [],
+  dig: [],
 },
 
-// Actions that can be enqueued when in certain areas, and a flag indicating whether they can be done randomly.
+// Actions that can be enqueued randomly.
 // The first item in each list is the default action. There should always be a corresponding function in act[action].
-// Some functions rely on the actions being listed here, stop doubting it.
-xd = {
-  'bg': {[jd]: 1, uncrawl: 1, [Mc]: 1, [Ba]: 0, slip: 0, land: 0, kip: 0, [Pc]: 0, [K]: 0, [Oc]: 0, die: 0, [_]: 0},
-  [H]: {[xc]: 1, [ia]: 1, [$]: 1, [jd]: 1, [Mc]: 1, [Jd]: 1, [Ga]: 1, [Ba]: 0, kip: 0, [Pc]: 0, [zc]: 0, [K]: 0, [Oc]: 0, die: 0, [_]: 0},
-  [Eb]: {[ia]: 1, [bf]: 1, [Mc]: 1, [md]: 0, [Ba]: 0, [Jd]: 0, kip: 0, [Pc]: 0, [zc]: 0, [K]: 0, [Oc]: 0, die: 0, [_]: 0, [Qb]: 0},
+acts = {
+  'bg': ['crawl', 'uncrawl', 'rest'],
+  'top': ['pace', 'dive', 'dig', 'crawl', 'rest', 'eat', 'drink'],
+  'bot': ['dive', 'climb', 'rest'],
 },
 
 // Nip Ids (Note: 0 is not a valid key for nipIds)
-Nb = [0, 'nip-bl', 'nip-br', 'nip-tl', 'nip-tr'],
+nipIds = [0, 'nip-bl', 'nip-br', 'nip-tl', 'nip-tr'],
 
 // Reasons an ant might die.
-Cj = {
-  [sg]: 'of hunger',
-  [tg]: 'of thirst',
-  [Ba]: 'in a fight',
-  [Gd]: 'of a broken heart'
+deathCauses = {
+  hunger: 'of hunger',
+  thirst: 'of thirst',
+  fight: 'in a fight',
+  other: 'of a broken heart'
 },
 
 // HTML for farm.
-Dj =
-`<div id=kit><div id=wrapper class=farm data-col=green><div id=a-nip-tl class="nants nip-tl"></div><div id=a-nip-tr class="nants nip-tr"></div><div id=a-nip-bl class="nants nip-bl"></div><div id=a-nip-br class="nants nip-br"></div><div id=farm data-fill=none><div id=card></div><div id=scenery class=above></div><div id=food class=above></div><div id=hills class=above></div><div id=fill class=fill><div class=specks></div></div><div id=tunnels class=fill></div></div><div id=glass><div id=frost></div><div class=ahole-set><div class=ahole></div><div class=ahole></div><div class=ahole></div></div><div class=ahole-set><div class=ahole></div><div class=ahole></div><div class=ahole></div></div></div><div id=decals></div><div id=l-wrap><div id=loupe><div id=lg></div><div id=lh></div></div><div id=l-inf><div id=l-head></div><div id=l-l><div id=l-t><span class=txt></span><span class=emo>🐜</span></div><div id=l-c><span class=txt></span><span class=emo></span></div><div id=l-d><span class=txt></span><span class=emo>⌛</span></div><div id=l-a><span class=txt></span><span class=emo>💡</span></div></div><div id=l-r><div id=l-rot><span class=emo>☣️</span><span class=bar></span></div><div id=l-decay><span class=emo>🥀</span><span class=bar></span></div><div id=l-fd><span class=emo>🍔</span><span class=bar></span></div><div id=l-dr><span class=emo>🥤</span><span class=bar></span></div><div id=l-md><span class=emo></span><span class=bar></span></div><div id=l-hp><span class=emo>♥️</span><span class=bar></span></div></div></div></div><div class="frame-l frame"></div><div class="frame-r frame"></div><div id=dropzone class=glow></div><div id=lid><div class="hole frame"></div><div class="frame-t frame"></div></div><div class="frame-b frame"></div><div id=nip-tl class="nip frame"><div class="nipcap frame"></div></div><div id=nip-tr class="nip frame"><div class="nipcap frame"></div></div><div id=nip-bl class="nip frame"><div class="nipcap frame"></div></div><div id=nip-br class="nip frame"><div class="nipcap frame"></div></div><div id=vial class=vial><div class=vc></div><div class=vt></div><div class=vf></div><div class=vw></div><div class=vs><div></div></div></div><div id=t-nip-tl class="toob nip-tl"><div></div><span><span>►</span><span>►</span><span>►</span></span></div><div id=t-nip-tr class="toob nip-tr"><div></div><span><span>►</span><span>►</span><span>►</span></span></div><div id=t-nip-bl class="toob nip-bl"><div></div><span><span>►</span><span>►</span><span>►</span></span></div><div id=t-nip-br class="toob nip-br"><div></div><span><span>►</span><span>►</span><span>►</span></span></div></div><div id=base class=frame data-col=green><div id=sign class=plate><div class="sign-l plate"></div><h1 id=n>ANT FARM SOCIAL</h1><div class="sign-r plate"></div></div><div class="trim plate"><div class=trim-inner></div></div></div></div>`,
+farmTemplate =
+  html( // #kit
+    html( // #wrapper
+      mapJoin(nipIds.slice(1), nip => divc('nants ' + nip, {id: 'a-' + nip})) +
+      html(
+        html('', {id: 'card'}) +
+        mapJoin(['scenery', 'food', 'hills'], id => divc('above', {id})) +
+        html(divc('specks'), {id: 'fill', class: 'fill'}) +
+        divc('fill', {id: 'tunnels'}),
+        {id: 'farm', 'data-fill': 'none'}
+      ) +
+      html(
+        divc('frost') +
+        repeat(2, X => html(divc('ahole') + divc('ahole') + divc('ahole'), {class: 'ahole-set'})),
+        {id: 'glass'}
+      ) +
+      html('', {id: 'decals'}) +
+      html(
+        html(html('', {id: 'lg'}) + html('', {id: 'lh'}), {id: 'loupe'}) +
+        html(
+          html('', {id: 'l-head'}) +
+          html(
+            html(span('', {class: 'txt'}) + span('🐜', {class: 'emo'}), {id: 'l-t', title: 'TYPE'}) +
+            html(span('', {class: 'txt'}) + span('', {class: 'emo'}), {id: 'l-c', title: 'CASTE'}) +
+            html(span('', {class: 'txt'}) + span('⌛', {class: 'emo'}), {id: 'l-d', title: 'TENURE'}) +
+            html(span('', {class: 'txt'}) + span('', {class: 'emo'}), {id: 'l-a'}),
+            {id: 'l-l'}
+          ) +
+          html(
+            html(span('☣️', {class: 'emo'}) + span('', {class: 'bar'}), {id: 'l-rot'}) +
+            html(span('🥀', {class: 'emo'}) + span('', {class: 'bar'}), {id: 'l-decay'}) +
+            html(span('🍔', {class: 'emo'}) + span('', {class: 'bar'}), {id: 'l-fd'}) +
+            html(span('🥤', {class: 'emo'}) + span('', {class: 'bar'}), {id: 'l-dr'}) +
+            html(span('', {class: 'emo'}) + span('', {class: 'bar'}), {id: 'l-md'}) +
+            html(span('💀', {class: 'emo'}) + span('', {class: 'txt'}), {id: 'l-re', title: 'DIED'}) +
+            html(span('', {class: 'emo'}) + span('', {class: 'bar'}) + span('', {class: 'txt'}), {id: 'l-hp'}),
+            {id: 'l-r'}
+          ),
+          {id: 'l-inf'}
+        ),
+        {id: 'l-wrap'}
+      ) +
+      divc('frame frame-l') +
+      divc('frame frame-r') +
+      divc('glow', {id: 'dropzone'}) +
+      html(divc('hole frame') + divc('frame frame-t'), {id: 'lid'}) +
+      divc('frame frame-b') +
+      mapJoin(nipIds.slice(1), nip => html(divc('nipcap frame'), {id: nip, class: 'nip frame'})) +
+      mapJoin(nipIds.slice(1), nip => html(html(html('') + html(span(repeat(3, X => span('►'))))), {id: 't-' + nip, class: 'toob ' + nip})),
+      {id: 'wrapper', class: 'farm', 'data-col': 'green'}
+    ) +
+    html(
+      html(divc('plate plate-l') + html(tag(1, 'ANT FARM SOCIAL', {id: 'n'})) + divc('plate plate-r'), {id: 'sign', class: 'plate'}) + html(divc('trim-inner'), {class: 'trim plate'}),
+      {id: 'base', class: 'frame', 'data-col': 'green'}
+    ),
+    {id: 'kit'}
+  ),
 
 // HTML for ant.
-Ej =
-`<div id=ant class=ant><div class=spot></div><div class=body><div class=body-mag><div class=body-wrap><div class="legs legs-l"><div class=leg><div class=foot></div></div><div class=leg><div class=foot></div></div><div class=leg><div class=foot></div></div></div><div class=head><div class=antenna></div><div class=antenna></div><div class=hat></div><div class=c></div></div><div class=torso></div><div class=rear></div><div class="legs legs-r"><div class=leg><div class=foot></div></div><div class=leg><div class=foot></div></div><div class=leg><div class=foot></div></div></div><div class=wings><div class="wing wing-l"></div><div class="wing wing-r"></div></div></div></div></div></div>`,
+antTemplate =
+  html( // .ant
+    divc('spot') +
+    html( // .body
+      html( // .body-mag
+        html( // .body-wrap
+          html(
+            // Left legs
+            repeat(3, X => html(divc('foot'), {class: 'leg'})),
+            {class: 'legs legs-l'}
+          ) +
+          // Head
+          html(
+            divc('antenna') +
+            divc('antenna') +
+            divc('hat') +
+            divc('c'),
+            {class: 'head'}
+          ) +
+          // Torso & Rear
+          divc('torso') +
+          divc('rear') +
+          // Right legs
+          html(
+            repeat(3, X => html(divc('foot'), {class: 'leg'})),
+            {class: 'legs legs-r'}
+          ) +
+          // Wings
+          html(
+            divc('wing wing-l') +
+            divc('wing wing-r'),
+            {class: 'wings'}
+          ),
+          {class: 'body-wrap'}
+        ),
+        {class: 'body-mag'}
+      ),
+      {class: 'body'}
+    ),
+    {id: 'ant', class: 'ant'}
+  ),
 
 // Locations for the bus tickets (the bg images and corresponding ambient audio).
-gg = {
+locs = {
   // Keyed by the base slugs of the image filenames, c: count of bgs, a: audio file.
   beach: {c: 5}, // Default 'a' is 'wind'.
   park: {c: 5, a: 'park'},
   country: {c: 6, a: 'wild'},
   lake: {c: 3, a: 'wild'},
-  [hi]: {c: 8},
+  dystopia: {c: 8},
   picnic: {c: 3, a: 'park'},
   desert: {c: 6},
 };
 
 // STICKERS
 // Dynamically added because they're all identical.
-for (let fk = 1; fk < 9; fk++) {
-  l[sb + (w + fk).padStart(2, 0)] = {
+for (let i = 1; i < 9; i++) {
+  items['s' + ('' + i).padStart(2, 0)] = {
     n: 'a sticker',
-    [j]: w,
-    t: Te,
+    desc: '',
+    t: 'sticker',
     max: 1,
-    [e]: 100,
+    lvl: 100,
   }
 }
 

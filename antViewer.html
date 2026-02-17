@@ -28,7 +28,6 @@
       .view-ant p {
         font-size: small;
         text-align: center;
-
         margin-bottom: 1em;
         color: #eee;
         position: absolute;
@@ -55,7 +54,7 @@
         height: 320px;
       }
       .full .ant {
-        transform: translate(-50%,-50%) scale(5) rotate(90deg);
+        transform: translate(-50%,-50%) scale(5);
       }
       fieldset {
         display: inline-block;
@@ -429,6 +428,16 @@ window.addEventListener('load', viewAnts);
           <option value="cola">Cola</option>
           <option value="flesh">Flesh</option>
         </select>
+      </fieldset>
+
+
+      <fieldset>
+        <legend>Rot & Decay</legend>
+        <label><input type="checkbox" name="rot" value="rot">rot</label>
+        <label><input type="checkbox" name="rot1" value="rot1">rot1</label>
+        <label><input type="checkbox" name="rot2" value="rot2">rot2</label>
+        <label><input type="checkbox" name="decay" value="decay">decay</label>
+        <label><input type="checkbox" name="decay1" value="decay1">decay1</label>
       </fieldset>
 
       <input type="text" id="classNameInput" width="40" placeholder="Add Classes">

@@ -166,12 +166,8 @@ items = {
     n: 'Cola',
     desc: "You're like 99% parched here.<br>You could really use a cola.",
     lvl: 0,
-    max: 1,
     t: 'hydration',
-    dr: 10,
-    fd: 2,
-    health: 1,
-    sweet: 1,
+    max: 1,
     keep: 1,
     quip: [
       ["Why you never drink water, fatty?"],
@@ -187,7 +183,7 @@ items = {
     desc: "With artisan hands, it is crafted with care.<br>Each crumb a masterpiece, beyond compare.",
     lvl: 2,
     t: 'nutrition',
-    fd: 10,
+    sweet: 1,
     max: 1,
     keep: 1,
     quip: [
@@ -202,7 +198,6 @@ items = {
     desc: "Nothing compares to a cheese danish.<br>This one has been stepped on though.",
     lvl: 5,
     t: 'nutrition',
-    fd: 12,
     sweet: 1,
     max: 1,
     keep: 1,
@@ -217,7 +212,6 @@ items = {
     desc: "I want some Salt Pork!<br>I need halp!!!",
     lvl: 5,
     t: 'nutrition',
-    fd: 12,
     meat: 1,
     max: 1,
     keep: 1,
@@ -231,12 +225,8 @@ items = {
     n: 'Asti Spumante',
     desc: "When you've got good taste it shows.<br>The celebration grows!",
     lvl: 5,
-    max: 1,
     t: 'hydration',
-    dr: 12,
-    fd: 0,
-    //md: -3,
-    health: -1,
+    max: 1,
     keep: 1,
     quip: [
       ['When my bottle pop.'],
@@ -254,7 +244,6 @@ items = {
     desc: "That's the only way I cook my wieners.<br>(An ALDI in-house brand)",
     lvl: 8,
     t: 'nutrition',
-    fd: 12,
     meat: 1,
     max: 1,
     keep: 1,
@@ -480,7 +469,7 @@ items = {
   },
   white: {
     n: "Titanium",
-    desc: "I'm bull**it proof.  Nothing to lose.<br>Fire-A-Way! Fire-A-Way!",
+    desc: "I'm bulls hit proof.  Nothing to lose.<br>Fire-A-Way! Fire-A-Way!",
     t: 'paint',
     max: 3,
     lvl: 80,
@@ -535,8 +524,7 @@ items = {
   },
   // Dummy item for crucible burnt farms.
   metal: {
-    nodrop: 1,
-    fx: 'm'
+    nodrop: 1
   },
 
   // ANT TUBES
@@ -570,7 +558,7 @@ items = {
   },
   chi: {
     n: "Lady Chimera",
-    desc: "It's pronounced <em>chimera</em>.<br>But, go on…",
+    desc: `It's pronounced <em>chimera</em>.<br>But, go on…`,
     t: 'ants',
     max: 1,
     lvl: 140,
@@ -945,6 +933,13 @@ items = {
     max: 1,
     lvl: 222
   },
+  sculpt: {
+    n: 'Metal Sculpture',
+    desc: "",
+    t: 'sculpt',
+    lvl: 333,
+    nodrop: 1
+  },
   mom: {
     n: 'Mom',
     desc: "Bucket to mop, you've done it all.<br>You cleaned up.",
@@ -1225,6 +1220,7 @@ jokes = [
     ["Having a queen is better than ant-archy"],
     ["This farm should have its own national ant-hem"],
     ["Ant nothin but a G thang"],
+    ["How do you determine the gender of an ant?", "If it sinks: girl ant.", "If it floats…"],
 
     // Limericks
     ["There once was an ant with great charm,", "Living in an ant farm, so warm.", "With tunnels so neat,", "It couldn't be beat,", "In its tiny ant-sized farm!"],
@@ -1284,7 +1280,7 @@ jokes = [
     ["In Israel, the Cataglyphis niger ant has been studied extensively","due to its remarkable navigational abilities.","These ants live in harsh desert environments","and have adapted to find their way back to their nests","over long distances using the position of the sun and internal step-counting.","Israeli researchers have been fascinated by their precise homing skills","in the extreme heat of the southern Israeli Negev desert.","This ability to navigate in seemingly featureless landscapes…","has drawn parallels to modern robotic navigation techniques."," ","In fact, the research conducted in Israel on desert ants…","has contributed to the understanding of biological navigation systems","which in turn has inspired improvements in robotics","and Israeli autonomous vehicle guidance systems."],
     ["In Israel, scientists discovered a unique species of blind subterranean ants","called Aphaenogaster phillipsi, which thrive in caves in the Galilee region.","These ants have adapted to their dark, underground environment","by losing their eyesight completely and relying on chemical signals","and vibrations to communicate and navigate.","This discovery is quite significant because it highlights","the extreme adaptations organisms can develop","in response to their specific environments."," ","Additionally, these Israeli cave ants have attracted interest from biologists","studying evolutionary processes and how creatures adapt over time","to isolated and challenging Israeli habitats."],
     ["In Israel's Hula Valley there is an ant species called Crematogaster scutellaris","and it plays a surprising role in local agriculture.","These ants have a symbiotic relationship with fig trees.","The ants protect the fig trees from herbivorous insects and pests","in exchange for the sugary secretions produced by the tree's fig wasps.", "This mutualistic interaction has been observed to significantly benefit the fig trees","resulting in healthier plants and higher fruit yields for Israelis."," ","This ant-fig partnership garnered attention from agricultural researchers in Israel","as they study natural methods of pest control","that reduce the need for chemical pesticides","contributing to more sustainable farming practices in that region of Israel."],
-    ["In Israel, researchers have studied the Tapinoma israele.","These ants are known for their highly efficient recruitment behavior.","When they discover a food source, they quickly recruit other members of their colony", "using chemical trails to lead them directly to the food.","What makes Tapinoma israele particularly interesting is their speed and coordination","with which they mobilize their colony compared to other ant species."," ","This behavior has implications for the study of collective intelligence and swarm behavior","areas that are of great interest in fields like computer science and robotics.","Israeli researchers are exploring how ant foraging can inspire algorithms","for solving problems like optimizing routes in networks or coordinating robot swarms."],
+    ["In Israel, researchers have studied the Tapinoma israele.","These ants are known for their highly efficient recruitment behavior.","When they discover a food source, they quickly recruit other members of their colony", "using chemical trails to lead them directly to the food.","What makes Tapinoma israele particularly interesting is their speed and coordination","with which they mobilize their colony compared to other ant species."," ","This has implications for the study of collective intelligence and swarm behavior","areas that are of great interest in fields like computer science and robotics.","Israeli researchers are exploring how ant foraging can inspire algorithms","for solving problems like optimizing routes in networks or coordinating robot swarms."],
   ],
 
   // Philosophical ant puns and jokes.
@@ -1297,8 +1293,8 @@ jokes = [
     ["When ants gather for deep conversations…", '…do they form an "ant-hology" of thoughts?'],
     ["Can an ant change its destiny…", '…or is it stuck in an "ant-ernal" cycle?'],
     ["If an ant has an existential crisis…", '…is it called an "ant-xiety" attack?'],
-    ['Do ants ponder the "ant-oropy" of their universe…', "…and their place within it?"],
-    ["Is an ant that seeks knowledge on the meaning of life…", '…a true "ant-seeker"?'],
+    ['Do ants ponder the "ant-ropy" of their universe…', "…and their place within it?"],
+    ["Is an ant that looks for knowledge on the meaning of life…", '…a true "ant-swer seeker"?'],
     ["If ants had a concept of ethics…", '…would they follow an "ant-ics" code?'],
     ["Do ants ever wonder if their tiny actions create…", '…"ant-icipated" consequences in the grand scheme of life?'],
     ["Can an ant ever escape its predetermined role…", '…or is it bound by "ant-tuition"?'],
@@ -1306,15 +1302,15 @@ jokes = [
     ['Is there an ultimate "ant-cestor"…', "…that all ants revere as the origin of their species?"],
     ["Do ants believe in the concept of free will…", '…or do they accept their "ant-omated" existence?'],
     ["If an ant philosopher wrote about love…", '…would it call it "ant-icipation"?'],
-    ["Do ants have their own version of…", '…the "ant-iest" argument for the existence of a higher power?'],
-    ["If an ant achieves great things…", '…does it ponder if it has fulfilled its "ant-ential"?'],
+    ["Do ants have their own version of…", '…the "ant-theist" argument for the existence of a higher power?'],
+    ["If an ant achieves great things…", '…does it ponder if it has fulfilled its "dest-anty"?'],
     ["When ants gather to discuss the mysteries of the universe…", '…do they hold an "ant-cient" symposium?'],
     ["Can an ant's search for knowledge…", '…be considered an "ant-ellectual" journey?'],
     ["If an ant believes in multiple lives…", '…does it wonder about its "ant-carnation"?'],
     ["Is an ant's journey through life…", '…guided by "ant-uition" or random chance?'],
     ["If ants had their own version of existential dread…", '…would they call it "ant-nihilation"?'],
     ["When an ant faces a moral dilemma…", '…does it seek advice from an "ant-agonist"?'],
-    ["We're a microcosm of life in general and the co-dependency of all life."],
+    ["Ants are a microcosm of life in general and the co-dependency of all."],
   ],
 
   // Philosophical questions referring to ants.
@@ -1481,7 +1477,7 @@ ach = {
   },
   'sac': {
     n: "Sacrifices",
-    desc: "Feed rival ants to meat eaters.",
+    desc: "Feed rival ants to starved meat eaters.",
     lvls: 1,
     sub: "ants sacrificed",
     ico: "🤼‍♂️",
@@ -1518,7 +1514,7 @@ ach = {
   },
   'sweep': {
     n: "Queen Sweep",
-    desc: "A single queen wipes out a colony.",
+    desc: "A single queen wipes out an entire colony.",
     ico: "👸🏾",
     lvl: 35,
   },
@@ -1556,7 +1552,7 @@ ach = {
   },
   'day': {
     n: "Twinny Faux",
-    desc: "Keep a farm going at least a day.",
+    desc: "Keep a farm going for at least a day.",
     ico: "🌗",
     lvl: 65,
   },
@@ -1581,6 +1577,7 @@ farmDefault = {
       hunger: 0,
       thirst: 0,
       fight: 0,
+      sick: 0,
       other: 0,
     },
     cap: 0,
@@ -1596,13 +1593,12 @@ farmDefault = {
   dig: [],
 },
 
-// Actions that can be enqueued when in certain areas, and a flag indicating whether they can be done randomly.
+// Actions that can be enqueued randomly.
 // The first item in each list is the default action. There should always be a corresponding function in act[action].
-// Some functions rely on the actions being listed here, stop doubting it.
 acts = {
-  'bg': {crawl: 1, uncrawl: 1, rest: 1, fight: 0, slip: 0, land: 0, kip: 0, lay: 0, nip: 0, freeze: 0, die: 0, carry: 0},
-  'top': {pace: 1, dive: 1, dig: 1, crawl: 1, rest: 1, eat: 1, drink: 1, fight: 0, kip: 0, lay: 0, get: 0, nip: 0, freeze: 0, die: 0, carry: 0},
-  'bot': {dive: 1, climb: 1, rest: 1, srv: 0, fight: 0, eat: 0, kip: 0, lay: 0, get: 0, nip: 0, freeze: 0, die: 0, carry: 0, drop: 0},
+  'bg': ['crawl', 'uncrawl', 'rest'],
+  'top': ['pace', 'dive', 'dig', 'crawl', 'rest', 'eat', 'drink'],
+  'bot': ['dive', 'climb', 'rest'],
 },
 
 // Nip Ids (Note: 0 is not a valid key for nipIds)
@@ -1618,123 +1614,105 @@ deathCauses = {
 
 // HTML for farm.
 farmTemplate =
-`<div id="kit">
-  <div id="wrapper" class="farm" data-col="green">
-    <div id="a-nip-tl" class="nants nip-tl"></div>
-    <div id="a-nip-tr" class="nants nip-tr"></div>
-    <div id="a-nip-bl" class="nants nip-bl"></div>
-    <div id="a-nip-br" class="nants nip-br"></div>
-    <div id="farm" data-fill="none">
-      <div id="card"></div>
-      <div id="scenery" class="above"></div>
-      <div id="food" class="above"></div>
-      <div id="hills" class="above"></div>
-      <div id="fill" class="fill"><div class="specks"></div></div>
-      <div id="tunnels" class="fill"></div>
-    </div>
-    <div id="glass">
-      <div id="frost"></div>
-      <div class="ahole-set">
-        <div class="ahole"></div>
-        <div class="ahole"></div>
-        <div class="ahole"></div>
-      </div>
-      <div class="ahole-set">
-        <div class="ahole"></div>
-        <div class="ahole"></div>
-        <div class="ahole"></div>
-      </div>
-    </div>
-    <div id="decals"></div>
-    <div id="l-wrap">
-      <div id="loupe"><div id="lg"></div><div id="lh"></div></div>
-      <div id="l-inf">
-        <div id="l-head"></div>
-        <div id="l-l">
-          <div id="l-t"><span class="txt"></span><span class="emo">🐜</span></div>
-          <div id="l-c"><span class="txt"></span><span class="emo"></span></div>
-          <div id="l-d"><span class="txt"></span><span class="emo">⌛</span></div>
-          <div id="l-a"><span class="txt"></span><span class="emo">💡</span></div>
-        </div>
-        <div id="l-r">
-          <div id="l-rot"><span class="emo">☣️</span><span class="bar"></span></div>
-          <div id="l-decay"><span class="emo">🥀</span><span class="bar"></span></div>
-          <div id="l-fd"><span class="emo">🍔</span><span class="bar"></span></div>
-          <div id="l-dr"><span class="emo">🥤</span><span class="bar"></span></div>
-          <div id="l-md"><span class="emo"></span><span class="bar"></span></div>
-          <div id="l-hp"><span class="emo">♥️</span><span class="bar"></span></div>
-        </div>
-      </div>
-    </div>
-    <div class="frame-l frame"></div>
-    <div class="frame-r frame"></div>
-    <div id="dropzone" class="glow"></div>
-    <div id="lid">
-      <div class="hole frame"></div>
-      <div class="frame-t frame"></div>
-    </div>
-    <div class="frame-b frame"></div>
-    <div id="nip-tl" class="nip frame"><div class="nipcap frame"></div></div>
-    <div id="nip-tr" class="nip frame"><div class="nipcap frame"></div></div>
-    <div id="nip-bl" class="nip frame"><div class="nipcap frame"></div></div>
-    <div id="nip-br" class="nip frame"><div class="nipcap frame"></div></div>
-    <div id="vial" class="vial">
-      <div class="vc"></div>
-      <div class="vt"></div>
-      <div class="vf"></div>
-      <div class="vw"></div>
-      <div class="vs"><div></div></div>
-    </div>
-    <div id="t-nip-tl" class="toob nip-tl"><div></div><span><span>►</span><span>►</span><span>►</span></span></div>
-    <div id="t-nip-tr" class="toob nip-tr"><div></div><span><span>►</span><span>►</span><span>►</span></span></div>
-    <div id="t-nip-bl" class="toob nip-bl"><div></div><span><span>►</span><span>►</span><span>►</span></span></div>
-    <div id="t-nip-br" class="toob nip-br"><div></div><span><span>►</span><span>►</span><span>►</span></span></div>
-  </div>
-  <div id="base" class="frame" data-col="green">
-    <div id="sign" class="plate">
-      <div class="sign-l plate"></div>
-      <h1 id="n">ANT FARM SOCIAL</h1>
-      <div class="sign-r plate"></div>
-    </div>
-    <div class="trim plate">
-      <div class="trim-inner"></div>
-    </div>
-  </div>
-</div>`,
+  html( // #kit
+    html( // #wrapper
+      mapJoin(nipIds.slice(1), nip => divc('nants ' + nip, {id: 'a-' + nip})) +
+      html(
+        html('', {id: 'card'}) +
+        mapJoin(['scenery', 'food', 'hills'], id => divc('above', {id})) +
+        html(divc('specks'), {id: 'fill', class: 'fill'}) +
+        divc('fill', {id: 'tunnels'}),
+        {id: 'farm', 'data-fill': 'none'}
+      ) +
+      html(
+        divc('frost') +
+        repeat(2, X => html(divc('ahole') + divc('ahole') + divc('ahole'), {class: 'ahole-set'})),
+        {id: 'glass'}
+      ) +
+      html('', {id: 'decals'}) +
+      html(
+        html(html('', {id: 'lg'}) + html('', {id: 'lh'}), {id: 'loupe'}) +
+        html(
+          html('', {id: 'l-head'}) +
+          html(
+            html(span('', {class: 'txt'}) + span('🐜', {class: 'emo'}), {id: 'l-t', title: 'TYPE'}) +
+            html(span('', {class: 'txt'}) + span('', {class: 'emo'}), {id: 'l-c', title: 'CASTE'}) +
+            html(span('', {class: 'txt'}) + span('⌛', {class: 'emo'}), {id: 'l-d', title: 'TENURE'}) +
+            html(span('', {class: 'txt'}) + span('', {class: 'emo'}), {id: 'l-a'}),
+            {id: 'l-l'}
+          ) +
+          html(
+            html(span('☣️', {class: 'emo'}) + span('', {class: 'bar'}), {id: 'l-rot'}) +
+            html(span('🥀', {class: 'emo'}) + span('', {class: 'bar'}), {id: 'l-decay'}) +
+            html(span('🍔', {class: 'emo'}) + span('', {class: 'bar'}), {id: 'l-fd'}) +
+            html(span('🥤', {class: 'emo'}) + span('', {class: 'bar'}), {id: 'l-dr'}) +
+            html(span('', {class: 'emo'}) + span('', {class: 'bar'}), {id: 'l-md'}) +
+            html(span('💀', {class: 'emo'}) + span('', {class: 'txt'}), {id: 'l-re', title: 'DIED'}) +
+            html(span('', {class: 'emo'}) + span('', {class: 'bar'}) + span('', {class: 'txt'}), {id: 'l-hp'}),
+            {id: 'l-r'}
+          ),
+          {id: 'l-inf'}
+        ),
+        {id: 'l-wrap'}
+      ) +
+      divc('frame frame-l') +
+      divc('frame frame-r') +
+      divc('glow', {id: 'dropzone'}) +
+      html(divc('hole frame') + divc('frame frame-t'), {id: 'lid'}) +
+      divc('frame frame-b') +
+      mapJoin(nipIds.slice(1), nip => html(divc('nipcap frame'), {id: nip, class: 'nip frame'})) +
+      mapJoin(nipIds.slice(1), nip => html(html(html('') + html(span(repeat(3, X => span('►'))))), {id: 't-' + nip, class: 'toob ' + nip})),
+      {id: 'wrapper', class: 'farm', 'data-col': 'green'}
+    ) +
+    html(
+      html(divc('plate plate-l') + html(tag(1, 'ANT FARM SOCIAL', {id: 'n'})) + divc('plate plate-r'), {id: 'sign', class: 'plate'}) + html(divc('trim-inner'), {class: 'trim plate'}),
+      {id: 'base', class: 'frame', 'data-col': 'green'}
+    ),
+    {id: 'kit'}
+  ),
 
 // HTML for ant.
 antTemplate =
-`<div id="ant" class="ant">
-  <div class="spot"></div>
-  <div class="body">
-    <div class="body-mag">
-      <div class="body-wrap">
-        <div class="legs legs-l">
-          <div class="leg"><div class="foot"></div></div>
-          <div class="leg"><div class="foot"></div></div>
-          <div class="leg"><div class="foot"></div></div>
-        </div>
-        <div class="head">
-          <div class="antenna"></div>
-          <div class="antenna"></div>
-          <div class="hat"></div>
-          <div class="c"></div>
-        </div>
-        <div class="torso"></div>
-        <div class="rear"></div>
-        <div class="legs legs-r">
-          <div class="leg"><div class="foot"></div></div>
-          <div class="leg"><div class="foot"></div></div>
-          <div class="leg"><div class="foot"></div></div>
-        </div>
-        <div class="wings">
-          <div class="wing wing-l"></div>
-          <div class="wing wing-r"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>`,
+  html( // .ant
+    divc('spot') +
+    html( // .body
+      html( // .body-mag
+        html( // .body-wrap
+          html(
+            // Left legs
+            repeat(3, X => html(divc('foot'), {class: 'leg'})),
+            {class: 'legs legs-l'}
+          ) +
+          // Head
+          html(
+            divc('antenna') +
+            divc('antenna') +
+            divc('hat') +
+            divc('c'),
+            {class: 'head'}
+          ) +
+          // Torso & Rear
+          divc('torso') +
+          divc('rear') +
+          // Right legs
+          html(
+            repeat(3, X => html(divc('foot'), {class: 'leg'})),
+            {class: 'legs legs-r'}
+          ) +
+          // Wings
+          html(
+            divc('wing wing-l') +
+            divc('wing wing-r'),
+            {class: 'wings'}
+          ),
+          {class: 'body-wrap'}
+        ),
+        {class: 'body-mag'}
+      ),
+      {class: 'body'}
+    ),
+    {id: 'ant', class: 'ant'}
+  ),
 
 // Locations for the bus tickets (the bg images and corresponding ambient audio).
 locs = {

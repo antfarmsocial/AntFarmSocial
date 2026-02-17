@@ -26,8 +26,13 @@ to get back into it, here are some tips:
   'npm version patch', 'npm version minor' etc.., or modifying the package.json
   because the version is shown in the UI.
 - GitHub has an app called "GitHub Desktop" that makes the git stuff easier.
-- When publishing a production release; the files listed in .gitattributes do
-  not need to be present.
+- When publishing a production release; the files listed in .gitattributes need
+  not be present.  Github will do this automatically.
+- Be aware that even minor additions such as a new type of item drop or ant
+  behaviour can be a laborious process that requires a lot of asset preparation and
+  careful consideration.  Many ideas going into this project have been ditched
+  as even the MVP features (to make the game winnable) have considerable scope.
+  Check TODO.md for some ideas that have survived but are just not implemented.
 
 ### Developer Cheats
 
@@ -46,6 +51,7 @@ to get back into it, here are some tips:
   Sometimes that works out better.
 - PSD/AI resources are NOT kept in the git repo, but are retained offline.
 - General rule for images is to make them at least twice the resolution that they'll be displayed (look up "@2x retina assets").
+  However, images used in the background (out of focus) are quite a low resolution and highly compressed.
 - The process for making game graphics is ideally to make them as a vector first.  First step is to create a raster design in photoshop based
   on reference images, and cleaning it up as much as possible.  Then in illustrator either manually trace the design or for more
   complicated images use the Image Trace functionality and create an image with reduced complexity.  Sometimes you can get away with just
@@ -53,7 +59,7 @@ to get back into it, here are some tips:
   files from it typically with a maximum longest dimension of 512px, or 256px for "stickers".  Very small/simple (non-bag) GUI images and/or dynamically coloured
   item images must be saved as SVG v1.1 with CSS Properties set to Presentation Attributes.
 - Small SVG files that are part of the GUI (other than bag/drop images) can be inserted directly into HTML/JS code, but should be compressed
-  as mentioned above, and further crushed using [HyperCrush](https://braksator.github.io/hypercrush).
+  as described here, and further crushed using [HyperCrush](https://braksator.github.io/hypercrush).
 - SVG item (scene and paint) files should be compressed with an online tool first [vecta.io nano](https://vecta.io/nano), unless the result conflicts with
  `JCrush SVG` in which case try [iLoveImg](https://www.iloveimg.com/compress-image) or another tool.
 - SVG item (scene and paint) images in ./src/img/items are converted to dynamic SVG code in ./src/svgItems.js.  The images must be 2 colours, the main
@@ -74,11 +80,16 @@ to get back into it, here are some tips:
 
 Since this app uses a lot of resources every opportunity is taken to reduce sizes of files served to the end user.
 
-- A library called [JsShrink](https://github.com/brandon942/js-shrink) is included to preprocess the code
-  before minification.  Careful; it has been modified specifically for AFS.
-- Gulpfile uses dev dependencies to minify JS/CSS/HTML (as normal).
-- HTML files and HTML in Javascript strings get squeezed using [HyperCrush](https://www.npmjs.com/package/hypercrush)
+- Code brevity and density should always be a priority unless run-time performance is unacceptable.  Readability will come naturally as developer
+  becomes familiar with terse syntax.  Always be open to refactoring opportunities.
+- This does not mean excessively removing whitespace in js code or shortening variable names as that is handled by minification.  This is only done
+  as far as to comfortably fit more code onto the screen when browsing it.  No formalised style guide; take cues from existing code.
+- It also does not mean compromising when it comes to text content for display to the player.
+- However anything that makes it to the final output should be short, such as object keys and CSS class names, at least as much as can be reasonably
+  understood for the sake of development.  There is no minification employed for these things and they perhaps could use improvement.
+- Gulp reports a gzip size for the combined & minified js file which can help evaluate the effectiveness of refactoring.  A log of these reports is
+  generated too so you can track progress. Results often reveal efforts are counter-intuitive as "Gzip hates your DRY code".
+- Gulpfile uses dev dependencies to minify JS/CSS/HTML (as is normally done for web projects).
+- HTML files and HTML in Javascript strings get squeezed in gulp tasks using [HyperCrush](https://www.npmjs.com/package/hypercrush)
 - Note: `JCrush SVG`, and `HyperCrush` were developed specifically for this app.
-
-
 
