@@ -18,6 +18,7 @@ import {gzipSizeSync} from 'gzip-size';
 var isDev = process.argv.includes('--dev');
 
 gulp.task('svgItems', function (done) {
+  fs.mkdirSync('src/temp'); // Ensure temp directory exists
   jcrushSVG({ inDir: 'src/img/items', outFile: 'src/temp/svgItems.js', checkNew: 1, param: 1,
     bundle: 1, maxLen: 120, funcName: 'SVG', resVars: ['bg', 'fg', 'op'],
     processSVG: (filePath, svgContent) => {
