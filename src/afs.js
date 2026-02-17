@@ -2765,8 +2765,11 @@ antCap = (ant, antEl) => {
   antSurface(ant);
 },
 
+// Adds the fight action via an insta queue, if it's not already there.
+addFight = (ant, ant2) => !ant.q.some(a => a.act == 'fight' && a.ant == ant2.id) && antInstaQ(ant, {act: 'fight', ant: ant2.id}),
+
 // Sets up a fight between two ants.
-antFight = (ant, ant2) => !ant.carry && !ant2.carry && antInstaQ(ant, {act: 'fight', ant: ant2.id}) && !ant2.fight && antInstaQ(ant2, {act: 'fight', ant: ant.id}),
+antFight = (ant, ant2) => !ant.carry && !ant2.carry && addFight(ant, ant2) && !ant2.fight && addFight(ant2, ant),
 
 // Resets an ant to sit properly on the surface level and executes the next item in the queue.
 // Note: For newly captured ants this is how the ant's queue is "activated".
@@ -2925,7 +2928,7 @@ antInstaQ = (ant, queueItems, keepFirst = 1) => ant.q = [...keepFirst ? [ant.q.s
 
 // Delegates an ant action.  Importantly; calls an antUpdate() so that anything that calls antAction doesn't have to first do an antUpdate().
 // Done in a timer to prevent exceeding callstack and handle framerate speed by default.
-antAction = (ant, timeout = frameTick, action = ant.q[0]?.act || 'idle') => antUpdate(ant) || /* START-DEV */!stopAnts &&/* END-DEV */ (livesInFarm(ant) || action == 'die') && setTimeout(X => act[action](ant), timeout),
+antAction = (ant, timeout = frameTick, action = ant.q[0]?.act || 'idle') => /* START-DEV */!stopAnts &&/* END-DEV */ livesInFarm(ant) && antUpdate(ant) || setTimeout(X => act[action](ant), timeout),
 
 // Does next action in finna queue.
 // Most notably this calls antAction() and is often the logical alternative to calling antAction() directly.

@@ -997,6 +997,10 @@ window.onload = function() {
   devLoaded = 1;
 
   // Update antNext() to keep a history for dev purposes.
-  antNext = (ant, timeout) => {ant.hist ||= []; ant.hist.push(ant.q.shift()); antAction(ant, timeout); antThot(ant)};
+  antNext = (ant, timeout) => {
+    ant.hist ||= []; ant.hist.push(ant.q.shift());
+    antAction(ant, timeout); antThot(ant);
+    while (ant.q.length > 20) ant.q.shift(); // limit history length
+  };
 
 }
