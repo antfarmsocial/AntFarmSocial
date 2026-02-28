@@ -17,37 +17,6 @@ import {gzipSizeSync} from 'gzip-size';
 
 var isDev = process.argv.includes('--dev');
 
-gulp.task('svgItems', function (done) {
-  fs.mkdirSync('src/temp'); // Ensure temp directory exists
-  jcrushSVG({ inDir: 'src/img/items', outFile: 'src/temp/svgItems.js', checkNew: 1, param: 1,
-    bundle: 1, maxLen: 120, funcName: 'SVG', resVars: ['bg', 'fg', 'op'],
-    processSVG: (filePath, svgContent) => {
-      // Validates the SVG file for version and color usage
-      if (svgContent.includes('version=') && !svgContent.includes('version="1.1"')) // Check if version="1.1" exists
-        throw new Error(`SVG in ${filePath} does not have version="1.1". Ensure you set "SVG Profile: SVG 1.1" in save-as dialogue of Adobe Illustrator.`);
-      if (svgContent.match(/<style[^>]*>[\s\S]*?<\/style>/g)) // Check for style tags
-        throw new Error(`SVG in ${filePath} contains <style> tags, which are not allowed. Ensure you set "CSS Properties: Presentation Attributes" in save-as dialogue of Adobe Illustrator.`);
-      if (/style\s*=\s*["'][^"']*color\s*:/i.test(svgContent)) // Check if it uses CSS for colors (and if so, throw an error)
-        throw new Error(`SVG in ${filePath} uses CSS for colors, which is not allowed. Ensure you set "CSS Properties: Presentation Attributes" in save-as dialogue of Adobe Illustrator.`);
-      // Replaces color codes with placeholders
-      svgContent = svgContent.replace(new RegExp('#64bc41', 'gi'), '🟩'); // Background
-      if (!filePath.includes('paint') && !filePath.includes('ants')) {
-        svgContent = svgContent
-          .replace(/#[a-fA-F0-9]{6}|#[a-fA-F0-9]{3}/gi, '⬛') // Foreground
-          .replace(/opacity="([^"]+)"/gi, 'opacity="🔲"'); // Opacity
-      }
-      return svgContent.trim();
-    },
-    processJS:(filePath, jsContent) => {
-      return jsContent.replace('(k,', '(k,bg,fg,op,')
-        .replace(/🟩/g, '${bg}')
-        .replace(/⬛/g, '${fg}')
-        .replace(/🔲/g, '${op}');
-    },
-  });
-  done(); // Signal completion
-});
-
 gulp.task('imagemin', function (done) {
   let dirs = [
     {in: './src/img', out: './img', q: 50 },
@@ -89,20 +58,47 @@ gulp.task('imagemin', function (done) {
   done(); // Signal completion
 });
 
-gulp.task('minify-css', function () {
-  return gulp.src('./src/*.css')
-    .pipe(replace('url(../img/', 'url(img/'))
-    .pipe(lightningcss({
-      minify: true,
-      sourceMap: false,
-      nesting: false,
-      exclude: Features.Nesting,
-    }))
-    .pipe(rename({ suffix: '.min' }))
-    .pipe(gulp.dest('./'));
+gulp.task('svgItems', function (done) {
+  fs.mkdirSync('src/temp', { recursive: true }); // Ensure temp directory exists
+  jcrushSVG({
+    inDir: 'src/img/items',
+    outFile: 'src/temp/svgItems.js',
+    checkNew: 1,
+    param: 1,
+    allowZeroGain: true, // To allow output without deduplication.
+    maxLen: 2, // <-- Setting this to 120 is good for deduplication, but gzip size is better without it.  A value of 2 prevents deduplication.
+    bundle: 1,
+    funcName: 'SVG',
+    resVars: ['bg', 'fg', 'op'],
+    processSVG: (filePath, svgContent) => {
+      // Validates the SVG file for version and color usage
+      if (svgContent.includes('version=') && !svgContent.includes('version="1.1"')) // Check if version="1.1" exists
+        throw new Error(`SVG in ${filePath} does not have version="1.1". Ensure you set "SVG Profile: SVG 1.1" in save-as dialogue of Adobe Illustrator.`);
+      if (svgContent.match(/<style[^>]*>[\s\S]*?<\/style>/g)) // Check for style tags
+        throw new Error(`SVG in ${filePath} contains <style> tags, which are not allowed. Ensure you set "CSS Properties: Presentation Attributes" in save-as dialogue of Adobe Illustrator.`);
+      if (/style\s*=\s*["'][^"']*color\s*:/i.test(svgContent)) // Check if it uses CSS for colors (and if so, throw an error)
+        throw new Error(`SVG in ${filePath} uses CSS for colors, which is not allowed. Ensure you set "CSS Properties: Presentation Attributes" in save-as dialogue of Adobe Illustrator.`);
+      // Replaces color codes with placeholders
+      svgContent = svgContent.replace(new RegExp('#64bc41', 'gi'), '🟩'); // Background
+      if (!filePath.includes('paint') && !filePath.includes('ants')) {
+        svgContent = svgContent
+          .replace(/#[a-fA-F0-9]{6}|#[a-fA-F0-9]{3}/gi, '⬛') // Foreground
+          .replace(/opacity="([^"]+)"/gi, 'opacity="🔲"'); // Opacity
+      }
+      return svgContent.trim();
+    },
+    processJS:(filePath, jsContent) => {
+      return jsContent.replace('(k,', '(k,bg,fg,op,')
+        .replace(/🟩/g, '${bg}')
+        .replace(/⬛/g, '${fg}')
+        .replace(/🔲/g, '${op}');
+    },
+  });
+  done(); // Signal completion
 });
 
 gulp.task('strip-js', function () {
+  fs.mkdirSync('src/temp', { recursive: true }); // Ensure temp directory exists
   // Removes anything between /* START-DEV */ and /* END-DEV */
   if (!isDev) {
     return gulp.src(['src/afs.js'])
@@ -128,6 +124,19 @@ gulp.task('prepare-js', function () {
     .pipe(hypercrush())
     .pipe(replace('〰️', ' ')) // Restore nbsp char.
     .pipe(gulp.dest('./src/temp'));
+});
+
+gulp.task('minify-css', function () {
+  return gulp.src('./src/*.css')
+    .pipe(replace('url(../img/', 'url(img/'))
+    .pipe(lightningcss({
+      minify: true,
+      sourceMap: false,
+      nesting: false,
+      exclude: Features.Nesting,
+    }))
+    .pipe(rename({ suffix: '.min' }))
+    .pipe(gulp.dest('./'));
 });
 
 gulp.task('minify-js', function () {

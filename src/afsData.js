@@ -176,6 +176,7 @@ items = {
       ["Who is this?  Whitney Houston?"],
       ["You want some fries to go with that mate?"],
       ["And the waters prevailed upon the earth an hundred and fifty days"],
+      ["Ants actually prefer fANTa!"]
     ]
   },
   bread: {

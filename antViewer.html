@@ -198,8 +198,9 @@ function drawAnt(ant, container = document.body) {
   }
   newAnt.dataset.id = ant.id;
   // Add the ant to the document
-  container.appendChild(newAnt);
+  container && container.appendChild(newAnt);
   newAnt.style.display = 'block';
+  return newAnt;
 }
 
 function viewAnts() {
@@ -306,20 +307,20 @@ function viewAnts() {
   let carryParam = urlParams.get('carry');
   carrySelect.value = carryParam;
 
+  let carryMap = {
+    egg: `<div class="egg"></div>`,
+    saltpork: `<div class="carry Cfood saltpork"></div>`,
+    hotdog: `<div class="carry Cfood hotdog"></div>`,
+    bread: `<div class="carry Cfood bread"></div>`,
+    danish: `<div class="carry Cfood danish"></div>`,
+    asti: `<div class="carry Cdrink asti"></div>`,
+    cola: `<div class="carry Cdrink cola"></div>`,
+    flesh: `<div class="carry Cfood flesh"></div>`,
+  };
+
   document.querySelectorAll('.ant .c').forEach(cEl => {
-    let carryMap = {
-      egg: `<div class="egg"></div>`,
-      saltpork: `<div class="carry Cfood saltpork"></div>`,
-      hotdog: `<div class="carry Cfood hotdog"></div>`,
-      bread: `<div class="carry Cfood bread"></div>`,
-      danish: `<div class="carry Cfood danish"></div>`,
-      asti: `<div class="carry Cdrink asti"></div>`,
-      cola: `<div class="carry Cdrink cola"></div>`,
-      flesh: `<div class="carry Cfood flesh"></div>`,
-    };
     cEl.innerHTML = carryParam ? carryMap[carryParam] : '';
   });
-
 
   // Add additional class(es) to all elements with class "ant"
   function addAdditionalClassToAnts() {

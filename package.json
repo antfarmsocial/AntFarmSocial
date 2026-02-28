@@ -42,5 +42,8 @@
     "imagemin-webp": "^6.1.0",
     "jcrushsvg": "^1.1.40",
     "path": "^0.12.7"
+  },
+  "dependencies": {
+    "jcrush": "^1.2.0"
   }
 }

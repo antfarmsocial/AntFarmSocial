@@ -12,6 +12,7 @@ let dev = 1;
 let showLines = 0;
 let allActs = cloneData(acts);
 let devLoaded = 0;
+let keepHistory = 0;
 
 // Debug line: Draws a line defined in the obj parameter.
 const DL = (obj, score = 100) => {
@@ -26,7 +27,7 @@ const drawLine = (x1, y1, x2, y2, score) => {
   !getEl('L') && appendHTML(B, `<div id="L" style="position: absolute; z-index: 1; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></div>`);
   let lineContainer = getEl('L'),
     line = document.createElement('div'),
-    length = hypot(x2 - x1, y2 - y1),
+    length = getHypot(x2 - x1, y2 - y1),
     angle = atan2(y2 - y1, x2 - x1) * (deg180 / PI);
   Object.assign(line.style, {
     position: 'absolute',
@@ -56,10 +57,17 @@ const toggleWaypoints = (delOnly, tracer = 0) => {
       pointDiv.classList.add('waypoint');
       pointDiv.style.position = 'absolute';
       pointDiv.style.left = `${p.x - 1}px`;
-      pointDiv.style.top = `${p.y - 1}px`;
+      pointDiv.style.top = `${p.y - surface - 1}px`;
       pointDiv.style.width = '2px';
       pointDiv.style.height = '2px';
-      pointDiv.style.backgroundColor = `${p.c ? p.c : 'lime'}`;
+      let wpTunId = getWpTunnel(F, p);
+      let pointColor = '#adff2f'; // Default color: lime;
+      if (wpTunId) {
+        let tunSide = tunGetSide(getTun(F, wpTunId), p);
+        if (tunSide > 0) pointColor = '#66ff00'; // side +1 greener
+        if (tunSide < 0) pointColor = '#cae00d'; // side -1 yellower
+      }
+      pointDiv.style.backgroundColor = `${p.c ? p.c : pointColor}`;
       pointDiv.style.borderRadius = '50%';
       pointDiv.style.transition = 'outline 0.3s ease';
       document.querySelector('#waypoints').appendChild(pointDiv);
@@ -72,9 +80,9 @@ const toggleWaypoints = (delOnly, tracer = 0) => {
         const flashNext = () => {
           const el = wpEls[i % wpEls.length];
           el.style.outline = '1px solid white';
-          setTimeout(() => el.style.outline = 'none', 500); // remove after 2s
+          setTimeout(() => el.style.outline = 'none', 500); // remove after .5s
           i++;
-          setTimeout(flashNext, 100); // move to next point every 0.5s
+          setTimeout(flashNext, 100); // move to next point every 0.1s
         };
         flashNext();
       }
@@ -98,6 +106,9 @@ const handleSpawner = (doSpawn = 0) => {
 
 // Allow the main script to notify us that a switch happened.
 const devNotifySwitch = X => {
+  let devParams = new URLSearchParams(window.location.search);
+  if (!devParams.get('dev')) return;
+
   // Do it immediately if possible.
   if (devLoaded) {
     handleSpawner();
@@ -206,6 +217,8 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
       <button id="dev-antright">➡️ R</button>
       <button id="dev-antflip">↔️ Flip</button>
 
+      <br>
+      <button id="dev-antcycle">↳ cycle ant order</button>
 
       <hr>
 
@@ -219,7 +232,7 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
       <h3>Allowed Random Actions</h3>
       <div id="dev-banned-acts">
         ${devBannedActsOpts}
-        <small>Some actions are forced, search code for "defaulting".</small>
+        <small>Some actions are forced, disable director to avoid all.</small>
       </div>
 
       <br>
@@ -298,6 +311,7 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
           <br>
           <button id="dev-remove-tunnels" disabled>🧹 Kill tuns<span class="countdown"></span></button>
         ` : `<p>(Reload to see new tuns)</p>`}
+        <div id="specialTuns"></div>
       </details>
 
       <hr>
@@ -307,6 +321,9 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
       Use after editing vars <input id="d_" class="devinput" type="text" name="_" value="_" disabled> and <input id="dF" class="devinput" type="text" name="F" value="F" disabled> in console
 
       <hr>
+
+      <label><input type="checkbox" id="dev-hist" name="dev-hist"><span id="dev-hist-label">🚫 Enable action history</span></label>
+      <br>
 
       <button id="dev-savestate" style="margin-bottom: .5em">📥 Save state</button>
 
@@ -425,6 +442,10 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
         font-weight: bold;
       }
 
+      #dev-antcycle {
+          font-size: .92em;
+      }
+
       .pin {
         width: 2px;
         height: 2px;
@@ -475,12 +496,14 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
           display: inline-block;
           width: 2em;
       }
+      #dev-hist,
       #dev-msg,
       #dev-director,
       #dev-stopants,
       #dev-spawner {
         display: none;
       }
+      #dev-hist-label,
       #dev-msg-label,
       #dev-director-label,
       #dev-stopants-label,
@@ -550,6 +573,15 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
       queryAll('.ant.free').forEach(el => el.remove());
     }, 50);
   });
+
+  // Handle the history checkbox.
+  const handleHistory = () => {
+    let historyCheckbox = document.querySelector('#dev-hist').checked;
+    keepHistory = historyCheckbox;
+    document.querySelector('#dev-hist-label').innerHTML = historyCheckbox ? '✅ Disable action history' : '🚫 Enable action history';
+  };
+  document.querySelector('#dev-hist').addEventListener('change', event => { handleHistory(); });
+
 
   // Handle form buttons.
   document.querySelectorAll('#dev button').forEach(butt => {
@@ -645,6 +677,21 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
   updateCountdown(countdownEls, timeLeft, timer); // initial render
 
   renderDevStates();
+
+  // Special tuns list.
+  let updateSpecialTuns = () => {
+    let morgue = F.tuns.find(t => t.morgue)?.id;
+    let out = '<div><b>Morgue:</b> ' + (morgue || 'none') + '</div>';
+    let antNestMap = Object.fromEntries(F.a.filter(a => a.nest).map(a => [a.id, a.nest]));
+    console.log(antNestMap);
+    for (let [antId, nestId] of Object.entries(antNestMap)) {
+      out += `<div><b>${antId} nest:</b> ${nestId}</div>`;
+    }
+    getEl('specialTuns').innerHTML = out;
+  };
+  updateSpecialTuns();
+  getEl('mngTuns').addEventListener('click', updateSpecialTuns);
+
 };
 
 let devSpeedCheck;
@@ -723,6 +770,9 @@ const devButtFunk = {
   'dev-antflip': X => {
     F.a[0].scale *= -1;
     antUpdate(F.a[0], getEl(F.a[0].id));
+  },
+  'dev-antcycle': X => {
+    F.a.push(F.a.shift());
   },
   'dev-testtuns': X => {
     showLines = document.querySelector('#dev-lines').checked;
@@ -920,9 +970,8 @@ const devObjectDisplay = obj => {
 // Displays the HTML of calculated properties of an ant.
 const devAntCalcDisplay = ant => {
   if (ant) return `
-    <div class="row"><span class="label">antFaceX:</span><span class="value">${antFaceX(ant)}</span></div>
-    <div class="row"><span class="label">antDiveY:</span><span class="value">${antDiveY(ant)}</span></div>
-    <div class="row"><span class="label">antGroundLevel:</span><span class="value">${antGroundLevel(ant)}</span></div>
+    <div class="row"><span class="label">antFaceX:</span><span class="value">${antFaceX(ant).toFixed(4)}</span></div>
+    <div class="row"><span class="label">antGroundLevel:</span><span class="value">${antGroundLevel(ant).toFixed(4)}</span></div>
     <div class="row"><span class="label">Classes:</span><span class="value">${getEl(ant.id) ? getEl(ant.id).className.split(' ').join('<br>') : '?'}</span></div>
   `;
   return '<em>(no ant)</em>';
@@ -976,16 +1025,23 @@ const devResetAnt = (ant) => {
     ant.r = 0;
     ant.x = getEl('farm').offsetWidth / 2;
     ant.y = antGroundLevel(ant);
-    ant.q = [{act:'idle'}];
-    ant.area = {n:'top',d:0,t:0};
+    ant.q = [{act: 'idle'}];
+    ant.area = {n: 'top', d: 0, t: 0};
     ant.md = 100;
     ant.hp = 100;
     ant.fd = 100;
     ant.dr = 100;
     ant.digDur = 0;
     ant.side = 1;
+    ant.scale = 1;
     del(ant, 'carry', 'hist');
-    setTimeout(X => {stopAnts = stopVal; antSurface(ant); antRemAnimUpdate(ant);}, 1000);
+    // Replace ant with a clone of itself to disconnect it from existing actions.
+    const index = F.a.findIndex(a => ant.id === a.id);
+    if (index !== -1) {
+      F.a[index] = cloneData(F.a[index]);
+      ant = F.a[index];
+    }
+    setTimeout(X => {stopAnts = stopVal; antSurface(ant); antRemAnimUpdate(ant);}, 300);
   }
 };
 
@@ -998,9 +1054,15 @@ window.onload = function() {
 
   // Update antNext() to keep a history for dev purposes.
   antNext = (ant, timeout) => {
-    ant.hist ||= []; ant.hist.push(ant.q.shift());
-    antAction(ant, timeout); antThot(ant);
-    while (ant.q.length > 20) ant.q.shift(); // limit history length
+    let popAction = ant.q.shift();
+    antAction(ant, timeout);
+    antThot(ant);
+    if (keepHistory) {
+      ant.hist ||= []; ant.hist.push(popAction);
+      while (ant.hist.length > 20) ant.hist.shift(); // limit history length
+    }
+    else del(ant, 'hist');
+    if (!livesInFarm(ant)) console.warn("Dead ant walking!");
   };
 
 }

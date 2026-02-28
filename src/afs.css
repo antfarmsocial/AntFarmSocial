@@ -1208,6 +1208,7 @@ body {
   position: absolute;
   background: var(--gr1);
   margin-left: 50px;
+  pointer-events: none;
 }
 
 #sign {
@@ -2504,6 +2505,7 @@ body.glass #l-wrap {
   &.decay1 {
     transform: scale(.6) rotate(90deg) !important;
   }
+
 }
 
 .spot {
