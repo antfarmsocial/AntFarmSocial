@@ -783,6 +783,8 @@ body {
     padding-top: 2px;
     display: inline-block;
     vertical-align: top;
+    font-variant-emoji: text;
+    line-height: 1.2em;
   }
 }
 
@@ -4131,6 +4133,7 @@ body.bit .ant {
     background: linear-gradient(to bottom, rgba(200, 0, 0, .7) 0, rgba(200, 0, 0, 0) 100%);
     transition: opacity 3s;
     opacity: 0;
+    cursor: not-allowed;
   }
 }
 
@@ -4241,7 +4244,8 @@ body.bit .ant {
     filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .4));
     .Bn {
       font-size: .5em;
-      line-height: 1em;
+      line-height: 1.2em;
+      font-variant-emoji: text;
     }
   }
 }

@@ -683,7 +683,6 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
     let morgue = F.tuns.find(t => t.morgue)?.id;
     let out = '<div><b>Morgue:</b> ' + (morgue || 'none') + '</div>';
     let antNestMap = Object.fromEntries(F.a.filter(a => a.nest).map(a => [a.id, a.nest]));
-    console.log(antNestMap);
     for (let [antId, nestId] of Object.entries(antNestMap)) {
       out += `<div><b>${antId} nest:</b> ${nestId}</div>`;
     }

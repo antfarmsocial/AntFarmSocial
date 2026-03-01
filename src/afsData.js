@@ -662,7 +662,7 @@ items = {
     quip: [
       ["I don't think you're ready for this."],
       ['Can you dig it? (Yes)'],
-      ["That's one small step for an ant"]
+      ["That's one small step for an ant"],
       ["Failure is not an option"],
       ["Do the other things, not because they are easy, but because they are hard."],
       ["The dream of yesterday is the hope of today and the reality of tomorrow."],
@@ -1662,7 +1662,8 @@ farmTemplate =
       html(divc('hole frame') + divc('frame frame-t'), {id: 'lid'}) +
       divc('frame frame-b') +
       mapJoin(nipIds.slice(1), nip => html(divc('nipcap frame'), {id: nip, class: 'nip frame'})) +
-      mapJoin(nipIds.slice(1), nip => html(html(html('') + html(span(repeat(3, X => span('►'))))), {id: 't-' + nip, class: 'toob ' + nip})),
+      html(divc('vc') + divc('vt') + divc('vf') + divc('vw') + html(divc(''), {class: 'vs'}), {id: 'vial', class: 'vial'}) +
+      mapJoin(nipIds.slice(1), nip => html(html('') + span(repeat(3, X => span('►'))), {id: 't-' + nip, class: 'toob ' + nip})),
       {id: 'wrapper', class: 'farm', 'data-col': 'green'}
     ) +
     html(

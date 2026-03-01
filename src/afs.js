@@ -1826,7 +1826,7 @@ modal = {
     // Nerd boxes.
     candidates.push({k: ['box'], n: `3x ${items['box'].n}`, x: 3, d: 'Returns not accepted'});
     shuffle(candidates).slice(0, 4).forEach(c => {
-      opts[(c.x || 1) + '-' + c.k.join(',')] = html(repeat(c.x || 1, k => bagImg({k: k})), {class: `select-img ebay-img x-${c.x || c.k.length}`}) + tag(3, c.n) + (c.d || '');
+      opts[(c.x || 1) + '-' + c.k.join(',')] = html(repeat(c.x || 1, X => mapJoin(c.k, k => bagImg({k}))), {class: `select-img ebay-img x-${c.x || c.k.length}`}) + tag(3, c.n) + (c.d || '');
     });
     el.innerHTML = selectForm(k, 'ebay', opts, 'eBay offers', pickRandom(['Accept offer', 'This is how eBay works', 'Sell the farm']));
   },
@@ -2155,7 +2155,7 @@ farmIsRunning = farm => farm.a.some(livesInFarm),
 farmIsDeveloping = farm => farm.tuns.filter(t => t.t == 'cav' && t.dun).length > 1,
 
 // Determines if an act is a carry-related task.
-isCarryTask = act => ['carry', 'get', 'srv'].includes(act),
+isCarryTask = act => ['carry', 'get', 'srv', 'drop'].includes(act),
 
 // Checks if an ant has carry tasks.
 hasCarryTasks = ant => antUniqueActs(ant).some(isCarryTask),
@@ -2835,7 +2835,7 @@ eggDelete = egg => deleteDataAndEl(egg, 'e'),
 // Updates the display of an egg element.
 eggUpdate = (egg, eggEl = objGetEl(egg)) => {
   if (eggEl && eggEl.isConnected) {
-    egg.area.t && assign(egg, ...cavFloor(getTun(egg.area.t), egg.pc)); // Egg is in a tunnel, update the x/y coords from the tunnel.
+    egg.area.t && assign(egg, ...cavFloor(getTun(getFarm(egg), egg.area.t), egg.pc)); // Egg is in a tunnel, update the x/y coords from the tunnel.
     eggEl.className = 'egg lvl' + egg.lvl; // Note: 'lvl' doesn't actually change the y-value of the egg (it still sits on the cavFloor), the CSS will just make it look like it did.
     eggEl.style.left = egg.x + 'px';
     eggEl.style.top = egg.y + 'px';
@@ -2877,10 +2877,7 @@ carryUndraw = (ant, farm = getFarm(ant), carry = ant.carry, carryEl = getEl(carr
     !['inf', 'dead'].includes(carry.t) && carryEl.remove();
     if (['egg', 'inf', 'dead'].includes(carry.t)) {
       carryItem.x = headPoint.x;
-      let headCoord = getTunPosition(headPoint, farm, 0, tun, 'cav');
-      let cavFloor = cavFloor(tun, headCoord);
-      console.log("carryUndraw:", headCoord, cavFloor);
-      carryItem.y = tun ? cavFloor.y : antGroundLevel(headPoint);
+      carryItem.y = tun ? cavFloor(tun, getTunPosition(headPoint, farm, 0, tun, 'cav').pc).y : antGroundLevel(headPoint);
       carry.t == 'egg' ? (getEl('farm').appendChild(carryEl), eggUpdate(carryItem)) : antUpdate(carryItem);
     }
   }
@@ -3238,13 +3235,13 @@ updateCorpseState = (ant, twoHours = 7200) => {
 },
 
 // Returns a random worker, or failing that - a queen.  Must be the same type as the farm's colony, in OK health, and not carrying.
-getWorkerOrQueen = (farm, eligible = farm.a.filter(a => !a.carry && a.t == farm.t && livesInFarm(a) && a.hp > 50 && !isDrone(a)), workers = eligible.filter(isWorker)) =>
+getWorkerOrQueen = (farm, data = farm.a, eligible = data?.filter(a => !a.carry && a.t == farm.t && a.hp > 40 && !isDrone(a)), workers = eligible.filter(isWorker)) =>
   pickRandom(workers.length ? workers : eligible),
 
 // Determines what, if anything, needs to be carried by a random worker.
 trySetCarryTask = (farm, morgue = farm.tuns.find(t => t.morgue), morgueCandidates = farm.tuns.filter(t => t.t == 'cav' && !t.nip && t.co.filter(co => getTun(farm, co).dun).length < 2 && t.dun),
   carrierAnt = getWorkerOrQueen(farm), queen, itemToMove,
-  deadAnt = farm.a.find(a => deadInFarm(a) && a.tsd > num2000 && !getTun(getTunPosition(a, farm)?.tun)?.morgue), infant = farm.a.find(a => a.moveTo), egg = farm.e.filter(e =>
+  deadAnt = farm.a.find(a => deadInFarm(a) && a.tsd > num2000 && !getTun(farm, a.area.t)?.morgue), infant = farm.a.find(a => a.moveTo), egg = farm.e.filter(e =>
     queen = farm.a.find(a => a.id == e.Q && livesInFarm(a)) && queen.nest && e.area.t != queen.nest || e.moveTo // No need to check if egg is in morgue because queen will move her nest soon if that's the case.  'moveTo' was set if queen left farm.
   ).sort((a, b) => b.lvl - a.lvl)[0]) => {
   // Recalculate where the morgue should be.
@@ -3261,9 +3258,8 @@ trySetCarryTask = (farm, morgue = farm.tuns.find(t => t.morgue), morgueCandidate
       variable && param && farm.a.every(a => a.carry?.t != type || a.carry.id != variable.id)
     )) antFinna(carrierAnt, 'carry', {t: itemToMove[1], id: itemToMove[0].id});
   }
-  else if (carrierAnt = getVial(farm)?.item.a.find(isWorker)) {
-    // We found no ant to perform the carry task.  Last chance: If there's a worker in a vial, call them back out so there's a shot at giving them the task on the next pass.
-    // Note: queen is never called back?  If we want her called back then update getWorkerOrQueen with respect to the data storage and state check to support selecting nip ants.
+  else if (carrierAnt = /*getVial(farm)?.item.a.find(isWorker)*/getWorkerOrQueen(farm, getVial(farm)?.item.a)) {
+    // We found no ant to perform the carry task.  Last chance: If there's an eligible ant in a vial, call them back out so there's a shot at giving them the task on the next pass.
     exitVial(carrierAnt);
   }
 },
@@ -3301,7 +3297,8 @@ antNipWalk = (ant, dest, basePhase = 0, animLoop = setInterval(X => {
     nipPh: 1 + basePhase, // Flag that walk is happening.
     walk: 1,
     scale: getSign(dest > ant.x),
-    r: ant.x < 20 || ant.x > 32 ? 90 : 90 + ant.scale * getAngle({x: 20, y: 32}, {x: 32, y: 38}) * .5, // Actual angle nerfed to half because it looked too intense.
+   /// r: ant.x < 20 || ant.x > 32 ? 90 : 90 + ant.scale * getAngle({x: 20, y: 32}, {x: 32, y: 38}) * .5, // Actual angle nerfed to half because it looked too intense.
+    r: ant.x < 20 || ant.x > 32 ? 0 : ant.scale * getAngle({x: 20, y: 32}, {x: 32, y: 38}) / 2, // Actual angle nerfed to half because it looked too intense.
     x: ant.x + antGetStep(ant) / 2,
     y: (ant.x < 20 ? 28 : ant.x > 32 ? 38 : 32 + 6 * (abs(ant.x - 20) / 24)) - antOffsetY(ant),
     nipTs: getTime()
@@ -3699,7 +3696,7 @@ act = {
         // Rot Walk execution.
         // Work out step (step size) and dist (num steps / frames).
         temp = calcDistComponents(ant.x, ant.y, dest.x, dest.y);
-        action.dist = round(getHypot(dest.x - ant.x, dest.y - ant.y) / getHypot(temp.x * step, temp.y * step)); // @TODO there is a getDistance() candidate here.
+        action.dist = round(getHypot(dest.x - ant.x, dest.y - ant.y) / getHypot(temp.x * step, temp.y * step)); // Note: There is a getDistance() usage candidate here, but we aren't currently including that function in production.
         // Switch to prone when entering tunnel from surface at a badAngle.
         badAngle && setTimeout(X => {ant.pose = 'prone'}, action.dist / frameTick * 2);
         if (tun.t == 'ent') action.dist *= .8; // Speed up entry transitions.
@@ -4266,7 +4263,7 @@ act = {
       // Note: No proximity check for food/drink items; that is the responsibility of 'eat' and 'drink' actions.  Those check whether it exists, and moving the item changes the id number.
       if (carryItem.x && !inTargetProximity(ant, carryItem, antOffsetX(ant) + 12)) {// Very permissive margin due to targetting troubles.
         // Too far.
-        ant.area.t == carryItem?.area?.t && getTun(farm, ant.area.t)?.t == 'cav' ?
+        ant.area.t == carryItem?.area?.t /*&& getTun(farm, ant.area.t)?.t == 'cav'*/ ?
           antFinna(ant, 'tunOrient', {target: {x: carryItem.x, y: carryItem.y}, margin: 12}) : antGoToAnt(ant, carryItem); // Don't store the whole carryItem in queue data, because that's asking for troubles.
         antFinna(ant, 'get', action);
         return antAction(ant);
@@ -4422,13 +4419,11 @@ act = {
         }
       }
     }) => {
-      console.log("drop action");
     // Set the x/y of the package first.   (These values will be overriden for eggs in tunnels by the code below in conjunction with eggUpdate().)
     pkg.x = headPoint.x;
     pkg.y = tun ? cavFloor(tun, getTunPosition(headPoint, farm, 0, tun, 'cav')).y : antGroundLevel(headPoint);
     // Eggs dropped in tunnels need a lot more special handling so they are displayed next to each other nicely.
     if (tun && action.t == 'egg') {
-      console.log("egg code");
       // spotFinder() is different from how the queen picks a spot to lay, as she uses a slow trial-and-error approach, whereas spotFinder() works out a good spot to drop.
       if (newSpot = spotFinder()) {
         // Found a spot.
@@ -4447,7 +4442,6 @@ act = {
         assign(pkg, {pc: tunPos.pc, lvl: 0, area: {t: tun.id}});
       }
     }
-      console.log("drop action carry undraw");
     // Note: If it's not in a tun I suppose they'll just leave it where it is.  Add more code here if that looks silly!
     carryUndraw(ant);
     del(pkg, 'moveTo');
@@ -4470,10 +4464,10 @@ act = {
 
   // Ant nips off to a nip.
   nip: (ant, farm = getFarm(ant), action = ant.q[0], id = action.id, nip = action.nip, idOrNip = id || nip, tun = id ? getTun(farm, action.tun) : farm.tuns.find(t => t.nip == nip),
-    nipData = farm.nips.find(n => n.nip == idOrNip), nipItem = nipData?.item, isTop = idOrNip > 2, isLeftSide = idOrNip % 2 > 0, antX = antFaceX(ant), rev = action.rev) => {
+    nipData = farm.nips.find(n => n.nip == idOrNip), nipItem = nipData?.item, isTop = idOrNip > 2, isLeftSide = idOrNip % 2 > 0, faceX = antFaceX(ant), rev = action.rev) => {
     if (nipItem && rev) {
       // Entering farm from a nip area.
-      if (isLeftSide ? antX < 20 : antX > 940) {
+      if (isLeftSide ? faceX < 20 : faceX > 940) {
         antSetWalk(ant);
         if (ant.carry) {
           antUpdate(ant); // Correct x/y pos of carried items.
@@ -4501,7 +4495,7 @@ act = {
     }
     else if (nipItem && id && !nipItem.a.some(a => a.t != ant.t)) {
       // Exiting farm into a nip area.
-      if (isLeftSide ? antX > -25 : antX < 985) {
+      if (isLeftSide ? faceX > max(tun.x1, -25) : faceX < min(tun.x2, 985)) {
         antSetWalk(ant);
         if (isTop) antMoveSurface(ant); // Top area.
         else {
@@ -4727,6 +4721,8 @@ director = (temp1, temp2) => {
           ant.maxhp = ant.maxhp ? clamp(ant.maxhp - .01, 1, 99) : 99;
           ant.hp = min(ant.hp, ant.maxhp);
         }
+        // If ant didn't drop, it needs to be requeued.
+        ant.carry && !hasCarryTasks(ant) && ant.carry.q?.forEach(q => ant.q.push(q));
       }, num500);
       // Update the ant's thoughts, but limit it to changing every 10th loop (~5 minutes) so as not to override thoughts, particularly those set within other functions, too soon.
       ant.thotD > 9 ? antThot(ant) : ant.thotD++;
