@@ -92,6 +92,14 @@ const toggleWaypoints = (delOnly, tracer = 0) => {
 
 };
 
+
+// Handle the trans checkbox.
+const handleTrans = () => {
+  let doTrans = !document.querySelector('#dev-trans').checked;
+  document.querySelector('#dev-trans-label').textContent = doTrans ? '👓 Restore farm cowling' : '🕶️ Remove farm cowling';
+  queryAll('#glass, #wrapper, #kit, #game, #waypoints, .frame').forEach(el => el.classList.toggle('frametrans', doTrans));
+};
+
 // Handle the spawner checkbox.
 const handleSpawner = (doSpawn = 0) => {
   spawner = !document.querySelector('#dev-spawner').checked;
@@ -331,6 +339,9 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
 
       <hr>
 
+      <label><input type="checkbox" id="dev-trans" name="dev-trans"><span id="dev-trans-label">👓 Remove farm cowling</span></label>
+      <br>
+
       Note: <input id="devQ" class="devinput" type="text" name="Q" value="Q()" style="width:1.6em;" disabled> in console will clear game data
       <br>
       <a onClick="devClear()">Reset form and reload</a>
@@ -496,6 +507,7 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
           display: inline-block;
           width: 2em;
       }
+      #dev-trans,
       #dev-hist,
       #dev-msg,
       #dev-director,
@@ -503,6 +515,7 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
       #dev-spawner {
         display: none;
       }
+      #dev-trans-label,
       #dev-hist-label,
       #dev-msg-label,
       #dev-director-label,
@@ -538,10 +551,24 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
         font-family: monospace;
         font-size: 1.4em;
       }
+      .frametrans {
+        pointer-events: none;
+      }
+      .frametrans #farm * {
+        pointer-events: all;
+      }
+      .frametrans #farm #waypoints {
+        pointer-events: none;
+      }
+      .glass.frametrans,
+      .frame.frametrans {
+        opacity: .2;
+      }
     </style>
   `);
 
   document.querySelector('#dev-spawner').addEventListener('change', event => { handleSpawner(1); });
+  document.querySelector('#dev-trans').addEventListener('change', event => { handleTrans(); });
 
   // Handle the director checkbox.
   const handleDirector = () => {
@@ -614,6 +641,7 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
   }, 50);
 
   handleSpawner();
+  handleTrans();
   handleDirector();
 
   // Highlight selected tunnel in the list.
@@ -843,6 +871,7 @@ const devButtFunk = {
     }
     goToLocation(F.a[0], location);
   },
+
 };
 
 // Handles the banned actions functionality.

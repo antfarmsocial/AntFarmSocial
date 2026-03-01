@@ -380,7 +380,7 @@ startFarm = isNew => {
 },
 
 // Precalculates the tunnel system layout of the current ant farm.
-calcFarm = (numEntrances = 2 + randomInt(4), tries = 0, hills = [-50, 1010], sublevels = [0, 120, 240, 380, 495], adjustedTun = 0, adjustLeft = !randomInt(4),
+calcFarm = (numEntrances = 2 + randomInt(4), tries = 0, hills = [-50, 1010], sublevels = [0, 120, 240, 370, 495], adjustedTun = 0, adjustLeft = !randomInt(4),
   adjustRight = !randomInt(4), entX, xCollector = [], cavLines = [], lines = [], joinLines = [], sublvl = 1, i = 0, stubEntIndex = -1) => {
   // Ants do not randomly pick tunnel surface entrances, the program does.
   // It also places the adjacent hills in position, but set at zero height, so they can grow as the tunnels are dug.
@@ -573,7 +573,7 @@ buildATun = (lines, joinLines, tun1, func = 'BL',
       (ln.x2 == tun1.x1 && ln.y2 == tun1.y1) ? {...ln, X1: ln.x2, Y1: ln.y2, X2: ln.x1, Y2: ln.y1} :
       (ln.x1 == tun1.x2 && ln.y1 == tun1.y2) ? {...ln, X1: ln.x1, Y1: ln.y1, X2: ln.x2, Y2: ln.y2} :
       (ln.x2 == tun1.x2 && ln.y2 == tun1.y2) ? {...ln, X1: ln.x2, Y1: ln.y2, X2: ln.x1, Y2: ln.y1} :
-      0).filter(Boolean).filter(tunLn => !joinLines.some(ln => doLinesIntersect(tunLn, ln, 2))))
+      0).filter(Boolean).filter(tunLn => !joinLines.some(ln => doLinesIntersect(tunLn, ln, 4))))
   ) => {
   if (choice) {
     // Remove this line from future choices.
@@ -656,7 +656,7 @@ lineFinder = (lines, tunId, thisLevel, xK, yK, tunX, tunY, score1, score2, t,
 },
 
 // Checks if two lines (actually rectangles) intersect along their length.
-doLinesIntersect = (line1, line2, thickness, ignoreEnds = 30, returnIntersectionPoint = 0) => {
+doLinesIntersect = (line1, line2, thickness, ignoreEnds = 28, returnIntersectionPoint = 0) => {
   let {x1: x1_1, y1: y1_1, x2: x2_1, y2: y2_1} = line1,
     {x1: x1_2, y1: y1_2, x2: x2_2, y2: y2_2} = line2,
     pointAlongLine = (x1, y1, x2, y2, distance, ratio = distance / calculateDistance(x1, y1, x2, y2)) => ({x: x1 + ratio * (x2 - x1), y: y1 + ratio * (y2 - y1)}),
@@ -1111,7 +1111,7 @@ useItem = (i, doQuip = 1, doDel = 1, item = _.bag[i], itemKey = item.k, itemType
                   let ant = assign(ants[a], {x: window.innerWidth / 2 + randomInt(num200) - 100, y: -30, pose: 'pick'});
                   del(ant, 'nipPh', 'vial');
                   checkExpatQueen(ant, F);
-                  dropAntInFarm(ant);
+                  dropAntInFarm(ant, item);
                 }, num500 * a);
               }
               emptyVial.a = [];
@@ -1235,7 +1235,7 @@ placeItem = (i, type, item = assign(cloneData(_.bag[i]), {id: _.bag[i].id || 'i'
         obj.style.left = xPos + 'px';
         if (type == 'food') {
           obj.style.bottom = getHillHeight(xPos + itemWidth / 2) + 'px';
-          obj.style.transform = `rotate(${antHillAngle({x: xPos + itemWidth / 2, scale: 1, f: F.id})}deg)`;
+          obj.style.transform = `rotate(${antHillAngle({x: xPos + itemWidth / 2, scale: 1, f: F.id}, 9)}deg)`;
         }
         if (type == 'drink') obj.style.bottom = getDrinkHillHeight(xPos);
       },
@@ -1456,7 +1456,7 @@ pourCrucible = (audio = ambienceOverride('sizz1'), fx = getEl('fx'), hills = get
         mHillEl.classList.add('vis');
         F.a.filter(a => a.area.n == 'bg' || a.area.n == 'top').forEach(a => {
           a.area.n == 'bg' && randomInt(2) && antSlip(a);
-          a.classList.add('burn');
+          getEl(a.id).classList.add('burn');
           setTimeout(X => {
             playSound('sizz2', .3);
             a.area.n == 'bg' && randomInt(2) && antSlip(a);
@@ -1464,7 +1464,7 @@ pourCrucible = (audio = ambienceOverride('sizz1'), fx = getEl('fx'), hills = get
           }, num1000 + randomInt(num2000));
         });
         F.e.filter(e => e.y <= surface).forEach(e => {
-          e.classList.add('burn');
+          getEl(e.id).classList.add('burn');
           setTimeout(X => eggDelete(e), randomInt(num2000));
         });
         queryAll('#scenery > div, #food > div').forEach(el => {
@@ -1520,6 +1520,7 @@ farmSetSculpture = farm => {
   farm.mTuns.forEach(t => t.prog = 100);
   farm.fill = farm.col = farm.plate = 'metal';
   let {id, n, mTuns} = farm;
+  del(farm, 'card');
   farm = assign(farm, cloneData(farmDefault), {id, n, mTuns, sculpt: 1});
 },
 
@@ -2176,6 +2177,7 @@ isWorker = ant => ant.caste == 'W',
 isServant = (queen, ant) => livesInFarm(ant) && isWorker(ant) && queen.t == ant.t,
 
 // Prints an integer with markup, but caps to 4 digits so as to not screw up UI.
+// Because the default content font used in this app makes digits look wierdly small, this function can also be used to wrap numbers in a monospace font (as long as they're under 10,000).
 printInt = number => (number = Number(number) || 0, span(number > 9999 ? 'many' : number, {class: 'num'})),
 
 // Prints a numeric count of terms with basic pluralisation.
@@ -2752,7 +2754,6 @@ antBgNear = (ant, ignoreAngle = 0, margin = antOffsetX(ant) * 2) =>
 
 // Moves ant to the middle of #F.
 antFall = (ant, antEl = objGetEl(ant), move = 1.2, target = antGroundLevel(ant)) => {
-  ///ant.y < target && (ant.y += 1);
   ant.y += 1.2;
   ant.x += ant.x < 450 ? move : ant.x > 490 ? -move : 0;
   if (round(ant.r) < 0) ant.r += 1.2;
@@ -3109,7 +3110,7 @@ antNudgeToMid = (ant, tun, maxNudge = antGetTunnelStep(ant) / 4, nextTun = getTu
 },
 
 // Nudges an ant toward the supplied waypoint.
-antNudgeToWP = (ant, wp, maxNudge = antGetTunnelStep(ant) / 4, dx = wp.x - ant.x, dy = wp.y - ant.y,
+antNudgeToWP = (ant, wp, maxNudge = antGetTunnelStep(ant) / 2, dx = wp.x - ant.x, dy = wp.y - ant.y,
   dist = getHypot(dx, dy), diff = dist - antOffsetY(ant), step = sign(diff) * min(abs(diff), maxNudge)) => {
   if (dist) {
     ant.x += (dx / dist) * step;
@@ -3252,15 +3253,17 @@ trySetCarryTask = (farm, morgue = farm.tuns.find(t => t.morgue), morgueCandidate
       if (morgue = pickRandom(morgueCandidates)) morgue.morgue = 1;
     }
   }
-  if (carrierAnt && !hasCarryTasks(carrierAnt)) {
-    // Find the first item that is available to move and not already assigned.
-    if (itemToMove = [[deadAnt, 'dead', morgue], [infant, 'inf', 1], [egg, 'egg', 1]].find(([variable, type, param]) =>
-      variable && param && farm.a.every(a => a.carry?.t != type || a.carry.id != variable.id)
-    )) antFinna(carrierAnt, 'carry', {t: itemToMove[1], id: itemToMove[0].id});
-  }
-  else if (carrierAnt = /*getVial(farm)?.item.a.find(isWorker)*/getWorkerOrQueen(farm, getVial(farm)?.item.a)) {
-    // We found no ant to perform the carry task.  Last chance: If there's an eligible ant in a vial, call them back out so there's a shot at giving them the task on the next pass.
-    exitVial(carrierAnt);
+  if (itemToMove = [[deadAnt, 'dead', morgue], [infant, 'inf', 1], [egg, 'egg', 1]].find(([variable, type, param]) =>
+    variable && param && farm.a.every(a => a.carry?.t != type || a.carry.id != variable.id)
+  )) {
+    if (carrierAnt && !hasCarryTasks(carrierAnt)) {
+      // Find the first item that is available to move and not already assigned.
+      antFinna(carrierAnt, 'carry', {t: itemToMove[1], id: itemToMove[0].id});
+    }
+    else if (carrierAnt = getWorkerOrQueen(farm, getVial(farm)?.item.a)) {
+      // We found no ant to perform the carry task.  Last chance: If there's an eligible ant in a vial, call them back out so there's a shot at giving them the task on the next pass.
+      exitVial(carrierAnt);
+    }
   }
 },
 
@@ -3284,30 +3287,31 @@ getVial = farm => farm.nips.find(n => n.item.k == 'vial'),
 // Tells an ant to exit a vial.
 // Perform a phase 3 nipWalk, while repeatedly checking if it reached phase 5.
 exitVial = (ant, farm = getFarm(ant), exitInterval = setInterval(X => {
-    // Repeatedly check the nipWalk moved the ant to phase 5 and then deNip() it.
-    if (ant.nipPh == 5) {
-      deNip(ant, getVial(farm), farm);
-      stopInterval(exitInterval);
-    }
-  }, microDelay)) => antNipWalk(ant, -25, 3),
+  // Repeatedly check the nipWalk moved the ant to phase 5 and then deNip() it.
+  if (ant.nipPh == 5) {
+    deNip(ant, getVial(farm), farm);
+    stopInterval(exitInterval);
+  }
+}, microDelay)) => antNipWalk(ant, -25, 3),
 
 // Handles ant walking into an item attached to a nip, to a certain destination.
 antNipWalk = (ant, dest, basePhase = 0, animLoop = setInterval(X => {
   assign(ant, {
     nipPh: 1 + basePhase, // Flag that walk is happening.
     walk: 1,
-    scale: getSign(dest > ant.x),
-   /// r: ant.x < 20 || ant.x > 32 ? 90 : 90 + ant.scale * getAngle({x: 20, y: 32}, {x: 32, y: 38}) * .5, // Actual angle nerfed to half because it looked too intense.
-    r: ant.x < 20 || ant.x > 32 ? 0 : ant.scale * getAngle({x: 20, y: 32}, {x: 32, y: 38}) / 2, // Actual angle nerfed to half because it looked too intense.
-    x: ant.x + antGetStep(ant) / 2,
-    y: (ant.x < 20 ? 28 : ant.x > 32 ? 38 : 32 + 6 * (abs(ant.x - 20) / 24)) - antOffsetY(ant),
-    nipTs: getTime()
+    nipTs: getTime(),
+    x: ant.x + antGetStep(ant) / 2
   });
+  // The following cannot be assigned above, because they depend on ant being mutated one bit at a time.
+  ant.y = (ant.x < 20 ? 28 : ant.x > 32 ? 38 : 32 + 6 * (abs(ant.x - 20) / 24)) - antOffsetY(ant);
+  ant.r = ant.x < 20 || ant.x > 32 ? 0 : ant.scale * getAngle({x: 20, y: 32}, {x: 32, y: 38}) / 2; // Actual angle nerfed to half because it looked too intense.
+  // Check if destination reached.
   if (abs(ant.x - dest) < antOffsetX(ant)) {
     ant.nipPh = 2 + basePhase; // Flag ant is ready for next phase.
     del(antGetStill(ant), 'nipTs'); // Note: antGetStill() slipped in here to avoid setting walk=0 in this same block of code.
     stopInterval(animLoop);
   }
+  else ant.scale = getSign(dest > ant.x); // Reverse for next loop if applicable.
   antUpdate(ant);
 }, frameTick)) => 1,
 
@@ -3638,7 +3642,7 @@ act = {
           // Ant is about to surface; predict how it should end up.
           !action.pt && antToProneWithCorrection(ant, tun); // Can't remember what this is for, maybe digging?
           data = cloneData(ant); // Set data variable to a fake ant so we can test it out.
-          data.scale = ant.pose == 'side' ? -tunGetSide(getTun(farm, action.pt), getWaypointIndex(farm, antFootPoint(ant), wp)) : randomSign();
+          data.scale = ant.pose == 'side' ? tunGetSide(getTun(farm, action.pt), getWaypointIndex(farm, antFootPoint(ant), wp)) : randomSign();
           data.x = (data.scale > 0 ? max : min)(ant.x, tun.x1) + 7 * data.scale;
           data.y = antGroundLevel(data);
           dest = data;
@@ -3824,10 +3828,12 @@ act = {
           if (ant.scale < 0) temp1 = mirrorAngle(temp1);
           temp2 = normalize180(temp1 - ant.r); // Diff.
           // Update the ant's rotation, but cap it at 9 degrees per step, and snap if over 99 deg off.
-          ant.r = normalize360(ant.r + clamp(temp2, -5, 5));
-          // Nudge ant closer to wp if needed.
-          antNudgeToWP(ant, wp);
-          abs(temp2) > 5 && antNudgeToMid(ant, tun); // Counter-nudge for ants doing hard turns.
+          ant.r = normalize360(ant.r + clamp(temp2, -9, 9));
+          // Nudge ant closer to wp if needed but counter-nudge for ants doing turns.
+          abs(temp2) > 5 ? antNudgeToMid(ant, tun) : antNudgeToWP(ant, wp);
+          // If an ant's body is closer to the waypoint than it's foot, it is possibly out-of-bounds, do a big nudge to mid.
+          temp3 = squareDistance(antFootPoint(ant), wp);
+          temp3 > squareDistance(ant, wp) && antNudgeToMid(ant, tun, sqrt(temp3));
         }
       }
       if (!wp || !last(wpSet)) {
@@ -3870,7 +3876,14 @@ act = {
       // Determine if we're on a collision course with a waypoint and then align the ant with the waypoint angle by 2 degrees to minimise the collision.
       if (antWaypointCollision(farm, ant, 7 + (tun.t == 'cav' && antOffsetX(ant)))) {
         temp3 ? (randomInt(3) ? antInstaQ(ant, {}, 0) : antNudgeToMid(ant, tun)) : // Ant is dealing with an ant collision as well, give it some hesitation or at least get away from walls.
-          ant.r = normalize360(ant.r + sign([0, deg180].map(a => normalize180(tun.r + a - ant.r)).sort((a, b) => abs(a) - abs(b))[0]) * (tun.t == 'cav' ? 5 : 2));
+          // Angle correction in response to waypoint collision:
+          ant.r = normalize360(
+            ant.r + (
+              nextTun?.t == 'con' ? normalize180(angleFromDelta(nextTun.x1 - ant.x, nextTun.y1 - ant.y) - ant.r) / 4 : // If next tun is a 'con', angle a quarter turn towards the center of the con.
+              tun.t == 'con' && nextTun ? normalize180(getAngle(ant, getConnectionPoint(tun, nextTun)) - ant.r) / 4 : // If current tun is a 'con', angle a quarter turn to the next overlap point.
+              sign([0, deg180].map(a => normalize180(tun.r + a - ant.r)).sort((a, b) => abs(a) - abs(b))[0]) * (tun.t == 'cav' ? 5 : 2) // Otherwise try to nudge towards the current tun's angle in general direction of travel.
+            )
+          );
       }
     }
     // Store the current wp to make the next wp fetch more efficient.
@@ -3886,7 +3899,6 @@ act = {
         if (antWaypointRange(ant, wp, .8)) {// .8 mult so it has a chance to take another couple steps to angle itself.
           ant.r = ant.r > 90 ? deg180 : 0; // Awkward snap.
           antToSideWithCorrection(ant, tun, wp); // Ant is in landing range, so land it.
-          ///action.ns = 1;
         }
         else {
           temp1 = normalize180((
@@ -4263,7 +4275,7 @@ act = {
       // Note: No proximity check for food/drink items; that is the responsibility of 'eat' and 'drink' actions.  Those check whether it exists, and moving the item changes the id number.
       if (carryItem.x && !inTargetProximity(ant, carryItem, antOffsetX(ant) + 12)) {// Very permissive margin due to targetting troubles.
         // Too far.
-        ant.area.t == carryItem?.area?.t /*&& getTun(farm, ant.area.t)?.t == 'cav'*/ ?
+        ant.area.t == carryItem?.area?.t ?
           antFinna(ant, 'tunOrient', {target: {x: carryItem.x, y: carryItem.y}, margin: 12}) : antGoToAnt(ant, carryItem); // Don't store the whole carryItem in queue data, because that's asking for troubles.
         antFinna(ant, 'get', action);
         return antAction(ant);
@@ -4464,10 +4476,10 @@ act = {
 
   // Ant nips off to a nip.
   nip: (ant, farm = getFarm(ant), action = ant.q[0], id = action.id, nip = action.nip, idOrNip = id || nip, tun = id ? getTun(farm, action.tun) : farm.tuns.find(t => t.nip == nip),
-    nipData = farm.nips.find(n => n.nip == idOrNip), nipItem = nipData?.item, isTop = idOrNip > 2, isLeftSide = idOrNip % 2 > 0, faceX = antFaceX(ant), rev = action.rev) => {
+    nipData = farm.nips.find(n => n.nip == idOrNip), nipItem = nipData?.item, isTop = idOrNip > 2, isLeftSide = idOrNip % 2 > 0, antX = ant.x, rev = action.rev) => {
     if (nipItem && rev) {
       // Entering farm from a nip area.
-      if (isLeftSide ? faceX < 20 : faceX > 940) {
+      if (isLeftSide ? antX < 20 : antX > 940) {
         antSetWalk(ant);
         if (ant.carry) {
           antUpdate(ant); // Correct x/y pos of carried items.
@@ -4495,13 +4507,14 @@ act = {
     }
     else if (nipItem && id && !nipItem.a.some(a => a.t != ant.t)) {
       // Exiting farm into a nip area.
-      if (isLeftSide ? faceX > max(tun.x1, -25) : faceX < min(tun.x2, 985)) {
+      if (isLeftSide ? antX > -25 : antX < 985) {
         antSetWalk(ant);
         if (isTop) antMoveSurface(ant); // Top area.
         else {
-          // Tunnel
-          antToProneWithCorrection(ant, tun); // It's a copout, but I'm not going through the whole waypoint saga here.
-          ant.r = getAngle(ant, isLeftSide ? {x: tun.x1, y: tun.y1} : {x: tun.x2, y: tun.y2}); // Ant hasn't reached the tunPoint yet, so force the angle.
+          // Tunnel.
+          // Can't use antToProneWithCorrection() because the nudger is a fudger.
+          ant.pose = 'prone'; antProneCorrection(ant); // It's a copout to be in prone pose, but I'm not going through the whole waypoint saga here.
+          ant.r = getAngle(ant, isLeftSide ? {x: min(tun.x1, -25), y: tun.y1} : {x: max(tun.x2, 985), y: tun.y2}); // Ant hasn't reached the tunPoint yet, so force the angle.
           antMoveTunnel(ant);
         }
         antAction(ant);
@@ -4831,7 +4844,7 @@ updateFoodAndDrink = temp => {
   // Food items have to be regularly updated to reflect being eaten and hill heights, as well as being deleted when exhausted.
   F.items = F.items.filter(i => i.t != 'food' || (
       temp = getEl(i.id), i.sz > 0 ?
-        (temp.innerHTML = foodCode(i), temp.style.bottom = getHillHeight(parseInt(i.x) + 25) + 'px', temp.style.transform = `rotate(${antHillAngle({x: i.x, scale: 1, f: F.id}, 0)}deg)`) :
+        (temp.innerHTML = foodCode(i), temp.style.bottom = getHillHeight(parseInt(i.x) + 25) + 'px', temp.style.transform = `rotate(${antHillAngle({x: i.x, scale: 1, f: F.id}, 9)}deg)`) :
         (deleteDataAndEl(i, 'items', F), 0)
     )
   );
@@ -4993,6 +5006,7 @@ window.addEventListener('load', antFarmSocial);
 ///////////////////
 window.addEventListener('focus', X => {
   F.a.forEach(antUpdate);
+  _.a.forEach(antUpdate);
   F.nips.forEach(n => n.item.a.forEach(antUpdate));
 });
 

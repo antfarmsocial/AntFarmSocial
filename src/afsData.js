@@ -617,7 +617,7 @@ items = {
   },
   antFarm: {
     n: 'Ant Farm',
-    desc: "Set up a new Ant Farm.<br>100% SCIENTIFICALLY ACCURATE",
+    desc: `Set up a new Ant Farm.<br>${printInt(100)}% SCIENTIFICALLY ACCURATE`,
     lvl: 20,
     max: 2,
     t: 'expansion pack',

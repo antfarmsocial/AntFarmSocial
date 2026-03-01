@@ -3898,6 +3898,18 @@ body.bit .ant {
   }
 }
 
+.nants {
+  z-index: 2 !important;
+  &.on {
+    display: block;
+  }
+  &.nip-tl, &.nip-bl {
+    &.on {
+      left: -600px;
+    }
+  }
+}
+
 .nants,
 .toob,
 #vial {
@@ -4025,18 +4037,6 @@ body.bit .ant {
   }
   &.nip-bl, &.nip-br {
     top: 528px;
-  }
-}
-
-.nants {
-  z-index: 2;
-  &.on {
-    display: block;
-  }
-  &.nip-tl, &.nip-bl {
-    &.on {
-      left: -600px !important;
-    }
   }
 }
 
