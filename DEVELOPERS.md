@@ -53,6 +53,7 @@ to get back into it, here are some tips:
 
 - For graphics and UI design ideas check [this Pinterest board](https://www.pinterest.com.au/braksator/antfarmsocial).
   This also contains reference images (where potentially useful) from the original design of the UI.
+- UI "paint" colours were inspired by retro plastic toys.
 - The first goal should always be to avoid using images or external files for anything; use HTML/CSS/ASCII as much as you can push it.
   Sometimes that works out better.
 - PSD/AI resources are NOT kept in the git repo, but are retained offline.
