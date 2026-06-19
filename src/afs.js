@@ -122,8 +122,10 @@ normalize360 = a => (a + deg360) % deg360,
 oppositeAngle = a => normalize360(a + deg180),
 // Gets the mirror of an angle.
 mirrorAngle = a => normalize360(deg180 - a),
+/* START-DEV */ // For use with gulp-strip-code.
 // Gets the flip of an angle.
-flipAngle = a => normalize360(deg360 - a),
+flipAngle = a => normalize360(deg360 - a), // This func isn't used anywhere, and that is why it is surrounded by the dev tags.  May be safe to remove in the future.
+/* END-DEV */
 // Gets the angle between two precalculated delta values.
 angleFromDelta = (dx, dy, offset = 0) => normalize360(radToDeg(atan2(dy, dx)) + offset),
 // Gets the angle between two objects that have x/y props.
@@ -136,6 +138,8 @@ easeInQuad = t => t * t,
 easeOutQuad = t => 1 - easeInQuad(1 - t),
 // Gets the squared distance, useful for distance comparisons without the cost of a square root.
 squareDistance = (dx, dy) => dx * dx + dy * dy,
+// Get the squared distance between two simple coordinates.
+squareDistanceCoords = (coord1, coord2) => squareDistance(coord2.x - coord1.x, coord2.y - coord1.y),
 // Faster alternative to Math.hypot().
 getHypot = (dx, dy) => sqrt(dx * dx + dy * dy),
 // Calculates distance with components.
@@ -150,6 +154,8 @@ getDistance = (a, b) => getHypot(b.x - a.x, b.y - a.y),
 
 // Mark load time, used for various purposes.
 loadTime = getTime(),
+// Mark mouse/touch moves to detect user activity for the idle reload feature.
+lastActivity = getTime(),
 
 // Loads the app.
 antFarmSocial = X => {
@@ -170,12 +176,16 @@ antFarmSocial = X => {
     if (!farm.sculpt) {
       updateWaypoints(farm); // Calculate waypoints.
       farm.a.forEach(a =>
-        a.state == 'free' && antCap(a, objGetEl(a)) // Fix ants that didn't cop a cap before the last save().
-        || antAction(a) // Activate.
+        a.state == 'free' && antCap(a) // Fix ants that didn't cop a cap before the last save().
+        || a.inf || antAction(a) // Activate (unless it is an infant).
       );
       getVial(farm)?.item.a.forEach(a => a.nipPh > 2 && exitVial(a)); // Fix ants trying to leave a vial.
+      // Timeout any ants walking in tubes so that the tubeWalker logic resumes them immediately.
+      farm.nips.forEach(n => n.item.k == 'tube' && n.item.a.forEach(a => (a.nipPh === 1 || a.nipPh == 4) && (a.nipTs = 0)));
     }
   });
+  // Fix ant pos if this is an existing game.
+  fixAntPos();
   // Start nip loops.
   tubeLoop();
   vialLoop();
@@ -211,6 +221,15 @@ antFarmSocial = X => {
   setupMsgLog();
   // Set up the switch control panel.
   setupSwitcher();
+  // Trigger carousel if _.car is set from a prev session.
+  _.car && toggleCarousel();
+},
+
+// Fixes ant positions and display upon load or tab switch.
+fixAntPos = X => {
+  F.a.forEach(a => antUpdate(antGetStill(a)));
+  _.a.forEach(antUpdate);
+  F.nips.forEach(n => n.item.a.forEach(a => antUpdate(antGetStill(a))));
 },
 
 // Retrieves all data from local storage.
@@ -372,7 +391,7 @@ startFarm = isNew => {
   addDecals();
   addNipItems();
   // Re-add eggs into the farm.
-  F.e.forEach(eggDraw);
+  F.e.forEach(egg => eggDraw(egg));
   // Add lid function.
   if (F.items.length || F.card || F.a.some(deadInFarm)) addLidFunc();
   // Re-enable spawner if it got turned off by something.
@@ -380,7 +399,7 @@ startFarm = isNew => {
 },
 
 // Precalculates the tunnel system layout of the current ant farm.
-calcFarm = (numEntrances = 2 + randomInt(4), tries = 0, hills = [-50, 1010], sublevels = [0, 120, 240, 370, 495], adjustedTun = 0, adjustLeft = !randomInt(4),
+calcFarm = (numEntrances = 2 + randomInt(4), tries = 0, hills = [-50, 1010], sublevels = [0, 120, 240, 367, 496], adjustedTun, adjustLeft = !randomInt(4),
   adjustRight = !randomInt(4), entX, xCollector = [], cavLines = [], lines = [], joinLines = [], sublvl = 1, i = 0, stubEntIndex = -1) => {
   // Ants do not randomly pick tunnel surface entrances, the program does.
   // It also places the adjacent hills in position, but set at zero height, so they can grow as the tunnels are dug.
@@ -524,7 +543,7 @@ calcFarm = (numEntrances = 2 + randomInt(4), tries = 0, hills = [-50, 1010], sub
   // - There are fewer than 5 chamber cavities with paths to an entrance
   // It is a bad design. Used to do clearVars() and dumpFarm(1), but it's more fun to add
   // this feature where the user is blamed for a spill (and trigger it randomly too).
-  if (!randomInt(50) || !F.tuns.length || !adjustedTun || !findPath(F, adjustedTun, {t: 'ent'}) || F.tuns.filter(tun => tun.t == 'cav' && findPath(F, tun, {t: 'ent'})).length < 5)
+  if ((!randomInt(50) && _.farms.length > 1) || !F.tuns.length || !adjustedTun || !findPath(F, adjustedTun, {t: 'ent'}) || F.tuns.filter(tun => tun.t == 'cav' && findPath(F, tun, {t: 'ent'})).length < 5)
     return spill();
   // Store hills.
   for (i = 0; i < hills.length; i += 2) F.hills.push({id: i / 2, l: hills[i], r: hills[i + 1], h: 0});
@@ -622,13 +641,15 @@ buildATun = (lines, joinLines, tun1, func = 'BL',
 // When calculating paths for ant to actually walk on, pathDun should probably be 1, meaning that the tunnels in the path have to be completed.
 // This is different when testing proposed future tunnels for whether yet-to-be-built tunnels would actually connect them properly to an entrance.
 // To understand usage; best to study how this function is used in the various cases where it is employed.  Sometimes used in reverse!
-findPath = (farm, tun, targetAttrs, path = [], invertMatch = 0, pathDun = 0, firstTunId = 0, tid, result) => {
+findPath = (farm, tun, targetAttrs, path = [], invertMatch, pathDun, firstTunId, deterministic, tid, result, donePoints = t => t.dun ? [[t.x1, t.y1], [t.x2, t.y2]] : [t.rwip ? [t.x2, t.y2] : [t.x1, t.y1]], tunCo) => {
   // If the current tunnel matches all target attributes, return the path.
   if (keys(targetAttrs).every(attr => invertMatch ? tun[attr] != targetAttrs[attr] : tun[attr] == targetAttrs[attr])) return path;
-  if (!pathDun || tun.dun || !firstTunId)
+  if (!pathDun || tun.dun || !firstTunId) {
     // Recursively search for the path. (Shuffle the next tunnels to introduce randomness.)
-    for (tid of shuffle(tun.co.filter(tid => !path.includes(tid) && tid != firstTunId)))
-      if (result = findPath(farm, getTun(farm, tid), targetAttrs, [...path, tid], invertMatch, pathDun, firstTunId || tun.id)) return result;
+    tunCo = tun.co.filter(tid => !path.includes(tid) && tid != firstTunId && (!pathDun || donePoints(getTun(farm, tid)).some(([x1, y1]) => donePoints(tun).some(([x2, y2]) => x1 == x2 && y1 == y2))));
+    for (tid of (deterministic ? tunCo : shuffle(tunCo)))
+      if (result = findPath(farm, getTun(farm, tid), targetAttrs, [...path, tid], invertMatch, pathDun, firstTunId || tun.id, deterministic)) return result;
+  }
 },
 
 // Creates a connection junction between chamber cavities and joining tunnels.
@@ -817,7 +838,7 @@ reorderAndSmoothWaypoints = (points, radius = 2, factor = .2, remaining = [...po
       nearestIndex = -1;
       nearestDist = Infinity;
       for (i = 0; i < remaining.length; i++) {
-        d = squareDistance(current.x - remaining[i].x, current.y - remaining[i].y);
+        d = squareDistanceCoords(remaining[i], current);
         if (d < nearestDist) {
           nearestDist = d;
           nearestIndex = i;
@@ -831,7 +852,7 @@ reorderAndSmoothWaypoints = (points, radius = 2, factor = .2, remaining = [...po
       if (p.y - surface > 50) {// Skip smoothing for low-y points
         for (j = i - radius; j <= i + radius; j++) {
           neigh = arr[(j + n) % n];
-          d = squareDistance(p.x - neigh.x, p.y - neigh.y);
+          d = squareDistanceCoords(neigh, p);
           if (d > maxNeighDist) maxNeighDist = d;
           if (maxNeighDist > 144) break; // (12 * 12) Break early if any neighbor is too far to consider for smoothing.
           sumX += neigh.x;
@@ -847,8 +868,8 @@ reorderAndSmoothWaypoints = (points, radius = 2, factor = .2, remaining = [...po
 
 // Filters out waypoints that are too close to each other.
 filterCloseWaypoints = (points, result = [], p) => {
-  // Note: `squareDistance()` is used instead of `getHypot()` for performance reasons.
-  for (p of points) !result.some(q => squareDistance(p.x - q.x, p.y - q.y) < 4) && result.push(p);
+  // Note: `squareDistanceCoords()` is used instead of `getHypot()` for performance reasons.
+  for (p of points) !result.some(q => squareDistanceCoords(q, p) < 4) && result.push(p);
   return result;
 },
 
@@ -885,13 +906,13 @@ stitchWaypointSegments = (segments, stitched = [], current, c, i) => {
 // Calculates square distance to a target if it is roughly within the supplied squared proximity, otherwise Infinity.
 // This is a faster function for distance comparison algorithms, just be aware that any value compared to the result of this function should be squared.
 boxProxSquareDistance = (coord, target, squaredProximity) =>
-  abs(target.x - coord.x) < squaredProximity && abs(target.y - coord.y) < squaredProximity ? squareDistance(target.x - coord.x, target.y - coord.y) : Infinity,
+  abs(target.x - coord.x) < squaredProximity && abs(target.y - coord.y) < squaredProximity ? squareDistanceCoords(coord, target) : Infinity,
 
 // Calculates if a coord object and target object are in proximity.
 // Note: Also checks the target is not the coord object itself so that .find() and .filter() operations of ant sets do not need to specify this.
 inTargetProximity = (coord, target, prox) => (!coord.id || coord.id != target.id) &&
   abs(target.x - coord.x) < prox && abs(target.y - coord.y) < prox && // Box distance check to quickly eliminate most targets.
-  squareDistance(target.x - coord.x, target.y - coord.y) < prox * prox, // Square distance check.
+  squareDistanceCoords(coord, target) < prox * prox, // Square distance check.
 
 // Renders hills.
 drawHill = hill => {
@@ -952,7 +973,7 @@ getDrinkHillHeight = (x, xPos = parseInt(x)) => (getHillHeight(xPos + 25) + min(
 addItems = X =>
   F.items.forEach(item => {
     let isFood = ['food', 'drink'].includes(item.t);
-    appendHTML(getEl(isFood ? 'food' : item.t), html(isFood ? foodCode(item) : sceneImg(item), {id: item.id, style: 'left:' + item.x, class: items[item.k].t, 'data-fx': items[item.col]?.fx}));
+    appendHTML(getEl(isFood ? 'food' : item.t), html(isFood ? foodCode(item) : sceneImg(item), {id: item.id, style: 'left:' + item.x, class: items[item.k].t + ' ' + item.k, 'data-fx': items[item.col]?.fx}));
   }) || updateFoodAndDrink(),
 
 // Re-adds placed stickers when switching to farm or loading page.
@@ -1085,6 +1106,8 @@ useItem = (i, doQuip = 1, doDel = 1, item = _.bag[i], itemKey = item.k, itemType
       }, num500);
     },
     ants(ants = item.a, emptyVial = cloneData(item)) {
+      // Note: A lot of this code does things with 'emptyVial' (a deep clone of 'item') because 'item' will be deleted
+      //   by deleteBagItem(i) below whereas 'emptyVial' will be pushed into the inventory.  Worth keepin that in mind!
       doDel = 0; // Don't delete because it will dump the item before the setTimeout below can check it.
       if (itemKey == 'vial') {
         setTimeout(X => {
@@ -1109,12 +1132,19 @@ useItem = (i, doQuip = 1, doDel = 1, item = _.bag[i], itemKey = item.k, itemType
               for (let a = 0; a < ants.length; a++) {
                 setTimeout(X => {
                   let ant = assign(ants[a], {x: window.innerWidth / 2 + randomInt(num200) - 100, y: -30, pose: 'pick'});
-                  del(ant, 'nipPh', 'vial');
+                  del(ant, 'nipPh');
                   checkExpatQueen(ant, F);
                   dropAntInFarm(ant, item);
                 }, num500 * a);
               }
               emptyVial.a = [];
+              // Eggs also need to fall out.  These are timed to come out last.
+              for (let e = 0; e < item.e.length; e++) {
+                setTimeout(X => {
+                  dropAntInFarm(assign(item.e[e], {x: window.innerWidth / 2 + randomInt(num200) - 100, y: -30, area: {n: 'top', t: 0}}), item, undefined, 1);
+                }, num500 * ants.length + num500 * e);
+              }
+              emptyVial.e = [];
             }
             else {
               for (let a = 0; a <= (items[itemKey].W || 0); a++) {
@@ -1123,6 +1153,7 @@ useItem = (i, doQuip = 1, doDel = 1, item = _.bag[i], itemKey = item.k, itemType
                     scale: getSign(randomInt(1)),
                     pose: 'pick',
                     alate: 0,
+                    lay: 999, // Forces any Queen to have a high chance of laying eggs.
                   }), _);
                 }, num500 * a);
               }
@@ -1169,7 +1200,7 @@ useItem = (i, doQuip = 1, doDel = 1, item = _.bag[i], itemKey = item.k, itemType
     },
     backdrop() {_.grad = (_.grad + 1) % 8; _.bg = ''; setBg()},
     clonekit() {clone(3)},
-    speedo() {_.ss = Date.now() + (3 * longDelay) + randomInt(longDelay); doWarp(); randomMsg(items['speedo'].quip)},
+    speedo() {_.ss = getTime() + (3 * longDelay) + randomInt(longDelay); doWarp(); randomMsg(items['speedo'].quip)},
     ebay() {popup('ebay', i)},
     antFarm() {addFarm(); score(20, 1)},
     mom() {msg('<b>Win.</b>', 'err'); _.win = 1; score(100, 1)},
@@ -1227,7 +1258,7 @@ placeItem = (i, type, item = assign(cloneData(_.bag[i]), {id: _.bag[i].id || 'i'
   switcher = 0;
   getEl('olay').classList.add('vis');
   setTimeout(X => getEl('lid').classList.add('off'), num500);
-  appendHTML(el, html(type == 'scenery' ? sceneImg(item) : foodCode(item), {id: item.id, class: items[item.k].t + ' temp up'}));
+  appendHTML(el, html(type == 'scenery' ? sceneImg(item) : foodCode(item), {id: item.id, class: items[item.k].t + ' ' + item.k + ' temp up'}));
   let obj = getEl(item.id), itemWidth = obj.offsetWidth,
     cleanup = pointerPlace(obj, el,
       (e, rect) => {
@@ -1351,7 +1382,7 @@ removeArrows = (e, olay = getEl('olay'), pull = getEl('pull')) => {
 
 // Shows arrows when something attached to a nipple is clicked.
 createNipArrows = (nipData, nipItemEl, nipItem = nipData.item, pull = createArrowsInit(getEl('pull')), nipId = nipIds[nipData.nip], arrow = document.createElement('div'),
-nipEl = getEl(nipId), nipRect = nipEl.getBoundingClientRect(), nantEl = getEl('a-' + nipId), otherFarm = getFarm(nipData.f)) => {
+nipEl = getEl(nipId), nipRect = nipEl.getBoundingClientRect(), nantEl = getEl('a-' + nipId), otherFarm = getFarm(nipData.f), otherData = otherFarm?.nips.find(n => n.id == nipData.id)) => {
   arrow.classList.add('arrow', 'niparrow', nipId);
   pull.appendChild(arrow);
   arrow.style.left = `${nipRect.left - pull.getBoundingClientRect().left + 10}px`;
@@ -1370,16 +1401,13 @@ nipEl = getEl(nipId), nipRect = nipEl.getBoundingClientRect(), nantEl = getEl('a
         nipItemEl.classList.remove('vis');
       }, num800);
       if (nipItem.k == 'tube') {
-        // Chuck the ants into the other farm somewhere.
-        nipItem.a.forEach(a => {
-          a.x = 20 + randomInt(940);
-          a.y = antGroundLevel(a);
-          otherFarm.a.push(a);
-          checkExpatQueen(a, otherFarm);
-        });
-        nipItem.a = [];
+        // Denip all of the ants from both halves of the tube into the farm that is not currently displayed (because this mass ant dump looks stupid).
+        // Note: eggs will be moved by the deNip as well as they're each tied to a carrier ant.
+        nipItem.a.forEach(a => deNip(a, nipData, otherFarm, otherData.nip)); // Overriding the default 'nip' param because we need it to be set to the relevant nip of the OTHER farm.
+        otherData.item.a.forEach(a => deNip(a, otherData, otherFarm));
+        // Kill the corresponding tube (our side of the tube will be removed as normal below).
         otherFarm.nips = otherFarm.nips.filter(n => n.id != nipData.id);
-        // Note: tubeLoop() is responsible for stopping tubeInterval if no longer needed.
+        // Note: tubeLoop() and antNipWalk() detect when they're no longer needed and clear their own animation loops when this happens.
       }
       if (nipItem.a.length) nipItem.k = 'collected';
       del(F.nips, nipData.nip);
@@ -1392,7 +1420,7 @@ nipEl = getEl(nipId), nipRect = nipEl.getBoundingClientRect(), nantEl = getEl('a
 },
 
 // Fetches a list of usable nips the farm has, optionally restricted to available nips.
-getNips = (avail = 0, f = F, nips = nipIds.slice(-2)) => (f.tuns.forEach(t => t.nip && t.dun && nips.push(nipIds[t.nip])), nips.filter(n => !avail || !f.nips.some(nip => nipIds[nip.nip] == n))),
+getNips = (avail, f = F, nips = nipIds.slice(-2)) => (f.tuns.forEach(t => t.nip && t.dun && nips.push(nipIds[t.nip])), nips.filter(n => !avail || !f.nips.some(nip => nipIds[nip.nip] == n))),
 
 // Enables the nipple selection UI mode.  Calling workflow is responsible for checking getNips(1) works.
 nippleSelection = (callback, nips = getNips(1), nipCount = 0, nippleClick = e => {
@@ -1576,7 +1604,7 @@ modal = {
         ) : ''), {id: 'bag-caption'});
     queryAll('.sort-caption a').forEach(lnk => lnk.addEventListener('click', e => {_.bs = parseInt(e.target.dataset['s']); popup('bag', 0, 0)}));
     for (let [i, bagItem] of [..._.bag.entries()].sort(_.bs > 1 ? (([, a], [, b]) => (items[a.k].n > items[b.k].n ? 1 : items[a.k].n < items[b.k].n ? -1 : 0)) : !_.bs ? X => 0 : ([, a], [, b]) => keys(items).indexOf(a.k) - keys(items).indexOf(b.k))) {
-      let cta = 'Use item', disable = 0, customDesc, itemKey = bagItem.k, item = items[itemKey], itemType = item.t, dumpItem,
+      let cta = 'Use item', disable, customDesc, itemKey = bagItem.k, item = items[itemKey], itemType = item.t, dumpItem,
       useFunc = (e, el = e.target, i = el.dataset.i) => {
         if (itemType == 'sanitation') {
           // This one needs a confirm workflow.
@@ -1612,6 +1640,7 @@ modal = {
               let ts = [], cnts = [], cnt;
               bagItem.a.forEach(a => !ts.includes(a.t) && ts.push(a.t));
               ts.forEach(at => keys(castes).forEach(c => (cnt = bagItem.a.filter(a => a.caste == c && a.t == at).length) && cnts.push(printInt(cnt) + ` ${types[at].n} Ant ${castes[c] + (cnt === 1 ? '' : 's')}`)));
+              bagItem.e?.length && cnts.push(printInt(bagItem.e.length) + ` egg${bagItem.e.length === 1 ? '' : 's'}`); // Also count any eggs that were dropped in the vial.
               customDesc = `Your reused ant vial containing:<br>${cnts.length > 1 ? cnts.slice(0, -1).join(', ') + ', and ' + last(cnts) : cnts[0]}.`;
               cta = `Release ${bagItem.a.length} ant${bagItem.a.length === 1 ? '' : 's'}`;
             }
@@ -1628,7 +1657,7 @@ modal = {
         tube() {!_.farms.some(f => f.fill && f.id != F.id && getNips(1, f)) && (cta = 'No other farm to connect', disable = 1); fillCheck()},
         antfax() {cta = 'View'},
         antfaxpro() {cta = 'View'},
-        clonekit() {!F.a.some(a => isWorker(a) && a.state == 'cap') && (cta = 'No eligible donor found', disable = 1)},
+        clonekit() {!F.a.some(a => isWorker(a) && !a.inf && livesInFarm(a)) && (cta = 'No eligible donor found', disable = 1)},
         speedo() {_.ss && (cta = 'A second Speedo would tear a hole in space', disable = 1)},
         ebay() {cta = 'Sell ant farm'; F.fill && (cta = 'Farm has not been cleaned out', disable = 1); _.farms.length < 2 && (cta = 'This is your only farm', disable = 1)},
         mom() {cta = '🏆 WIN GAME 🏆'; if (_.win) (cta = 'Game won', disable = 1)},
@@ -1838,7 +1867,7 @@ modal = {
       html(tag('ul', mapJoin(_.farms, f =>
         html(html(f.sculpt ? img('sculpt') : getFarmThumbnail(f), {id: `f-${f.id}`, class: 'select-img af'}) + tag(3, f.n) + getFarmDesc(f) + tag('i', '••<br>••<br>••', {class: 'g-dots'}), {class: 'feng-item', draggable: 'true', 'data-id': f.id}, 'li')
       )) + tag('button', 'Harmonize'), {id: 'feng-list'});
-    let farmList = query('#feng-list ul'), draggedItem = 0,
+    let farmList = query('#feng-list ul'), draggedItem,
       touchMap = {touchstart: 'dragstart', touchmove: 'dragover', touchend: 'dragend'}, // Don't use "pointer" events because we want to target mobile only for the touch bridge code or it causes a headache!
       handlers = {
         dragstart: (e, item = e.target.closest('.feng-item')) => {
@@ -1892,7 +1921,7 @@ modal = {
   },
 
   // Templates antfax popup.
-  antfax: (el, k, pro = _.bag[k].k != 'antfax', fax = txt => 'fax' + txt, antType = types[_[pro ? fax('p') : fax()] || (pro ? 'H' : 'N')],
+  antfax: (el, k, pro = _.bag[k].k != 'antfax', fax = (txt = '') => 'fax' + txt, antType = types[_[pro ? fax('p') : fax()] || (pro ? 'H' : 'N')],
     content = {
       l: {// Left column.
         // Size.
@@ -2058,7 +2087,7 @@ xSelect = (k, select, val = query(`input[name=${select}]:checked`)?.value, key =
                 F.nips.push(newNip);
                 tubeEl2.dataset.id = farmId;
                 tubeEl2.classList.add('vis');
-                setTimeout(X => tubeEl2.classList.add('on') || getEl('a-' + nip2Id).classList.add('on'), num800);
+                setTimeout(X => tubeEl2.classList.add('on') || getEl('a-' + nip2Id).classList.add('on', 'fade'), num800);
                 tubeEl2.addEventListener('click', e => createNipArrows(newNip, tubeEl2));
                 tubeFollowLinks();
                 deleteBagItem(k);
@@ -2084,7 +2113,7 @@ xSelect = (k, select, val = query(`input[name=${select}]:checked`)?.value, key =
 },
 
 // Opens the modal dialog.
-popup = (modalId, param = 0, delay = num500) => setTimeout(X => {
+popup = (modalId, param, delay = num500) => setTimeout(X => {
   !delay && getEl('modal') && closePopup(); // If caller sets delay to 0, it implies they want to close/override any existing popup.  That's just how it is.
   if (bodyClasses.contains('pik') || getEl('olay').classList.contains('vis') || getEl('modal')?.classList.contains('vis') || pouring)
     // Can't show modal yet.
@@ -2144,9 +2173,11 @@ newAntId = (type, caste, idHigh = 9999, clashes = 0, id) => {
 colonyType = (f, tc = {}, X = f.a.forEach(ant => {livesInFarm(ant) && (tc[ant.t] = (tc[ant.t] || 0) + 1)})) => !keys(tc).length ? '' : entries(tc).sort((a, b) => b[1] - a[1])[0][0],
 
 // Checks an ant is not 'dead'.  Also can't be 'free' or 'nip' etc... must be 'cap' which suggests it is in a farm somewhere.
+// * can be in a tube or vial too, so take care.
 livesInFarm = ant => ant.state == 'cap',
 
 // Checks an ant is 'dead'.  Also can't be 'free' or 'nip' etc... must be 'dead' which suggests it is in a farm somewhere.
+// * can be in a tube or vial too, so take care.
 deadInFarm = ant => ant.state == 'dead',
 
 // Checks if a farm is running (has ants living in it).
@@ -2174,7 +2205,15 @@ isDrone = ant => ant.caste == 'D',
 isWorker = ant => ant.caste == 'W',
 
 // Checks if an ant is one of the queen's living workers.
-isServant = (queen, ant) => livesInFarm(ant) && isWorker(ant) && queen.t == ant.t,
+isServant = (queen, ant) => livesInFarm(ant) && isWorker(ant) && !ant.inf && queen.t == ant.t,
+
+// Determines if the queen of an ant or egg is in a connected item (vial or tube-connected farm) and returns a positive integer which is the nip value of the connected item.
+// Set 'anyQueen' to 1 to allow finding a fallback queen even if it isn't the guardian queen set in the ant's 'Q' property.
+// Note: This only works with DIRECTLY connected items, and won't find a queen that traversed through an intermediately connected farm.
+isAntsQueenInConnectedItem = (ant, farm, anyQueen, checkAnyQueen, nipToCheck = getVial(farm)) =>
+  nipToCheck?.item.a.some(a => a.id == ant.Q || checkAnyQueen && isQueen(a) && a.t == ant.t) ? nipToCheck.nip : // Queen is found in a vial.
+  (nipToCheck = farm.nips.find(n => n.item.k == 'tube' && getFarm(n.f)?.a.some(a => livesInFarm(a) && (a.id == ant.Q || checkAnyQueen && isQueen(a) && a.t == ant.t)))) ? nipToCheck.nip : // Queen is found in a connected farm.
+  anyQueen && isAntsQueenInConnectedItem(ant, farm, 0, 1), // Perform the anyQueen check in a recursive call.
 
 // Prints an integer with markup, but caps to 4 digits so as to not screw up UI.
 // Because the default content font used in this app makes digits look wierdly small, this function can also be used to wrap numbers in a monospace font (as long as they're under 10,000).
@@ -2203,7 +2242,7 @@ spawnAnt = (autoLoop = 1, randomEdge = randomInt(3), x, y, r, wHeight = window.i
   }
 },
 
-// Creates an ant, stores it in data, and attaches a DOM representation of it.
+// Creates an ant, stores it in data, and attaches a DOM representation of it (if needed).
 createAnt = (data = F, x, y, r, state = 'free', caste = !randomInt(F.fill == 'lube' ? 12 : 24) ? 'Q' : 'W',
   type = caste == 'Q' && !farmHasQueen(F) && !randomInt(2) && F.t ? F.t : pickRandom(keys(types).filter(t => !types[t].p)), id = newAntId(type, caste), ant = {
   id: id,
@@ -2226,38 +2265,42 @@ createAnt = (data = F, x, y, r, state = 'free', caste = !randomInt(F.fill == 'lu
   thot: pickRandom(["I feel like I'm being watched", "Somebody is watching me!"]),
   thotD: 8,
   rm: [], // Body part removal.
-}) => data.a.push(ant) && (ant.state == 'free' ? freeAntDraw : antDraw)(ant) || ant,
+}) => data.a.push(ant) && (ant.state == 'free' ? freeAntDraw : currentFarm(data) && antDraw)?.(ant) || ant,
 
 // Clones a capped ant.
-clone = (c, donor = F.a.find(a => isWorker(a) && a.state == 'cap'), fx = getEl('fx')) => {
+clone = (c, donor = F.a.find(a => isWorker(a) && !a.inf && livesInFarm(a)), fx = getEl('fx'), i = 0) => {
   switcher = 0;
   playSound('zap');
   fx.classList.add('flashit');
-  for (let i = 0; i < c;) setTimeout((id = newAntId(donor.t, donor.caste), xPos = 400 + i * 40) =>
-    antDraw(F.a[F.a.push(assign(cloneData(donor), {
-      id: id,
-      n: id,
-      x: xPos,
-      y: antGroundLevel({f: donor.f, t: donor.t, x: xPos}),
-      q: [{act: 'idle'}],
-      r: antHillAngle({scale: 1, t: donor.t, x: xPos}),
-      scale: 1,
-      thot: pickRandom(["Who am I?", "What just happened?", "Is that me?", "I am reborn!"]),
-      dur: 0,
-      ts: getTimeSec(),
-      h: 0,
-      carry: 0,
-    })) - 1]) || antAction(getAnt(F, id)), i++ * num500 + num500
-  );
+  for (; i < c;) {
+    let id = newAntId(donor.t, donor.caste), xPos = 480 + (i - (c - 1) / 2) * 40;
+    setTimeout(X =>
+      antDraw(F.a[F.a.push({
+        ...cloneData(donor),
+        id,
+        n: id,
+        x: xPos,
+        y: antGroundLevel({f: donor.f, t: donor.t, x: xPos}),
+        q: [{act: 'idle'}],
+        r: antHillAngle({scale: 1, t: donor.t, x: xPos}),
+        scale: 1,
+        thot: pickRandom(["Who am I?", "What just happened?", "Is that me?", "I am reborn!"]),
+        dur: 0,
+        ts: getTimeSec(),
+        h: 0,
+        carry: 0,
+        area: {n: 'top', d: 0}
+      }) - 1]) || antAction(getAnt(F, id)), i++ * num500 + num500);
+  }
   setTimeout(X => {fx.classList.remove('flashit'); switcher = 1; save()}, c * num500 + num500);
   randomMsg(items['clonekit'].quip);
 },
 
 // Gets the ant's size, adjusted for infancy and caste.
 // Goal IIRC: Return ant's size as configured, except Queen's are 2 sizes larger (if possible), Drones are one size larger,
-// Infant at larvae stage are small unless the ant type's default is small then they're "baby" size, and infant larval drones are one size larger than the infants.
+// Infant at larval stage are small unless the ant type's default is small then they're "baby" size, and infant larval drones are one size larger than the infants.
 antGetSize = (ant, sz = types[ant.t].s, sizes = ['b', 's', 'm', 'l', 'x'], i = sizes.indexOf(sz)) =>
-  ant['inf'] === 1 ? (sz == 's' ? 'b' : 's') : sizes[min(i + (isDrone(ant) ? 1 : isQueen(ant) ? (ant.t == 'T' ? 1 : 2) : 0), 4)],
+  ant.inf === 1 ? (sz == 's' ? 'b' : 's') : sizes[min(i + (isDrone(ant) ? 1 : isQueen(ant) ? (ant.t == 'T' ? 1 : 2) : 0), 4)],
 
 // Draws a free ant.
 freeAntDraw = ant => {
@@ -2270,7 +2313,7 @@ freeAntDraw = ant => {
 
 // Draws an existing ant into the currently displayed farm, or another container.
 // Note: This function cannot protect against ant being drawn into wrong farm or non-existent container as this func is used for various purposes, calling code is responsible.
-antDraw = (ant, cont = getEl('farm')) => antUpdate(ant, cont.appendChild(assign(getTemplate(antTemplate), {id: ant.id}))),
+antDraw = (ant, cont = getEl('farm')) => antUpdate(ant, cont.appendChild(assign(getTemplate(antTemplate), {id: ant.id})), 1),
 
 // Gets DOM element from the cache or from query (and store in cache if its part of the current farm).
 objGetEl = (obj, cachedEl = elCache[obj.id]) => cachedEl?.isConnected && cachedEl || obj.f == F.id && (elCache[obj.id] = getEl(obj.id)) || getEl(obj.id),
@@ -2307,8 +2350,8 @@ pickAnt = (e, antEl = e.currentTarget, ant = getFreeAnt(antEl)) => {
             {id: ant.id + wing, style: `transform:rotate(${ant.r}deg);left:${left}px;top:${top}px;width:${antEl.clientWidth}px;height:${antEl.clientHeight}px;`, class: 'leaf alate ' + antGetSize(ant)}
           )
         );
-        let leaf = getEl(ant.id + wing), dir = getSign(wing != 'wing-l'), wLeft = left, wRotation = ant.r, wTop = top, leafInterval = setInterval(X => {
-          if (abs(left - wLeft) < 99) {leaf.style.left = (wLeft += dir) + 'px'; dir *= .995}
+        let leaf = getEl(ant.id + wing), dir = getSign(wing != 'wing-l'), wRotation = ant.r, wTop = top, t, leafInterval = setInterval(X => {
+          leaf.style.left = (left + easeOutQuad(t = min(t + .01, 1)) * 99 * dir) + 'px';
           leaf.style.transform = `rotate(${wRotation += dir}deg)`;
           leaf.style.top = (wTop += .7) + 'px';
           wTop > window.innerHeight + 99 && (leaf.remove() || stopInterval(leafInterval));
@@ -2342,7 +2385,7 @@ dragAnt = e => {
       dx = clientX - elX, dy = clientY - elY, dist = getHypot(dx, dy), clampDist = min(dist, 30);
     (abs(parseInt(pickedAntEl.style.left) - clientX) > 25 || abs(parseInt(pickedAntEl.style.top) - clientY) > 25) && pickedAntEl.dispatchEvent(loseAnt);
     pickedAntEl.style.left = elX + (dx / dist) * clampDist + 'px';
-    pickedAntEl.style.top = elY + (dy / dist) * clampDist + 'px';
+    pickedAntEl.style.top = 16 + elY + (dy / dist) * clampDist + 'px'; // 16 is so that the cursor doesn't cover the small ants up, though this causes the ant's position to suddenly jump, but whatevs...
   }
 },
 
@@ -2358,13 +2401,13 @@ dropAnt = (e, ant = getFreeAnt(pickedAntEl), dropzoneRect = getEl('dropzone').ge
   }
 },
 
-// Moves an ant into the farm via a falling animation.
+// Moves an ant (or egg) into the farm via a falling animation.
 // Note: Any functions calling this should probably book-end their process with switcher=0/switcher=1.
-dropAntInFarm = (ant, oldDataset, antFarmRect = getEl('farm').getBoundingClientRect()) => {
+dropAntInFarm = (ant, oldDataset, antFarmRect = getEl('farm').getBoundingClientRect(), isEgg = undefined) => {
   ant.x -= antFarmRect.left;
   ant.y -= antFarmRect.top;
-  transferObject(F, 'a', ant, oldDataset, F, {f: F.id, fall: 1});
-  antFall(ant);
+  transferObject(F, isEgg ? 'e' : 'a', ant, oldDataset, F, {f: F.id, fall: 1});
+  antFall(ant, isEgg ? eggUpdate : undefined, isEgg ? X => 1 : undefined);
 },
 
 // Handles the mouseover event for spotting ants.
@@ -2378,8 +2421,8 @@ freeAntRun = ant => !ant.fall && screenWalk(assign(ant, {pose: 'prone', r: rando
 
 // Decides whether to do an ant bite and then does it.
 // Note: The force param is for dev.js, infact that's why this code exists as its own function.
-antBite = (ant, force) => {
-  if (force || (_.score > 9 && types[ant.t].b && !randomInt(20))) {
+antBite = (ant/* START-DEV */, force/* END-DEV */) => {
+  if (/* START-DEV */force || /* END-DEV */(_.score > 9 && types[ant.t].b && !randomInt(20))) {
     _.bit = 1;
     randomMsg(biteMsg);
     doThrob();
@@ -2431,6 +2474,7 @@ doWarp = X => {
     playSound('speed', .7);
     getEl('ss').classList.add('vis');
     getEl('game').classList.add('ss');
+    B.classList.add('warp');
     setTimeout(X => getEl('game').classList.remove('ss'), standardDelay / 2);
     stopInterval(warper);
     warper = setInterval(clearWarp, standardDelay);
@@ -2442,7 +2486,7 @@ doWarp = X => {
 
 // Supports the functionality for disabling superspeed.
 clearWarp = X => {
-  if (Date.now() > _.ss) {
+  if (getTime() > _.ss) {
     playSound('fizzle', .7);
     frameTick = 20;
     microDelay = num500,
@@ -2455,6 +2499,7 @@ clearWarp = X => {
     _.ss = 0;
     save();
     setTimeout(X => {
+      B.classList.remove('warp');
       getEl('game').classList.add('ss');
       setTimeout(X => getEl('game').classList.remove('ss'), shortDelay/2);
       getEl('ss').classList.remove('vis');
@@ -2464,7 +2509,7 @@ clearWarp = X => {
 
 // Increments score.
 // Can be used to decrement score (inc=-1) or enable score display (inc=0), and to set bonuses (which don't trigger drops).
-score = (inc, isBonus = 0, win = _.win ? span('🏆', {class: 'win'}) : '', scoreEl = getEl('score'), bonusEl = getEl('bonus')) => {
+score = (inc, isBonus, win = _.win ? span('🏆', {class: 'win'}) : '', scoreEl = getEl('score'), bonusEl = getEl('bonus')) => {
   _.score += parseInt(inc);
   if (inc) {
     if (isBonus) {
@@ -2526,7 +2571,7 @@ antThot = (ant, thots, farm = getFarm(ant), uniqueActs = antUniqueActs(ant), tho
   if (ant.thotD > 1) {// Protect against changing thoughts too quickly.
     ant.thot = pickRandom(thots || [
       // Auto thots are ordered from high priority to low priority, only the first valid one is used.
-      X => ant['inf'] && ["😘🎮", "✏❓🎨", "🌵📥🍗🍖", "💥👍💥", "🔥🔥👅", "👀👑🌍", "👃💩", "🎨🎾", "🔵🌊", "💪🎀", "👄👄", "💪⚡🐭", "🐛🔜"],
+      X => ant.inf && ["😘🎮", "✏❓🎨", "🌵📥🍗🍖", "💥👍💥", "🔥🔥👅", "👀👑🌍", "👃💩", "🎨🎾", "🔵🌊", "💪🎀", "👄👄", "💪⚡🐭", "🐛🔜"],
       X => ant.fight && ["Why I oughta!", "Put em up! Put em up!", "Tough guy eh?", "Is that all you've got?", "You're going down!", "Take that!", "Come on then!", "En garde!", "Have at you!",
         "You'll regret that!", "I'm gonna mess you up!", "For my family!", "You're going to pay!", "Don't mess with me!", "This is personal!", "Say your prayers!", "Feel my wrath!",
         "You asked for it!", "I'm unstoppable!", "For the colony!", "Ant power!"],
@@ -2581,7 +2626,7 @@ antMagnify = (middleAnt, a, distSq, minDistSq = 784, lgRect = getEl('lg').getBou
     isAlive = livesInFarm(middleAnt);
     middleAnt.mag ||= 1; // Set to 1 if not already set to some higher value.
     antUpdate(middleAnt);
-    getEl('l-head').innerHTML = middleAnt.n;
+    getEl('l-head').innerHTML = (middleAnt.inf > 1 ? 'Pupa ' : middleAnt.inf ? 'Larva ' : '') + middleAnt.n;
     query('#l-t .txt').innerHTML = types[middleAnt.t].n + ' ant';
     query('#l-c .txt').innerHTML = casteLabel(middleAnt);
     query('#l-c .emo').innerHTML = casteIcon(middleAnt);
@@ -2604,7 +2649,7 @@ antMagnify = (middleAnt, a, distSq, minDistSq = 784, lgRect = getEl('lg').getBou
     getEl('l-inf').classList.add('vis');
     magInterval ||= setInterval(X => {
       if (!middleAnt?.mag) magInterval = stopInterval(magInterval);
-      else if (isAlive && ++middleAnt.mag > 20) {
+      else if (isAlive && !middleAnt.inf && ++middleAnt.mag > 20) {
         antUpdateClasses(middleAnt, {flare: 1});
         if (--middleAnt.hp <= 0) {
           magInterval = stopInterval(magInterval);
@@ -2631,7 +2676,9 @@ glassAddDrag = e => document.addEventListener('pointermove', dragGlass),
 glassRemDrag = e => document.removeEventListener('pointermove', dragGlass),
 
 // Toggles the display of the magnifying glass.
-toggleGlass = (e, lWrap = getEl('l-wrap')) => {
+toggleGlass = (e, lWrap = getEl('l-wrap'), styleGlass = X => {
+    lWrap.style.transform = `translate3d(${clamp(glassDragX - 55 - wrapperRect.x, -8, wrapperRect.width - 85)}px, ${clamp(glassDragY - 90 - wrapperRect.y, -33, wrapperRect.height - 68)}px,0)`;
+  }) => {
   if (bodyClasses.contains('glass')) {
     bodyClasses.remove('glass');
     lWrap.removeEventListener('pointerdown', glassAddDrag);
@@ -2642,16 +2689,14 @@ toggleGlass = (e, lWrap = getEl('l-wrap')) => {
     F.a.forEach(a => {antUpdateClasses(a, {mag: 0, flare: 0}); magInterval = stopInterval(magInterval)});
     getEl('l-inf').classList.remove('vis');
   }
-  else {
+  else if (switcher) {// Guarded by switcher flag because enabling the magnifying glass during a switch causes glitches.
     wrapperRect = getEl('wrapper').getBoundingClientRect();
+    styleGlass();
     bodyClasses.add('glass');
     lWrap.addEventListener('pointerdown', glassAddDrag);
     document.addEventListener('pointerup', glassRemDrag);
     magnifier = setInterval(antMagnify, 200);
-    glassDragInterval = setInterval(X => {
-      getEl('l-wrap').style.transform =
-        `translate3d(${clamp(glassDragX - 55 - wrapperRect.x, -8, wrapperRect.width - 85)}px, ${clamp(glassDragY - 90 - wrapperRect.y, -33, wrapperRect.height - 68)}px,0)`;
-    }, 30);
+    glassDragInterval = setInterval(styleGlass, 30);
   }
 },
 
@@ -2663,6 +2708,7 @@ toggleCarousel = (e, olay = getEl('olay')) => {
     olay.classList.remove('vis');
     stopInterval(carInterval);
     bodyClasses.remove('car');
+    del(_, 'car'); // Remove carousel state from data.
   }
   else if (_.farms.length > 1) {
     if (switcher) {
@@ -2674,6 +2720,7 @@ toggleCarousel = (e, olay = getEl('olay')) => {
       carousel(); // Switch immediately for confirmation.
       navigator.userAgent.indexOf('Mac') > -1 && msg("Press Shift-CMD-F for full screen.", 'warn');
       navigator.userAgent.indexOf('Win') > -1 && msg("Press F11 for full screen.", 'warn');
+      _.car = 1; // Carousel state to retain after reload.
     }
     else denyClick(getEl('a-car'));
   }
@@ -2704,38 +2751,45 @@ screenWalk = (ant, frameDelay = 0) =>
     antUpdate(ant) || setTimeout(X => spawner && ant.pose != 'pick' && antMoveDefault(ant, screenWalk), frameDelay),
 
 // Determines if two ants are peaceful towards each other, and also not trying to do a hand-off.
-antsPassive = (ant, ant2) => (ant2.t == ant.t || getFarm(ant)?.coex) && ant.carry?.Q != ant2.id && ant2.carry?.Q != ant.id,
+antsWillAvoid = (ant, ant2) => (ant2.t == ant.t || getFarm(ant)?.coex) && ant.carry?.Q != ant2.id && ant2.carry?.Q != ant.id,
 
-// Tracks ant avoidance.
-antTrackAvoidance = ant => {
-  ant.avoid ||= 0;
-  ant.avoid++;
-  setTimeout(X => del(ant, 'avoid'), num2000);
-  antUpdate(antGetStill(ant)); // Note: antGetStill() slipped into this code to prevent treadmill while in avoidance.
+// Tracks ant avoidance, scoped per other ant. ant.avoid is an object: { [otherId]: { n, t } }
+// The idea is that for each other ant encountered there is a counter (n) that ticks up on every collision check, in the first 100 ticks the
+// avoidance is allowed, then for the next 100 it is ignored.  Resets the counter after 200 ticks to start the cycle again.
+// If tracker is not triggered for 1s the relevant data removed.
+antTrackAvoidance = (ant, other, avoider) => {
+  ant.avoid ||= {};
+  avoider = ant.avoid[other.id] ||= {n: 0};
+  if (++avoider.n > 200) temp1.n = 0;
+  clearTimeout(avoider.t);
+  avoider.t = setTimeout(X => del(ant.avoid, other.id), 999); // Reset if this ant pair goes quiet for a bit.
+  antUpdate(antGetStill(ant));
 },
 
-// Checks ant avoidance tracker.
-antCheckAvoidance = ant => !ant.avoid || ant.avoid < 29,
+// Checks ant avoidance tracker for a specific other ant. Returns true if avoidance should happen.
+antCheckAvoidance = (ant, other) => !ant.avoid?.[other.id] || ant.avoid[other.id].n < 99,
 
 // Handles random direction prone walking, with collision handling for both modes this is used in.
-antMoveDefault = (ant, callback, allowPause = 0, speedMult = 1, rotMult = 1, rand = random(), collision = antCollision(ant), ant2 = collision?.a, dist, near) => {
+antMoveDefault = (ant, callback, allowPause, speedMult = 1, rotMult = 1, rand = random(), collision = antCollision(ant), ant2 = collision?.a, dist, near) => {
   antSetWalk(ant);
   if (collision) {
-    if (ant.state == 'free' || antsPassive(ant, ant2)) {// Too much trouble to handle collisions near the boundary.
-      if (!(near = ant.area.n == 'bg' && antBgNear(ant, 1)) && antCheckAvoidance(antGetStill(ant))) {
+    if (ant.state == 'free' || antsWillAvoid(ant, ant2)) {// Too much trouble to handle collisions near the boundary.
+      if (!(near = ant.area.n == 'bg' && antBgNear(ant, 1)) && antCheckAvoidance(antGetStill(ant), ant2)) {
         dist = calcDistComponents(ant2.x, ant2.y, ant.x, ant.y);
         ant.r = normalize360(ant.r + collision.d * randomInt(20));
         ant.x += dist.x;
         ant.y += dist.y;
         // Track ant avoidance duration so we can stop doing it if it gets too insane.
-        antTrackAvoidance(ant);
+        antTrackAvoidance(ant, ant2);
       }
     }
     else if (ant2.carry?.Q == ant.id) {
       // Make the hand-off easier.
       ant.r = normalize360(ant.r - collision.d);
     }
-    else antFight(ant, ant2); // Fight!
+    else if (ant.carry?.Q == ant2.id || antFight(ant, ant2)) {
+      return antNextStill(ant); // Progresses to next item in queue.
+    }
   }
   else if (rand < .2) ant.r = normalize360(ant.r + pickRandom([-2, -1, 1, 2]) * rotMult); // Randomly select an angle for direction change.
   antTakeProneStep(ant, speedMult);
@@ -2749,20 +2803,20 @@ antTakeProneStep = (ant, speedMult = 1, angleInRadians = degToRad(ant.r), mult =
 },
 
 // Tests if ant is about to cross a boundary in the bg area and reports which boundary (270 - top, 0 - right, 90 - bottom, 180 - left).
-antBgNear = (ant, ignoreAngle = 0, margin = antOffsetX(ant) * 2) =>
+antBgNear = (ant, ignoreAngle, margin = antOffsetX(ant) * 2) =>
   [[deg270, ant.y < 322], [0, ant.x > 960 - margin], [90, ant.y > antGroundLevel(ant, 0) - margin], [deg180, ant.x < margin]].find(b => b[1] && (ignoreAngle || (abs(normalize180(ant.r - b[0])) < 90))),
 
-// Moves ant to the middle of #F.
-antFall = (ant, antEl = objGetEl(ant), move = 1.2, target = antGroundLevel(ant)) => {
+// Moves ant (or egg) to the middle of #F.
+antFall = (ant, updateFunc = antUpdate, finalFunc = antCap, move = 1.2, target = antGroundLevel(ant)) => {
   ant.y += 1.2;
   ant.x += ant.x < 450 ? move : ant.x > 490 ? -move : 0;
   if (round(ant.r) < 0) ant.r += 1.2;
-  antUpdate(ant, antEl);
-  ant.y < target && setTimeout(X => antFall(ant, antEl, max(0, move - .02)), frameTick / 2) || antCap(ant, antEl);
+  updateFunc(ant);
+  ant.y < target ? setTimeout(X => antFall(ant, updateFunc, finalFunc, max(0, move - .02)), frameTick / 2) : finalFunc(ant);
 },
 
 // Captures an ant into the farm.
-antCap = (ant, antEl) => {
+antCap = (ant, antEl = objGetEl(ant)) => {
   antEl.removeEventListener('pointerdown', pickAnt);
   if (ant.state != 'cap') getFarm(ant).stats['cap']++;
   ant.state = 'cap';
@@ -2770,7 +2824,7 @@ antCap = (ant, antEl) => {
   ant.ts = getTimeSec();
   setColonyAndFoe(getFarm(ant));
   score(isQueen(ant) ? 3 : 1);
-  antThot(ant, ["Don't touch me!", "Am I kidnapped?", "WTF is going on?", "I'm confused!"]);
+  !ant.inf && antThot(ant, ["Don't touch me!", "Am I kidnapped?", "WTF is going on?", "I'm confused!"]);
   antSurface(ant);
 },
 
@@ -2785,14 +2839,15 @@ antFight = (ant, ant2) => !ant.carry && !ant2.carry && addFight(ant, ant2) && !a
 // Note: This calls antNext() and should be considered an alternative to calling antNext() in some situations.
 antSurface = ant => {
   antArea(ant, 'top');
-  antNext(assign(ant, {r: antHillAngle(ant), y: antGroundLevel(ant), scale: ant.scale * getSign(ant.r < 90), pose: 'side', fall: 0, walk: 0, run: 0}));
+  !ant.inf && antNext(assign(ant, {r: antHillAngle(ant), y: antGroundLevel(ant), scale: ant.scale * getSign(ant.r < 90), pose: 'side', fall: 0, walk: 0, run: 0}));
 },
 
 // Gets a free ant object given the ant element or some object with an id.
 getFreeAnt = antEl => getAnt(_, antEl?.id),
 
 // Gets an ant object by ID.
-getAnt = (farm, id) => getById(farm.a, id),
+// Note: dataSet is usually the farm object.
+getAnt = (dataSet, id) => getById(dataSet.a, id),
 
 // Removes an object (must have .id) from a data set in the array at the subscript property, and remove the corresponding DOM element including its cache. Done in a timer, so it doesn't mess up any loops that call this.
 deleteDataAndEl = (obj, key = 'a', dataSet = getFarm(obj) || _, id = obj.id, el = getEl(id)) => setTimeout(X => {dataSet[key] = dataSet[key]?.filter(d => d.id != id); el && (el.remove() || del(elCache, id))}, 0),
@@ -2802,33 +2857,56 @@ deleteDataAndEl = (obj, key = 'a', dataSet = getFarm(obj) || _, id = obj.id, el 
 antDelete = ant => deleteDataAndEl(ant),
 
 // Updates the antEl to reflect the state of the object, if possible.
-antUpdate = (ant, antEl = objGetEl(ant)) => {
+antUpdate = (ant, antEl = objGetEl(ant), sync) => {
   rafQueue[ant.id] ||= requestAnimationFrame(X => {// Prevent queuing the same ant object for an update multiple times (to avoid render lag when switching tabs).
-    if (antEl?.isConnected) {
-      antEl.className = [
-        'ant', ant.caste, ant.t, ant.state, ant.pose, antGetSize(ant), ant['inf'] && 'inf' + ant['inf'], // String values.
-        ...['walk', 'jit', 'dig', 'wig', 'h', 'fall', 'fight', 'mag', 'alate', 'flare', 'rot', 'rot1', 'rot2', 'decay', 'decay1'].filter(f => ant[f]), // Boolean values.
-        ...ant.rm // Body part removal.
-      ].join(' ');
-      antEl.style.left = ant.x + 'px';
-      antEl.style.top = ant.y + 'px';
-      antEl.style.transform = `scaleX(${ant.scale}) rotate(${ant.r + 90}deg)`; // +90 because the ant was built facing north instead of east in CSS.
-    }
+    antElUpdate(ant, antEl);
     del(rafQueue, ant.id);
   });
+  sync && antElUpdate(ant, antEl); // Allows doing an immediate synchronous pass.
   // Also update any ants the ant is carrying.
+  // Note: We aren't doing any of this for carried eggs.  Haven't noticed any reason to do that yet, but that's something to keep in mind.
   if (['dead', 'inf'].includes(ant.carry?.t)) {
-    let carryItem = getCarry(getFarm(ant), ant.carry), headCoord = antHeadPoint(ant);
-    ({x: carryItem.x, y: carryItem.y, r: carryItem.r} = headCoord);
-    antUpdate(carryItem);
+    let carryItem = getCarry(getFarm(ant), ant.carry);
+    if (carryItem) {
+      ({x: carryItem.x, y: carryItem.y, r: carryItem.r} = antHeadPoint(ant));
+      carryItem.area = ant.area; // Keep the area prop matching the carrier for safety.
+      antUpdate(carryItem, objGetEl(carryItem), sync);
+    }
   }
   /* START-DEV */
   isNaN(ant.x + ant.y + ant.r) && console.error("ant is nanned", ant);
   /* END-DEV */
 },
 
+// Provides the ant element update functionality for antUpdate().
+antElUpdate = (ant, antEl) => {
+  if (antEl?.isConnected) {
+    antEl.className = [
+      'ant', ant.caste, ant.t, ant.state, ant.pose, antGetSize(ant), ant.inf && 'inf' + ant.inf, ant.lvl && 'lvl' + ant.lvl, // String values.
+      ...['walk', 'jit', 'dig', 'wig', 'h', 'fall', 'fight', 'mag', 'alate', 'flare', 'rot', 'rot1', 'rot2', 'decay', 'decay1'].filter(f => ant[f]), // Boolean values.
+      ...ant.rm // Body part removal.
+    ].join(' ');
+    antEl.style.left = ant.x + 'px';
+    antEl.style.top = ant.y + 'px';
+    antEl.style.transform = `scaleX(${ant.scale}) rotate(${ant.r + 90}deg)`; // +90 because the ant was built facing north instead of east in CSS.
+    if (ant.rot) {
+      antEl.style.setProperty('--RT', -ant.r - 90 + 'deg'); // Counter-rotate stink lines.
+      antEl.style.setProperty('--AD', ant.rAd + 's'); // Randomize animation duration.
+    }
+  }
+},
+
+// Updates the ant object to reflect the state of the antEl, in NaN situations.
+antFixNaN = (ant, antEl = objGetEl(ant), style = antEl && getComputedStyle(antEl), match = style?.transform.match(/rotate\(([+-]?\d*\.?\d+)deg\)/)) => {
+  if (antEl?.isConnected) {
+    if (isNaN(ant.x)) ant.x = parseFloat(style.left) || 480; // 480 = getEl('farm').offsetWidth / 2.
+    if (isNaN(ant.y)) ant.y = parseFloat(style.top) || antGroundLevel(ant);
+    if (isNaN(ant.r)) ant.r = match ? parseFloat(match[1]) - 90 : 0; // -90 to reverse the +90 offset applied in antUpdate.
+  }
+},
+
 // Gets an egg.
-getEgg = (farm, id) => getById(farm.e, id),
+getEgg = (dataSet, id) => getById(dataSet.e, id),
 
 // Removes an egg from data and visually remove, either because it hatched or died.
 eggDelete = egg => deleteDataAndEl(egg, 'e'),
@@ -2836,11 +2914,10 @@ eggDelete = egg => deleteDataAndEl(egg, 'e'),
 // Updates the display of an egg element.
 eggUpdate = (egg, eggEl = objGetEl(egg)) => {
   if (eggEl && eggEl.isConnected) {
-    egg.area.t && assign(egg, ...cavFloor(getTun(getFarm(egg), egg.area.t), egg.pc)); // Egg is in a tunnel, update the x/y coords from the tunnel.
     eggEl.className = 'egg lvl' + egg.lvl; // Note: 'lvl' doesn't actually change the y-value of the egg (it still sits on the cavFloor), the CSS will just make it look like it did.
     eggEl.style.left = egg.x + 'px';
     eggEl.style.top = egg.y + 'px';
-    eggEl.style.transform = `scaleX(${egg.scale}) rotate(${egg.r}deg)`
+    eggEl.style.transform = `scaleX(${egg.scale}) rotate(${egg.r}deg)`;
   }
 },
 
@@ -2853,13 +2930,16 @@ eggDraw = (egg, cont = getEl('farm')) => {
 },
 
 // Gets a carried item.
-getCarry = (farm, carry) => carry.t == 'egg' ? getEgg(farm, carry.id) : ['inf', 'dead'].includes(carry.t) ? getAnt(farm, carry.id) : carry,
+getCarry = (farm, carry, nipData = farm.nips.find(n => n.nip == carry.nip), dataSet = carry.nip ? nipData?.item : farm) =>
+  nipData && (carry.t == 'egg' ? getEgg(dataSet, carry.id) : ['inf', 'dead'].includes(carry.t) ? getAnt(dataSet, carry.id) : carry),
+
+// Get the subscript key of a carried item.
+getCarryKey = carry => carry.t == 'egg' ? 'e' : 'a',
 
 // Draws a carried item, or moves it from the farm container to the ant element.
 carryDraw = (ant, farm = getFarm(ant), carry = ant.carry, carryEl = getEl(carry?.id), cEl = query(`#${ant.id} .c`), carryItem = carry && getCarry(farm, carry)) => {
-  if (carry?.f == F.id && carryEl?.isConnected) {
-    // This assumes the object was already drawn prior to this function running.
-    if (carry.t == 'egg') {
+  if (carryItem?.f == F.id) {
+    if (carry.t == 'egg' && carryEl?.isConnected) {
       carryItem.x = carryItem.y = 0;
       eggUpdate(carryItem);
       carryEl.remove();
@@ -2867,25 +2947,29 @@ carryDraw = (ant, farm = getFarm(ant), carry = ant.carry, carryEl = getEl(carry?
       cEl.appendChild(carryEl);
     }
     else if (!['inf', 'dead'].includes(carry.t)) appendHTML(cEl, divc(`carry C${carry.t} ` + carry.k, {id: carry.id}));
-    // Note: For carried ants an antUpdate() called from antAction() should do the trick.
+    // Note: For carried ants (inf or dead) an antUpdate() called from antAction() should do the trick.
   }
 },
 
 // Undraws a carried item, or moves it from the ant element into the farm container.
-carryUndraw = (ant, farm = getFarm(ant), carry = ant.carry, carryEl = getEl(carry?.id), carryItem = getCarry(farm, carry),
-  headPoint = antHeadPoint(ant, (6 + antOffsetX(ant)) * ant.scale), tun = getTun(farm, ant.area.t)) => {
-  if (carry?.f == F.id && carryEl?.isConnected) {
+carryUndraw = (ant, dest, farm = getFarm(ant), carry = ant.carry, carryEl = getEl(carry?.id), carryItem = getCarry(farm, carry),
+  headPoint = antHeadPoint(ant, (6 + antOffsetX(ant)) * ant.scale), tun = getTun(farm, ant.area.t), pc) => {
+  if (carryItem?.f == F.id && carryEl?.isConnected) {
     !['inf', 'dead'].includes(carry.t) && carryEl.remove();
     if (['egg', 'inf', 'dead'].includes(carry.t)) {
-      carryItem.x = headPoint.x;
-      carryItem.y = tun ? cavFloor(tun, getTunPosition(headPoint, farm, 0, tun, 'cav').pc).y : antGroundLevel(headPoint);
-      carry.t == 'egg' ? (getEl('farm').appendChild(carryEl), eggUpdate(carryItem)) : antUpdate(carryItem);
+      if (!dest) {
+        pc = getTunPosition(headPoint, farm, 0, tun, 'cav')?.pc;
+        dest = {x: headPoint.x, y: tun ? cavFloor(tun, pc)?.y || headPoint.y : antGroundLevel(carryItem, 0) + 2};
+        carry.t == 'egg' && (carryItem.pc = pc);
+      }
+      assign(carryItem, {x: dest.x, y: dest.y});
+      carry.t == 'egg' ? ((dest.el || getEl('farm')).appendChild(carryEl), eggUpdate(carryItem)) : antUpdate(carryItem);
     }
   }
 },
-// @TODO how does drop a carry in a nip work?  hint: it doesn't yet.
 
 // Transfers an object from one data set to another and removes/draws the DOM elements as well.
+// Important: 'farm' parameter does not mean "the source farm".  The source is the oldSet.  This is a bit of a gotcha.
 // Note: newCont defaults to #farm container if undefined, that's handled in antDraw() and eggDraw().
 transferObject = (farm, key, obj, oldSet, newSet, newVals, newCont) => {
   newSet[key].push(assign(obj.id ? obj : getById(oldSet[key], obj), newVals));
@@ -2908,23 +2992,26 @@ antFaceX = ant => ant.x + antOffsetX(ant) * ant.scale,
 // Gets a more accurate x/y coordinate of where the ant's head is with respect to its rotation.
 // Note: When ant is known to be facing roughly east or west in side-position it may be sufficient to just use antFaceX() instead.
 // Updated to create an ant shim with commonly needed properties.
-antHeadPoint = (ant, offset = antOffsetX(ant) * ant.scale, rad = degToRad(ant.r)) => ({x: ant.x + cos(rad) * offset, y: ant.y + sin(rad) * offset, r: ant.r, scale: ant.scale, t: ant.t, f: ant.f, area: ant.area}),
+antHeadPoint = (ant, offset = antOffsetX(ant), rad = degToRad(ant.scale < 0 ? deg180 - ant.r : ant.r)) => ({x: ant.x + cos(rad) * offset, y: ant.y + sin(rad) * offset, r: ant.r, scale: ant.scale, t: ant.t, f: ant.f, area: ant.area}),
 
 // Gets a more accurate x/y coordinate of where the ant's middle set of feet are with respect to its rotation.
 // To get the rear & front foot positions, see how getAntWaypointDirection() does it.
 // This is just antHeadPoint() with different default params.
 // Note: Intended for finding closest waypoint of a rotated ant, where ant.y + antOffsetY(ant) is insufficient.
-antFootPoint = (ant, offset = antOffsetY(ant), rad = degToRad(ant.r + 90 * ant.scale)) => antHeadPoint(ant, offset, rad),
+antFootPoint = (ant, offset = antOffsetY(ant), rad = degToRad(ant.r + 90)) => antHeadPoint(ant, offset, ant.scale < 0 ? PI - rad : rad),
+
+// Gets a more accurate x/y coordinate of where the ant's tail is with respect to its rotation.  This is just antFootPoint() with different default params.
+antTailPoint = (ant, offset = antOffsetY(ant), rad = degToRad(ant.r + 180)) => antFootPoint(ant, offset, rad),
 
 // Computes the vertical offset (y) of the upper half of a horizontally stretched ellipse for a given position (x).
 // Note: the divisor for h caps the height, and the steepness of the hill for fine-tuning can be changed by turning the last part into sqrt(1 - pow(pow(xNorm, 2), 1)) and tweaking the 1.
 getHillNudge = (l, r, h, x, c = (l + r) / 2, w = (r - l) / 2, xNorm = (x - c) / w) => x < l || x > r ? 0 : h / 2 * sqrt(1 - xNorm * xNorm), // Note: pow(xNorm, 2) was optimised to xNorm * xNorm.
 
 // Gets the height of a hill at an x-position.
-// Note: The "- h *.13" because our hills are positioned at 63% not 50%.
-getHillHeight = (x, farm = F, hill = farm.hills.find(h => h.l < x && h.r > x), h = min(50, hill?.h)) => hill ? max(0, getHillNudge(hill.l, hill.r, h, x) - h * .13) : 0,
+// Note: The "- h *.12" because our hills are positioned at 62% not 50%.
+getHillHeight = (x, farm = F, hill = farm.hills.find(h => h.l < x && h.r > x), h = min(50, hill?.h)) => hill ? max(0, getHillNudge(hill.l, hill.r, h, x) - h * .12) : 0,
 
-// Figures out the ant's "ground" level.
+// Figures out the ant's "ground" level.  Also used with eggs.
 antGroundLevel = (ant, applyAntOffset = 1) => surface - (applyAntOffset && antOffsetY(ant)) - getHillHeight(ant.x, getFarm(ant)),
 
 // Figures out the angle an ant would be due to the sides of hills being steep.
@@ -2961,10 +3048,7 @@ antActionStill = (ant, timeout) => antAction(antGetStill(ant), timeout),
 antNextStill = (ant, timeout) => antNext(antGetStill(ant), timeout),
 
 // Adds a tracker to quickly determine where ant is. Includes a duration used in some areas, or a tunnel ID for the bottom.
-antArea = (ant, area, tun) => {
-  ant.area.n == area && ant.area.t == tun ? ant.area.d++ : ant.area = {n: area, d: 0, t: tun};
-  ['dead', 'inf'].includes(ant.carry?.t) && antArea(getAnt(getFarm(ant), ant.carry.id), area, tun); // Update dead ants and infants it is carrying.
-},
+antArea = (ant, area, tunId) => ant.area.n == area && ant.area.t == tunId ? ant.area.d++ : ant.area = {n: area, d: 0, t: tunId},
 
 // Calculates the size of an ant step with impediments and lethargy.
 antGetStep = ant => ant.scale * (
@@ -2994,35 +3078,30 @@ antMoveTunnel = (ant, step = antGetTunnelStep(ant), ang = degToRad((ant.scale < 
   ant.y += sin(ang) * step;
 },
 
-// Get the entrance point of a tunnel.
-getEntrancePoint = (tun, margin = 0, pos = 0, distance = 6, distComp = calcDistComponents(tun.x1, tun.y1, tun.x2, tun.y2),
-  actualDistance = min(distance, distComp.d * (tun.prog / 100)), offset = (tun.h / 2 - margin) * -pos) =>
-  ({x: tun.x1 + distComp.x * actualDistance - distComp.y * offset, y: tun.y1 + distComp.y * actualDistance + distComp.x * offset}),
-
 // Find where con overlaps with nextTun along nextTun's middle line.
 getConnectionPoint = (con, nextTun, dist = calcDistComponents(nextTun.x1, nextTun.y1, nextTun.x2, nextTun.y2), offset = 1 + con.w / 2,
   [x0, y0, s] = con.x1 == nextTun.x1 && con.y1 == nextTun.y1 ? [nextTun.x1, nextTun.y1, offset] : [nextTun.x2, nextTun.y2, -offset]) =>
   ({x: x0 + dist.x * s, y: y0 + dist.y * s}),
 
 // Gets the index of the closest waypoint to an ant or a previous waypoint or whatever.
-getWaypointIndex = (farm, coord, knownWp, wps = wayPoints[farm.id], index = coord.i ?? -1, start = knownWp?.i ?? 0, best = Infinity, leftDone = 0, rightDone = 0, found = 0, offset = 0, idx,
-  check = (i, wp = wps[i], dSq = boxProxSquareDistance(coord, wp, 81)) => // 81 = 9 * 9, the square of the threshold. (experimental; used to be 7*7=49)
-     dSq < best && dSq < 49 ? (best = dSq, index = i, found = 1) : index != -1 && dSq > best && found) => {
-  if (index < 0) while (!leftDone || !rightDone) leftDone ||= (idx = start - offset - 1) < 0 || check(idx), rightDone ||= (idx = start + offset) >= wps.length || check(idx), offset++;
+getWaypointIndex = (farm, coord, knownWp, thresholdSq = 81, wps = wayPoints[farm.id], index = coord.i ?? -1, start = knownWp?.i ?? 0, best = Infinity, leftDone, rightDone, found, offset = 0, idx,
+  check = (i, wp = wps?.[i], dSq = wp && boxProxSquareDistance(coord, wp, thresholdSq)) => // Default threshold: 81 = 9 * 9, the square of the threshold. (experimental; used to be 7*7=49)
+     dSq < best && dSq < thresholdSq ? (best = dSq, index = i, found = 1) : index != -1 && dSq > best && found) => {
+  if (index < 0) while (!leftDone || !rightDone) leftDone ||= (idx = start - offset - 1) < 0 || check(idx), rightDone ||= (idx = start + offset) >= wps?.length || check(idx), offset++;
   return index;
 },
 
 // Gets the next waypoint relative to the current one.  Returns false if there is a problem such as the found wp being too far away.
 getNextWaypoint = (farm, cur, dir = 1, wps = wayPoints[farm.id], nextIndex = cur.i + dir) =>
-  dir && nextIndex >= 0 && nextIndex < wps.length && inTargetProximity(cur, wps[nextIndex], 12) && wps[nextIndex],
+  dir && nextIndex >= 0 && nextIndex < wps.length && inTargetProximity(cur, wps[nextIndex], 14) && wps[nextIndex],
 
 // Gets the waypoint direction vector for the ant.
 // Attempts to get the rear and front foot positions, and compare them to each other to determine the direction (in the wayPoints[farm.id] array) that the ant is moving along,
 // or failing to get both; compares one of those to the known waypoint which should be close to the middle of the ant.
 getAntWaypointDirection = (ant, farm, knownWp,
-  r = getWaypointIndex(farm, antFootPoint(antHeadPoint(ant, -antOffsetX(ant))), knownWp),
+  r = getWaypointIndex(farm, antFootPoint(antTailPoint(ant)), knownWp),
   f = getWaypointIndex(farm, antFootPoint(antHeadPoint(ant)), knownWp)) =>
-  (r = r < 0 ? knownWp?.i : r, f = f < 0 ? knownWp?.i : f, r != f && getSign(r < f) * ant.scale),
+  (r = r < 0 ? knownWp?.i : r, f = f < 0 ? knownWp?.i : f, r != f && getSign(r < f)),
 
 // Gets average angle of a set of waypoints.
 getWaypointAngle = (points, sumX = 0, sumY = 0) =>
@@ -3035,17 +3114,7 @@ antWaypointCollision = (farm, ant, range, wp, angle) => {
       angle = normalize360(getAngle(ant, wp) - ant.r);
       /* START-DEV */
       // For dev debugging, visually indicate the collision (pink) as well as any non-collision points checked in range (orange) up until the collision was found.
-      const wpEls = queryAll('.waypoint');
-      if (wpEls.length) {
-        const el = wpEls[wp.i];
-        if (angle < 30 || angle > 330) {
-          el.style.outline = '1px solid #ec3b83';
-        }
-        else {
-          el.style.outline = '1px solid #d69a17';
-        }
-        setTimeout(X => el.style.outline = 'none', 500); // remove after .5s
-      }
+      devHighlightWaypoint(farm, wp, angle < 30 || angle > 330 ? '#ec3b83' : '#d69a17');
       /* END-DEV */
       if (angle < 30 || angle > 330) return 1; // Waypoint is within the forward "cone" tolerance.
     }
@@ -3053,9 +3122,10 @@ antWaypointCollision = (farm, ant, range, wp, angle) => {
 },
 
 // Determines if ant will collide with any others.  Optionally pass in an ant array to only check that group of ants.
+// The goal of this is just to make it look like ants are aware of each other's presence, but we have to allow them to ignore collisions under many conditions.
 antCollision = (ant, cone = 30, a, angle) => {
   for (a of ant.f ? getFarm(ant)?.a : _.a) {
-    if (!deadInFarm(a) && (!ant.area && !a.area || ant.area.n == a.area.n) && inTargetProximity(a, ant, 30)) {
+    if (!deadInFarm(a) && !a.inf && (!ant.area && !a.area || ant.area.n == a.area.n) && inTargetProximity(a, ant, 30)) {
       angle = normalize180(getAngle(ant, a));
       if (angle < cone || angle > mirrorAngle(cone)) return {a, d: sign(angle)};
     }
@@ -3069,7 +3139,7 @@ antCorpseProximity = (ant, farm = getFarm(ant), nearestCorpse = farm.a.find(a =>
     playerHint(farm, ["Ants are getting sick from rotting corpses."]);
     if (ant.hp <= 0) {
       ant.wig = 1;
-      setTimeout(X => {ant.q = [{act: 'die', r: 'sick'}]; ant.wig = 0; antNext(ant)}, num2000);
+      setTimeout(X => {antGetStill(ant).q = [{}, {act: 'die', r: 'sick'}]; ant.wig = 0}, num2000);
     }
   }
 },
@@ -3094,32 +3164,37 @@ antSideCorrection = (ant, tun, wp, action = ant.q[0]) => {
 // Returns true if ant is facing forward along the tunnel, false if backward.
 antDir = (ant, tun, antAngle = degToRad(ant.r)) => (cos(antAngle) * ant.scale * (tun.x2 - tun.x1) + sin(antAngle) * (tun.y2 - tun.y1)) > 0,
 
+// Gets the closest point on the middle line of a tunnel.
+closestPointOnMid = (point, tun, comp = calcDistComponents(tun.x1, tun.y1, tun.x2, tun.y2), t = clamp((point.x - tun.x1) * comp.x + (point.y - tun.y1) * comp.y, 0, comp.d)) => ({x: tun.x1 + comp.x * t, y: tun.y1 + comp.y * t, comp}),
+
 // Nudges an ant toward the middle line of a tunnel.
-antNudgeToMid = (ant, tun, maxNudge = antGetTunnelStep(ant) / 4, nextTun = getTun(getFarm(ant), ant.q[1]?.id), dist = calcDistComponents(tun.x1, tun.y1, tun.x2, tun.y2),
-    vx = ant.x - tun.x1, vy = ant.y - tun.y1, offset = abs(vx * dist.y - vy * dist.x), t = clamp(vx * dist.x + vy * dist.y, 0, dist.d),
-    dx = tun.x1 + dist.x * t - ant.x, dy = tun.y1 + dist.y * t - ant.y, d = getHypot(dx, dy), move = min(maxNudge, d)
-  ) => {
-    if (d > 2) {
-      ant.x += (dx / d) * move;
-      ant.y += (dy / d) * move;
-      if (nextTun?.t == 'con') {
-        // Next tunnel is a con, let's angle it towards the con. The effect is subtle but it minimises hugging the last curve before a con.
-        ant.r = normalize360(ant.r + clamp(normalize180(getAngle(ant, {x: nextTun.x1, y: nextTun.y1}) - ant.r) * min(1, offset / 80), -.5, .5))
-      }
+antNudgeToMid = (ant, tun, maxNudge = antGetTunnelStep(ant) / 4, nextTun = getTun(getFarm(ant), ant.q[1]?.id), closest = closestPointOnMid(ant, tun), dx = closest.x - ant.x, dy = closest.y - ant.y,
+  dist = getHypot(dx, dy), move = min(maxNudge, dist)
+) => {
+  if (dist > 2) {
+    ant.x += (dx / dist) * move;
+    ant.y += (dy / dist) * move;
+    if (nextTun?.t == 'con') {
+      // Next tunnel is a con, let's angle it towards the con. The effect is subtle but it minimises hugging the last curve before a con.
+      ant.r = normalize360(ant.r + clamp(normalize180(getAngle(ant, {x: nextTun.x1, y: nextTun.y1}) - ant.r) * min(1, abs((ant.x - tun.x1) * closest.comp.y - (ant.y - tun.y1) * closest.comp.x) / 80), -.5, .5));
     }
+  }
 },
 
 // Nudges an ant toward the supplied waypoint.
-antNudgeToWP = (ant, wp, maxNudge = antGetTunnelStep(ant) / 2, dx = wp.x - ant.x, dy = wp.y - ant.y,
+antNudgeToWP = (ant, wp, maxNudge = antGetTunnelStep(ant) / 2, minDist = 0, dx = wp.x - ant.x, dy = wp.y - ant.y,
   dist = getHypot(dx, dy), diff = dist - antOffsetY(ant), step = sign(diff) * min(abs(diff), maxNudge)) => {
-  if (dist) {
+  if (dist > minDist) {
     ant.x += (dx / dist) * step;
     ant.y += (dy / dist) * step;
   }
 },
 
+// Nudges an ant very slightly to the closest possible waypoint, used for out-of-bounds reasons.
+antNudgeToClosestWp = (ant, farm, maxNudge = 1, wpIndex = getWaypointIndex(farm, ant, 0, 1000000), wp = wayPoints[farm.id][wpIndex]) => antNudgeToWP(ant, wp, maxNudge),
+
 // Nudges an ant to middle of tunnel, changes to prone pose, and performs correction.
-antToProneWithCorrection = (ant, tun) => {ant.pose = 'prone'; antProneCorrection(ant); antNudgeToMid(ant, tun, antOffsetY(ant))},
+antToProneWithCorrection = (ant, tun) => {ant.pose = 'prone'; antProneCorrection(ant); antNudgeToMid(ant, tun, antOffsetY(ant) / 2)},
 
 // Nudges an ant to waypoint along tunnel, changes to side pose, and performs correction.
 antToSideWithCorrection = (ant, tun, wp) => {ant.pose = 'side'; antSideCorrection(ant, tun, wp); antNudgeToWP(ant, wp, antOffsetY(ant))},
@@ -3129,7 +3204,8 @@ antToSideWithCorrection = (ant, tun, wp) => {ant.pose = 'side'; antSideCorrectio
 antWaypointRange = (ant, wp, mult = 1) => wp && inTargetProximity(ant, wp, antOffsetX(ant) * mult),
 
 // Determines the side of a tunnel a point is at.
-tunGetSide = (tun, point) => tun.t == 'con' ? getSign(point.y < tun.y1) : tun.t == 'ent' ? getSign(point.x > tun.x1) : getSign((tun.x2 - tun.x1) * (point.y - tun.y1) - (tun.y2 - tun.y1) * (point.x - tun.x1) < 0),
+// Warning: The default param for 'point' is a hack to prevent this func from failing in exceptional circumstances, and will cause a 50% chance of giving an incorrect result.  (This may be concealing bugs)
+tunGetSide = (tun, point = {x: 0, y: 0}) => tun.t == 'con' ? getSign(point.y < tun.y1) : tun.t == 'ent' ? getSign(point.x > tun.x1) : getSign((tun.x2 - tun.x1) * (point.y - tun.y1) - (tun.y2 - tun.y1) * (point.x - tun.x1) < 0),
 
 // Determines whether a tunnel is of a centered rotation type.
 isRotationTunnel = tun => tun.t == 'con' || tun.t == 'ent',
@@ -3187,7 +3263,7 @@ tunPixels = (tun, percent) => percent / 100 * tun.w,
 
 // Gets the coordinates of the cavity floor.
 cavFloor = (tun, pc, yOffset = 0, r = degToRad(tun.r)) =>
-  ({x: (tun.x1 + (tun.x2 - tun.x1) * (pc / 100)) - sin(r) * (tun.h / 2), y: (tun.y1 + (tun.y2 - tun.y1) * (pc / 100)) + cos(r) * (tun.h / 2) - yOffset}),
+  ({id: tun.id, x: (tun.x1 + (tun.x2 - tun.x1) * (pc / 100)) - sin(r) * (tun.h / 2), y: (tun.y1 + (tun.y2 - tun.y1) * (pc / 100)) + cos(r) * (tun.h / 2) - yOffset}),
 
 // Slips an ant off the bg area.
 // It is generally OK to call this function directly (note: it will clear the ant's finna queue to simulate a head injury).
@@ -3209,20 +3285,24 @@ antDeath = (ant, cause, farm = getFarm(assign(ant, {
     hp: 0,
     md: 0,
     q: [],
-  }))) => {
+  })), tunPos = getTunPosition(ant, farm, 0, 0, 0, 4)) => {
   farm.stats.death[cause]++;
   msg(ant.n + ` died in "${farm.n}" ${deathCauses[cause]}.`, 'err');
   setColonyAndFoe(farm);
   if (cause == 'fight' && farm.a.length === 1 && isQueen(farm.a[0])) farm.sweep = 1;
   antUpdate(ant);
+  // Correct antArea data.
+  if (tunPos?.tun) antArea(ant, 'bot', tunPos.tun.id);
   save();
   addLidFunc(); // Allow plucking dead ants.
 },
 
 // Updates the decomposition state of a corpse and handles ant removal.
-updateCorpseState = (ant, twoHours = 7200) => {
+// Note: The time calculations in this function do not speed up by using the superspeed feature.
+updateCorpseState = (ant, farm, twoHours = 7200) => {
   timeLog(ant, 'tsd', 'dts'); // Update time-since-death duration.
   if (ant.tsd > twoHours) {// Wait time before corpse gets nasty.
+    ant.rAd ||= randomInt(3) + 3; // Stink animation duration.
     if (ant.tsd < twoHours * 3) ant.rot = ((ant.tsd - twoHours) / (twoHours * 2)) * 100; // Rotting phase (2h to 6h).
     else if (ant.tsd < twoHours * 4) {
       // Decaying / shrinking phase (6h to 8h).
@@ -3233,47 +3313,57 @@ updateCorpseState = (ant, twoHours = 7200) => {
   }
   // Extra properties are added for the sake of CSS classes/styles. (note 'rot' and 'decay' also have styles)
   antUpdateClasses(ant, {rot1: ant.rot > 20, rot2: ant.rot > 80, decay1: ant.decay > 60});
+  // If ant is out-of-bounds let's just nudge it over on the sly.
+  if (ant.area.t && !getTunPosition(ant, farm, 0, 0, 0, 4)) antNudgeToClosestWp(ant, farm);
 },
 
 // Returns a random worker, or failing that - a queen.  Must be the same type as the farm's colony, in OK health, and not carrying.
-getWorkerOrQueen = (farm, data = farm.a, eligible = data?.filter(a => !a.carry && a.t == farm.t && a.hp > 40 && !isDrone(a)), workers = eligible.filter(isWorker)) =>
+getWorkerOrQueen = (farm, testCond = X => 1, data = farm.a, eligible = data?.filter(a => !a.carry && a.t == farm.t && a.hp > 40 && !isDrone(a) && !a.inf && testCond(a)), workers = eligible.filter(isWorker)) =>
   pickRandom(workers.length ? workers : eligible),
 
 // Determines what, if anything, needs to be carried by a random worker.
 trySetCarryTask = (farm, morgue = farm.tuns.find(t => t.morgue), morgueCandidates = farm.tuns.filter(t => t.t == 'cav' && !t.nip && t.co.filter(co => getTun(farm, co).dun).length < 2 && t.dun),
-  carrierAnt = getWorkerOrQueen(farm), queen, itemToMove,
-  deadAnt = farm.a.find(a => deadInFarm(a) && a.tsd > num2000 && !getTun(farm, a.area.t)?.morgue), infant = farm.a.find(a => a.moveTo), egg = farm.e.filter(e =>
-    queen = farm.a.find(a => a.id == e.Q && livesInFarm(a)) && queen.nest && e.area.t != queen.nest || e.moveTo // No need to check if egg is in morgue because queen will move her nest soon if that's the case.  'moveTo' was set if queen left farm.
-  ).sort((a, b) => b.lvl - a.lvl)[0]) => {
+  carrierAnt = getWorkerOrQueen(farm, ant => !hasCarryTasks(ant)), queen, itemToMove, temp,
+  deadAnt = farm.a.find(a => deadInFarm(a) && a.tsd > num2000 && !getTun(farm, a.area.t)?.morgue),
+  // No need to check if eggs/infants are in morgue because queen will move her nest soon if that's the case.  'moveTo' was set if queen left farm.
+  infant = farm.a.filter(e => (queen = farm.a.find(a => a.id == e.Q && livesInFarm(a))) && queen.nest && e.area.t != queen.nest || e.moveTo).sort((a, b) => b.lvl - a.lvl)[0],
+  egg = farm.e.filter(e => (queen = farm.a.find(a => a.id == e.Q && livesInFarm(a))) && queen.nest && e.area.t != queen.nest || e.moveTo).sort((a, b) => b.lvl - a.lvl)[0]) => {
   // Recalculate where the morgue should be.
-  if (!morgue || !morgueCandidates.includes(morgue)) {
+  if (deadAnt && (!morgue || !morgueCandidates.includes(morgue))) {
     // Pick a new morgue.
     if (morgue) morgue.morgue = 0; // Unmorgue existing morgue.
     if (morgueCandidates || (morgueCandidates = farm.tuns.filter(t => t.t == 'cav' && t.dun))) {// Loosen morgue requirements if needed.
       if (morgue = pickRandom(morgueCandidates)) morgue.morgue = 1;
     }
   }
-  if (itemToMove = [[deadAnt, 'dead', morgue], [infant, 'inf', 1], [egg, 'egg', 1]].find(([variable, type, param]) =>
-    variable && param && farm.a.every(a => a.carry?.t != type || a.carry.id != variable.id)
-  )) {
-    if (carrierAnt && !hasCarryTasks(carrierAnt)) {
-      // Find the first item that is available to move and not already assigned.
-      antFinna(carrierAnt, 'carry', {t: itemToMove[1], id: itemToMove[0].id});
-    }
-    else if (carrierAnt = getWorkerOrQueen(farm, getVial(farm)?.item.a)) {
-      // We found no ant to perform the carry task.  Last chance: If there's an eligible ant in a vial, call them back out so there's a shot at giving them the task on the next pass.
-      exitVial(carrierAnt);
+  if (itemToMove = [[deadAnt, 'dead', morgue], [infant, 'inf', 1], [egg, 'egg', 1]].find(([variable, , param]) =>
+    variable && param && !farm.a.some(a => a.carry?.id == variable.id || a.q.some(q => q.act == 'carry' && q.id == variable.id)))) {
+    if (carrierAnt) antFinna(carrierAnt, 'carry', {t: itemToMove[1], id: itemToMove[0].id}); // Find the first item that is available to move and not already assigned.
+    else if (itemToMove[0].moveTo) {
+      // No in-farm carrier found. The item has a moveTo nip destination (vial or tube), so we need to summon one.
+      // Last chance #1: if the matching vial has an eligible ant, call it out so it can take the task next pass.
+      temp = getVial(farm); // Vial nip data.
+      if (temp?.nip == itemToMove[0].moveTo && (carrierAnt = getWorkerOrQueen(farm, undefined, temp.item.a)))
+        !temp.item.a.some(a => a.nipPh >= 4) && exitVial(carrierAnt); // Guard against summoning when an ant is already actively exiting (nipPh >= 4 means exit walk is underway).
+      else if (temp = farm.nips.find(n => n.nip == itemToMove[0].moveTo && n.item.k == 'tube')) {// Tube nip data.
+        // Last chance #2: check farms connected via tubes for an eligible ant that can be summoned here.
+        let otherFarm = getFarm(temp.f), otherNipData = otherFarm?.nips.find(n => n.id == temp.id);
+        // Skip if an ant is already mid-tube heading here (nipPh >= 3), or if another ant in the connected farm is already queued to walk to this same nip.
+        if (otherFarm && otherNipData && !temp.item.a.some(a => a.nipPh >= 3)
+          && !otherFarm.a.some(a => antUniqueActs(a).includes('nip') && a.q.some(q => q.act == 'nip' && q.nip == otherNipData.nip))
+          && (carrierAnt = getWorkerOrQueen(otherFarm, undefined, otherFarm.a))) antFinnaUnique(carrierAnt, 'nip', {nip: otherNipData.nip});
+      }
     }
   }
 },
 
-// Sends an ant to care for an egg or larvae.
-care4kids = (farm, carerAnt = getWorkerOrQueen(farm),
-  target = pickRandom([farm.e.sort((a, b) => a.hp - b.hp)[0], farm.a.filter(a => a['inf']).sort((a, b) => a.hp - b.hp)[0]].filter(Boolean)), // Randomly pick either a low hp egg or infant.
+// Sends an ant to care for an egg or larva.
+care4kids = (farm, carerAnt = getWorkerOrQueen(farm, ant => (isQueen(ant) && ant.q.length < 20 || !antUniqueActs(ant).includes('care'))),
+  target = pickRandom([farm.e.sort((a, b) => a.hp - b.hp)[0], farm.a.filter(a => a.inf).sort((a, b) => a.hp - b.hp)[0]].filter(Boolean)), // Randomly pick either a low hp egg or infant.
   isInf = target?.inf) => {
-  // Ensure target exists and that no ant is already caring for an egg/infant.
-  if (target && !farm.a.some(a => antUniqueActs(a).includes('care'))) {
-    isInf ? antGoToAnt(carerAnt, target) : goToLocation(carerAnt, makeDiveStub({tun: target.tun, pc: target.pc, pos: 'd'}));
+  // Ensure target exists, needs care, and that ant is not already caring for an egg/infant (in case carer is a queen we allow queuing extra care actions if her queue is not too long).
+  if (target && target.hp < 89 && carerAnt) {
+    goToLocation(carerAnt, makeDiveStub({tun: target.area.t, pc: target.pc, pos: 'd'}));
     antFinna(carerAnt, 'care', {t: isInf ? 'inf' : 'egg', id: target.id});
   }
 },
@@ -3286,16 +3376,16 @@ getVial = farm => farm.nips.find(n => n.item.k == 'vial'),
 
 // Tells an ant to exit a vial.
 // Perform a phase 3 nipWalk, while repeatedly checking if it reached phase 5.
-exitVial = (ant, farm = getFarm(ant), exitInterval = setInterval(X => {
+exitVial = (ant, farm = getFarm(ant), nipData = getVial(farm), exitInterval = setInterval(X => {
   // Repeatedly check the nipWalk moved the ant to phase 5 and then deNip() it.
   if (ant.nipPh == 5) {
-    deNip(ant, getVial(farm), farm);
+    deNip(ant, nipData, farm);
     stopInterval(exitInterval);
   }
-}, microDelay)) => antNipWalk(ant, -25, 3),
+}, microDelay)) => antNipWalk(ant, nipData, -35, 3),
 
 // Handles ant walking into an item attached to a nip, to a certain destination.
-antNipWalk = (ant, dest, basePhase = 0, animLoop = setInterval(X => {
+antNipWalk = (ant, nipData, dest, basePhase = 0, animLoop = setInterval(X => {
   assign(ant, {
     nipPh: 1 + basePhase, // Flag that walk is happening.
     walk: 1,
@@ -3312,22 +3402,27 @@ antNipWalk = (ant, dest, basePhase = 0, animLoop = setInterval(X => {
     stopInterval(animLoop);
   }
   else ant.scale = getSign(dest > ant.x); // Reverse for next loop if applicable.
-  antUpdate(ant);
+  // If the nip item was removed we need to kill this loop (createNipArrows() will handle rescuing the ant), otherwise we can run antUpdate() safely.
+  !getFarm(ant).nips.includes(nipData) ? stopInterval(animLoop) : antUpdate(ant);
 }, frameTick)) => 1,
 
 // Provides the vial animation activity. Makes ants walk into the vial and then randomly do random things.
-// Curiously this code has no need to know which vial or farm the ant is in.
-vialActivity = (ant, rand = randomInt(6)) => {
-  !ant.nipPh && antNipWalk(ant, 40 + randomInt(170)); // Ant has not begun their vial walk yet.
-  ant.nipPh === 1 && getTime() - ant.nipTs > longDelay && antNipWalk(ant, 40 + randomInt(170)); // Ant was stuck in nipPh 1.
-  del(ant, 'carry');
-  if (!randomInt(3)) {
-    if (ant.nipPh > 1) {
+vialActivity = (ant, nipData, farm = getFarm(ant), rand = randomInt(6)) => {
+  !ant.nipPh && antNipWalk(ant, nipData, 40 + randomInt(170)); // Ant has not begun their vial walk yet.
+  ant.nipPh === 1 && getTime() - ant.nipTs > longDelay && antNipWalk(ant, nipData, 40 + randomInt(170)); // Ant was stuck in nipPh 1.
+  if (ant.nipPh > 1) {
+    if (ant.carry) {
+      // Note: The pattern "antHeadPoint(ant, (6 + antOffsetX(ant))" is used in a few places, but HERE it is NOT multiplied by the ant's scale like it is elsewhere.
+      ant.carry && carryUndraw(ant, {x: antHeadPoint(ant, (6 + antOffsetX(ant))).x, y: 36, el: getEl('a-' + nipIds[vial.nip])});
+      del(getCarry(farm, ant.carry), 'moveTo');
+      del(ant, 'carry');
+    }
+    if (!randomInt(3)) {
       if (rand > 1) {
         // Location change.
         ant.r = 0;
         ant.nipPh = 0; // Blocks other animations.
-        antNipWalk(ant, 40 + randomInt(170));
+        antNipWalk(ant, nipData, 40 + randomInt(170));
       }
       else if (rand) ant.pose == 'side' ? ant.scale *= -1 : ant.r = oppositeAngle(ant.r);
       else {
@@ -3346,21 +3441,32 @@ vialActivity = (ant, rand = randomInt(6)) => {
 },
 
 // Starts a vial animation loop if it isn't running already.  Also activates an antNipWalk() into the vial when first run.
-vialLoop = X => vialInterval ||= setInterval((hasAnts = 0) => {
-  _.farms.forEach(farm => getVial(farm)?.item.a.forEach(a => {hasAnts = 1; !a['inf'] && currentFarm(farm) && vialActivity(a)}));
+vialLoop = nipData => vialInterval ||= setInterval((hasAnts = 0) => {
+  _.farms.forEach(farm => {
+    nipData = getVial(farm);
+    nipData?.item.a.forEach(a => {hasAnts = 1; !a.inf && currentFarm(farm) && vialActivity(a, nipData)});
+  });
   if (!hasAnts) vialInterval = stopInterval(vialInterval);
 }, pauseDelay + randomInt(shortDelay)),
 
 // Handles a phase 5 tube walk to insert an ant into a farm.
-deNip = (ant, nipData, farm) => {
+deNip = (ant, nipData, farm, nip = nipData.nip, tun = farm.tuns.find(t => t.nip == nip), isLeftSide = nip % 2 > 0) => {
   checkExpatQueen(ant, farm);
   // Move ant into the farm.
+  // Note: some of what is done here may be redundant with what happened in phase 2 in tubeWalker(), but I believe that it has to be done again here for the sake of vials.
+  ant.x = isLeftSide ? -35 : 995;
   transferObject(farm, 'a', ant, nipData.item, farm, {
     thot: pickRandom(["That was a long walk!", "I've travelled to another world", "I'm a neighbor", "Moving in!"]),
-    nipPh: 0, state: 'cap', f: farm.id, x: nipData.nip % 2 > 0 ? -25 : 985, y: antGroundLevel(ant), scale: 1
+    nipPh: 0, nipTs: 0, f: farm.id, y: tun ? (isLeftSide ? tun.y1 : tun.y2) : antGroundLevel(ant), scale: 1
   });
+  if (ant.carry) {
+    transferObject(farm, getCarryKey(ant.carry), getCarry(0, ant.carry, nipData.item), nipData.item, farm, {f: farm.id}); // Don't pass first param to getCarry() because we're specifying the 3rd param for dataset.
+    ant.carry.nip = 0;
+    // Note: even though we update the f prop on the carried item, it is not updated in the ant.carry object!
+  }
   setColonyAndFoe(farm);
-  antFinna(ant, 'nip', {nip: nipData.nip, rev: 1});
+  ant.q = [{act: 'nip', nip: nip, rev: 1}]; // Create a new queue with the reverse nip walk action.
+  ant.carry?.q2?.forEach(q => antFinnaVia(ant, q.act, {...q})); // Queue up any carry.q2 tasks that were supplied.
   // Activate.
   antAction(ant);
 },
@@ -3378,16 +3484,26 @@ deNip = (ant, nipData, farm) => {
  */
 tubeWalker = (farm, nipData, ant, nipItem = nipData.item, otherFarm = getFarm(nipData.f),
   otherData = otherFarm?.nips.find(n => n.id == nipData.id), otherNipEl = getEl('a-' + nipIds[otherData.nip])) => {
-  antUpdate(antGetStill(ant));
-  if (!ant.nipPh || ant.nipPh === 1 && getTime() - ant.nipTs > longDelay) antNipWalk(ant, 600); // Phase 0.
-  else if (ant.nipPh == 2) transferObject(otherFarm, 'a', ant, nipItem, otherData.item, {nipPh: 3}, otherNipEl); // Phase 2. Move ant to other half of tube.
-  else if (ant.nipPh == 3 || ant.nipPh == 4 && getTime() - ant.nipTs > longDelay) antNipWalk(ant, -25, 3); // Phase 3.
+  ant.pose = 'side';
+  if (ant.nipPh === 1 || ant.nipPh == 4) antUpdate(antGetStill(ant)); // We need to be picky about when to call antUpdate() here to avoid issues with carried items and other glitches.
+  if (!ant.nipPh || ant.nipPh === 1 && getTime() - ant.nipTs > longDelay) antNipWalk(ant, nipData, 600); // Phase 0. (Also restart anything stuck on phase 1)
+  else if (ant.nipPh == 2) {// Phase 2. Move ant to other half of tube.
+    // Note: checkExpatQueen() and the "F: otherFarm.id" may seem redundant with deNip() later on but they need to be done here too to avoid problems!
+    checkExpatQueen(ant, otherFarm);
+    if (ant.carry) {
+      ant.carry.nip = otherData.nip; // Set BEFORE transferObject so antUpdate can find the carried item correctly.
+      transferObject(otherFarm, getCarryKey(ant.carry), getCarry(farm, ant.carry, nipItem), nipItem, otherData.item, {nipPh: 3, f: otherFarm.id}, otherNipEl);
+      // Note: even though we update the f prop on the carried item, it is not updated in the ant.carry object!
+    }
+    transferObject(otherFarm, 'a', ant, nipItem, otherData.item, {nipPh: 3, f: otherFarm.id}, otherNipEl);
+  }
+  else if (ant.nipPh == 3 || ant.nipPh == 4 && getTime() - ant.nipTs > longDelay) antNipWalk(ant, nipData, -35, 3); // Phase 3.
   else if (ant.nipPh == 5) deNip(ant, nipData, farm); // Phase 5.
 },
 
 // Starts a tube animation loop if it isn't running already.
 tubeLoop = X => tubeInterval ||= setInterval((hasAnts = 0) => {
-  _.farms.forEach(farm => farm.nips.forEach(nipData => nipData.item.k == 'tube' && nipData.item.a.forEach(a => {hasAnts = 1; !a['inf'] && tubeWalker(farm, nipData, a)})));
+  _.farms.forEach(farm => farm.nips.forEach(nipData => nipData.item.k == 'tube' && nipData.item.a.forEach(a => {hasAnts = 1; !a.inf && tubeWalker(farm, nipData, a)})));
   if (!hasAnts) tubeInterval = stopInterval(tubeInterval);
 }, microDelay),
 
@@ -3409,22 +3525,36 @@ act = {
     antSetWalk(ant);
     ant.pose = 'side';
     antArea(ant, 'top');
-    if (collision) {
-      if (!antsPassive(ant, ant2)) antFight(ant, ant2); // Fight, or check if a drop target is nearby.
-      else if (ant2.carry?.Q == ant.id) return antActionStill(ant, randomInt(pauseDelay)); // Queen pauses for a hand-off.
-    }
     // Move ant.
     antMoveSurface(ant, nextAction?.tx ? abs(nextAction.tx - faceX) : 3);
     action.for && action.for--;
+    if (collision && !antsWillAvoid(ant, ant2)) {
+      if (ant2.carry?.Q == ant.id) return antActionStill(ant, randomInt(pauseDelay)); // Queen pauses for a hand-off.
+      else if (ant.carry?.Q == ant2.id || antFight(ant, ant2)) {
+        // Pop off irrelevant actions that are in the way.
+        while (ant.q[0] && !['fight', 'srv'].includes(ant.q[0].act)) ant.q.shift();
+        return antActionStill(ant); // Progress to the 'srv' or 'fight' action.
+      }
+    }
     // Check if the ant is set to reach a certain target and hand it off to another action.
     // Note: This code assumes .tx is never set to 0.
     if (!action.for && nextAction && (!nextAction.tx || abs(nextAction.tx - faceX) < xOffset)) antNextStill(ant, randomInt(microDelay));
     else {
       if (!rand || !nextAction && rand < .0002 || nextAction?.tx && (nextAction.tx - (ant.x + ant.scale * xOffset)) * ant.scale < 0) {// Random or heading the wrong way.
+        // Detect flip-flop: tx target is so close it falls inside the body on both orientations.
+        // Count consecutive wrong-way flips; on random flips reset the counter.
+        if (nextAction?.tx && (nextAction.tx - faceX) * ant.scale < 0) {
+          if ((action.flp = (action.flp || 0) + 1) > 3) {
+            del(action, 'flp');
+            antInstaQ(ant, {act: 'pace', for: randomInt(99)}, 0); // Walk to a fresh position before retrying.
+          }
+        }
+        else del(action, 'flp'); // Random flip — not a stuck condition, reset.
         // Flip direction (with brief pause).
         antActionStill(ant, randomInt(microDelay));
         ant.scale *= -1; // <-- Yes, this has to be here after antAction() to set up the next loopback, rather than do it right away.  Looks better.
         ant.r = antHillAngle(ant); // <-- And yes, thanks to setting the scale here we gotta do this too on a flip'n'pause or it looks silly.
+        ant.carry && antUpdate(ant); // <-- Ugh yeah and that too, or whatever it's carrying lags behind by one frame upon a direction flip.
       }
       else if (rand < .001) antActionStill(ant, randomInt(pauseDelay)) // Pause.
       else antAction(ant);
@@ -3457,32 +3587,25 @@ act = {
 
   // Start or continue digging.
   dig: (ant, farm = getFarm(ant), currentDig = getById(farm.dig, ant.digT) || pickRandom(farm.dig), action = ant.q[0], tun = getTun(farm, action.id), antType = types[ant.t],
-    digAmt = antType.v * .2, nudger, temp,
+    digAmt = antType.v * .2, nudger, temp, dir,
     entNudge = (ant, tun) => nudger = setInterval(X => {
       ant.x += getSign(antFaceX(ant) < tun.x1) * random();
       ant.y = antGroundLevel(ant) + 2;
       ant.r = antHillAngle(ant) + tun.prog / 9 + randomInt(5);
       antUpdate(ant);
     }, num200),
-    conNudge = (ant, tun, sumX = 0, sumY = 0, rad) => {
+    conNudge = (ant, tun, sumX = 0, sumY = 0, a, rad) => {
       // Turn ant towards a random point that is roughly facing away from the already-dug tunnels.
-      farm.tuns.filter(t => t.dun && t.co.includes(tun.id)).map(ct => getAngle(tun, (ct.x1 == tun.x && ct.y1 == tun.y) ? {x: ct.x2, y: ct.y2} : {x: ct.x1, y: ct.y1})).forEach(a => {
+      farm.tuns.filter(t => t.dun && t.co.includes(tun.id)).forEach(ct => {
+        a = (ct.x1 == tun.x1 && ct.y1 == tun.y1) ? ct.r : oppositeAngle(ct.r);
         rad = degToRad(a);
         sumX -= cos(rad);
         sumY -= sin(rad);
       });
-      temp = normalize180(angleFromDelta(sumX, sumY) + randomInt(60) - 30) + 45; // Final angle.
+      temp = normalize180(angleFromDelta(sumX, sumY) + randomInt(60) - 30); // Final angle.
       nudger = setInterval(X => {
-        let distComp = calcDistComponents(ant.x, ant.y, tun.x1, tun.y1);
-        if (distComp.d > .2) {
-          ant.x += distComp.x * .2;
-          ant.y += distComp.y * .2;
-          antUpdate(ant);
-        }
-        else {
-          ant.r += getSign(normalize180(temp - ant.r));
-          stopInterval(nudger);
-        }
+        let distComp = calcDistComponents(ant.x, ant.y, tun.x1, tun.y1), diff = normalize180((ant.scale < 0 ? mirrorAngle(temp) : temp) - ant.r);
+        distComp.d > .2 ? (ant.x += distComp.x * .2, ant.y += distComp.y * .2) : abs(diff) < 1 ? stopInterval(nudger) : (ant.r += sign(diff));
         antUpdate(ant);
       }, frameTick);
     }) => {
@@ -3501,18 +3624,26 @@ act = {
           // Ant would have been blocked from entering tunnel by the dive action, so continue to act like it's digging an entrance or con.
           tun.co.includes(action.ent) ?
             entNudge(ant, getTun(farm, action.ent)) :
-            conNudge(ant, farm.tuns.find(t => tun.co.includes(t.id) && t.t == 'con' && t.dun && t.x1 == (tun.rwip ? tun.x2 : tun.x1))); // That's a lot of conditions which are redundant in most cases, but which one do you dare remove?
+            conNudge(ant, farm.tuns.find(t => tun.co.includes(t.id) && t.t == 'con' && t.dun && t.x1 == (tun.rwip ? tun.x2 : tun.x1)));
         }
         else {
           // Default nudger; just brings the ant closer to the edge of the dig area every 2 seconds if needed.
           nudger = setInterval(X => {
             temp = getTunPosition(ant, farm, 0, tun);
-            if (temp?.tun?.id == tun.id && temp.pc + tunPercent(tun, antOffsetX(ant) + antGetTunnelStep(ant)) < (tun.rwip ? 100 - tun.prog : tun.prog)) antMoveTunnel(ant);
+            dir = getSign(!tun.rwip);
+            temp?.tun?.id == tun.id && dir * (temp.pc + dir * tunPercent(tun, antOffsetX(ant) + antGetTunnelStep(ant))) < dir * (tun.rwip ? 100 - tun.prog : tun.prog) && antMoveTunnel(ant);
             antUpdate(ant);
           }, num2000);
         }
       }
-      else if (tun.t == 'ent') entNudge(ant, tun); // Entrance tunnel.
+      else if (tun.t == 'ent') {
+        if (abs(antFaceX(ant) - tun.x1) > 9) {
+          // Too far.  Walk a bit and try again.
+          antInstaQ(ant, {act: 'pace', for: randomInt(99)}, 0);
+          return antAction(ant);
+        }
+        entNudge(ant, tun); // Entrance tunnel.
+      }
       else conNudge(ant, tun); // Con tunnel.
       // Everything from now on happens after a significant delay.
       // This makes the digging slow, and prevents an exploit where reloading skips the wait-time in digging.
@@ -3580,13 +3711,12 @@ act = {
         tun = pickRandom(farm.tuns.filter(t => t.t == 'ent' && t.dun));
         if (temp = tun && randomInt(9) && findPath(farm, tun, {dun: 1, t: 'ent'}, [], 1, 1, tun.id)) {// Inverted match.
           currentDig = temp.length ? {n: 'bot', id: last(temp), ent: tun.id} : {n: 'top', tx: tun.x1, id: tun.id, ent: tun.id};
-          // Detect duplicate dig jobs before storing data.
-          getById(farm.dig, currentDig.id) ? currentDig = 0 : farm.dig.push(currentDig);
+          // Detect duplicate dig jobs before storing data. Also reject new dig jobs too close to a morgue.
+          getById(farm.dig, currentDig.id) || getTun(farm, currentDig.id).co.some(t => getTun(farm, t).morgue || getTun(farm, t).co.some(nt => nt.morgue)) ? currentDig = 0 : farm.dig.push(currentDig);
         }
         else {
           // Dig a new entrance.
-          tun = pickRandom(farm.tuns.filter(t => t.t == 'ent' && !t.dun));
-          if (tun) farm.dig.push(currentDig = {n: 'top', tx: tun.x1, id: tun.id, ent: tun.id});
+          if (tun = pickRandom(farm.tuns.filter(t => t.t == 'ent' && !t.dun))) farm.dig.push(currentDig = {n: 'top', tx: tun.x1, id: tun.id, ent: tun.id});
           else if (farm.tuns.every(t => t.dun)) farm.dun = 1; // Nothing more to do.
         }
       }
@@ -3611,10 +3741,12 @@ act = {
         antArea(ant, 'bot', tunPos.tun.id);
         path = findPath(farm, tunPos.tun, {dun: 1, t: 'ent'}, [], 0, 1);
       }
-      ant.area.t && climbQ.push(makeDiveStub({id: last(path)}));
-      climbQ.push({act: 'pace', for: 9 + randomInt(99)});
-      // Prepend the climb queue to the main queue.
-      antInstaQ(ant, climbQ);
+      if (path) {
+        ant.area.t && path.length && climbQ.push(makeDiveStub({id: last(path)}));
+        climbQ.push({act: 'pace', for: 9 + randomInt(99)});
+        // Prepend the climb queue to the main queue.
+        antInstaQ(ant, climbQ);
+      }
     }
     antNext(ant);
   },
@@ -3628,21 +3760,25 @@ act = {
       wp = wayPoints[farm.id][getWaypointIndex(farm, ant.pose == 'side' ? antFootPoint(ant) : ant, action.wp)],
       previousTun = getTun(farm, action.pt), step = antGetTunnelStep(ant), executeAction = 1, nextTunAngle = nextTun?.r || 0,
       badAngle = ant.scale * (nextTun?.r - 90) > 0,
-      data = [], dest, dir, temp
+      data = [], dest, temp1, temp2, temp3
   ) => {
     if (tun) {
       // This is a fully expanded dive queue; determine destinations.
       if (!isRotationTunnel(tun) && tun.prog < tunPercent(tun, 8) || isRotationTunnel(tun) && nextTun && (nextTun.prog < tunPercent(nextTun, 8) || !tun.dun)) return antNext(ant); // Protect against entering underbuilt tunnels.
       if (tun.t == 'ent') {
-        if (ant.area.n == 'top' || nextTun) {
+        if (nextTun) { // If there is a nextTun it must mean that ant.area.n=='top', by virtue of other code knowing not to queue a dive into an entrance with no nextTun.
           if (tun.co.length > 1) badAngle = 1; // Reduce risk of ants trying to side-walk down the wrong tunnel from a two-way entrance. Same issue as con's "Figure out where the ant will wind up" below, except handled in a lazy way.
-          dest = getEntrancePoint(nextTun, antOffsetY(ant), badAngle ? 0 : -ant.scale); // Entering from surface.
+          // Entering from surface; get the entrance point of a tunnel.
+          temp1 = calcDistComponents(nextTun.x1, nextTun.y1, nextTun.x2, nextTun.y2); // Distance components.
+          temp2 = min(6, temp1.d * (nextTun.prog / 100)); // Actual distance.
+          temp3 = (nextTun.h / 2 - antOffsetY(ant)) * (badAngle ? 0 : ant.scale); // Offset.
+          dest = {x: (nextTun.rwip ? nextTun.x2 : nextTun.x1) + temp1.x * temp2 - temp1.y * temp3, y: (nextTun.rwip ? nextTun.y2 : nextTun.y1) + temp1.y * temp2 + temp1.x * temp3};
         }
         else {
           // Ant is about to surface; predict how it should end up.
           !action.pt && antToProneWithCorrection(ant, tun); // Can't remember what this is for, maybe digging?
           data = cloneData(ant); // Set data variable to a fake ant so we can test it out.
-          data.scale = ant.pose == 'side' ? tunGetSide(getTun(farm, action.pt), getWaypointIndex(farm, antFootPoint(ant), wp)) : randomSign();
+          data.scale = wp && ant.pose == 'side' ? tunGetSide(getTun(farm, action.pt), wayPoints[farm.id][getWaypointIndex(farm, antFootPoint(ant), wp)]) : randomSign();
           data.x = (data.scale > 0 ? max : min)(ant.x, tun.x1) + 7 * data.scale;
           data.y = antGroundLevel(data);
           dest = data;
@@ -3663,28 +3799,36 @@ act = {
         }
         else if (nextTun) {
           // Figure out where the ant will wind up if it continues in side pose.
-          dir = getAntWaypointDirection(ant, farm, wp); // Precalculate this as it is too hefty to do in the do-loop.
+          temp2 = getAntWaypointDirection(ant, farm, wp); // Precalculate this as it is too hefty to do in the do-loop.
           do {
-            wp &&= getNextWaypoint(farm, wp, dir);
-            temp = wp && getWpTunnel(farm, wp, tun);
-          } while (temp && (temp == tun.id || temp == action.pt));
+            wp &&= getNextWaypoint(farm, wp, temp2);
+            temp1 = wp && getWpTunnel(farm, wp, tun);
+          } while (temp1 && (temp1 == tun.id || temp1 == action.pt));
           // Check if next tunnel is not the one ant is heading to, or any other action's tunnel after that.
           // Note: This assumes there isn't some OTHER kind of act wedged in between expanded future dive actions.
-          if (!ant.q.some(a => a?.act == 'dive' && a.id == temp)) {
+          if (!ant.q.some(a => a?.act == 'dive' && a.id == temp1)) {
             // Ant is creeping toward wrong tunnel - switch to prone to make a proper turn, and loopback to this function.
             antToProneWithCorrection(ant, tun);
             return antActionStill(ant);
           }
           // NOTE: At this point the execution should fall through to the "if (executeAction > 1) {" part of the code.
         }
+        else return antNextStill(ant); // Side pose, no nextTun: ant is already at the destination con.
         // Check for an unusual "starting dive in the wrong con" scenario.  This situation was observed once near an entrance, and an extra condition for setting badAngle was added above to minimise the chances.
         // But this may potentially also occur if two tuns begin almost parallel with each other and the random direction prone walking algorithm permits ant to cross the waypoint-less threshold into the wrong one.
-        temp = getTunPosition(ant, farm, action.pt, tun, tun.t);
-        if (temp && temp.tun.id != tun.id) {
-          // Somethings wrong.  The ant wandered into the wrong tunnel on a previous iteration, but our tunnel walking functions didn't handle this exact situation properly and redirected ant backwards,
-          // and now the queue expects that we're up to a certain 'con' piece (we probably are not) and that may be because that con is the site of a current dig operation.
-          // Note: This situation might not arise very often, and this may be an improper way of handling the case anyway.
-          action.id = temp.tun?.id; // Update the action to where the ant actually is and immediately do another pass.
+        temp1 = getTunPosition(ant, farm, action.pt, tun, tun.t);
+        if (temp1 && ![tun.id, action.pt].includes(temp1.tun.id)) {
+          if (temp1.tun.co.includes(tun.id)) {
+            // Wait... the con we want to be in connects to this tun.  Let's prone walk to the con we thought we'd be in and pick this dive path up again.
+            antToProneWithCorrection(ant, tun);
+            antInstaQ(ant, {act: 'dive', id: temp1.tun.id}, 1);
+          }
+          else {
+            // Somethings wrong.  The ant wandered into the wrong tunnel on a previous iteration, but our tunnel walking functions didn't handle this exact situation properly and redirected ant backwards,
+            // and now the queue expects that we're up to a certain 'con' piece (we probably are not) and that may be because that con is the site of a current dig operation.
+            // Note: This situation might not arise very often, and this may be an improper way of handling the case anyway.
+            action.id = temp1.tun?.id; // Update the action to where the ant actually is and immediately do another pass.
+          }
           return antActionStill(ant);
         }
       }
@@ -3699,8 +3843,8 @@ act = {
       if (executeAction > 1) {
         // Rot Walk execution.
         // Work out step (step size) and dist (num steps / frames).
-        temp = calcDistComponents(ant.x, ant.y, dest.x, dest.y);
-        action.dist = round(getHypot(dest.x - ant.x, dest.y - ant.y) / getHypot(temp.x * step, temp.y * step)); // Note: There is a getDistance() usage candidate here, but we aren't currently including that function in production.
+        temp1 = calcDistComponents(ant.x, ant.y, dest.x, dest.y);
+        action.dist = round(getHypot(dest.x - ant.x, dest.y - ant.y) / getHypot(temp1.x * step, temp1.y * step)); // Note: There is a getDistance() usage candidate here, but we aren't currently including that function in production.
         // Switch to prone when entering tunnel from surface at a badAngle.
         badAngle && setTimeout(X => {ant.pose = 'prone'}, action.dist / frameTick * 2);
         if (tun.t == 'ent') action.dist *= .8; // Speed up entry transitions.
@@ -3728,16 +3872,15 @@ act = {
         // Work out whether the ant is meant to be walking in reverse (towards the 0% point of the tunnel).
         if (nextTun) action.rev = tun.x1 == nextTun.x1 && tun.y1 == nextTun.y1; // If there's a nextTun use it's connection to this tunnel to judge whether we're doing a reverse walk.
         else if (previousTun) action.rev = tun.x2 == previousTun.x2 && tun.y2 == previousTun.y2; // No next tun, but if there's a prevTun use it's connection to this tunnel to judge whether we're doing a reverse walk.
-        else if ('pc' in action) {
+        else if ('pc' in action && (temp1 = getTunPosition(ant, farm, action.pt, tun)) && temp1.tun) {
           // We're probably going to another spot within the exact same tunnel, so judge whether we're doing a reverse walk based on the relative position of the ant to the supplied target percentage.
-          temp = getTunPosition(ant, farm, action.pt, tun);
-          action.rev = temp.tun.id == tun.id ? temp.pc > action.pc : squareDistance(ant.x - tun.x1, ant.y - tun.y1) > squareDistance(ant.x - tun.x2, ant.y - tun.y2);
+          action.rev = temp1.tun.id == tun.id ? temp1.pc > action.pc : squareDistance(ant.x - tun.x1, ant.y - tun.y1) > squareDistance(ant.x - tun.x2, ant.y - tun.y2);
         }
         // Work out a default target percentage if one isn't supplied.
         if (typeof action.pc != 'number') action.pc = action.rev ? 0 : 100;
         // Track the current position (in percentage) of the ant.
         action.dist = action.rev ? 100 : 0; // This is wrong if the ant starts inside the target tunnel but it will be corrected after one step in tunWalk.
-        if (!isRotationTunnel(tun) && antDir(ant, tun) == action.rev) ant.pose == 'side' ? antSideCorrection(ant, tun, wp) : (ant.r = oppositeAngle(ant.r));
+        if (!isRotationTunnel(tun) && ant.pose == 'side' && antDir(ant, tun) == action.rev) antSideCorrection(ant, tun, wp);
         // Store the waypoint.
         action.wp = wp;
         // Override 'dive' with the relevant walking action and execute.
@@ -3747,24 +3890,26 @@ act = {
       }
     }
     else {
+      // Setup.
+      // Start by double-checkin if the tunnel the ant thinks it is in is actually the tunnel it seems like it is in.
+      if ((temp1 = getTunPosition(ant, farm, action.pt, getTun(farm, ant.area.t))) && temp1.tun?.id != ant.area.t) antArea(ant, 'bot', temp1.tun.id);
       // No dive queue - select tunnels and create queue.
-      tun = action.tun ? getTun(farm, action.tun) : pickRandom(farm.tuns.filter(t => t.t == 'cav' && t.dun && !t.morgue));
-      if (tun) {
+      if (tun = action.tun ? getTun(farm, action.tun) : pickRandom(farm.tuns.filter(t => t.t == 'cav' && t.dun && !t.morgue))) {
         // Calculate a temp path in reverse for consideration in assembling queue data.
-        temp = findPath(farm, tun, ant.area.n == 'top' ? {dun: 1, t: 'ent'} : {id: ant.area.t}, [], 0, 1);
-        if (ant.area.n == 'top') {
+        temp1 = findPath(farm, tun, ant.area.n == 'top' ? {dun: 1, t: 'ent'} : {id: ant.area.t}, [], 0, 1, 0, !!ant.digT); // Note: Diggers use the deterministic version of the path finder.
+        if (ant.area.n == 'top' && temp1) {
           // On the top level, need to pace to the tunnel entrance first.
-          dest = tun.t == 'ent' ? tun : getTun(farm, temp.pop()); // Get the entrance tun.
+          dest = tun.t == 'ent' ? tun : getTun(farm, temp1.pop()); // Get the entrance tun.
           data.push({act: 'pace'});
           data.push({act: 'dive', tx: dest.x1, id: dest.id});
         }
-        if (ant.area.t && !temp) {
+        if (ant.area.t && !temp1) {
           // Different tunnel system, need to climb out of the current system.
           data.push({act: 'climb'});
           data.push({act: 'dive', tun: tun.id});
         }
         else {
-          temp?.reverse().forEach(tunId => data.push({act: 'dive', id: tunId}));
+          temp1?.reverse().forEach(tunId => data.push({act: 'dive', id: tunId}));
           // Rebuild the current action into the final destination action.
           action.id ||= tun.id;
           action.pc ||= !isRotationTunnel(tun) && min(tun.prog, 20 + randomInt(60));
@@ -3806,7 +3951,7 @@ act = {
   // Burrowing walk-along action.
   tunWalk: (ant, farm = getFarm(ant), action = ant.q[0], tun = getTun(farm, action.id), nextAction = ant.q[1],
       nextTun = nextAction?.act == 'dive' && getTun(farm, nextAction.id),
-      wp = wayPoints[farm.id][getWaypointIndex(farm, ant, action.wp)],
+      wp = wayPoints[farm.id][getWaypointIndex(farm, ant.pose == 'side' ? antFootPoint(ant) : ant, action.wp)],
       wpSet, wpTargetLen,
       temp1, temp2, temp3 // Reuse temp vars as various values and bits of data are juggled here, and this saves declaring a whole bunch.
     ) => {
@@ -3815,32 +3960,55 @@ act = {
     if (ant.pose == 'side') {
       // Note: We don't ever check collisions in side pose, this is intentional.
       if (wp) {
+        /* START-DEV */
+        devHighlightWaypoint(farm, wp, 'black', 200);
+        /* END-DEV */
         temp1 = getAntWaypointDirection(ant, farm, wp);
         wpSet = [wp];
         if (temp1) {
           // Get the nearest waypoints to align the ant to.  This algorithm seeks backwards and forwards from the current central waypoint,
           // as opposed to considering the rear and front footpoints, which fail to register when the ant is rotating around a corner.
           while (wpSet[0] && wpSet.length < 3 && (temp3 = getNextWaypoint(farm, wpSet[0], -temp1))) wpSet.unshift(temp3);
-          wpTargetLen = wpSet.length + 3; // Precalculate this value as length changes on the next line.
+          wpTargetLen = wpSet.length + 4; // Precalculate this value as length changes on the next line.
           while (wpSet.length < wpTargetLen && (temp3 = getNextWaypoint(farm, last(wpSet), temp1))) wpSet.push(temp3);
+          /* START-DEV */
+          wpSet.forEach(wpoint => {
+            if (wpoint != wp) {
+              devHighlightWaypoint(farm, wpoint, '#333', 200);
+            }
+          });
+          /* END-DEV */
           // Determine ant's new angle.
           temp1 = getWaypointAngle(wpSet); // Desired angle.
           if (ant.scale < 0) temp1 = mirrorAngle(temp1);
           temp2 = normalize180(temp1 - ant.r); // Diff.
-          // Update the ant's rotation, but cap it at 9 degrees per step, and snap if over 99 deg off.
-          ant.r = normalize360(ant.r + clamp(temp2, -9, 9));
-          // Nudge ant closer to wp if needed but counter-nudge for ants doing turns.
-          abs(temp2) > 5 ? antNudgeToMid(ant, tun) : antNudgeToWP(ant, wp);
-          // If an ant's body is closer to the waypoint than it's foot, it is possibly out-of-bounds, do a big nudge to mid.
-          temp3 = squareDistance(antFootPoint(ant), wp);
-          temp3 > squareDistance(ant, wp) && antNudgeToMid(ant, tun, sqrt(temp3));
+          if (abs(temp2) > 120) { // Note: This cutoff of 120 can probably go as low as ~90 (to abort on softer angles) and as high as ~160 (if giving up on corners it should attempt).
+            // Encountered a waypoint set containing a potential hook turn.  We'd rather not follow the waypoints here, so just use prone pose.
+            antToProneWithCorrection(ant, tun, action.rev);
+            action.ns = 1; // Mark this action as "no switch" to prevent random pose switching. (no need for getTime() on this one because it is in prone pose)
+          }
+          else {
+            // Update the ant's rotation, but cap it at 20 degrees per step.
+            ant.r = normalize360(ant.r + clamp(temp2, -20, 20));
+            // Nudge ant closer to wp if needed but counter-nudge for ants doing turns.
+            abs(temp2) > 15 ? antNudgeToMid(ant, tun) : antNudgeToWP(ant, wp, undefined, 1);
+            if (!isRotationTunnel(tun)) {
+              // If an ant's body is closer to the waypoint than it's foot, it is possibly out-of-bounds, do a big nudge to mid.
+              squareDistanceCoords(antFootPoint(ant), wp) > squareDistanceCoords(ant, wp) && antNudgeToMid(ant, tun, 1);
+              // Nudge ant to mid if foot is further from mid than body, to prevent weird out-of-bounds situations.
+              temp1 = closestPointOnMid(ant, tun);
+              squareDistanceCoords(ant, temp1) > squareDistanceCoords(antFootPoint(ant), temp1) && antNudgeToMid(ant, tun, 1);
+            }
+          }
         }
       }
       if (!wp || !last(wpSet)) {
         // Lost waypoint.
         antToProneWithCorrection(ant, tun, action.rev);
-        action.ns = 1; // Mark this action as "no switch" to prevent random pose switching.
+        action.ns = 1; // Mark this action as "no switch" to prevent random pose switching. (no need for getTime() on this one because it is in prone pose)
       }
+      // For safety we will drop the 'ns' flag on side posed ants after 30 seconds, which may be preventing the ant from getting out of a jam.
+      if (action.ns && getTime() - action.ns > standardDelay) action.ns = 0;
     }
     else {
       // Prone walk roughly towards the destination with collision corrections.
@@ -3848,25 +4016,27 @@ act = {
       if (temp3 = antCollision(ant, 4)) {
         // Ant is going to collide with another ant.
         temp2 = temp3.a;
-        if (antsPassive(ant, temp2)) {
-          if (ant.pose == 'prone' && temp2.pose == 'prone' && tun.t == 'cav' && antCheckAvoidance(antGetStill(ant))) {// Note: antGetStill() slipped in here so the ant doesn't treadmill in place when halted by collision.
+        if (antsWillAvoid(ant, temp2)) {
+          // Note: We also give a hall pass to low hp ants as they need to hurry through their queue.
+          if (ant.pose == 'prone' && temp2.pose == 'prone' && tun.t == 'cav' && ant.hp > 9 && antCheckAvoidance(antGetStill(ant), temp2)) {// Note: antGetStill() slipped in here so the ant doesn't treadmill in place when halted by collision.
             // Avoid this ant.
             temp1 = calcDistComponents(temp2.x, temp2.y, ant.x, ant.y);
-            ant.r = normalize360(ant.r + temp3.d * 2);
+            ant.r = normalize360(ant.r + temp3.d * 2 * (!randomInt(9) ? -9 : 1));
             ant.x += temp1.x / 2;
             ant.y += temp1.y / 3;
             // Track ant avoidance duration so we can stop doing it if it gets too insane.
-            antTrackAvoidance(ant);
+            antTrackAvoidance(ant, temp2);
           }
         }
         else if (temp2.carry?.Q == ant.id) {
           // We are a queen awaiting service from the collision ant.
-          if (ant.pose == 'prone' && temp2.pose == 'prone' && tun.t == 'cav') {
-            ant.r = normalize360(ant.r - temp3.d); // Turn toward.
-          }
+          if (ant.pose == 'prone' && temp2.pose == 'prone' && tun.t == 'cav') ant.r = normalize360(ant.r - temp3.d); // Turn toward.
           ant.frz = 1; // Let's attempt to pause a moment.
         }
-        else antFight(ant, temp2); // Fight!
+        else if (ant.carry?.Q == temp2.id || antFight(ant, temp2)) {
+          while (ant.q[0] && !['fight', 'srv'].includes(ant.q[0].act)) ant.q.shift();
+          return antActionStill(ant);
+        }
       }
       // Partial correction for prone ants that have a weird trajectory.
       temp1 = normalize180(tun.r - (action.rev && deg180) - ant.r);
@@ -3889,20 +4059,26 @@ act = {
     // Store the current wp to make the next wp fetch more efficient.
     action.wp = wp;
     if (nextTun) nextAction.wp = wp;
-    // Check for nearby enemies (even without collision).
-    if (temp1 = farm.foe && farm.a.find(a => ant.area.t == a.area.t && !antsPassive(ant, a) && inTargetProximity(ant, a, 30))) antFight(ant, temp1); // Ant is near an enemy ant.
+    // Check for nearby enemies or co-targets (even without collision).
+    if ((temp1 = farm.foe && farm.a.find(a => tun.id == a.area.t && livesInFarm(a) && !a.inf && !antsWillAvoid(ant, a) && inTargetProximity(ant, a, 30))) && (ant.carry?.Q == temp1.id || antFight(ant, temp1))) {
+      // Progress to srv/fight action.
+      while (ant.q[0] && !['fight', 'srv'].includes(ant.q[0].act)) ant.q.shift();
+      return antActionStill(ant);
+    }
     if (action.pos) {
       // Position encourager feature.  Coaxes ant to walk towards the side of the tunnel it is supposed to be on, but there is no guarantee it'll get there.
       // NOTE: This only works for 'cav' tunnels which are roughly horizontal, that isn't checked here, it is assumed the calling code will only use this feature for cavs.
       // NOTE: Doesn't work too well if ant is already near the area it is supposed to go to; best to circle back via another cav or use 'tunOrient' to march straight to a target.
       if (ant.pose == 'prone') {
-        if (antWaypointRange(ant, wp, .8)) {// .8 mult so it has a chance to take another couple steps to angle itself.
+        temp2 = wp && tunGetSide(tun, wp); // Determine tunnel side: < 0 is good for 'd', > 0 is good for 'u'.
+        temp3 = action.pos == 'u' ? temp2 > 0 : temp2 < 0; // Whether ant is on the correct side of the tunnel for its intended position.
+        if (temp3 && antWaypointRange(ant, wp, .8)) {// .8 mult so it has a chance to take another couple steps to angle itself.
           ant.r = ant.r > 90 ? deg180 : 0; // Awkward snap.
           antToSideWithCorrection(ant, tun, wp); // Ant is in landing range, so land it.
         }
         else {
           temp1 = normalize180((
-            antWaypointRange(ant, wp, 2) ? // The 2 multiplier is mostly useless because the wp doesn't even register at that distance for most ant sizes.
+            temp3 && antWaypointRange(ant, wp, 2) ? // The 2 multiplier is mostly useless because the wp doesn't even register at that distance for most ant sizes.
               (ant.r > 90 ? deg180 : 0) : // VERY close to landing range, prob too steep. Without fetching another WP from further away this is unlikely to be enough convincingly align the ant with the surface but it might be just enough to show intention.
               (action.pos == 'd' ? deg270 : 90) // Ant is too far away from tunnel surface and needs to be angled there.
           ) - ant.r);
@@ -3912,16 +4088,17 @@ act = {
       }
       else {
         temp1 = tunGetSide(tun, ant);
-        if (action.pos == 'u' && temp1 > 0 || action.pos == 'd' && temp1 < 0) action.ns = 1; // Already correct position, flag "no switch" to prevent random pose switching.
+        if (action.pos == 'u' && temp1 > 0 || action.pos == 'd' && temp1 < 0) action.ns = getTime(); // Already correct position, flag "no switch" to prevent random pose switching.
         else {
           // Wrong side of the tunnel, switch to prone.
           antToProneWithCorrection(ant, tun);
-          action.ns = action.pos == 'm'; // Disable random switching for 'm' position.
+          action.ns = action.pos == 'm'; // Disable random switching for 'm' position.  (no need to use getTime here as it is in prone pose)
         }
       }
     }
     // Tun end adjuster, for smoother transitions.
     temp1 = tun.prog / 100 * tunPercent(tun, 42); // Percentage representing 42px of the tunnel taking the current dig progress into account.
+    temp2 = getSign(!action.rev);
     if (action.rev ? action.dist < temp1 : action.dist > tun.prog - temp1) {
       // Near end of tunnel, but not right at the end. Direct towards next con.
       ant.pose == 'prone' && antNudgeToMid(ant, tun);
@@ -3929,7 +4106,7 @@ act = {
     // Random ant pose switching feature.
     // Ensure we're not at the end of the tunnel or have flagged the no-switch.
     else if (!action.ns && !isRotationTunnel(tun) && !randomInt(ant.pose == 'prone' ? 100 : num800) && antWaypointRange(ant, wp)) {
-      action.ns = 1; // Don't randomly switch again in this tunnel.
+      action.ns = getTime(); // Don't randomly switch again in this tunnel.
       ant.pose == 'side' ? antToProneWithCorrection(ant, tun) : antToSideWithCorrection(ant, tun, wp);
     }
     // Walk along tunnel.
@@ -3939,17 +4116,23 @@ act = {
     // Suggestion: If doing getTunPosition() on every frame is too expensive for performance, be aware that getWpTunnel() caches the result and it might be a better system to upgrade that functionality for use here?
     if (!temp3) {
       // If we're working on an underbuilt tunnel, let's just say we're in the previous tunnel.
-      if (tun.prog < 15) temp3 = {tun: farm.tuns.find(t => t.co.includes(tun.id) && t.dun)};
-      while (!temp3) {
+      if (tun.prog < 15) temp3 = {tun: farm.tuns.find(t => tun.id == action.pt && t.co.includes(tun.id) && t.dun)};
+      temp2 = 0; // Prevent endless/long loop.  Will be detected below.
+      while (!temp3 && temp2++ < 9) {
         !randomInt(9) ? antToProneWithCorrection(ant, tun) : antNudgeToMid(ant, tun); // Shuffle the ant back into the tunnel with a random chance to switch side->prone.
         temp3 = getTunPosition(ant, farm);
       }
+      if (!temp3) {
+        // Still out-of-bounds after 9 nudges, let's give it a shove towards the closest waypoint and circle back later.
+        antNudgeToClosestWp(ant, farm);
+        return antNextStill(ant, pauseDelay); // We cannot allow the remaining code to execute as it relies on ant being in a tun.
+      }
     }
     // Check skipped tunnels.
-    if (temp3 && temp3.tun.id != tun.id) {// Ant's tun position MUST exist at this point.
+    if (temp3 && temp3.tun.id != tun.id && temp3.tun.id != action.pt) {
       // Ant is in a different tunnel than the one it is supposed to be in.
       // This could be normal in which case antNext() will continue the journey, but there are some cases to check first.
-      if (nextTun && temp3.tun.id != nextTun?.id && temp3.tun.id != action.pt) {
+      if (nextTun && temp3.tun.id != nextTun?.id) {
         // Ant's current actual position is not in the nextTun in the queue.  This code will investigate the problem.
         antArea(ant, 'bot', temp3.tun.id);
         // Check if a tunnel was skipped over (it happens), and we should be further along in the queue.
@@ -3963,9 +4146,9 @@ act = {
         else {
           antToProneWithCorrection(ant, tun);
           // Severe course correction.  Ant is lost, so set up a new path to the original destination (the last dive action in the queue).
-          temp1 = max(0, ant.q.findLastIndex(a => a.act == 'dive' && a.tun)); // Calculate the index of the final dive action.
+          temp1 = ant.q.slice(1).findIndex(a => a.act != 'dive' || !a.tun); // Calculate the index of the final dive action.
           temp2 = ant.q[temp1]; // Store the final action itself because we're about to delete it.
-          ant.q.splice(0, temp1 + 1); // Remove the dive queue, but keep anything after the final dive.
+          ant.q.splice(0, temp1); // Remove the dive queue, but keep anything after the final dive. Keeps the final dive so antNext doesn't skip the next action.
           antInstaQ(ant, makeDiveStub(temp2));
         }
       }
@@ -3977,16 +4160,13 @@ act = {
       // Side pose walking can take an ant along the waypoints through a rotational tunnel, so the ant needs to just keep going.
       antAction(ant); // Special case for rotation tunnels.  Just loopback to this action without doing further checks.
     }
-    else if (antDir(ant, tun) == action.rev) {
+    else if (temp3.tun.id == tun.id && antDir(ant, tun) == action.rev && !(action.rev ? action.dist < temp1 : action.dist > tun.prog - temp1)) {// IMPORTANT: temp1 here should still be 42px as a percentage as defined above!!!
       // Wrong way!  Ant needs to be flipped around safely.
       antChangeTunDir(ant, tun, wp);
       action.act = 'dive';
       antActionStill(ant, randomInt(pauseDelay));
     }
-    else if (
-      abs(temp3.pc - action.pc) < tunPercent(tun, antOffsetX(ant)) && !ant.frz || // Face reached goal.
-      temp3.pc > action.pc && !action.rev || temp3.pc < action.pc && action.rev // Overshot, likely due to ant.frz.
-    ) {
+    else if (!ant.frz && temp2 * (action.pc - (temp3.pc + temp2 * tunPercent(tun, antOffsetX(ant)))) < 0) {// Face reached goal (or overshot).
       antNextStill(ant); // Ant reached action.pc
     }
     else {
@@ -4003,12 +4183,15 @@ act = {
   // Prone walks an ant to exactly a target ant/egg.  It won't work for arbitrary target coordinates unless they use the same surface offset that ants do!
   // Note: action.target (required) is any object/shim with x/y coords, and action.ant (if set) is just the id of an ant if temporary freeze of an ant target is desired.
   // Important: This assumes the ant is already in the same cavity as the target, so nothing too funky happens.
-  tunOrient: (ant, action = ant.q[0], tun = getTun(getFarm(ant), ant.area.t)) => {
+  tunOrient: (ant, action = ant.q[0], tun = getTun(getFarm(ant), ant.area.t), margin = antOffsetX(ant) + (action.margin || 6), dr) => {
     // Track time spent doing orient action to reduce breakdancing ants bug when target is in an odd orientation.
     action.orient ||= 0;
-    antToProneWithCorrection(ant, tun);
-    ant.r = getAngle(ant, action.target); // Snap to orientation so as not to do a rotational walk that might take ant out-of-bounds.
-    if (action.orient++ < tun.w * 4 && !inTargetProximity(ant, action.target, antOffsetX(ant) + (action.margin || 6))) {// Important: Neither the ant or the target are adjusted for dive coordinates here!
+    ant.pose = 'prone'; antProneCorrection(ant); // Can't use antToProneWithCorrection() correction here because the nudger is a fudger.
+    dr = normalize180(getAngle(ant, action.target) - ant.r); // Rotation delta must be calculated after the antProneCorrection above.
+    if (dr > 165) ant.r = oppositeAngle(ant.r); // Quick flip if way off.
+    else if (calculateDistance(ant, action.target) < margin) ant.r = getAngle(ant, action.target); // Snap when too close.
+    else ant.r += sign(dr) * clamp(abs(dr), 0, max(1, 15 - action.orient / 2)); // More gradual version.
+    if (action.orient++ < tun.w * 4 && !inTargetProximity(ant, action.target, margin)) {// Important: Neither the ant or the target are adjusted for dive coordinates here!
       // Freezes the target if it is an ant (for a non-guaranteed amount of time up to 4 seconds).  Chance of target escaping from current tunnel is negligible.
       // Note: Currently only implemented for ants doing a 'tunWalk' using the pause mechanism there.
       if (action.ant) getAnt(getFarm(ant), action.ant).frz = 2;
@@ -4022,17 +4205,16 @@ act = {
 
   // Slip an ant to the floor of a tunnel.
   // This does not use cavFloor() as the ant might be in another type of tunnel and not aligned with a cavity.  Also using waypoints would be too involved.
-  tunSlip: ant => {
+  tunSlip: (ant, tunPos = getTunPosition(ant), r = tunPos.tun.r) => {
     ant.pose = 'pick'; // Note: We never reset the pose back to what it was before, that can change later if needed perhaps by passing a param in the action.
-    if (getTunPosition(ant)) {// Ant still "in" the tunnel.
-      // Move downwards. Note: We don't rotate the ant here to land on its feet, that can be added later if needed.
+    if (tunPos?.tun) {// Ant still "in" the tunnel.
+      // Move downwards.
       ant.y += 1; // This occurs slower than the 'slip' action because everything in tunnels is slower.
+      ant.r = lerpAngle(ant.r, abs(normalize180(r - ant.r)) < abs(normalize180(oppositeAngle(r) - ant.r)) ? r : oppositeAngle(r), .1);
       antAction(ant);
     }
     else {
       // Hit past the edge of the tunnel. Note: We don't readjust it back into the tunnel here, that can be added later if needed.
-      // Leave the ant in a horizontal position with random flip & scale - if this proves unacceptable consider trying getWaypointAngle() of the 3 closest waypoints.
-      ant.r = pickRandom([0, deg180]);
       ant.scale = randomSign();
       antNext(ant);
     }
@@ -4111,6 +4293,10 @@ act = {
           diff = normalize180(90 - ant.r);
           if (abs(diff) > 30) ant.r = normalize360(ant.r + getSign(diff > 0) * 5);
         }
+      }
+      // Curb "forever crawl" situations without being too forceful about it.
+      if (nextAction && ant.area.d > longDelay && !randomInt(shortDelay)) {
+        action.top = 1;
       }
       // Track time spent.
       action.for && action.for--;
@@ -4270,16 +4456,17 @@ act = {
 
   // Ant picks up a bit of food or drink for the queen, or an infant or a dead ant, this assumes the ant is already in a location where they can do a pick-up.
   get: (ant, farm = getFarm(ant), action = ant.q[0], carryItem = getCarry(farm, action)) => {
-    if (carryItem) {
+    if (carryItem && !farm.a.some(a => a.carry?.id == action.id) && (action.t != 'inf' || carryItem.inf)) {// Ensure carryItem exists and is not being carried by someone else. Additional check to prevent pickup of infants that have matured.
       ant.q = [{}]; // Clear the ant's queue, they have only one mission right now.
       // Note: No proximity check for food/drink items; that is the responsibility of 'eat' and 'drink' actions.  Those check whether it exists, and moving the item changes the id number.
       if (carryItem.x && !inTargetProximity(ant, carryItem, antOffsetX(ant) + 12)) {// Very permissive margin due to targetting troubles.
         // Too far.
-        ant.area.t == carryItem?.area?.t ?
-          antFinna(ant, 'tunOrient', {target: {x: carryItem.x, y: carryItem.y}, margin: 12}) : antGoToAnt(ant, carryItem); // Don't store the whole carryItem in queue data, because that's asking for troubles.
+        ant.area.t && ant.area.t == carryItem?.area?.t ?
+          antFinna(ant, 'tunOrient', {target: {x: carryItem.x, y: carryItem.y}, margin: 6}) : antGoToAnt(ant, carryItem); // Don't store the whole carryItem in queue data, because that's asking for troubles.
         antFinna(ant, 'get', action);
         return antAction(ant);
       }
+      if (carryItem.lvl) carryItem.lvl = 0; // Picked up items with a lvl prop should lose their level.
       action.f = ant.f;
       ant.carry = action;
       ant.run = .7;
@@ -4287,7 +4474,7 @@ act = {
       // Special case where ant is going to serve a queen.  It needs to hand control back to the 'srv' action.
       action.Q && antFinna(ant, 'srv', action);
       // Queue up the items that this action was told to queue up once the carry item was fetched.
-      action.q?.forEach(q => ant.q.push(q));
+      action.q?.forEach(q => antFinnaVia(ant, q.act, {...q}));
     }
     antNext(ant, pauseDelay);
   },
@@ -4300,7 +4487,7 @@ act = {
         if (!inTargetProximity(ant, antHeadPoint(queen), antOffsetX(ant) + 6)) {// Very permissive margin due to targetting troubles (also 6px is the size of small carried items).
           // Ant too far from queen's face.  This code can produce some odd ant behaviours, but it is fun to watch.
           ant.q = []; // Clear the ant's queue, they have only one mission right now.
-          ant.area.t == queen.area.t && getTun(farm, ant.area.t)?.t == 'cav' ?
+          ant.area.t && ant.area.t == queen.area.t && getTun(farm, ant.area.t)?.t == 'cav' ?
             antFinna(ant, 'tunOrient', {target: antHeadPoint(queen), ant: queen.id}) : antGoToAnt(ant, antHeadPoint(queen));
           antFinna(ant, 'srv', action);
           return antAction(ant);
@@ -4336,18 +4523,20 @@ act = {
     if (getTun(farm, ant.nest)?.morgue) ant.nest = 0;
     (ant.nest ||= pickRandom(farm.tuns.filter(t => t.t == 'cav' && t.dun && !t.nip && !t.morgue && t.co.length < 2 && !nests.includes(t.id)))?.id)
       && goToLocation(ant, makeDiveStub({tun: ant.nest, pc: 20 + randomInt(60), pos: 'd'}));
-    antFinnaUnique(ant, 'rest');
+    antFinna(ant, 'rest');
     // Queue egg laying if no eggs in the nest, not overpopulated, and random chance passed with respect to various factors.
     // Note: The 'lay' action will protect from laying if something went wrong in the queue and she's not in a cav, and actually has a high chance of requeueing another dive/lay cycle.
-    ant.hp > 40 && !farm.e.length && antCount < 40 && !random(num1000 * Math.ceil(antCount / 30) - (farm.fill == 'lube' ? deg360 : 0) - (farm.a.some(a => isDrone(a) && livesInFarm(a)) || antCount < 9 && deg360)) && antFinnaUnique(ant, 'lay');
-    antCount > 39 && playerHint(farm, ["Queen won't lay eggs due to overpopulation."]);
+    ant.lay ??= 300; // Initialize the lay chance factor if it doesn't exist yet.
+    antCount < 40 ?
+     ant.hp > 40 && !farm.e.length && !randomInt(max(9, num1000 * Math.ceil(antCount / 30) - (farm.fill == 'lube' ? num500 : 0) - (antCount < 9 ? num500 : 0) - ant.lay++)) && antFinnaUnique(ant, 'lay')
+     : playerHint(farm, ["Queen won't lay eggs due to overpopulation."]);
     // Note: free ant spawning stops at 25 ants, ant vials disallow use at 30, and laying stops at 40.  This seems like a decent progression allowance.
     antNextStill(ant);
   },
 
   // Queen lays eggs.
-  lay: (ant, farm = getFarm(ant), action = ant.q[0], lvl = action.lvl || 0, laid = action.laid || 0, tunPos = getTunPosition(ant), eggLvlCount = farm.e.filter(e => e.lvl == lvl && e.area.t == tunPos.tun).length,
-    tun = tunPos?.tun, eggSize = tunPercent(tun, 5), egg = {
+  lay: (ant, farm = getFarm(ant), action = ant.q[0], lvl = action.lvl || 0, laid = action.laid || 0, tunPos = getTunPosition(ant), eggLvlCount = farm.e.filter(e => e.lvl == lvl && e.area.t == tunPos?.tun).length,
+    tun = tunPos?.tun, eggSize = tun && tunPercent(tun, 5), thePose = ant.pose, egg = {
       id: ant.id + getTime(),
       Q: ant.id,
       t: ant.t,
@@ -4355,62 +4544,65 @@ act = {
       caste: randomInt(6) ? 'W' : 'D',
       dur: 0,
       ts: getTimeSec(),
-      area: {t: tunPos?.tun},
+      area: ant.area,
       pc: tunPos?.pc,
       r: randomInt(deg180),
       hp: 99,
       scale: randomSign()
       // Note: we never set an x/y value for eggs in tuns, the coordinate can be deduced from 'pc' in eggUpdate().
     }) => {
-    if (ant.hp < 50) {
+    if (ant.hp < 40) {
+      // Queen weak, requeue after a kip.  Requeue should trigger near the bottom of this function.
       antFinnaUnique(ant, 'kip');
-      antFinnaUnique(ant, 'lay');
     }
-    if (tunPos && tun.t == 'cav' && !tun.nip && !tun.morgue && ant.pose == 'side' && inTargetProximity(ant, cavFloor(tun, tunPos.pc), antOffsetY(ant) * 2)) {// Layable tunnel and position.
+    else if (tunPos && tun.t == 'cav' && !tun.nip && !tun.morgue) {// Layable tunnel and position.
       if (tunPos.pc < 20 || tunPos.pc > 80 || farm.e.some(e => e.area.t == tun.id && e.lvl == lvl && abs(e.pc - tunPos.pc) < eggSize) // Check there is no egg occupying current space
         || (farm.e.some(e => e.area.t == tun.id && e.lvl == lvl) && !farm.e.some(e => e.area.t == tun.id && e.lvl == lvl && abs(e.pc - tunPos.pc) < eggSize * 1.4)) // Check it is right next to an existing egg or there is no other egg
         || lvl && farm.e.filter(e => e.area.t == tun.id && e.lvl == lvl - 1 && abs(e.pc - tunPos.pc) < eggSize).length < 2) {// Check there are two supporting eggs to stack an egg on.
         // Can't lay here, walk a bit and try again.
         antFinna(ant, 'dive', {tun: tun.id, pc: tunPos.pc + randomInt(eggSize) * (tunPos.pc < 20 ? 1 : tunPos.pc > 80 ? -1 : randomSign()), pos: 'd'});
-        randomInt(num500) && antFinna(ant, 'lay', {laid: laid, lvl: lvl}); // There's also a random small chance (about once every 4 hours) that she'll give up laying here altogether to avoid permanent deadlock.
       }
       else {
-        while ((eggLvlCount > 6 - (lvl * 2) || randomInt(4)) && eggLvlCount < 16 - (lvl * 2)) lvl++; // Go up a level when there are lots of eggs on the current level.
+        if (eggLvlCount > 6 - lvl * 2 && (eggLvlCount > 8 - lvl * 2 || !randomInt(4))) lvl++; // Go up a level when there are lots of eggs on the current level.
         egg.lvl = lvl;
         // Animate.
         antUpdateClasses(ant, {pose: 'pick', jit: 1});
         setTimeout(X => {
-          ant.pose = 'side'; // Note: Don't need antToSideWithCorrection() here because this is just resetting to 'pose' from 'pick', and NOT from 'prone' pose.
+          ant.pose = thePose;
           antRemAnimUpdate(ant);
           // Lay an egg.
           farm.e.push(egg);
+          (({x, y}) => assign(egg, {x, y}))(cavFloor(getTun(getFarm(egg), egg.area.t), egg.pc)); // Egg is in a tunnel (assumed by context), update the x/y coords from the tunnel.
           eggDraw(egg);
           antStats(ant, {hp: -9, fd: 2, dr: 2, md: 2}); // Increase chance of queen being forced to sleep between eggs.  Queens self-feed during this time.
-          (laid < 8 || randomInt(8)) && laid < 26 && lvl < 4 && antFinna(ant, 'lay', {laid: ++laid, lvl: lvl}); // If eggs aren't stacked too high, loopback to laying.
         }, pauseDelay);
+        laid++;
       }
     }
-    if (laid < 10 && farmIsDeveloping(farm) && !antUniqueActs(ant).includes('lay') && randomInt(2)) {
-      // Queen did not lay eggs or not enough eggs, and the logic above did not queue up any more laying.  Take a high chance to remind her to pop a few more out, even elsewhere.
-      antFinnaVia(ant, 'dive', {pos: 'd', n: 'bot'});
-      antFinnaUnique(ant, 'lay', {laid: laid});
+    if ((laid < 6 || randomInt(8)) && laid < 26 && lvl < 4 && farmIsDeveloping(farm)) {
+      // Lay more eggs.
+      randomInt(29) ? goToLocation(ant, makeDiveStub({tun: ant.nest, pc: 20 + randomInt(60), pos: 'd'})) : antFinnaVia(ant, 'dive', {pos: 'd', n: 'bot'});
+      antFinna(ant, 'lay', {laid: laid, lvl: lvl});
     }
+    else ant.lay = 0; // Lay chance is handled by the 'kip' action, but we need to reset this after each lay session is complete.
     antNext(ant, shortDelay + randomInt(standardDelay));
   },
 
   // Ant carries an egg, infant, or a dead ant to another location.
-  carry: (ant, farm = getFarm(ant), action = ant.q[0], pkg = getCarry(farm, action), nipData = pkg && getById(farm.nips, pkg.moveTo)) => {
-    if (pkg && !farm.a.some(a => a.id != ant.id && a.carry == action.id)) {
+  carry: (ant, farm = getFarm(ant), action = ant.q[0], pkg = getCarry(farm, action), nipData = pkg && farm.nips.find(n => n.nip == pkg.moveTo)) => {
+    if (pkg && !farm.a.some(a => a.id != ant.id && a.carry?.id == action.id)) {
       if (action.t == 'dead') {
-        antGoToAnt(ant, pkg);
-        let morgueTun = farm.tuns.find(t => t.morgue);
-        antFinna(ant, 'get', assign(action, {q: [{act: 'dive', tun: morgueTun.id, pc: (morgueTun.rwip ? 5 : 80) + randomInt(15), pos: 'd'}, {...action, act: 'drop'}]}));
+        if (!getTun(farm, pkg?.area.t)?.morgue) {// Extra guard added here to prevent pickup if the dead ant is already in the morgue.
+          antGoToAnt(ant, pkg);
+          let morgueTun = farm.tuns.find(t => t.morgue);
+          antFinna(ant, 'get', assign(action, {q: [{act: 'dive', tun: morgueTun.id, pc: (morgueTun.rwip ? 10 : 70) + randomInt(20), pos: 'd'}, {...action, act: 'drop'}]}));
+        }
       }
       else if (pkg.moveTo)
-        nipData ? antFinna(ant, 'get', assign(action, {q: [{act: 'nip', nip: nipData.nip}, {...action, act: 'drop'}]})) : del(pkg, 'moveTo'); // Pass in a nip action or remove stale flag.
+        nipData ? antFinna(ant, 'get', assign(action, {f: farm.id, q: [{act: 'nip', nip: nipData.nip}], q2: [{act: 'pace', for: randomInt(999)}, {...action, act: 'drop'}]})) : del(pkg, 'moveTo');
       else {
-        antFinnaVia(ant, 'dive', {tun: pkg.id, pc: pkg.pc, pos: 'd'});
-        antFinna(ant, 'get', assign(action, {q: [{act: 'dive', tun: getById(farm.a, getAnt(farm, pkg.Q).nest)}, {...action, act: 'drop'}]}));
+        antFinnaVia(ant, 'dive', {tun: pkg.area.t, pc: pkg.pc, pos: 'd'});
+        antFinna(ant, 'get', {...action, q: [{act: 'dive', tun: getAnt(farm, pkg.Q)?.nest}, {...action, act: 'drop'}]});
       }
     }
     antNext(ant);
@@ -4418,114 +4610,133 @@ act = {
 
   // Drop a carried item.  Carefully though.
   drop: (ant, farm = getFarm(ant), action = ant.q[0], pkg = getCarry(farm, ant.carry), tunPos = getTunPosition(ant), tun = tunPos?.tun, newSpot,
-    headPoint = antHeadPoint(ant, (6 + antOffsetX(ant)) * ant.scale), spotFinder = (lvl = 0, eggSize = tunPercent(tun, 5), levelEggs, egg, offset, pc) => {
+    headPoint = antHeadPoint(ant, (6 + antOffsetX(ant)) * ant.scale), spotFinder = (lvl = 0, pkgSize = tunPercent(tun, 5), levelPkgs, aPkg, offset, pc) => {
       for (; lvl < 4; lvl++) {
-        levelEggs = farm.e.filter(e => e.area.t == tun.id && e.lvl === lvl).sort((a, b) => a.pc - b.pc);
-        for (egg of levelEggs) {
-          for (offset of [-eggSize, eggSize]) {
-            pc = egg.pc + offset;
-            if (pc > 20 && pc < 80 && !farm.e.some(e => e.area.t == tun.id && abs(pc - e.pc) < eggSize) &&
-              (!lvl || farm.e.filter(e => e.area.t == tun.id && e.lvl === lvl - 1).filter(e => abs(pc - e.pc) < eggSize).length > 1) &&
-              (!levelEggs.length || levelEggs.some(e => abs(pc - e.pc) < eggSize))) return {pc, lvl};
+        levelPkgs = [...farm.e, ...farm.a.filter(a => a.inf)].filter(e => e.area.t == tun.id && e.lvl === lvl).sort((a, b) => a.pc - b.pc);
+        if (!levelPkgs.length) levelPkgs = [{pc: tunPos.pc}]; // If there are no pkgs on this level, create a dummy value here to allow the following code to run.
+        for (aPkg of levelPkgs) {
+          for (offset of [-pkgSize, pkgSize]) {
+            pc = aPkg.pc + offset;
+            if (pc > 20 && pc < 80 && ![...farm.e, ...farm.a.filter(a => a.inf)].some(e => e.area.t == tun.id && e.lvl === lvl && abs(pc - e.pc) < pkgSize * .99) && // The .99 is because of float precision wierdness.
+              (!lvl || [...farm.e, ...farm.a.filter(a => a.inf)].filter(e => e.area.t == tun.id && e.lvl === lvl - 1).filter(e => abs(pc - e.pc) < pkgSize).length > 1) &&
+              (!levelPkgs.length || levelPkgs.some(e => abs(pc - e.pc) <= pkgSize))) return {pc, lvl};
           }
         }
       }
     }) => {
-    // Set the x/y of the package first.   (These values will be overriden for eggs in tunnels by the code below in conjunction with eggUpdate().)
-    pkg.x = headPoint.x;
-    pkg.y = tun ? cavFloor(tun, getTunPosition(headPoint, farm, 0, tun, 'cav')).y : antGroundLevel(headPoint);
-    // Eggs dropped in tunnels need a lot more special handling so they are displayed next to each other nicely.
-    if (tun && action.t == 'egg') {
-      // spotFinder() is different from how the queen picks a spot to lay, as she uses a slow trial-and-error approach, whereas spotFinder() works out a good spot to drop.
-      if (newSpot = spotFinder()) {
-        // Found a spot.
-        if (abs(tunPos.pc - newSpot.pc) > tunPercent(tun, antOffsetX(ant))) {
-          // Too far away!
-          ant.q = []; // Clear the ant's queue so it can focus on the current mission.
-          antFinna(ant, 'dive', {tun: tun.id, pc: newSpot.pc, pos: 'd'});
-          antFinna(ant, 'drop', action);
-          return antAction(ant);
+    if (pkg) {
+      // Set the x/y of the package first.  (These values will be overriden for egg/inf pkgs in tunnels by the code below)
+      pkg.x = headPoint.x;
+      pkg.y = tun?.t == 'cav' ? cavFloor(tun, getTunPosition(headPoint, farm, 0, tun, 'cav')).y : ant.area.n == 'top' ? antGroundLevel(headPoint) : headPoint.y;
+      // Pkgs dropped in tunnels need a lot more special handling so they are displayed next to each other nicely.
+      if (tun?.t == 'cav' && ['egg', 'inf'].includes(action.t)) {
+        // spotFinder() is different from how the queen picks a spot to lay, as she uses a slow trial-and-error approach, whereas spotFinder() works out a good spot to drop.
+        if (newSpot = spotFinder()) {
+          // Found a spot.
+          if (abs(tunPos.pc - newSpot.pc) > tunPercent(tun, antOffsetX(ant))) {
+            // Too far away!
+            ant.q = []; // Clear the ant's queue so it can focus on the current mission.
+            antFinna(ant, 'dive', {tun: tun.id, pc: newSpot.pc, pos: 'd'});
+            antFinna(ant, 'drop', action);
+            return antAction(ant);
+          }
+          else assign(pkg, {...newSpot, area: {t: tun.id}});
         }
-        else assign(pkg, {...newSpot, area: {t: tun.id}});
+        else {
+          // No spots.  Egg will be dropped here anyway, but we'll tell the queen her nest sucks.  This may cause ants to keep moving nest, fun!
+          getAnt(farm, pkg.Q).nest = 0;
+          assign(pkg, {pc: tunPos.pc, lvl: 0, area: {t: tun.id}});
+        }
+        (({x, y}) => assign(pkg, {x, y}))(cavFloor(getTun(getFarm(pkg), pkg.area.t), pkg.pc)); // Pkg is in a tunnel (assumed by context), update the x/y coords from the tunnel.
       }
-      else {
-        // No spots.  Egg will be dropped here anyway, but we'll tell the queen her nest sucks.  This may cause ants to keep moving nest, fun!
-        getAnt(farm, pkg.Q).nest = 0;
-        assign(pkg, {pc: tunPos.pc, lvl: 0, area: {t: tun.id}});
-      }
+      // Note: If it's not in a tun I suppose they'll just leave it where it is.  Add more code here if that looks silly!
+      carryUndraw(ant, pkg);
+      del(pkg, 'moveTo');
     }
-    // Note: If it's not in a tun I suppose they'll just leave it where it is.  Add more code here if that looks silly!
-    carryUndraw(ant);
-    del(pkg, 'moveTo');
     del(ant, 'carry', 'run');
     antNext(ant);
   },
 
   // Ant goes on a mission to care for an egg or infant.
   care: (ant, farm = getFarm(ant), action = ant.q[0], isEgg = action.t == 'egg', pkg = (isEgg ? getEgg : getAnt)(farm, action.id)) => {
-    if (pkg && inTargetProximity(antHeadPoint(ant), pkg)) {
-      // At the target.
-      isEgg ? pkg.hp += 2 : antStats(pkg, {hp: 2, fd: 2, dr: 2, md: 2});
-      antUpdateClasses(ant, {dig: 1});
-      setTimeout(X => antUpdateClasses(ant, {dig: 0}), shortDelay);
-      return antNext(ant, shortDelay + randomInt(shortDelay));
+    if (pkg) {
+      if (inTargetProximity(antHeadPoint(ant), pkg, antOffsetY(ant) * 2)) {
+        // At the target.
+        isEgg ? pkg.hp += 9 : antStats(pkg, {hp: 5 + randomInt(6), fd: 5, dr: 6, md: 5});
+        antUpdateClasses(ant, {dig: 1});
+        setTimeout(X => antUpdateClasses(ant, {dig: 0}), shortDelay);
+        return antNext(ant, shortDelay + randomInt(shortDelay));
+      }
+      else {
+        // Too far.
+        if (ant.area.t && ant.area.t == pkg.area.t && (getTun(farm, ant.area.t)?.t == 'cav' || !randomInt(9))) {
+          antInstaQ(ant, [{act: 'tunOrient', target: pkg}, {act: 'care', ...action}]);
+        }
+        else {
+          // Not even in the right area... ?
+          pkg.area.t ? goToLocation(ant, makeDiveStub({tun: pkg.area.t, pc: pkg.pc, pos: 'd'})) : antGoToAnt(ant, pkg);
+          antFinna(ant, 'care', action);
+        }
+      }
     }
-    else if (ant.q.length < 2) care4kids(farm, ant); // Try again if ant has nothing to do.
     antNext(ant);
   },
 
   // Ant nips off to a nip.
   nip: (ant, farm = getFarm(ant), action = ant.q[0], id = action.id, nip = action.nip, idOrNip = id || nip, tun = id ? getTun(farm, action.tun) : farm.tuns.find(t => t.nip == nip),
-    nipData = farm.nips.find(n => n.nip == idOrNip), nipItem = nipData?.item, isTop = idOrNip > 2, isLeftSide = idOrNip % 2 > 0, antX = ant.x, rev = action.rev) => {
-    if (nipItem && rev) {
+    nipData = farm.nips.find(n => n.nip == idOrNip), nipItem = nipData?.item, isTop = idOrNip > 2, isLeftSide = idOrNip % 2 > 0, antX = ant.x, dist) => {
+    if (action.rev) {
       // Entering farm from a nip area.
       if (isLeftSide ? antX < 20 : antX > 940) {
         antSetWalk(ant);
-        if (ant.carry) {
-          antUpdate(ant); // Correct x/y pos of carried items.
-          // Walk to a random spot and drop.
-          antFinna(ant, isTop ? 'pace' : 'dive', {for: randomInt(num500)});
-          antFinna(ant, 'drop', ant.carry);
-        }
         if (isTop) {
+          antArea(ant, 'top');
           ant.scale = getSign(isLeftSide);
           antMoveSurface(ant); // Top area.
         }
         else {
           // Tunnel
+          antArea(ant, 'bot', tun.id);
           antToProneWithCorrection(ant, tun);
-          // This actually calculates a tunPoint 20px from the end.
-          let tunPoint = isLeftSide ? {x: tun.x1, y: tun.y1} : {x: tun.x2, y: tun.y2},
-            dist = calcDistComponents(tun.x1, tun.y1, tun.x2, tun.y2),
-            offset = getSign(isLeftSide) * 20;
-          ant.r = getAngle(ant, {x: tunPoint.x + dist.x * offset, y: tunPoint.y + dist.y * offset});
+          dist = calcDistComponents(tun.x1, tun.y1, tun.x2, tun.y2);
+          ant.r = angleFromDelta(isLeftSide ? dist.x : -dist.x, isLeftSide ? dist.y : -dist.y);
           antMoveTunnel(ant);
         }
         antAction(ant);
       }
       else antNextStill(ant); // All done.
     }
-    else if (nipItem && id && !nipItem.a.some(a => a.t != ant.t)) {
+    else if (id && nipItem) {
+      if (nipItem.a.some(a => a.t != ant.t)) return antNextStill(ant); // There's an enemy ant in the vial/tube, let's not do this.
       // Exiting farm into a nip area.
-      if (isLeftSide ? antX > -25 : antX < 985) {
+      if (isLeftSide ? antX > -35 : antX < 995) {
         antSetWalk(ant);
         if (isTop) antMoveSurface(ant); // Top area.
         else {
           // Tunnel.
           // Can't use antToProneWithCorrection() because the nudger is a fudger.
           ant.pose = 'prone'; antProneCorrection(ant); // It's a copout to be in prone pose, but I'm not going through the whole waypoint saga here.
-          ant.r = getAngle(ant, isLeftSide ? {x: min(tun.x1, -25), y: tun.y1} : {x: max(tun.x2, 985), y: tun.y2}); // Ant hasn't reached the tunPoint yet, so force the angle.
+          ant.r = getAngle(ant, isLeftSide ? {x: -35, y: tun.y1} : {x: 995, y: tun.y2}); // Ant hasn't reached the tunPoint yet, so force the angle.
           antMoveTunnel(ant);
         }
         antAction(ant);
       }
       else {
         // Done! Move ant into "nip item space".
-        transferObject(farm, 'a', ant, farm, nipItem, {x: -25, y: 28 - antOffsetY(ant), state: nipItem.k, f: farm.id, q: []}, getEl('a-' + nipIds[id]));
+        antArea(ant, 'nip'); // This is just to invalidate any existing area.n the ant has, because the director function on a delay will try to do things to this ant if they're in a valid farm area.
+        transferObject(farm, 'a', ant, farm, nipItem, {x: -35, y: 28 - antOffsetY({...ant, x: -35}), q: []}, getEl('a-' + nipIds[id]));
+        if (ant.carry) {
+          transferObject(farm, getCarryKey(ant.carry), getCarry(farm, ant.carry), farm, nipItem, {q: []}, getEl('a-' + nipIds[id]));
+          ant.carry.nip = nipData.nip; // Now that the carried item is stored in the nipItem, we have to flag that in the carry data so we know where to fetch it from later.
+        }
         setColonyAndFoe(farm);
+        // Set the 'moveTo' flag immediately on any dependant eggs or infants that should be moved to wherever the queen went.
+        // Note: the director function does this anyway in case this workflow skipped an egg/ant that was not in the dataset at this time.
+        // If tubes/vials are disconnected/reconnected during the time it takes to resolve 'moveTo' tasks, or the queen moves through a subsequent tube, some shenanigans may occur.
+        // In such cases the player might be deliberately trying to cause the queen to abandon her dependants?  They're likely to still mature into adults, so not a big deal.
         if (isQueen(ant)) {del(ant, 'nest'); [...farm.e.filter(e => e.Q == ant.id), ...farm.a.filter(a => a.Q == ant.id)].forEach(b => b.moveTo = id)};
         save();
-        nipItem.k == 'vial' ? vialActivity(ant) || vialLoop() : tubeWalker(farm, nipData, ant) || tubeLoop();
+        nipItem.k == 'vial' ? vialActivity(ant, nipData) || vialLoop() : tubeWalker(farm, nipData, ant) || tubeLoop();
       }
     }
     else {
@@ -4543,18 +4754,21 @@ act = {
 
   // Prepare ant for antDeath().
   die: (ant, action = ant.q[0]) => {
-    ant.hp > 0 && antNext(ant); // Something fortuitous happened since the 'die' action was queued.
-    if (ant.carry || ant.nipPh) {
-      // This is no time to die. Requeue this action.
-      antFinna('die', action);
-      antNext(ant);
+    if (ant.hp <= 0) {// Otherwise something fortuitous happened since the 'die' action was queued.
+      if (ant.nipPh) antFinna(ant, 'die', action); // This is no time to die. Requeue this action.
+      else {
+        if (ant.carry) {
+          // Ant is carrying something, do an insta-drop.
+          carryUndraw(ant);
+          del(ant, 'carry', 'run');
+        }
+        if (ant.area.n == 'top') ant.y = antGroundLevel(ant, 0); // Ant is at the top, need to adjust it to ground level.
+        if (ant.area.n == 'bg') antInstaQ(ant, [{act: 'slip'}, action]); // Ant is on the bg, let's have it drop off first.  Can't use antSlip() here because it will forget to die.
+        else if (ant.area.t && ant.pose == 'prone' && !ant.slip) antInstaQ(ant, [{act: 'tunSlip'}, action]);
+        else return antDeath(ant, action.r);
+      }
     }
-    else {
-      if (ant.area.n == 'top') ant.y = antGroundLevel(ant, 0); // Ant is at the top, need to adjust it to ground level.
-      if (ant.area.n == 'bg') antInstaQ(ant, [{act: 'slip'}, action]) && antNext(ant); // Ant is on the bg, let's have it drop off first.  Can't use antSlip() here because it will forget to die.
-      else if (ant.area.t && ant.pose == 'prone' && !ant.slip) antInstaQ(ant, [{act: 'tunSlip'}, action]) && antNext(ant);
-      else antDeath(ant, action.r);
-    }
+    antNext(ant);
   },
 
   // Fight.
@@ -4621,10 +4835,10 @@ antGoToAnt = (ant, destAnt, location = {n: destAnt.area.n}) => {
   }
   if (location.tun = destAnt.area.t) location.pc = getTunPosition(destAnt)?.pc; // Note: assignment in condition on purpose.
   goToLocation(ant, location);
-  location.n == 'top' && antFinna(ant, 'pace', {tx: destAnt.x});
+  location.n == 'top' && antFinna(ant, 'pace') && antFinna(ant, 'pace', {tx: clamp(destAnt.x, 0, 960)}); // Gotta use two pace actions, because the first one terminates when it hits the tx of the 2nd one.
 },
 
-// Rates the current farm as to whether it is styling.
+// Rates the farm as to whether it is styling.
 // Returns 0 on fail, and a positive integer with the score on pass.  Never demand players to score more than a 2 to get full benefits.
 farmFlairScore = farm => max(0, farm.items.filter(i => i.t == 'scenery').length + farm.decals.length / 2 + (farm.card ? .5 : 0) - 1),
 
@@ -4641,11 +4855,12 @@ fillRefectory = (ant, fillMap = {
   'slime': {fd: .011, dr: .021, hp: .011}
 }) => antStats(ant, fillMap[getFarm(ant).fill] || {}),
 
-// Determines if the current farm has any queens.
+// Determines if the farm has any queens.
 farmHasQueen = farm => farm.a.some(a => isQueen(a) && livesInFarm(a)),
 
 // Determines if an egg or infant can upgrade to the next phase.
-canUpgrade = (pkg, day = 1) => pkg.tun && pkg.hp > 90 && !randomInt(pkg.dur > 8640 * (1 + day) ? 50 : num500) && pkg.dur > 8640 * day,
+// Note: The time calculations in this function do not speed up by using the superspeed feature.
+canUpgrade = (pkg, day = 1) => pkg.area.t && pkg.hp > 90 && !randomInt(pkg.dur > 8640 * (1 + day) ? 50 : num500) && pkg.dur > 8640 * day,
 
 // Directs farms by running checks every 30 seconds.
 // Adds deliberate tasks to the ants' finna queues so the action loops aren't responsible for checking everything.
@@ -4655,8 +4870,10 @@ director = (temp1, temp2) => {
     timeLog(farm); // Update duration.
     setTimeout(X => farm.a.forEach(ant => {
       timeLog(ant); // Update duration.
+      // Fix NaN bugs that might be happening.
+      isNaN(ant.x + ant.y + ant.r) && antFixNaN(ant);
       // Update corpse or handle living ant.
-      deadInFarm(ant) ? updateCorpseState(ant) : setTimeout(X => {// Perform a chunk of this without overloading the main thread with heaps of these at once.
+      deadInFarm(ant) ? updateCorpseState(ant, farm) : setTimeout(X => {// Perform a chunk of this without overloading the main thread with heaps of these at once.
         // Decrement stats.
         antStats(ant, {fd: -.05, dr: -.1, md: -.05, hp: -.1});
         !ant.area.t && antStats(ant, {md: farmFlairScore(farm) / 20}); // Boost mood stat based on presence of scenery (when not in tunnels).
@@ -4664,78 +4881,94 @@ director = (temp1, temp2) => {
         antStats(ant, ant.fd <= 0 || ant.dr <= 0 ? {hp: -9, md: -2} : ant.fd < 9 || ant.dr < 9 ? {hp: -.05, md: -.05} : {hp: ant.md < 9 ? -.05 : -.01});
         // Detect hunger/thirst deaths.
         if (ant.hp <= 0 && !ant.fight) {
-          if (ant.fd <= 0) antFinna(ant, 'die', {r: 'hunger'});
-          else if (ant.dr <= 0) antFinna(ant, 'die', {r: 'thirst'});
+          if (ant.fd <= 0) antFinnaUnique(ant, 'die', {r: 'hunger', n: 1});
+          else if (ant.dr <= 0) antFinnaUnique(ant, 'die', {r: 'thirst', n: 1});
           // Note: 'fight' and 'other' deaths should be handled elsewhere.
         }
-        // Ant tries to nourish from fill material if they are in a tunnel.
-        ant.area.t && fillRefectory(ant);
         // Cap ant's mood at the maximum its ant type can have.
         ant.md = min(ant.md, types[ant.t].m || 100);
-        //
-        if (ant.fight) {
-          // Summon reinforcement ant.
-          temp1 = pickRandom(farm.a.filter(a => livesInFarm(a) && !a.fight && (isWorker(a) || !randomInt(4))));
-          temp1 && !randomInt(2) && antGoToAnt(temp1, ant);
-        }
-        // Curb major problems.
-        ant.dr < 9 && antFinnaUnique(ant, 'drink');
-        ant.fd < 9 && antFinnaUnique(ant, 'eat');
-        ant.hp < 9 && antFinnaUnique(ant, 'rest', {n: 1}); // n:1 means "do it anywhere" since antFinnaUnique() passes through to antFinnaVia().
-        if (antUniqueActs(ant).every(a => ['crawl', 'pace', 'dive', 'tunWalk', 'rotWalk'].includes(a))) {
-          // Ant is "defaulting".
-          setTimeout(X => {// This is a random timeout because it looks super sus if several ants make a decision at the same time.
-            if (isWorker(ant) && !randomInt(3) && (!farmIsDeveloping(farm) || farmHasQueen(farm)) && farm.a.filter(a => a.digD).length < 3) antFinnaVia(ant, 'dig'); // Curb slack workers problem.
-            else if (!randomInt(5)) antFinnaVia(ant, pickRandom(acts[ant.area.n].filter((task, i) => i > 0 && !{Q: ['dig', 'rest'], D: ['dig']}[ant.caste]?.includes(task))), {n: ant.area.n}); // Randomly pick a non-default action.
-            else if (!randomInt(5)/* START-DEV */&& acts[ant.area.n].includes('dive')/* END-DEV */) antFinnaUnique(ant, 'dive'); // Increase chance of ants diving.
-            else if (!randomInt(5)/* START-DEV */&& acts[ant.area.n].includes('crawl')/* END-DEV */) antFinnaUnique(ant, 'crawl'); // Increase chance of ants crawling.
-          }, randomInt(shortDelay * 2));
-          // Hints for player.
-          ant.md < 25 && !farmHasQueen(farm) && playerHint(farm, ['Comrade, the workers are restless. They have no queen.', 'The absence of a queen is going to become a problem.']);
-          ant.md < 20 && !farmFlairScore(farm) && playerHint(farm, ['Some of your ants are complaining about the lack of scenery and decor.', "This farm doesn't have flair, the ants would like some decorations."]);
-          // Randomly go to vial.
-          temp1 = pickRandom(farm.nips);
-          if (temp1 && !farm.foe && !randomInt((farm.dun ? 90 : farmIsDeveloping(farm) ? 120 : deg180) - (farm.items.some(i => i.t == 'food' && i.sz > 0) ? 0 : 30) - (farm.items.some(i => i.t == 'drink' && i.sz > 0) ? 0 : 40))
-            && antFinnaUnique(ant, 'nip', {nip: temp1.nip}));
+        if (!ant.inf) {
+          // None of these forced actions should apply to infants.
+          // Ant tries to nourish from fill material if they are in a tunnel.
+          ant.area.t && fillRefectory(ant);
+          // Check if ant is fighting.
+          if (ant.fight) {
+            // Summon reinforcement ant.
+            temp1 = pickRandom(farm.a.filter(a => livesInFarm(a) && !a.fight && (isWorker(a) || !randomInt(4))));
+            temp1 && !randomInt(2) && antGoToAnt(temp1, ant);
+          }
+          // Curb major problems.
+          ant.dr < 9 && antFinnaUnique(ant, 'drink');
+          ant.fd < 9 && antFinnaUnique(ant, 'eat');
+          ant.hp < 9 && antFinnaUnique(ant, 'rest', {n: 1}); // n:1 means "do it anywhere" since antFinnaUnique() passes through to antFinnaVia().
+          if (ant.q.length < 9 && antUniqueActs(ant).every(a => ['crawl', 'pace', 'dive', 'tunWalk', 'rotWalk'].includes(a))) {
+            // Ant is "defaulting".
+            setTimeout(X => {// This is a random timeout because it looks super sus if several ants make a decision at the same time.
+              if (temp1 = acts[ant.area.n]) {
+                if (isWorker(ant) && !randomInt(3) && (!farmIsDeveloping(farm) || farmHasQueen(farm)) && farm.a.filter(a => a.digD).length < 3) antFinnaVia(ant, 'dig'); // Curb slack workers problem.
+                else if (!randomInt(5)) antFinnaVia(ant, pickRandom(temp1.filter((task, i) => i > 0 && !{Q: ['dig', 'rest'], D: ['dig']}[ant.caste]?.includes(task))), {n: ant.area.n}); // Randomly pick a non-default action.
+                else if (!randomInt(5)/* START-DEV */&& temp1.includes('dive')/* END-DEV */) antFinnaUnique(ant, 'dive'); // Increase chance of ants diving.
+                else if (!randomInt(5)/* START-DEV */&& temp1.includes('crawl')/* END-DEV */) antFinnaUnique(ant, 'crawl'); // Increase chance of ants crawling.
+              }
+            }, randomInt(shortDelay * 2));
+            // Hints for player.
+            ant.md < 25 && !farmHasQueen(farm) && playerHint(farm, ['Comrade, the workers are restless. They have no queen.', 'The absence of a queen is going to become a problem.']);
+            ant.md < 20 && !farmFlairScore(farm) && playerHint(farm, ['Some of your ants are complaining about the lack of scenery and decor.', "This farm doesn't have flair, the ants would like some decorations."]);
+          }
+          // Randomly go to vial or tube.
+          farm.nips.length && !farm.foe
+            && !randomInt((farm.dun ? 90 : farmIsDeveloping(farm) ? 120 : deg180) - (farm.items.some(i => i.t == 'food' && i.sz > 0) ? 0 : 30) - (farm.items.some(i => i.t == 'drink' && i.sz > 0) ? 0 : 40))
+            && antFinnaUnique(ant, 'nip', {nip: pickRandom(farm.nips).nip});
         }
       }, 1);
       setTimeout(X => {// Delay a chunk so the director function doesn't intefere with the displayed farm too much.
-        if (ant['inf'] && canUpgrade(ant, ant['inf'])) {
-          // Infant upgrader.
-          temp1 = objGetEl(ant).classList;
+        // WARNING! Because this chunk of code is delayed since farm.a was iterated, there is a chance the ant object provided here is NO LONGER in the farm.a data set!  If bugs arise, consider if this is the reason!
+        if (ant.inf && (temp1 = objGetEl(ant)?.classList)) {
           temp2 = ['a1', 'a2', 'a3'];
-          if (++ant['inf'] > 4) {
-            del(ant, 'inf', 'moveTo');
-            ant.state = 'cap';
-            !randomInt(9) && (ant.scale *= -1);
-            temp1.remove(...temp2);
-            antAction(ant);
-            isDrone(ant) && _.man++;
+          if (canUpgrade(ant, ant.inf)) {
+            // Infant upgrader.
+            if (++ant.inf > 4) {
+              del(ant, 'inf', 'moveTo', 'Q', 'pc');
+              temp1.remove(...temp2);
+              antAction(ant);
+              isDrone(ant) && _.man++;
+              msg(`${ant.n} in "${farm.n}" is now an adult ${types[ant.t].n} ant ${casteLabel(ant).toLowerCase()}!`);
+            }
+            ant.inf == 2 && msg(`Larva ${ant.n} in "${farm.n}" has puped!`);
           }
-          else temp1[pickRandom(['add', 'remove'])](pickRandom(temp2));
+          else temp1[pickRandom(['add', 'remove'])](pickRandom(temp2)); // Provides randomised animations - HOWEVER these are so subtle I'm not sure this was worth it.
+          if (!randomInt(9)) ant.r += randomInt(8) - 4 - normalize180(ant.r * 2) * .02; // Random rotation bump, but bias towards horizontal.
+          if ((temp1 = getTun(farm, ant.area.t)) && temp1.t == 'cav' && (temp2 = cavFloor(temp1, getTunPosition(ant, farm).pc))) ant.y += (temp2.y - ant.y) * .2; // Move infant towards the floor of the cav.
           antUpdate(ant);
+          // Fix infants that dodged the 'moveTo' workflow by being in the wrong place at the wrong time.
+          if (farm.a.find(a => a.id == ant.Q && livesInFarm(a))) del(ant, 'moveTo'); // Clear moveTo flag if queen came back.
+          else if (!ant.moveTo && (temp1 = isAntsQueenInConnectedItem(ant, farm, 1))) ant.moveTo = temp1; // Add a moveTo flag if queen is found in connected vial/farm.
+          // Readjust y-value if sitting on surface due to hill heights growing.
+          if (ant.area.n == 'top') {
+            ant.y = antGroundLevel(ant, 0) + 2;
+          }
         }
         else if (isQueen(ant)) {
           // Extra handling for Queens.
           if (!farmIsDeveloping(farm) && !farm.a.filter(a => isServant(ant, a)).length && ant.q.length < 2 && !randomInt(3)) antFinnaUnique(ant, 'dig'); // A queen without workers may dig a nest to start a colony.
-          else if (!isQueenAwaiting(ant) && ant.fd < 90 || ant.dr < 90)
+          if (!isQueenAwaiting(ant) && (ant.fd < 90 || ant.dr < 90))
             antFinnaUnique(pickRandom(farm.a.filter(a => isServant(ant, a) && !a.carry && a.q.length < 9 && !hasCarryTasks(a))), 'srv'); // Reduces the possibility of a queen having to eat or drink by herself.
-          else if (ant.hp < 95 && ant.q.length < 2 || ant.hp < 80) antFinnaUnique(ant, 'kip');
+          if (ant.hp < 95 && ant.q.length < 2 || ant.hp < 80) antFinnaUnique(ant, 'kip');
           // Being a queen takes an extra toll.
           antStats(ant, {fd: -.05, dr: -.05, hp: -.1, md: -.05});
           // Queen's presence boosts moodiest ant's MD.
           if (temp1 = farm.a.filter(a => a.caste != 'Q').reduce((min, a) => a.md < min.md ? a : min, 0)) antStats(temp1, {md: .3});
-          randomInt(2) && farm.a.filter(a => isServant(ant, a)).length < 3 && care4kids(farm, ant); // Farm with not enough workers?  Queen maybe performs an extra care task per cycle.
+          randomInt(2) && farm.a.filter(a => isServant(ant, a)).length < 3 && ant.q.length < 20 && care4kids(farm, ant); // Farm with not enough workers?  Queen maybe performs an extra care task per cycle.
         }
-        else if (isDrone(ant)) {
-          // Being a drone takes an extra toll.
+        else if (isDrone(ant) && !ant.inf) {
+          // Being an adult drone takes an extra toll.
           antStats(ant, {fd: -.02, dr: -.02, hp: -.02, md: -.02});
           // Cap drone's HP lower and lower over time, making it harder to stay alive.
           ant.maxhp = ant.maxhp ? clamp(ant.maxhp - .01, 1, 99) : 99;
           ant.hp = min(ant.hp, ant.maxhp);
         }
         // If ant didn't drop, it needs to be requeued.
-        ant.carry && !hasCarryTasks(ant) && ant.carry.q?.forEach(q => ant.q.push(q));
+        if (ant.carry && !hasCarryTasks(ant)) ant.carry.q ? ant.carry[ant.carry.f && ant.f != ant.carry.f ? 'q2' : 'q'].forEach(q => antFinnaUnique(ant, q.act, {...q})) : ant.carry.Q ? antFinna(ant, 'srv', ant.carry) : ant.q.push(ant.carry);
       }, num500);
       // Update the ant's thoughts, but limit it to changing every 10th loop (~5 minutes) so as not to override thoughts, particularly those set within other functions, too soon.
       ant.thotD > 9 ? antThot(ant) : ant.thotD++;
@@ -4743,14 +4976,17 @@ director = (temp1, temp2) => {
     setTimeout(X => {// Delay these extra bits to not perform everything all at the same time.
       farm.e.forEach(e => {
         // Decrease egg stats.
-        e.hp -= .3;
+        e.hp -= .2;
         timeLog(e); // Update duration.
-        if (e.hp <= 0) eggDelete(e); // Remove dead egg.
+        if (e.hp < 0) {
+          // Note: Ideally there'd be a dead-egg state/graphic for a while instead of just deleting it, but this will do for now.
+          eggDelete(e); // Remove dead egg.
+          msg(`An egg in "${farm.n}" perished due to neglect.`, 'err');
+        }
         else if (canUpgrade(e)) {
           // Egg can upgrade.
-          temp1 = cavFloor(getTun(farm, e.area.t), e.pc); // Floor coordinate.
           // Create an infant.
-          temp2 = assign(createAnt(farm, temp1.x, temp1.y, e.r, 'inf', e.caste, e.t), {
+          temp2 = assign(createAnt(farm, e.x, e.y, e.r, 'cap', e.caste, e.t), {
             Q: e.Q, // Mark the infant's mother.
             scale: randomSign(),
             f: farm.id,
@@ -4759,15 +4995,36 @@ director = (temp1, temp2) => {
             thot: pickRandom(["🧩🔒⏳", "🙂💡🚫", "🐢✨🚗", "🎎💁🍛"]),
             thotD: 1,
             inf: 1,
+            area: e.area,
+            pose: 'prone',
+            moveTo: e.moveTo,
+            pc: e.pc
           });
           eggDelete(e);
-          currentFarm(farm) && antDraw(temp2);
+          msg(`An egg in "${farm.n}" hatched into larval ${types[temp2.t].n} ant ${casteLabel(temp2).toLowerCase()} ${temp2.n}!`);
+        }
+        // Fix eggs that dodged the 'moveTo' workflow by being in the wrong place at the wrong time.
+        if (farm.a.find(a => a.id == e.Q && livesInFarm(a))) del(e, 'moveTo'); // Clear moveTo flag if queen present.
+        else if (!e.moveTo && (temp1 = isAntsQueenInConnectedItem(e, farm, 1))) e.moveTo = temp1; // Add a moveTo flag if queen is found in connected vial/farm.
+        // Readjust y-value if sitting on surface due to hill heights growing.
+        if (e.area.n == 'top'){
+          e.y = antGroundLevel(e, 0) + 2;
         }
       });
       // Look for dead ants, eggs, or infants that need moving.
       trySetCarryTask(farm);
       // Look for infants and eggs and see which one needs to be cared for next.
       care4kids(farm);
+      // Extra care call if there are infants or eggs with hp dipping.
+      if (farm.a.some(ant => ant.inf && ant.hp < 49) || farm.e.some(egg => egg.hp < 49)) care4kids(farm);
+      // Unmorgue the morgue if no need for a morgue.
+      (temp1 = farm.tuns.find(t => t.morgue)) && !farm.a.some(deadInFarm) && del(temp1, 'morgue');
+      // Reload if user idle (lastActivity over 30s ago) and loadTime over 6 hours ago.
+      // This prevents a bug that crashes the tab if left open overnight.
+      if (getTime() - lastActivity > 30000 && getTime() - loadTime > 21600000) {
+        save();
+        location.reload();
+      }
     }, num2000);
     fightSongCheckAndStop(); // Check if fight song didn't turn off.
   });
@@ -4794,7 +5051,7 @@ checkAchievements = (countWins, count = 0,
       sweep: X => F.sweep,
       kweens: X => F.a.filter(a => isQueen(a) && livesInFarm(a) && (a.t == F.t || F.coex)).length > 1,
       progeny: X => farmIsDeveloping(F) && !F.stats['cap'],
-      drag: X => _.dq,
+      drag: X => _.dq && !_.farms.some(farm => farm.nips.some(nip => nip.item.k == 'tube' && nip.item.a.some(isQueen))), // Extra check to ensure tubes don't contain queen, because that's confusing if this fires early.
       hb: X => F.stats.death.other > 9,
       day: X => F.dur > 86400,
       weak: X => F.dur > 604800,
@@ -4872,24 +5129,21 @@ displayMessage = X => {
     setTimeout(displayMessage, 4000);
   }
   else showMsgs = 0;
-  scroller ||= setInterval(scrollMessages, num2000);
+  // Keep the messages scrolling.
+  scroller ||= setInterval((lastmsgEl = getEl('messages').firstChild, msgEl = getEl('messages')) => {
+    if (hasFocus() && lastmsgEl && getTime() - parseInt(lastmsgEl.dataset.ts) > 12000) {
+      msgEl.firstChild.classList.add('rm');
+      setTimeout(X => {msgEl.firstChild && msgEl.removeChild(msgEl.firstChild); !showMsgs && displayMessage()}, num500);
+      if (!messages.length) scroller = stopInterval(scroller);
+    }
+  }, num2000);
 },
-
-// Removes the oldest message.
-removeMessage = (msgEl = getEl('messages')) => {
-  msgEl.firstChild.classList.add('rm');
-  setTimeout(X => {msgEl.firstChild && msgEl.removeChild(msgEl.firstChild); !showMsgs && displayMessage()}, num500);
-  if (!messages.length) scroller = stopInterval(scroller);
-},
-
-// Keeps the messages scrolling.
-scrollMessages = (lastmsgEl = getEl('messages').firstChild) => hasFocus() && lastmsgEl && getTime() - parseInt(lastmsgEl.dataset.ts) > 12000 && removeMessage(),
 
 // Adds a message to the array.
 msg = (txt, type = 'status') => messages.push({msg: txt, t: type}) && !showMsgs && displayMessage(),
 
 // Displays random messages, with message flood protection.
-randomMsg = (msgs, isJoke = 0, i = 0, randMsg) => {
+randomMsg = (msgs, isJoke, i = 0, randMsg) => {
   if (messages.length || !hasFocus())
     // There are already messages waiting in the queue, or the player is not watching, wait a bit and try again.
     // Except if it's a joke, just give that a miss.
@@ -4922,10 +5176,10 @@ joker = (i = _.farms.filter(farmIsRunning).length - 1) => {
 // Outputs a warning msg, but only if one from the same set hasn't been shown recently, and only if it's for the current farm.
 playerHint = (farm, msgs) => {
   while (warnings[0] && warnings[0][1] < getTime() - longDelay) warnings.shift();
-  if (hasFocus() && !warnings.some(w => w[0] == msgs.join(';'))) {
+  if (hasFocus() && !warnings.some(w => w[0] == farm.id + msgs.join(';'))) {
     if (currentFarm(farm)) {
       msg(pickRandom(msgs), 'warn');
-      warnings.push([msgs.join(';'), getTime()]);
+      warnings.push([farm.id + msgs.join(';'), getTime()]);
     }
     else {
       playerHint(F, [`"${farm.n}" (${getFarmDesc(farm)}) needs attention!`]);
@@ -4996,37 +5250,41 @@ playSound = (snd, v = 1) => {
 Q = X => {quitting = 1; localStorage.removeItem('_'); location.reload()};
 
 
-///////////////////
+//***************//
 // Load the app. //
-///////////////////
+//***************//
 window.addEventListener('load', antFarmSocial);
 
-///////////////////
+//***************//
 // Fix ants pos. //
-///////////////////
-window.addEventListener('focus', X => {
-  F.a.forEach(antUpdate);
-  _.a.forEach(antUpdate);
-  F.nips.forEach(n => n.item.a.forEach(antUpdate));
-});
+//***************//
+window.addEventListener('focus', fixAntPos);
 
-///////////////////
+//***************//
 // Resize trigs. //
-///////////////////
+//***************//
 window.addEventListener('resize', X => {
   getEl('wrapper').getBoundingClientRect(); // For the magnifier.
   tubeFollowLinkPosition(); // For the tube follow links.
 });
 
-///////////////////
+//***************//
 // Save on exit. //
-///////////////////
+//***************//
 window.addEventListener('pagehide', save);
 
-///////////////////
+//***************//
 // Save predict. //
-///////////////////
+//***************//
 document.addEventListener('mousemove', e => {
   !e.clientY && save();
+  lastActivity = getTime();
+});
+
+//***************//
+// Touch track.  //
+//***************//
+window.addEventListener('touchstart', e => {
+  lastActivity = getTime();
 });
 

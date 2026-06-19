@@ -33,6 +33,12 @@ to get back into it, here are some tips:
   careful consideration.  Many ideas going into this project have been ditched
   as even the MVP features (to make the game winnable) have considerable scope.
   Check TODO.md for some ideas that have survived but are just not implemented.
+- Note that development tends to involve weeks/months of playtesting a very slow game,
+  think twice before making that commitment!
+- If a bug can be explained with a creative narrative, then it is a feature. If it
+  is curious, interesting, or keeps the players attention then it counters the
+  intrinsic blandness of the sim.  It may also pose an unexpected challenge, such
+  as making the choice to dump a farm.
 
 ### Developer Cheats
 
@@ -88,7 +94,7 @@ Since this app uses a lot of resources every opportunity is taken to reduce size
 - However anything that makes it to the final output should be short, such as object keys and CSS class names, at least as much as can be reasonably
   understood for the sake of development.  There is no minification employed for these things and they perhaps could use improvement.
 - Gulp reports a gzip size for the combined & minified js file which can help evaluate the effectiveness of refactoring.  A log of these reports is
-  generated too so you can track progress. Results often reveal efforts are counter-intuitive as "Gzip hates your DRY code".
+  generated too (temp dir) so you can track progress. Results often reveal efforts are counter-intuitive as "Gzip hates your DRY code".
 - Gulpfile uses dev dependencies to minify JS/CSS/HTML (as is normally done for web projects).
 - HTML files and HTML in Javascript strings get squeezed in gulp tasks using [HyperCrush](https://www.npmjs.com/package/hypercrush)
 - Note: `JCrush SVG`, and `HyperCrush` were developed specifically for this app.

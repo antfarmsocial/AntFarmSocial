@@ -94,6 +94,7 @@ p {
 
 
 
+
 /* App container styles */
 
 #afs {
@@ -300,12 +301,60 @@ p {
   mix-blend-mode: screen;
   filter: blur(5px);
   &.vis {
-    opacity: .6;
+    opacity: .5;
   }
 }
 
 #game.ss {
   animation: warp .5s forwards;
+}
+
+@keyframes ssPulse {
+  0%, 100% {
+    opacity: .6;
+    border-color: #00C0FF;
+  }
+  50% {
+    opacity: .8;
+    border-color: #7FFFFF;
+  }
+}
+
+@keyframes ssPulse2 {
+  0%, 100% {
+    outline-width: 2px;
+    outline-color: #00C0FF;
+  }
+  50% {
+    outline-width: 3px;
+    outline-color: #7FFFFF;
+  }
+}
+
+#glass::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .5s;
+  border: 2px solid #00F0FF;
+  border-radius: 1px;
+  filter: blur(4px);
+}
+
+body.warp {
+  #glass::after {
+    outline: 3px solid #00F0FF;
+    animation: ssPulse .8s infinite alternate;
+  }
+  .toob, #vial {
+    > div:not(.vs,.vc) {
+      outline: 3px solid #00F0FF;
+      animation: ssPulse2 .8s infinite alternate;
+      filter: blur(2px);
+    }
+  }
 }
 
 
@@ -546,8 +595,8 @@ body {
 
 
 
-
 /* Switch styles */
+
 #switch {
   position: absolute;
   left: 0;
@@ -649,6 +698,7 @@ body {
 .deny {
   cursor: not-allowed;
 }
+
 
 
 
@@ -1195,6 +1245,7 @@ body {
   left: 50px;
   right: 50px;
   bottom: 0;
+  z-index: 9;
   &::before {
     content: "";
     display: block;
@@ -1334,15 +1385,18 @@ body {
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0) }
-  25%, 75% { transform: translateX(-.5px) rotate(-.25deg) }
-  50% { transform: translateX(.5px) rotate(.25deg) }
+  0%, 100% { transform: translate(0) }
+  25%, 75% { transform: translate(-.5px) rotate(-.25deg) }
+  50% { transform: translate(.5px) rotate(.25deg) }
 }
 
 .shake {
   animation-name: shake;
   animation-duration: 250ms;
   animation-timing-function: ease-in-out;
+  #fill {
+    bottom: 0; /* Fixes a bug where shake animation reveals a 1px gap between #hills and #fill, see also .fill style. */
+  }
 }
 
 #loupe {
@@ -1551,7 +1605,7 @@ body.glass #l-wrap {
 
 #farm .hill { /* must have #farm selector because .hill styles are usurped for another purpose */
   position: absolute;
-  transform: translateY(62%);
+  transform: translateY(62%) translateZ(0); /* the translateZ(0) reduces visual aberrations */
   bottom: 0;
   border-radius: 50%;
   max-height: 50px;
@@ -1562,9 +1616,9 @@ body.glass #l-wrap {
 }
 
 .fill {
-  height: 50%;
+  height: 511px; /* 1px larger than needed to cover up gaps between #hills and #fill when doing .shake */
   position: absolute;
-  bottom: 0;
+  bottom: -1px; /* the -1px (rather than 0) is to compensate for the height hack done above */
   left: 0;
   right: 0;
 }
@@ -1938,6 +1992,9 @@ body.glass #l-wrap {
     svg {
       height: 180px;
     }
+  }
+  .pyramids {
+    transform: translateY(2px); /* Conceals a bug where the pyramids SVG has a mysterious ~2px gap underneath */
   }
 }
 
@@ -2514,7 +2571,8 @@ body.glass #l-wrap {
   opacity: 0;
   border-radius: 50%;
   background: white;
-  transition: .5s all;
+  /*transition: .5s all;*/ /* Transitioning 'all' is intefering with infants upon page load, I don't remember why it was written this way in the first place.  Probably safe to remove this line in the future. */
+  transition: opacity .5s;
   width: 40px;
   height: 40px;
   position: absolute;
@@ -3086,6 +3144,21 @@ body.glass #l-wrap {
   50% { filter: blur(24px); opacity: .4 }
 }
 
+@keyframes stink {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--RT)) translateY(0);
+  }
+  50% {
+    opacity: .5;
+    transform: rotate(var(--RT)) translateY(-9px);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--RT)) translateY(-24px);
+  }
+}
+
 .rot .spot,
 .fight .spot {
   background: #ff0000;
@@ -3097,12 +3170,29 @@ body.glass #l-wrap {
 .rot .spot {
   background: #78a300;
   opacity: .1;
+
 }
 .rot1 .spot {
   opacity: .2;
 }
 .rot2 .spot {
   opacity: .3;
+}
+.rot {
+  --RT: 0; /* Ro Tation */
+  --AD: 0; /* Anim Duration */
+}
+.rot::after {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 40px;
+  background: url(../img/gif/stink.webp) no-repeat 50% 50%;
+  background-size: 16px 16px;
+  position: absolute;
+  top: -10px;
+  left: -16px;
+  animation: stink var(--AD) linear infinite;
 }
 
 body.bit .ant {
@@ -3299,12 +3389,25 @@ body.bit .ant {
     height: 2px;
   }
 }
+.egg, .inf1, .inf2, .inf3, .inf4 {
+  &.lvl1 {
+    margin-top: -5px;
+  }
+  &.lvl2 {
+    margin-top: -10px;
+  }
+  &.lvl3 {
+    margin-top: -15px;
+  }
+  &.lvl4 {
+    margin-top: -20px;
+  }
+}
 
 .inf1,
 .inf2,
 .inf3,
-.inf4,
-.inf5 {
+.inf4 {
   .legs, .antenna {
     display: none;
   }
@@ -3325,6 +3428,10 @@ body.bit .ant {
     .rear {
       top: 36px;
     }
+  }
+  .wings,
+  .c {
+    display: none;
   }
 }
 
@@ -3348,6 +3455,8 @@ body.bit .ant {
     border-bottom-right-radius: 6px;
     filter: drop-shadow(-1px 0 1px #c4c29b);
     z-index: 1;
+    transition: none;
+    scale: .5;
     &::after,
     &::before {
       content: '';
@@ -3375,6 +3484,7 @@ body.bit .ant {
   .body {
     opacity: .8;
     margin-left: -1px;
+    scale: .5;
     .body-wrap * {
       background: #9b9b91 !important;
       border-color: #d6d6c9 !important;
@@ -3426,10 +3536,11 @@ body.bit .ant {
   }
 }
 
-.inf2, .inf3, .inf4, .inf5 {
+.inf2, .inf3, .inf4 {
   filter: drop-shadow(1px 1px .5px #dfdfdc);
   .body {
     opacity: .8;
+    scale: .7;
   }
   .spot {
     width: 3px;
@@ -3444,6 +3555,7 @@ body.bit .ant {
     border-radius: 6px;
     border-top-left-radius: 18px;
     border-bottom-left-radius: 50px;
+    scale: .7;
   }
   &.m .spot {
     width: 4px;
@@ -3488,7 +3600,6 @@ body.bit .ant {
     z-index: 1;
   }
 }
-
 
 
 
@@ -3905,8 +4016,11 @@ body.bit .ant {
   }
   &.nip-tl, &.nip-bl {
     &.on {
-      left: -600px;
+      left: -600px !important;
     }
+  }
+  .egg, .inf1, .inf2, .inf3, .inf4 {
+    z-index: 3 !important;
   }
 }
 
@@ -5175,6 +5289,8 @@ body.bit .ant {
   position: absolute;
   bottom: 0;
 }
+
+
 
 
 

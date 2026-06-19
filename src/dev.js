@@ -92,6 +92,21 @@ const toggleWaypoints = (delOnly, tracer = 0) => {
 
 };
 
+// Waypoint highlighter.
+const devHighlightWaypoint = (farm, wp, color = 'black', duration = 500) => {
+  const wpEls = queryAll(`#kit[data-id=${farm.id}] .waypoint`);
+  if (wpEls.length) {
+    const el = wpEls[wp.i];
+    if (el) {
+      el.style.outline = '1px solid ' + color;
+      setTimeout(X => {
+        if (el) {
+          el.style.outline = 'none';
+        }
+      }, duration); // remove after duration.
+    }
+  }
+};
 
 // Handle the trans checkbox.
 const handleTrans = () => {
@@ -130,6 +145,21 @@ const devNotifySwitch = X => {
 // Creates a fully formed tunnel system.
 const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog = 100; t.dun = 1; tunProgDraw(t)}) || F.hills.forEach(h => {h.h = (h.r - h.l) / 4; drawHill(h)}), 0);
 
+const getLocalStorageSizeInMB = X => {
+  if (!window.localStorage) return "localStorage not supported";
+  const encoder = new TextEncoder();
+  let totalBytes = 0;
+  // Loop through all keys and sum byte sizes of key and value
+  for (const key of Object.keys(localStorage)) {
+    const value = localStorage.getItem(key);
+    totalBytes += encoder.encode(key).byteLength;
+    totalBytes += encoder.encode(value).byteLength;
+  }
+  const totalMB = (totalBytes / (1024 * 1024)).toFixed(2);
+  const totalKB = (totalBytes / 1024).toFixed(2);
+  return `Data loaded: ${parseFloat(totalMB)} MB (${totalKB} KB)`;
+};
+
 // Dispays the developer panel.
   const devPanel = X => {
   let devParams = new URLSearchParams(window.location.search);
@@ -163,6 +193,23 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
     devBannedActsOpts += '<br>';
   });
 
+  // Ant points.
+  let isSideTunWalking = firstAnt => firstAnt.pose == 'side' && firstAnt.area.t;
+  let antPoints = {
+    "head-point": ["Head", firstAnt => antHeadPoint(firstAnt), 'magenta', X => 1],
+    "mid-point": ["Mid (ant coord)", firstAnt => firstAnt, 'lightgrey', X => 1],
+    "tail-point": ["Tail", firstAnt => antTailPoint(firstAnt), 'green', X => 1],
+    "foot-point": ["Foot", firstAnt => antFootPoint(firstAnt), 'cyan', firstAnt => isSideTunWalking(firstAnt)],
+    "front-foot-point": ["Front foot", firstAnt => antFootPoint(antHeadPoint(firstAnt)), 'pink', firstAnt => isSideTunWalking(firstAnt)],
+    "rear-foot-point": ["Rear foot", firstAnt => antFootPoint(antTailPoint(firstAnt)), 'yellow', firstAnt => isSideTunWalking(firstAnt)],
+  };
+  let antPointOpts = [];
+  for (let [name, pointData] of Object.entries(antPoints)) {
+    antPointOpts.push(`<label><input type="checkbox" name="dev-ant-points" id="dev-ant-points-${name}" value="${name}"><span style="color: ${pointData[2]};">╋</span> ${pointData[0]} point</label>`);
+  }
+  antPointOpts = antPointOpts.join('<br>');
+
+
 
   appendHTML(B, `
     <div id="dev">
@@ -171,38 +218,54 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
 
       <hr>
 
-      Score <input type="number" id="dev-score" name="dev-score" value="1">
-      <label><input type="checkbox" id="dev-bonus" name="dev-bonus">bonus</label>
-      <button id="dev-score-submit">➕ Score</button>
+      <details>
+        <summary id=scoresAndDrops>Scores & Drops</summary>
+        <br>
+        Score <input type="number" id="dev-score" name="dev-score" value="1">
+        <label><input type="checkbox" id="dev-bonus" name="dev-bonus">bonus</label>
+        <button id="dev-score-submit">➕ Score</button>
 
-      <br>
+        <br>
 
-      <select name="dev-drop-item" id="dev-drop-item">${devDropOpts}</select>
-      <button id="dev-drop">🎁 Drop</button>
+        <select name="dev-drop-item" id="dev-drop-item">${devDropOpts}</select>
+        <button id="dev-drop">🎁 Drop</button>
 
-      <br>
+        <br>
 
-      <select name="dev-ach-item" id="dev-ach-item">${devAchOpts}</select>
-      <button id="dev-ach">🏆 Ach</button>
+        <select name="dev-ach-item" id="dev-ach-item">${devAchOpts}</select>
+        <button id="dev-ach">🏆 Ach</button>
 
-      <hr>
-
-      <button id="dev-ss">🚀 Super speed</button>
-      <label><input type="checkbox" id="dev-ss-reapply" name="dev-ss-reapply">reapply</label>
-      <br>
-      <button id="dev-ns">🐌 Normal speed</button>
-      <br>
-      <span id="framerate">50fps</span> <button id="dev-rs">📉 Reduce fps</button>
+      </details>
 
       <hr>
 
-      Clone # <input type="number" id="dev-clone-x" name="dev-clone-x" min="1" value="3">
-      <button id="dev-clone">👯 Clone</button>
-      <br>
-      <button id="dev-bite">🧛 Ant bite</button>
-      <button id="dev-clearbite">🧴 Clear bite</button>
-      <button id="dev-cologne">💨 Cologne</button>
 
+      <details>
+        <summary id=speedCtrl>Speed Control</summary>
+        <br>
+
+        <button id="dev-ss">🚀 Super speed</button>
+        <label><input type="checkbox" id="dev-ss-reapply" name="dev-ss-reapply">reapply</label>
+        <br>
+        <button id="dev-ns">🐌 Normal speed</button>
+        <br>
+        <span id="framerate">50fps</span> <button id="dev-rs">📉 Reduce fps</button>
+
+      </details>
+
+      <hr>
+
+      <details>
+        <summary id=powerUps>Power Ups</summary>
+        <br>
+        Clone # <input type="number" id="dev-clone-x" name="dev-clone-x" min="1" value="3">
+        <button id="dev-clone">👯 Clone</button>
+        <br>
+        <button id="dev-bite">🧛 Ant bite</button>
+        <button id="dev-clearbite">🧴 Clear bite</button>
+        <button id="dev-cologne">💨 Cologne</button>
+
+      </details>
 
       <hr>
 
@@ -212,6 +275,8 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
       <br>
       <button id="dev-spawnant">🐜 + Ant spawn</button>
       <button id="dev-clearants">🗑️ Clear all ants</button>
+      <br>
+      <button id="dev-cleardeadants">💀 Clear dead ants</button>
       <br>
 
 
@@ -227,6 +292,16 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
 
       <br>
       <button id="dev-antcycle">↳ cycle ant order</button>
+
+      <br>
+
+      <details>
+        <summary id=mngAntPoints>Ant Points</summary>
+          <small>Waypoints must be on.<br>Foot points show on side tun walk.</small>
+          <div id="dev-ant-points">
+            ${antPointOpts}
+          </div>
+      </details>
 
       <hr>
 
@@ -299,6 +374,10 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
           <button id="dev-gotoloc">📍 Go</button>
         </div>
 
+        <button id="dev-gotonip"><span style="display:inline-block;border-radius:3px;background:#a3da86;font-weight:bold;padding: 0 3px;">➜]</span> Queue a nip walk</button>
+        <br>
+        <button id="dev-egglay">🥚 Request egg laying</button>
+
       </details>
 
       <hr>
@@ -327,6 +406,8 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
       <button id="dev-save" style="margin-bottom: .5em" disabled>💾 Save game<span class="countdown"></span></button>
       <br>
       Use after editing vars <input id="d_" class="devinput" type="text" name="_" value="_" disabled> and <input id="dF" class="devinput" type="text" name="F" value="F" disabled> in console
+      <br>
+      ${getLocalStorageSizeInMB()}
 
       <hr>
 
@@ -388,15 +469,23 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
       #dev #framerate {
         font-family: monospace;
       }
+      #dev-ant-points {
+        width: 50%;
+        margin: 0 auto;
+      }
+      #dev #dev-ant-points,
       #dev #dev-banned-acts {
         text-align: left;
       }
+      #dev #dev-ant-points input,
       #dev #dev-banned-acts input {
         display: none;
       }
+      #dev #dev-ant-points label:has(input:checked),
       #dev #dev-banned-acts label {
         color: #006400;
       }
+      #dev #dev-ant-points label:not(:has(input:checked)),
       #dev #dev-banned-acts label.ban {
         color: #8B0000;
         text-decoration: line-through;
@@ -489,9 +578,8 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
         background-color: red;
         border: 1px solid blue;
       }
-      #mngTuns,
-      #gotoLoc {
-        color:#356AA0;
+      details summary {
+        color: #356AA0;
       }
       #locForm {
           background: rgba(212, 212, 212, 0.35);
@@ -564,6 +652,40 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
       .frame.frametrans {
         opacity: .2;
       }
+
+      .ant-point {
+        position: absolute;
+        width: 9px;
+        height: 9px;
+        transform: translate(-50%, -50%);
+        z-index: 50;
+        opacity: .5;
+      }
+      .ant-point::before,
+      .ant-point::after {
+        content: '';
+        position: absolute;
+        boxxx-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5);
+
+        background-color: var(--crosshair-color);
+      }
+      /* horizontal line */
+      .ant-point::before {
+        width: 9px;
+        height: 1px;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+      }
+      /* vertical line */
+      .ant-point::after {
+        width: 1px;
+        height: 9px;
+        left: 50%;
+        top: 0;
+        transform: translateX(-50%);
+      }
+
     </style>
   `);
 
@@ -593,7 +715,7 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
     localStorage.setItem('stopAnts', stopAnts); // remember it
     document.querySelector('#dev-stopants-label').textContent = stopAnts ? '▶️ Start ants' : '🛑 Stop ants';
     if (!stopAnts) {
-      F.a.forEach(a => antAction(a, getEl(a.id))); // restart
+      F.a.forEach(a => a.inf || antAction(a)); // restart
     }
     _.a.forEach(antDelete);
     setTimeout(() => {
@@ -616,8 +738,49 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
   });
 
 
-  // Banned actions.
+  // Ant points.
+  let antPointsTimer = null;
+  const handleAntPoints = () => {
+    // Clear existing timer.
+    antPointsTimer && clearInterval(antPointsTimer);
+    if (document.querySelectorAll('input[name="dev-ant-points"]:checked').length > 0) {
+      // Some checkbox is checked.
+      // Create new timer loop.
+      antPointsTimer = setInterval(() => {
+        let waypoints = getEl('waypoints');
+        if (waypoints) {
+          // Clear existing points.
+          waypoints.querySelectorAll('.ant-point').forEach(el => el.remove());
+          let firstAnt = F.a[0];
+          // Create new points.
+          for (let [name, [title, pointFunc, color, showFunc]] of Object.entries(antPoints)) {
+            if (document.querySelector('#dev-ant-points-' + name).checked && showFunc(firstAnt)) {
+              let antPoint = document.createElement('div');
+              let point = pointFunc(firstAnt);
+              antPoint.className = 'ant-point ' + name;
+              antPoint.style.left = point.x + 'px';
+              antPoint.style.top = point.y - surface + 'px';
+              antPoint.style.setProperty('--crosshair-color', color);
+              waypoints.appendChild(antPoint);
+            }
+          }
+        }
+      }, 20);
+    }
+    else if (getEl('waypoints')) {
+      // Clear existing points.
+      getEl('waypoints').querySelectorAll('.ant-point').forEach(el => el.remove());
+    }
+  };
+  for (let [name, pointData] of Object.entries(antPoints)) {
+    getEl('dev-ant-points-' + name).addEventListener('change', () => {
+      handleAntPoints();
+    });
+  }
+  handleAntPoints();
 
+
+  // Banned actions.
   document.querySelectorAll('#dev-banned-acts input').forEach(cb => {
     cb.addEventListener('change', event => banAction(cb));
   });
@@ -643,6 +806,7 @@ const testTuns = X => dumpFarm(1) || setTimeout(X => F.tuns.forEach(t => {t.prog
   handleSpawner();
   handleTrans();
   handleDirector();
+  handleHistory();
 
   // Highlight selected tunnel in the list.
   if (document.querySelector('#dev-tunnel-list')) {
@@ -776,6 +940,9 @@ const devButtFunk = {
     F.a.forEach(antDelete);
     _.a.forEach(antDelete);
   },
+  'dev-cleardeadants': X => {
+    F.a.filter(deadInFarm).forEach(antDelete);
+  },
   'dev-reset-ant': X => {
     devResetAnt(F.a[0]); // Alias for the first ant
   },
@@ -871,6 +1038,15 @@ const devButtFunk = {
     }
     goToLocation(F.a[0], location);
   },
+  'dev-gotonip': X => {
+    F.nips.length && antFinnaUnique(F.a[0], 'nip', {nip: pickRandom(F.nips).nip});
+  },
+  'dev-egglay': X => {
+    let randomQueen = pickRandom(F.a.filter(isQueen));
+    if (randomQueen) {
+      antFinna(randomQueen, 'lay');
+    }
+  },
 
 };
 
@@ -901,9 +1077,10 @@ const devSave = (input) => {
   localStorage.setItem('afsDev', JSON.stringify(devData));
 };
 
+const devData = JSON.parse(localStorage.getItem('afsDev')) || {};
+
 // Loads form data from one localStorage item.
 const devLoad = (input) => {
-  const devData = JSON.parse(localStorage.getItem('afsDev')) || {};
   // Apply the saved value if it exists
   const devSavedValue = devData[input.id];
   if (devSavedValue !== undefined) {
@@ -984,12 +1161,16 @@ const devClear = () => {
   location.reload();
 };
 
+const isFloat = (value) => {
+  return typeof value === 'number' && !isNaN(value) && !Number.isInteger(value);
+}
+
 // Displays the HTML output of an object.
 const devObjectDisplay = obj => {
   let html = '';
   for (const key in obj) {
     if (obj.hasOwnProperty(key)) {
-      html += `<span class="row"><span class="label">${key}:</span><span class="value">${typeof obj[key] === 'object' && obj[key] !== null ? devObjectDisplay(obj[key]) : obj[key]}</span></span>`;
+      html += `<span class="row"><span class="label">${key}:</span><span class="value">${typeof obj[key] === 'object' && obj[key] !== null ? devObjectDisplay(obj[key]) : isFloat(obj[key]) ? obj[key].toFixed(2) : obj[key]}</span></span>`;
     }
   }
   return `<div>${html || '<em>(empty)</em>'}</div>`;
@@ -998,8 +1179,8 @@ const devObjectDisplay = obj => {
 // Displays the HTML of calculated properties of an ant.
 const devAntCalcDisplay = ant => {
   if (ant) return `
-    <div class="row"><span class="label">antFaceX:</span><span class="value">${antFaceX(ant).toFixed(4)}</span></div>
-    <div class="row"><span class="label">antGroundLevel:</span><span class="value">${antGroundLevel(ant).toFixed(4)}</span></div>
+    <div class="row"><span class="label">antFaceX:</span><span class="value">${antFaceX(ant).toFixed(2)}</span></div>
+    <div class="row"><span class="label">antGroundLevel:</span><span class="value">${antGroundLevel(ant).toFixed(2)}</span></div>
     <div class="row"><span class="label">Classes:</span><span class="value">${getEl(ant.id) ? getEl(ant.id).className.split(' ').join('<br>') : '?'}</span></div>
   `;
   return '<em>(no ant)</em>';
@@ -1062,7 +1243,8 @@ const devResetAnt = (ant) => {
     ant.digDur = 0;
     ant.side = 1;
     ant.scale = 1;
-    del(ant, 'carry', 'hist');
+    ant.f = F.id;
+    del(ant, 'carry', 'hist', 'nipPh', 'nipTs');
     // Replace ant with a clone of itself to disconnect it from existing actions.
     const index = F.a.findIndex(a => ant.id === a.id);
     if (index !== -1) {
@@ -1091,6 +1273,10 @@ window.onload = function() {
     }
     else del(ant, 'hist');
     if (!livesInFarm(ant)) console.warn("Dead ant walking!");
+    if (ant.q.length > 99) {
+      console.warn(ant.id, getFarm(ant).n, "has a long queue.", JSON.stringify(ant.q));
+      ant.q = [{}];
+    }
   };
 
 }
