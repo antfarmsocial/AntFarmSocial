@@ -27,7 +27,7 @@ to get back into it, here are some tips:
   because the version is shown in the UI.
 - GitHub has an app called "GitHub Desktop" that makes the git stuff easier.
 - When publishing a production release; the files listed in .gitattributes need
-  not be present.  Github will do this automatically.
+  not be present.  GitHub will do this automatically.
 - Be aware that even minor additions such as a new type of item drop or ant
   behaviour can be a laborious process that requires a lot of asset preparation and
   careful consideration.  Many ideas going into this project have been ditched
@@ -36,7 +36,7 @@ to get back into it, here are some tips:
 - Note that development tends to involve weeks/months of playtesting a very slow game,
   think twice before making that commitment!
 - If a bug can be explained with a creative narrative, then it is a feature. If it
-  is curious, interesting, or keeps the players attention then it counters the
+  is curious, interesting, or keeps the player's attention then it counters the
   intrinsic blandness of the sim.  It may also pose an unexpected challenge, such
   as making the choice to dump a farm.
 
