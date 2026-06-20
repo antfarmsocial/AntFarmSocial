@@ -4843,7 +4843,7 @@ antGoToAnt = (ant, destAnt, location = {n: destAnt.area.n}) => {
 
 // Rates the farm as to whether it is styling.
 // Returns 0 on fail, and a positive integer with the score on pass.  Never demand players to score more than a 2 to get full benefits.
-farmFlairScore = farm => max(0, farm.items.filter(i => i.t == 'scenery').length + farm.decals.length / 2 + (farm.card ? .5 : 0) - 1),
+farmFlairScore = farm => clamp(farm.items.filter(i => i.t == 'scenery').length + farm.decals.length / 2 + (farm.card ? .5 : 0) - 1, 0, 2),
 
 // Applies ant stat adjustments.
 antStats = (ant, stats) => keys(stats).forEach(key => ant[key] = clamp(ant[key] + stats[key], 0, 100)),
