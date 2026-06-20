@@ -9,7 +9,8 @@ This file lists a few things that are never obvious.
 - Speedo makes ants walk and dig faster, but does not speed up egg hatching, infant maturation, or dead ant decay.
 - Speedo combined with Cologne can bring a lot of ants in but lasts shorter.  Multiple colognes stack.
 - Mood is affected by flair score (+1 per scenery item, +0.5 for card, +0.5 per sticker, and 1 is subtracted from
-  the total).  Min flair is 0 and max for full benefit is 2.
+  the total).  Min flair is 0 and max for full benefit is 2. So just 3 scenery items gets you the full mood boost,
+  and if that ruins your desired aesthetic you can layer items to conceal the extras.
 - Queens are a mood booster.
 - Low mood ants are slightly more aggressive in fights.
 - Some items never drop if you have only 1 farm, and some never drop if you have only 2 farms.  If you don't need

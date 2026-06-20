@@ -327,6 +327,7 @@ drawFarmKit = (farmId, swipeDir, farmTpl = getTemplate(farmTemplate)) => {
     a.mag = a.flare = 0; // Remove mag styles.
     antDraw(a);
     carryDraw(a);
+    a.fight && !fightSong && fightSongPlay(); // Restart fight music.
   });
   // Redraw nipped ants.
   F.nips.forEach(n => n.item.a.forEach(a => {
@@ -2353,7 +2354,7 @@ pickAnt = (e, antEl = e.currentTarget, ant = getFreeAnt(antEl)) => {
             {id: ant.id + wing, style: `transform:rotate(${ant.r}deg);left:${left}px;top:${top}px;width:${antEl.clientWidth}px;height:${antEl.clientHeight}px;`, class: 'leaf alate ' + antGetSize(ant)}
           )
         );
-        let leaf = getEl(ant.id + wing), dir = getSign(wing != 'wing-l'), wRotation = ant.r, wTop = top, t, leafInterval = setInterval(X => {
+        let leaf = getEl(ant.id + wing), dir = getSign(wing != 'wing-l'), wRotation = ant.r, wTop = top, t = 0, leafInterval = setInterval(X => {
           leaf.style.left = (left + easeOutQuad(t = min(t + .01, 1)) * 99 * dir) + 'px';
           leaf.style.transform = `rotate(${wRotation += dir}deg)`;
           leaf.style.top = (wTop += .7) + 'px';
@@ -3288,11 +3289,11 @@ antDeath = (ant, cause, farm = getFarm(assign(ant, {
     hp: 0,
     md: 0,
     q: [],
-  })), tunPos = getTunPosition(ant, farm, 0, 0, 0, 4)) => {
+  })), tunPos = getTunPosition(ant, farm, 0, 0, 0, 4), stillAlive = farm.a.filter(livesInFarm)) => {
   farm.stats.death[cause]++;
   msg(ant.n + ` died in "${farm.n}" ${deathCauses[cause]}.`, 'err');
   setColonyAndFoe(farm);
-  if (cause == 'fight' && farm.a.length === 1 && isQueen(farm.a.find(livesInFarm))) farm.sweep = 1;
+  if (cause == 'fight' && stillAlive.length === 1 && isQueen(stillAlive[0])) farm.sweep = 1;
   antUpdate(ant);
   // Correct antArea data.
   if (tunPos?.tun) antArea(ant, 'bot', tunPos.tun.id);
@@ -3543,8 +3544,7 @@ act = {
     // Check if the ant is set to reach a certain target and hand it off to another action.
     // Note: This code assumes .tx is never set to 0.
     if (!action.for && nextAction && (!nextAction.tx || abs(nextAction.tx - faceX) < xOffset)) antNextStill(ant, randomInt(microDelay));
-    // Genuine wrong-way-on-tx flip (independent of the edge guard).
-    else if (atEdge || !nextAction && rand < 1 || (nextAction?.tx && (nextAction.tx - (ant.x + ant.scale * xOffset)) * ant.scale < 0)) {// Edge of farm (pause + flip), random, or heading the wrong way on a tx target.
+    else if (atEdge || !nextAction && !rand || (nextAction?.tx && (nextAction.tx - (ant.x + ant.scale * xOffset)) * ant.scale < 0)) {// Edge of farm (pause + flip), random, or heading the wrong way on a tx target.
       // Detect flip-flop: tx target is so close it falls inside the body on both orientations.
       // Count consecutive wrong-way flips; only reset once the ant has walked clear of the contested
       // zone (one step further than antOffsetX(ant) past where the flip streak began).
@@ -3555,7 +3555,7 @@ act = {
           antInstaQ(ant, {act: 'pace', for: randomInt(99)}, 0); // Walk to a fresh position before retrying.
         }
       }
-      else if (!action.flp || abs(faceX - action.flpX) > xOffset) del(action, 'flp', 'flpX'); // Not flipping, and clear of the contested zone — reset.
+      else if (!action.flp || abs(faceX - action.flpX) > xOffset) del(action, 'flp', 'flpX'); // Not flipping, and clear of the contested zone, reset.
       // Flip direction (with brief pause). Also covers the at-edge-of-farm case.
       antActionStill(ant, randomInt(microDelay));
       ant.scale *= -1; // <-- Yes, this has to be here after antAction() to set up the next loopback, rather than do it right away.  Looks better.
@@ -5221,7 +5221,7 @@ fightSongPlay = X => {
     fightSong.volume = .001; // Don't start at zero so as to block successive calls to this func.
     fightSong.loop = 1;
     // Fade in, but try to keep the volume of fight song 10% lower than global volume so it is hardly audible at lowest volume setting.
-    fightVolume = setInterval(X => {fightSong.volume + .1 < _.vol / 100 ? fightSong.volume = min(fightSong.volume + .01, 1) : stopInterval(fightVolume)}, 5);
+    fightVolume = setInterval(X => {fightSong.volume + .1 < _.vol / 100 ? fightSong.volume = min(fightSong.volume + .01, 1) : fightVolume = stopInterval(fightVolume)}, 5);
     fightSong.play();
     randomMsg([['Two rival ants are fighting!'], ['Ants are having a fight!'], ['An ant is fighting an enemy!'], ['A fight has broken out!'], ['One of your ants is battling a foe!']]);
   }
@@ -5231,7 +5231,7 @@ fightSongPlay = X => {
 fightSongCheckAndStop = X => {
   if (fightSong && F.a.every(ant => !ant.fight)) {
     stopInterval(fightVolume);
-    fightVolume = setInterval(X => {fightSong.volume > 0 ? fightSong.volume = max(0, fightSong.volume - .01) : (fightSong.pause(), fightSong = 0, stopInterval(fightVolume))}, frameTick);
+    fightVolume = setInterval(X => {fightSong.volume > 0 ? fightSong.volume = max(0, fightSong.volume - .01) : (fightSong.pause(), fightSong = 0, fightVolume = stopInterval(fightVolume))}, frameTick);
   }
 },
 

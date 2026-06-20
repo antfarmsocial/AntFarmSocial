@@ -1991,6 +1991,7 @@ body.glass #l-wrap {
   .decor {
     svg {
       height: 180px;
+      transform: translateY(2px);
     }
   }
   .pyramids {
