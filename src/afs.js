@@ -1322,7 +1322,7 @@ createArrowsInit = (pull, olay = getEl('olay')) => {
 },
 
 // Shows arrows when lid lifted.
-createArrows = (e, pull = createArrowsInit(getEl('pull')), card = getEl('card'), items = [...(F.card ? [card] : []), ...queryAll('#scenery > *, #food > *')], ) => {
+createArrows = (e, pull = createArrowsInit(getEl('pull')), card = getEl('card'), items = [...(F.card ? [card] : []), ...queryAll('#scenery > *, #food > *')]) => {
   getEl('lid').classList.add('off');
   randomMsg(lidLift);
   setTimeout(X => {
@@ -1531,7 +1531,7 @@ pourCrucible = (audio = ambienceOverride('sizz1'), fx = getEl('fx'), hills = get
               ambience();
               setTimeout(X => mTunsEl.classList.add('fade'), 10000);
               setTimeout(X => {
-                fx.classList.add(['fog2']);
+                fx.classList.add('fog2');
                 setTimeout(X => fx.classList.remove('smoke', 'fog2'), 4500);
                 setTimeout(X => {
                   pouring = 0;
@@ -1553,7 +1553,7 @@ farmSetSculpture = farm => {
   farm.fill = farm.col = farm.plate = 'metal';
   let {id, n, mTuns} = farm;
   del(farm, 'card');
-  farm = assign(farm, cloneData(farmDefault), {id, n, mTuns, sculpt: 1});
+  assign(farm, cloneData(farmDefault), {id, n, mTuns, sculpt: 1});
 },
 
 // Draws progress of a tunnel pour.
@@ -1846,7 +1846,8 @@ modal = {
     itemKey = pickRandom(keys(items).filter(k => items[k].t == 'hat'));
     candidates.push({k: [itemKey], n: `8x ${items[itemKey].n}`, x: 8, d: 'Condition: slightly used'});
     // Science.
-    temp1 =  ['cologne', 'antyvenom', 'clonekit', 'speedo'], itemKey = pickRandom(temp1);
+    temp1 =  ['cologne', 'antyvenom', 'clonekit', 'speedo'];
+    itemKey = pickRandom(temp1);
     temp1 = temp1.filter(s => s != itemKey); // Remove one.
     candidates.push({k: temp1, n: `Science Lab`, d: temp1.map(k => items[k].n).join(', ')});
     // Tubes.
@@ -2030,7 +2031,7 @@ modal = {
         // Note: Do NOT modify the following all-caps wording without changing the Gulpfile too.
         span('THIS IS A DEV VERSION OF AFS AND SHOULD NOT BE DEPLOYED!') + tag('a', 'Github ↗️', {target: '_blank', href: 'https://github.com/antfarmsocial/AntFarmSocial'}), {id: 'credit'}
       );
-    getEl('vol').addEventListener('click', X => {_.vol = getEl('vol').value; getEl('audio').volume = _.vol / 100; if (fightSong) fightSong.volume = _.vol / 100});
+    getEl('vol').addEventListener('input', X => {_.vol = getEl('vol').value; getEl('audio').volume = _.vol / 100; if (fightSong) fightSong.volume = _.vol / 100});
     getEl('reset').addEventListener('click', (e, el = e.target) => {
       // Restarts app.
       el.innerHTML = span('⌛', {class: 'wait'});
@@ -2220,7 +2221,7 @@ isAntsQueenInConnectedItem = (ant, farm, anyQueen, checkAnyQueen, nipToCheck = g
   anyQueen && isAntsQueenInConnectedItem(ant, farm, 0, 1), // Perform the anyQueen check in a recursive call.
 
 // Prints an integer with markup, but caps to 4 digits so as to not screw up UI.
-// Because the default content font used in this app makes digits look wierdly small, this function can also be used to wrap numbers in a monospace font (as long as they're under 10,000).
+// Because the default content font used in this app makes digits look weirdly small, this function can also be used to wrap numbers in a monospace font (as long as they're under 10,000).
 printInt = number => (number = Number(number) || 0, span(number > 9999 ? 'many' : number, {class: 'num'})),
 
 // Prints a numeric count of terms with basic pluralisation.
@@ -2764,7 +2765,7 @@ antsWillAvoid = (ant, ant2) => (ant2.t == ant.t || getFarm(ant)?.coex) && ant.ca
 antTrackAvoidance = (ant, other, avoider) => {
   ant.avoid ||= {};
   avoider = ant.avoid[other.id] ||= {n: 0};
-  if (++avoider.n > 200) temp1.n = 0;
+  if (++avoider.n > 200) avoider.n = 0;
   clearTimeout(avoider.t);
   avoider.t = setTimeout(X => del(ant.avoid, other.id), 999); // Reset if this ant pair goes quiet for a bit.
   antUpdate(antGetStill(ant));
@@ -3108,7 +3109,7 @@ getAntWaypointDirection = (ant, farm, knownWp,
   (r = r < 0 ? knownWp?.i : r, f = f < 0 ? knownWp?.i : f, r != f && getSign(r < f)),
 
 // Gets average angle of a set of waypoints.
-getWaypointAngle = (points, sumX = 0, sumY = 0) =>
+getWaypointAngle = (points, sumX = 0, sumY = 0, a) =>
   points.slice(0, -1).forEach((p, i) => (a = atan2(p.y - points[i + 1].y, points[i + 1].x - p.x), sumX += cos(a), sumY -= sin(a))) || angleFromDelta(sumX, sumY),
 
 // Determines if ant will collide with a waypoint in front of it.
@@ -3676,7 +3677,7 @@ act = {
         // On a RANDOM chance when one of the following conditions is met: Dig duration is high, or queue exists.
         // Or the ant is low on hp.
         // Or there are at least 3 ants working on the same tunnel.
-        if (tun.prog == 100 || ((ant.digD > 5 || ant.q[1]) && !randomInt(5)) || ant.hp < 20 || farm.a.filter(a => a.digD && a.digT == ant.digT) > 3) {
+        if (tun.prog == 100 || ((ant.digD > 5 || ant.q[1]) && !randomInt(5)) || ant.hp < 20 || farm.a.filter(a => a.digD && a.digT == ant.digT).length > 3) {
           if (tun.prog == 100 && !tun.dun) {
             // Remove this tunnel piece from the dig list.
             farm.dig = farm.dig.filter(d => d.id != tun.id);
@@ -4621,7 +4622,7 @@ act = {
         for (aPkg of levelPkgs) {
           for (offset of [-pkgSize, pkgSize]) {
             pc = aPkg.pc + offset;
-            if (pc > 20 && pc < 80 && ![...farm.e, ...farm.a.filter(a => a.inf)].some(e => e.area.t == tun.id && e.lvl === lvl && abs(pc - e.pc) < pkgSize * .99) && // The .99 is because of float precision wierdness.
+            if (pc > 20 && pc < 80 && ![...farm.e, ...farm.a.filter(a => a.inf)].some(e => e.area.t == tun.id && e.lvl === lvl && abs(pc - e.pc) < pkgSize * .99) && // The .99 is because of float precision weirdness.
               (!lvl || [...farm.e, ...farm.a.filter(a => a.inf)].filter(e => e.area.t == tun.id && e.lvl === lvl - 1).filter(e => abs(pc - e.pc) < pkgSize).length > 1) &&
               (!levelPkgs.length || levelPkgs.some(e => abs(pc - e.pc) <= pkgSize))) return {pc, lvl};
           }
@@ -4961,7 +4962,7 @@ director = (temp1, temp2) => {
           // Being a queen takes an extra toll.
           antStats(ant, {fd: -.05, dr: -.05, hp: -.1, md: -.05});
           // Queen's presence boosts moodiest ant's MD.
-          if (temp1 = farm.a.filter(a => a.caste != 'Q').reduce((min, a) => a.md < min.md ? a : min, 0)) antStats(temp1, {md: .3});
+          if (temp1 = farm.a.filter(a => a.caste != 'Q').reduce((min, a) => !min || a.md < min.md ? a : min, 0)) antStats(temp1, {md: .3});
           randomInt(2) && farm.a.filter(a => isServant(ant, a)).length < 3 && ant.q.length < 20 && care4kids(farm, ant); // Farm with not enough workers?  Queen maybe performs an extra care task per cycle.
         }
         else if (isDrone(ant) && !ant.inf) {

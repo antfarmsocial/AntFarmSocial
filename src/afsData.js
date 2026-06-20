@@ -254,7 +254,7 @@ items = {
       ["Ooh, it's hot dog time."],
       ['These boys were 89 cents.'],
       ['8 wieners, 89 cents.'],
-      ['Leaking. Leaking! The Hog Dogs are leaking, people!'],
+      ['Leaking. Leaking! The Hot Dogs are leaking, people!'],
     ]
   },
 
@@ -341,7 +341,7 @@ items = {
     lvl: 40,
     max: 1
   },
-  gangster: {
+  jazz: {
     n: 'Jazz Hat',
     desc: 'What do you call someone wearing a "Make Jazz Great Again" hat?<br>A Trumpet Supporter.',
     t: 'hat',
@@ -725,7 +725,7 @@ items = {
       ['Slime… anyone?'],
       ["I don't know about this"],
       ["What is slime made of? I don't know!"],
-      ["Grape? Next time get lime slime!"]
+      ["Grape? Next time get lime slime!"],
       ['Drip. Drop. Squish. Pop!'],
       ['The fun that never dries up'],
     ]

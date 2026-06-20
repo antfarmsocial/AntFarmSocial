@@ -353,7 +353,7 @@ const getLocalStorageSizeInMB = X => {
           </div>
           <div data-show="bot" hidden>
             <label>Tun
-              <select name="loc-tun" id="loc-tun" id="loc-tun" ></select>
+              <select name="loc-tun" id="loc-tun"></select>
             </label>
           </div>
           <div data-show="bot" hidden>
@@ -665,8 +665,6 @@ const getLocalStorageSizeInMB = X => {
       .ant-point::after {
         content: '';
         position: absolute;
-        boxxx-shadow: 1px 1px 1px rgba(255, 255, 255, 0.5);
-
         background-color: var(--crosshair-color);
       }
       /* horizontal line */

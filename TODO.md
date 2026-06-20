@@ -7,6 +7,7 @@ Production meeting...
 Here is a list of bugs that have been occasionally observed but were not game-breaking, might be hard to repro, and may have been fixed by virtue of further development.
 - Created a level system for stacking eggs and infants, but have never witnessed that this actually does anything?
 - When carried items (esp infs/eggs) are dropped on the surface level, zero consideration is given to what they are dropped next to or on top of (food/drink/entrances/infants/eggs). Placement inside vials also does not check if they are infront of one another, but I think that's the same with the ants themselves - cramped space so not worth trying to spread them out.  Maybe none of this really matters.
+- <input type="range"> volume slider, and the listener is bound to 'click', but other methods of interaction are possible and not handled.
 
 # OPTIMIZATION
 Optimization ideas that are not too important and would require careful consideration (if worth doing anything about at all).
