@@ -4434,7 +4434,7 @@ act = {
       // Ant has reached the target drink.
       setTimeout(X => {
         if (drink = farm.items.find(i => i.id == action.id && i.sz > 0)) {// Got to recheck here incase the drink got removed/exhausted.
-          drink.sz -= .2;
+          drink.sz = max(drink.sz - .1, 0);
           !action.Q && antStats(ant, {dr: 9, md: .5, hp: .5});
           (ant.dr < 80 && !action.Q && ant.q.length < 2 && !randomInt(1) ? antAction : antNext)(ant); // Whether to go again or move on.
         }
