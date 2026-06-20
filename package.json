@@ -16,6 +16,9 @@
   ],
   "author": "D.A. Braksator",
   "license": "ISC",
+  "engines": {
+    "node": ">=18"
+  },
   "bugs": {
     "url": "https://github.com/braksator/AntFarmSocial/issues"
   },
@@ -27,7 +30,6 @@
   "devDependencies": {
     "baseline-browser-mapping": "^2.9.19",
     "browserslist": "^4.27.0",
-    "fs": "^0.0.1-security",
     "gulp": "^5.0.1",
     "gulp-concat": "^2.6.1",
     "gulp-htmlmin": "^5.0.1",
@@ -41,7 +43,6 @@
     "imagemin": "^9.0.1",
     "imagemin-webp": "^6.1.0",
     "jcrush": "^1.2.1",
-    "jcrushsvg": "^1.1.40",
-    "path": "^0.12.7"
+    "jcrushsvg": "^1.1.40"
   }
 }

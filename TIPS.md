@@ -19,4 +19,5 @@ This file lists a few things that are never obvious.
   for very low stats.
 - In multispecies setups the queen's servants must still be of the same type, and ants may avoid tubes and vials
   if they see another type of ant in there.
+- Ant corpse's are most toxic to nearby ants when the ROT value is 100% and the DECAY value is 0%.
 
