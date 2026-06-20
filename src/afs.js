@@ -1232,8 +1232,8 @@ pointerPlace = (obj, boundsEl, move, commit, boundsRect = boundsEl.getBoundingCl
 placeDecal = (i, decals = getEl('decals'), decal = assign(_.bag[i], {id: 'i' + getTime()})) => {
   getEl('olay').classList.add('vis');
   appendDecalImg(decals, decal);
-  let obj = getEl(decal.id), imgWidth = obj.offsetWidth, imgHeight = obj.offsetHeight,
-    cleanup = pointerPlace(obj, decals,
+  let obj = getEl(decal.id), imgEl = obj.querySelector('img'),
+    decalSetup = (imgWidth = obj.offsetWidth, imgHeight = obj.offsetHeight, decalCleanup = pointerPlace(obj, decals,
       (e, rect) => {
         obj.style.left = `${clamp(e.clientX - rect.left - imgWidth / 2, 0, decals.offsetWidth - imgWidth)}px`;
         obj.style.top = `${clamp(e.clientY - rect.top  - imgHeight / 2, 0, decals.offsetHeight - imgHeight)}px`;
@@ -1247,11 +1247,13 @@ placeDecal = (i, decals = getEl('decals'), decal = assign(_.bag[i], {id: 'i' + g
         deleteBagItem(i);
         getEl('olay').classList.remove('vis');
         save();
-        cleanup();
+        decalCleanup();
       }
-    );
-  obj.style.left = `${(decals.offsetWidth - imgWidth) / 2}px`;
-  obj.style.top = `${(decals.offsetHeight - imgHeight) / 2}px`;
+    )) => {
+    obj.style.left = `${(decals.offsetWidth - imgWidth) / 2}px`;
+    obj.style.top = `${(decals.offsetHeight - imgHeight) / 2}px`;
+  };
+  imgEl.complete ? decalSetup() : imgEl.addEventListener('load', X => decalSetup(), {once: true});
 },
 
 // Adds items into the farm.
