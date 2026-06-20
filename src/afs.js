@@ -3523,8 +3523,9 @@ act = {
   },
 
   // Ant explores the ground level of the ant farm (default activity).
-  pace: (ant, faceX = antFaceX(ant), action = ant.q[0], nextAction = ant.q[1], xOffset = antOffsetX(ant), rand = (ant.scale > 0 || faceX > xOffset) && (ant.scale < 0 || faceX < 960 - xOffset) && random(),
-    collision = antCollision(ant), ant2 = collision?.a) => {
+  pace: (ant, faceX = antFaceX(ant), action = ant.q[0], nextAction = ant.q[1], xOffset = antOffsetX(ant),
+    atEdge = (ant.scale < 0 && faceX <= xOffset) || (ant.scale > 0 && faceX >= 960 - xOffset),
+    rand = randomInt(5000), collision = antCollision(ant), ant2 = collision?.a) => {
     antSetWalk(ant);
     ant.pose = 'side';
     antArea(ant, 'top');
@@ -3542,28 +3543,28 @@ act = {
     // Check if the ant is set to reach a certain target and hand it off to another action.
     // Note: This code assumes .tx is never set to 0.
     if (!action.for && nextAction && (!nextAction.tx || abs(nextAction.tx - faceX) < xOffset)) antNextStill(ant, randomInt(microDelay));
-    else {
-      if (!rand || !nextAction && rand < .0002 || nextAction?.tx && (nextAction.tx - (ant.x + ant.scale * xOffset)) * ant.scale < 0) {// Random or heading the wrong way.
-        // Detect flip-flop: tx target is so close it falls inside the body on both orientations.
-        // Count consecutive wrong-way flips; on random flips reset the counter.
-        if (nextAction?.tx && (nextAction.tx - faceX) * ant.scale < 0) {
-          if ((action.flp = (action.flp || 0) + 1) > 3) {
-            del(action, 'flp');
-            antInstaQ(ant, {act: 'pace', for: randomInt(99)}, 0); // Walk to a fresh position before retrying.
-          }
+    // Genuine wrong-way-on-tx flip (independent of the edge guard).
+    else if (atEdge || !nextAction && rand < 1 || (nextAction?.tx && (nextAction.tx - (ant.x + ant.scale * xOffset)) * ant.scale < 0)) {// Edge of farm (pause + flip), random, or heading the wrong way on a tx target.
+      // Detect flip-flop: tx target is so close it falls inside the body on both orientations.
+      // Count consecutive wrong-way flips; only reset once the ant has walked clear of the contested
+      // zone (one step further than antOffsetX(ant) past where the flip streak began).
+      if (nextAction?.tx && (nextAction.tx - faceX) * ant.scale < 0) {
+        if (!action.flp) action.flpX = faceX; // Mark where this flip streak started.
+        if ((action.flp = (action.flp || 0) + 1) > 3) {
+          del(action, 'flp', 'flpX');
+          antInstaQ(ant, {act: 'pace', for: randomInt(99)}, 0); // Walk to a fresh position before retrying.
         }
-        else del(action, 'flp'); // Random flip — not a stuck condition, reset.
-        // Flip direction (with brief pause).
-        antActionStill(ant, randomInt(microDelay));
-        ant.scale *= -1; // <-- Yes, this has to be here after antAction() to set up the next loopback, rather than do it right away.  Looks better.
-        ant.r = antHillAngle(ant); // <-- And yes, thanks to setting the scale here we gotta do this too on a flip'n'pause or it looks silly.
-        ant.carry && antUpdate(ant); // <-- Ugh yeah and that too, or whatever it's carrying lags behind by one frame upon a direction flip.
       }
-      else if (rand < .001) antActionStill(ant, randomInt(pauseDelay)) // Pause.
-      else antAction(ant);
-      // Apply corpse proximity penalty.
-      antCorpseProximity(ant);
+      else if (!action.flp || abs(faceX - action.flpX) > xOffset) del(action, 'flp', 'flpX'); // Not flipping, and clear of the contested zone — reset.
+      // Flip direction (with brief pause). Also covers the at-edge-of-farm case.
+      antActionStill(ant, randomInt(microDelay));
+      ant.scale *= -1; // <-- Yes, this has to be here after antAction() to set up the next loopback, rather than do it right away.  Looks better.
+      ant.r = antHillAngle(ant); // <-- And yes, thanks to setting the scale here we gotta do this too on a flip'n'pause or it looks silly.
+      ant.carry && antUpdate(ant); // <-- Ugh yeah and that too, or whatever it's carrying lags behind by one frame upon a direction flip.
     }
+    else rand < 5 ? antActionStill(ant, randomInt(pauseDelay)) : antAction(ant); // Pause or continue.
+    // Apply corpse proximity penalty.
+    antCorpseProximity(ant);
   },
 
   // Ant needs to go to an area before executing the desired act.  See antFinnaVia() for how this is currently used.
@@ -4838,7 +4839,7 @@ antGoToAnt = (ant, destAnt, location = {n: destAnt.area.n}) => {
   }
   if (location.tun = destAnt.area.t) location.pc = getTunPosition(destAnt)?.pc; // Note: assignment in condition on purpose.
   goToLocation(ant, location);
-  location.n == 'top' && antFinna(ant, 'pace') && antFinna(ant, 'pace', {tx: clamp(destAnt.x, 0, 960)}); // Gotta use two pace actions, because the first one terminates when it hits the tx of the 2nd one.
+  location.n == 'top' && antFinna(ant, 'pace') && antFinna(ant, 'pace', {tx: clamp(destAnt.x, 1, 959)}); // Gotta use two pace actions, because the first one terminates when it hits the tx of the 2nd one.
 },
 
 // Rates the farm as to whether it is styling.
