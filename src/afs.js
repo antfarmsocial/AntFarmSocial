@@ -748,7 +748,7 @@ tunProgDraw = (tun, progEl = query(`#${tun.id} .prog`), tunEl = getEl(tun.id)) =
 updateWaypoints = farm => {wayPoints[farm.id] = reorderAndSmoothWaypoints(filterWaypoints(farm.tuns.filter(t => t.prog > 0).map(t => calculateWaypoints(t))))},
 
 // Calculates waypoints for the perimeter of the tunnel area.
-calculateWaypoints = (tun, step = 5, pivotX = tun.x1, pivotY = tun.y1, wipBr = {x: 7, y: 7}, points = [], i) => {
+calculateWaypoints = (tun, step = tun.t == 'con' ? 9 : 5, pivotX = tun.x1, pivotY = tun.y1, wipBr = {x: 7, y: 7}, points = [], i) => {
   let {x1, y1, x2, y2, t, prog, w, h, r} = tun,
     fullW = w,
     brParts = tun.br.split('/').map(s => s.trim()),
@@ -788,8 +788,9 @@ calculateWaypoints = (tun, step = 5, pivotX = tun.x1, pivotY = tun.y1, wipBr = {
     }
     else {
       if (t == 'con') {
+        x1 = x1 + fullW / 2 - w / 2;
+        y1 = y1 + h / 2 - w / 2;
         h = w;
-        x1 = x1 - w / 2;
         radii.tl = radii.bl = wipBr;
       }
       radii.tr = radii.br = wipBr;
