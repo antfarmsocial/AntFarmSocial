@@ -40,10 +40,8 @@
     "hypercrush": "^1.0.21",
     "imagemin": "^9.0.1",
     "imagemin-webp": "^6.1.0",
+    "jcrush": "^1.2.1",
     "jcrushsvg": "^1.1.40",
     "path": "^0.12.7"
-  },
-  "dependencies": {
-    "jcrush": "^1.2.0"
   }
 }

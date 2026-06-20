@@ -3289,7 +3289,7 @@ antDeath = (ant, cause, farm = getFarm(assign(ant, {
   farm.stats.death[cause]++;
   msg(ant.n + ` died in "${farm.n}" ${deathCauses[cause]}.`, 'err');
   setColonyAndFoe(farm);
-  if (cause == 'fight' && farm.a.length === 1 && isQueen(farm.a[0])) farm.sweep = 1;
+  if (cause == 'fight' && farm.a.length === 1 && isQueen(farm.a.find(livesInFarm))) farm.sweep = 1;
   antUpdate(ant);
   // Correct antArea data.
   if (tunPos?.tun) antArea(ant, 'bot', tunPos.tun.id);
