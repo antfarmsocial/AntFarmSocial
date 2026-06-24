@@ -1881,6 +1881,7 @@ body.glass #l-wrap {
 }
 
 .ent,
+.jun,
 .con {
   position: absolute;
   top: 0;
