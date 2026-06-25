@@ -7,24 +7,26 @@
  * This script is included in the app when gulp is run with the --dev flag.
  * Most of the functionality is easily accessible in a GUI when ?dev=1 is added to the app's URL.
  *
+ * UPDATE: This file has been restructured so that the HTML/CSS/JS for any piece of dev functionality
+ * is all very close together for ease of editing.  KEEP THAT GOING!
+ *
  *
  * STRUCTURE OF THIS FILE
  *
- * 1. Global state and utility functions used by multiple features.
- * 2. Feature definitions - each feature's HTML, CSS, event handler, and helpers are co-located.
+ * 1. Global state and utility functions used throughout the app.
+ * 2. Feature definitions - everything displayed in the developer panel comes from a "feature".
+ *    Each feature's HTML, CSS, JS, and helpers are co-located, as well as any directly related global vars/funcs.
  *    Features are grouped into sections (devSecXXXX arrays), then pushed into a devSections config
  *    which is supplied to the panel builder function.
- * 3. devBuildPanel(title, id, sections) - generic panel builder used by both the Developer Panel
- *    and the Ant Inspector Panel. Structure only; no CSS, no outer id.
- * 4. devPanel() - collects CSS, calls devBuildPanel(), mounts the dev panel, wires everything up.
- * 5. window.onload - entry point.
+ * 4. devPanel() - collects CSS, builds and mounts the dev panel - kind of the master dev function.
+ * 5. window.onload - entry point that call devPanel().
  *
  * HOW TO ADD A FEATURE
  *
  *   const myFeature = devFeature('My Feature Label');
  *   myFeature.html = `...`;
- *   myFeature.css = `...`;
- *   myFeature.switch = () => {...}; // optional, see below
+ *   myFeature.css = `...`; // Shared / Long styles that can't be inlined.
+ *   myFeature.switch = () => {...}; // Hook func for farm switch / stale data.
  *   secSomething.push(myFeature);
  *
  * devFeature(name) takes the one param every feature needs; everything
@@ -40,27 +42,10 @@
  *   id      - read-only getter; config.id if set, else devId(name) live.
  *
  * devId(label)  - slugifies a label to a DOM id: "Ant Points" -> "dev-ant-points"
- * devInput(label, type, opts) - builds a labelled input string with auto id/name.
- * devButt(label, opts)        - builds a button string with auto id.
- * devToggle(label, opts)      - builds one or more green/red-strikethrough
- *   checkbox toggles and wires their change handlers for you - see
- *   "Spawner" or "Director" for single toggles, "Banned Acts" or
- *   "Ant Points" for the multiple-toggle list form.
+ * devInput(label, type, opts) - builds labelled input string with auto id/name.
+ * devButt(label, opts)        - builds button string with auto id.
+ * devToggle(label, opts)      - builds toggle control html string.
  *
- * feat.switch - optional callback, called by devNotifySwitch() whenever the
- *   active farm changes (and by anything else that needs to signal that
- *   farm-dependent state is stale, e.g. "Test Tuns" fast-completing tunnels).
- *   Use it for any feature that builds DOM content from farm data (F.tuns,
- *   F.a, etc.) at .js time, since that content goes stale on switch.
- *   If .js and switch() need to share rebuild logic, factor it into
- *   a named function in the feature's own block and call it from both -
- *   see "Manage Tunnels" or "Go To Location" for examples.
- *
- * feat.css - only for styles that govern layout/look shared across more
- *   than one element or selector, or built dynamically (e.g. via map/join).
- *   A style that applies to exactly one element belongs inline on that
- *   element via attrs/style="..." in .html instead, so the rule
- *   lives next to the markup it affects.
  *
  */
 
@@ -207,7 +192,7 @@ const devBuildPanel = (title, id, sections) => {
 
 // Mounts a panel into the DOM.
 // opts: {css}
-const mountDevPanel = (title, id, sections, opts = {}) => {
+const devMountPanel = (title, id, sections, opts = {}) => {
   let css = '';
   sections.forEach(section => {
     section.forEach(f => { if (f.css) css += f.css + '\n'; });
@@ -609,7 +594,6 @@ const devSecPowerups = [];
 
 const devSecAnts = [];
 
-
 /*
  * SPAWNER TOGGLE
  */
@@ -638,7 +622,8 @@ const devSecAnts = [];
 {
   const feat = devFeature('Stop Ants');
 
-  feat.html = `<br>${devToggle('Stop Ants', {
+  feat.html = `
+  ${devToggle('Stop Ants', {
     prefix: '',
     text: ['🛑 Stop ants', '▶️ Start ants'],
     checked: true,
@@ -651,15 +636,16 @@ const devSecAnts = [];
       _.a.forEach(antDelete);
       setTimeout(() => queryAll('.ant.free').forEach(el => el.remove()), 50);
     },
-  })}<br>`;
+  })}
+  `;
 
   feat.css = `
     #dev-stop-ants-label .dev-tog-lbl {
-      color: initial;
+      color: #222;
       text-decoration: none;
       background: #FFFF88;
       padding: .5em;
-      margin: 0 1em;
+      margin: 1em;
       font-size: 1.4em;
       border-radius: 10px;
       font-weight: bold;
@@ -671,10 +657,11 @@ const devSecAnts = [];
 }
 
 /*
- * ANT SPAWN/CLEAR
+ * ANT MANAGEMENT
  */
 {
-  const feat = devFeature('Ant Spawn/Clear');
+  const feat = devFeature('Ant Management');
+  feat.config = {collapsible: true, collapsed: false};
 
   feat.html = `
     ${devButt('+ Ant Spawn', {prefix: '🐜', click: () => {
@@ -685,7 +672,9 @@ const devSecAnts = [];
     }})}
     ${devButt('Clear All Ants', {prefix: '🗑️', click: () => { F.a.forEach(antDelete); _.a.forEach(antDelete); }})}
     <br>
-    ${devButt('Clear Dead Ants', {prefix: '💀', click: () => F.a.filter(deadInFarm).forEach(antDelete)})}
+    ${devButt('Clear Dead', {prefix: '💀', click: () => F.a.filter(deadInFarm).forEach(antDelete)})}
+
+    ${devButt('Reset All Ants', {prefix: '🔄', click: () => [...F.a].forEach(a => devResetAnt(a))})}
   `;
 
   devSecAnts.push(feat);
@@ -705,7 +694,7 @@ const devSecAnts = [];
     toggle: checked => {
       if (checked) {
         if (getEl('dev-ant')) return;
-        devAntMounted = mountDevPanel('First ant', 'dev-ant', devAntSections);
+        devAntMounted = devMountPanel('First ant', 'dev-ant', devAntSections);
       }
       else {
         if (devAntMounted) {
@@ -730,13 +719,14 @@ const devSecAnts = [];
     #dev-ant-inspector-label > .dev-tog-lbl {
       background: #EEEEEE;
       display: block;
-      padding: .25em;
-      margin: 1em;
+      padding: .25em .5em;
+      margin: 1em .75em;
       border-radius: 5px;
       border: 2px solid #C3D9FF;
-      font-weight: bold;
       font-family: monospace;
+      font-weight: bold;
       font-size: 1.4em;
+      line-height: 1.4em;
       text-decoration: none;
       color: #356AA0;
     }
@@ -747,14 +737,15 @@ const devSecAnts = [];
 
 
 /*
- * ANT CONTROLS
+ * FIRST ANT CONTROLS
  */
 {
-  const feat = devFeature('Ant Controls');
+  const feat = devFeature('First Ant Controls');
+  feat.config = {collapsible: true, collapsed: false};
 
   feat.html = `
     ${devButt('Reset First Ant', {prefix: '🔄', click: () => devResetAnt(F.a[0])})}
-    ${devButt('Reset All Ants', {prefix: '🔄', click: () => [...F.a].forEach(a => devResetAnt(a))})}
+    ${devButt('Go', {prefix: '▶️', click: () => (stopAnts = 0, antAction(F.a[0]))})}
     <br>
     ${devButt('L', {prefix: '⬅️', click: () => { F.a[0].x = 10; antUpdate(F.a[0], getEl(F.a[0].id)); }})}
     ${devButt('C', {prefix: '⏺️', click: () => { F.a[0].x = getEl('farm').offsetWidth / 2; antUpdate(F.a[0], getEl(F.a[0].id)); }})}
@@ -805,8 +796,6 @@ const devSecActions = [];
 
 /*
  * DIRECTOR TOGGLE
- *
- * Enables/disables the director loop that governs ant behaviour.
  */
 {
   const feat = devFeature('Director');
@@ -818,13 +807,13 @@ const devSecActions = [];
       clearInterval(dirInterval);
       if (checked) {
         dirInterval = setInterval(director, standardDelay);
-        getEl("dev-director-tog-extra").innerHTML = '';
+        getEl("dev-director-tog-extra").innerHTML = '<span style="color: #006400;">(Called every 30 seconds)</span>';
       }
       else {
-        getEl("dev-director-tog-extra").innerHTML = '[currently only called once on load]';
+        getEl("dev-director-tog-extra").innerHTML = '<span style="color: #8B0000;">(Called once on load)</span>';
       }
     },
-  })}<div style="color: #8B0000;opacity: .7;" id="dev-director-tog-extra"></div>`;
+  })}<div style="opacity: .7;" id="dev-director-tog-extra"></div>`;
 
   devSecActions.push(feat);
 }
@@ -837,6 +826,9 @@ const devSecActions = [];
 let allActs = cloneData(acts);
 
 {
+  const feat = devFeature('Allowed Random Actions');
+  feat.config = {collapsible: true, collapsed: false};
+
   // Handles the banned action state for a single checkbox.
   const banAction = (devArea, devAct, allowed) => {
     if (allowed) {
@@ -853,7 +845,9 @@ let allActs = cloneData(acts);
     const areaLabel = devArea == 'bg' ? 'BG area' : devArea == 'top' ? 'Top area' : 'Bottom area';
     let devAreaActs = allActs[devArea];
     let defaultAct = devAreaActs[0]; // Default action - not controllable, shown plain.
-    bodyHtml += `<div class="dev-banned-acts-group"><b>${areaLabel}:</b> &nbsp;${defaultAct}`;
+    bodyHtml += `<div class="dev-banned-acts-group" style="margin-bottom: .25em;">`;
+    bodyHtml += `<div style="text-align: center"><b>${areaLabel}</b></div>`;
+    bodyHtml += `<div style="text-align: center">${defaultAct}`;
     devAreaActs.slice(1).forEach(devAct => {
       bodyHtml += devToggle(`Banned Act ${devArea} ${devAct}`, {
         checked: true, // Default: allowed.
@@ -863,20 +857,24 @@ let allActs = cloneData(acts);
       });
     });
     bodyHtml += '</div>';
+    bodyHtml += '</div>';
   });
 
-  const feat = devFeature('Allowed Random Actions');
   feat.html = `
-    <h3>Allowed Random Actions</h3>
     <div id="dev-banned-acts">${bodyHtml}</div>
-    <small>Some actions are forced; disable Director to avoid all.</small>
+    <p>Some actions not listed are forced.<br>Disable <em>Director loop</em> to avoid all.</p>
   `;
 
   feat.css = `
     #dev-banned-acts {
       text-align: left;
+      margin-bottom: .25em;
       .dev-toggle label::before {
         content: ' | ';
+      }
+      .dev-tog-lbl {
+        font-size: 1em;
+        font-weight: normal;
       }
     }
   `;
@@ -885,9 +883,12 @@ let allActs = cloneData(acts);
 }
 
 /*
- * REQUEST ACTION
+ * MASS ACTION
  */
 {
+  const feat = devFeature('Mass Action');
+  feat.config = {collapsible: true, collapsed: true};
+
   let devActsOpts = {};
   keys(acts).forEach(areakey =>
     acts[areakey].forEach(a => {
@@ -895,7 +896,6 @@ let allActs = cloneData(acts);
     })
   );
 
-  const feat = devFeature('Request Action');
   feat.html = `
     ${devSelect('Act', devActsOpts)}
     ${devButt('Request Action', {prefix: '📢', click: () => {
@@ -912,6 +912,8 @@ let allActs = cloneData(acts);
  */
 {
   const feat = devFeature('Go To Location');
+  feat.config = {collapsible: true, collapsed: true};
+
   feat.html = `
     <div id="locForm">
       <div>
@@ -939,7 +941,7 @@ let allActs = cloneData(acts);
           ${devSelect('Loc Pos', {'': '- none -', 'u': 'Up', 'd': 'Down', 'm': 'Mid'}, {id: 'loc-pos'})}
         </label>
       </div>
-      ${devButt('Go', {prefix: '📍', click: () => {
+      ${devButt('Go', {id: 'dev-gotoloc', prefix: '📍', click: () => {
         const locN = getEl('loc-n').value;
         const location = {n: locN};
         if (locN === 'top' && getEl('loc-tx').value)
@@ -955,19 +957,9 @@ let allActs = cloneData(acts);
         }
         goToLocation(F.a[0], location);
       }})}
+      <div>(first ant)</div>
     </div>
-    <br>
-    ${devButt('Queue a nip walk', {
-      prefix: '<span style="display:inline-block;border-radius:3px;background:#a3da86;font-weight:bold;padding:0 3px;">➜]</span>',
-      click: () => { F.nips.length && antFinnaUnique(F.a[0], 'nip', {nip: pickRandom(F.nips).nip}); }
-    })}
-    <br>
-    ${devButt('Request egg laying', {prefix: '🥚', click: () => {
-      let randomQueen = pickRandom(F.a.filter(isQueen));
-      if (randomQueen) antFinna(randomQueen, 'lay');
-    }})}
   `;
-  feat.config = {collapsible: true, collapsed: true};
 
   feat.css = `
     #locForm {
@@ -1034,6 +1026,28 @@ let allActs = cloneData(acts);
   devSecActions.push(feat);
 }
 
+/*
+ * SPECIAL ACTIONS
+ */
+{
+  const feat = devFeature('Special Actions');
+  feat.config = {collapsible: true, collapsed: true};
+
+  feat.html = `
+    ${devButt('Egg laying (random queen)', {prefix: '🥚', click: () => {
+      let randomQueen = pickRandom(F.a.filter(isQueen));
+      if (randomQueen) antFinna(randomQueen, 'lay');
+    }})}
+    <br>
+    ${devButt('Nip walk (first ant)', {
+      prefix: '<span style="display:inline-block;border-radius:3px;background:#a3da86;font-weight:bold;padding:0 3px;">➜]</span>',
+      click: () => { F.nips.length && antFinnaUnique(F.a[0], 'nip', {nip: pickRandom(F.nips).nip}); }
+    })}
+  `;
+
+  devSecActions.push(feat);
+}
+
 
 /*
  * ============================================================
@@ -1067,26 +1081,27 @@ const drawLine = (x1, y1, x2, y2, score) => {
 // Draws a debug line from a {x1,y1,x2,y2} object; called by the main
 // script file for debugging.
 const DL = (obj, score = 100) => {
-  if (showLines) {
+  if (devShowLines) {
     bb = getEl('fill').getBoundingClientRect();
     drawLine(bb.x + obj.x1, bb.y + obj.y1, bb.x + obj.x2, bb.y + obj.y2, score);
   }
 };
 
 /*
- * TUNNEL VISUALISERS
+ * GENERATE TUNNELS
  */
 
 // Global state.
-let showLines = 0;
+let devShowLines = 0;
 
 {
-  const feat = devFeature('Tunnel Visualisers');
+  const feat = devFeature('Generate Tunnels');
+  feat.config = {collapsible: true, collapsed: true};
+
   feat.html = `
     ${devButt('Test Tuns', {prefix: '⛏️', click: () => {
-      showLines = getEl('dev-lines').checked;
+      devShowLines = getEl('dev-lines').checked;
       getEl('L') && getEl('L').remove();
-      toggleWaypoints(0);
       testTuns();
     }})}
     ${devInput('Show Lines', 'checkbox', {id: 'dev-lines', labelText: 'show lines'})}
@@ -1117,39 +1132,31 @@ let showLines = 0;
  */
 {
   const feat = devFeature('Manage Tunnels');
+  feat.config = {collapsible: true, collapsed: true};
+
   feat.html = `
     <div id="dev-tunnel-list-container"></div>
     <div id="dev-special-tuns"></div>
   `;
-  feat.config = {collapsible: true, collapsed: true};
 
-  // Builds the tunnel <select> list and (re)wires its listeners.
-  // Safe to call again later (e.g. on farm switch) since the container's
-  // innerHTML is replaced wholesale each time, taking old listeners with it.
+  // Builds the tunnel <select> list and (re)wires its listeners.  Safe to call again later (e.g. on farm switch).
   const renderTunnelList = () => {
-    const container = getEl('dev-tunnel-list-container');
     if (F.tuns.length > 0) {
-      const tunIcon = t => t.t == 'con' ? '🟣' : t.t == 'jun' ? '🟦' : t.t == 'ent' ? '🕳️' : t.t == 'cav' ? '⭕' : '🟡';
-      container.innerHTML =
-        `<select id="dev-tunnel-list" multiple style="height:200px;">` +
-        F.tuns.slice().sort((a, b) => a.y1 - b.y1).map(tun =>
-          `<option value="${tun.id}">${tunIcon(tun)}${tun.id} (${tun.co ? tun.co.join(', ') : 'none'})</option>`
-        ).join('') +
-        `</select>` +
+      const tunIcon = t => t.t == 'con' ? '🟣' : t.t == 'jun' ? '🟦' : t.t == 'ent' ? '🕳️' :  t.t == 'cav' ? '⭕' : '🟡';
+      const options = Object.fromEntries(F.tuns.slice().sort((a, b) => a.y1 - b.y1).map(tun => [tun.id, `${tunIcon(tun)}${tun.id} (${tun.co ? tun.co.join(', ') : 'none'})`]));
+      getEl('dev-tunnel-list-container').innerHTML =
+        devSelect('Tunnel List', options, {id: 'dev-tunnel-list', attrs: 'multiple style="height:200px;"'}) +
         '<br>' +
         devButt('Kill Selected Tuns', {prefix: '🧹', id: 'dev-remove-tunnels', attrs: 'disabled'}) +
         `<span class="countdown monospace"></span>`;
     }
-    else {
-      container.innerHTML = '<p>(Reload to see new tuns)</p>';
-    }
-
     // Enable remove button after the standard delay.
     setTimeout(() => {
       const btn = getEl('dev-remove-tunnels');
       if (btn) btn.disabled = false;
     }, standardDelay);
-
+    // We do custom event listeners in this one because the form can be regenerated
+    // dynamically and devSelect/devButt aren't sophisticated enough to deal with it.
     if (getEl('dev-tunnel-list')) {
       getEl('dev-tunnel-list').addEventListener('change', event => {
         document.querySelectorAll('.highlighted-tunnel').forEach(el => {
@@ -1157,25 +1164,15 @@ let showLines = 0;
           el.style.outline = '';
         });
         Array.from(event.target.selectedOptions).forEach(option => {
-          const tunnelElement = document.querySelector(`#${option.value}`);
+          const tunnelElement = getEl(option.value);
           if (tunnelElement) {
             tunnelElement.classList.add('highlighted-tunnel');
             tunnelElement.style.outline = '2px solid #ff00ff';
           }
         });
       });
-
       getEl('dev-remove-tunnels').addEventListener('click', () => {
-        const selected = Array.from(getEl('dev-tunnel-list').selectedOptions).map(o => o.value);
-        F.tuns = F.tuns.filter(t => !selected.includes(t.id));
-        selected.forEach(id => {
-          const el = document.querySelector(`#${id}`);
-          if (el) el.remove();
-        });
-        // Remove dangling co-references.
-        F.tuns.forEach(t => {
-          if (t.co) t.co = t.co.filter(coId => F.tuns.some(et => et.id === coId));
-        });
+        Array.from(getEl('dev-tunnel-list').selectedOptions).map(o => o.value).forEach(id => tunDelete(F, getTun(F, id)));
         save();
         location.reload();
       });
@@ -1186,11 +1183,17 @@ let showLines = 0;
   // re-run both when the details block is opened and on farm switch.
   const updateSpecialTuns = () => {
     let morgue = F.tuns.find(t => t.morgue)?.id;
-    let out = `<div><b>Morgue:</b> ${morgue || 'none'}</div>`;
+    let out = `<div><b>Morgue:</b><span class="specialVal"> ${morgue || '<span class="none">none</span></span>'}</div>`;
     let antNestMap = Object.fromEntries(F.a.filter(a => a.nest).map(a => [a.id, a.nest]));
+    let nests = `<div><b>Nests:</b><span class="specialVal"> <span class="none">none</span></span></div>`;
+    let nestArray = [];
     for (let [antId, nestId] of Object.entries(antNestMap)) {
-      out += `<div><b>${antId} nest:</b> ${nestId}</div>`;
+      nestArray.push(`<div><b>${antId} nest:</b> ${nestId}</div>`);
     }
+    if (nestArray.length) nests = nestArray.join('');
+    out += nests;
+    let junTuns = F.tuns.filter(t => t.t == 'jun').length;
+    out += `<div><b>JUN tunnels:</b><span class="specialVal"> ${junTuns || '<span class="none">none</span></span>'}</div>`;
     getEl('dev-special-tuns').innerHTML = out;
   };
 
@@ -1200,6 +1203,17 @@ let showLines = 0;
     // Refresh when the details block is opened.
     getEl(devId('Manage Tunnels')).addEventListener('toggle', updateSpecialTuns);
   };
+
+  feat.css = `
+    .specialVal {
+      font-family: monospace;
+      font-size: 120%;
+      .none {
+        color: #999 !important;
+      }
+    }
+  `;
+
   feat.switch = () => {
     renderTunnelList();
     updateSpecialTuns();
@@ -1327,7 +1341,7 @@ devGlobalCSS += `
   const feat = devFeature('Waypoints');
   feat.html = devToggle('Waypoints', {
     id: 'dev-waypoints',
-    prefix: '📌',
+    prefix: ['📌', '🚫'],
     text: 'Waypoints',
     toggle: checked => toggleWaypoints(checked),
   });
@@ -1387,7 +1401,8 @@ let devAntPointsHandler = () => {
   );
 
   feat.html = `
-    <small>Waypoints must be on.<br>Foot points show on side tun walk.</small>
+    <p>Displays points on ant used for decisions.</p>
+    <small>First ant only. Waypoints must be on.<br>Foot points show on side tun walk.</small>
     <div id="dev-ant-points-list">${togglesHtml.join('<br>')}</div>
   `;
 
@@ -1406,7 +1421,7 @@ let devAntPointsHandler = () => {
  * CONNECTION POINTS
  */
 
-const devConnPointTypes = ['con', 'jun'];
+const devConnPointTypes = ['ent', 'con', 'jun'];
 let devConnPointsHandler = () => {
   if (document.querySelectorAll('#dev-conn-points-list input:checked').length > 0) {
     let waypoints = getEl('waypoints');
@@ -1439,12 +1454,13 @@ let devConnPointsHandler = () => {
     devToggle(`Connection Points ${type}`, {
       id: 'dev-conn-points-' + type,
       prefix: `<span style="color:#000;">╋</span>`,
-      text: `'${type}' tunnels`,
+      text: `${type.toUpperCase()} tunnels`,
       toggle: devConnPointsHandler,
     })
   );
 
   feat.html = `
+    <p>Displays "rotWalk" targets.</p>
     <small>Waypoints must be on.</small>
     <div id="dev-conn-points-list">${togglesHtml.join('<br>')}</div>
   `;
@@ -1486,16 +1502,20 @@ const getLocalStorageSizeInMB = () => {
  */
 {
   const feat = devFeature('Save Game');
+  feat.config = {collapsible: true, collapsed: false};
+
   feat.html = `
     ${devButt('Save Game', {prefix: '💾', id: 'dev-save', attrs: 'disabled', click: () => save()})}<span class="countdown monospace"></span>
     <br>
+    <div style="margin: .25em 0 .5em 0">
     Use after editing vars
     <input class="dev-console-hint" type="text" name="_" value="_" style="width:1em;" disabled>
     and
     <input class="dev-console-hint" type="text" name="F" value="F" style="width:1em;" disabled>
     in console
-    <br>
+    </div>
     ${getLocalStorageSizeInMB()}
+    <div><small>(includes dev data)</small></div>
   `;
 
   feat.css = `
@@ -1547,11 +1567,11 @@ let devKeepHistory = 0;
 }
 
 /*
- * SAVE STATE / LOAD STATE
+ * SAVED STATES
  */
 {
   // Renders the list of saved states into #dev-states-list.
-  const renderDevStates = () => {
+  const devRenderStates = () => {
     let states = JSON.parse(localStorage.getItem('afsDevStates') || '[]');
     let container = getEl('dev-states-list');
     container.innerHTML = '';
@@ -1565,7 +1585,7 @@ let devKeepHistory = 0;
       input.addEventListener('change', () => {
         states[i].name = input.value;
         localStorage.setItem('afsDevStates', JSON.stringify(states));
-        renderDevStates();
+        devRenderStates();
       });
       let loadBtn = document.createElement('button');
       loadBtn.textContent = '📤 Load';
@@ -1577,7 +1597,7 @@ let devKeepHistory = 0;
         getEl('kit').remove();
         switchFarm(_.F);
         devNotifySwitch();
-        renderDevStates();
+        devRenderStates();
         spawner = spawnerVal;
       });
 
@@ -1586,7 +1606,7 @@ let devKeepHistory = 0;
       delBtn.addEventListener('click', () => {
         states.splice(i, 1);
         localStorage.setItem('afsDevStates', JSON.stringify(states));
-        renderDevStates();
+        devRenderStates();
       });
 
       row.appendChild(input);
@@ -1596,8 +1616,11 @@ let devKeepHistory = 0;
     });
   };
 
-  const feat = devFeature('Save State');
+  const feat = devFeature('Saved States');
+  feat.config = {collapsible: true, collapsed: true};
+
   feat.html = `
+    <p style="margin: 0 0 .25em 0">Snapshot the farm/ants when debugging.</p>
     ${devButt('Save State', {prefix: '📥', click: () => {
       let states = JSON.parse(localStorage.getItem('afsDevStates') || '[]');
       let now = new Date();
@@ -1607,13 +1630,13 @@ let devKeepHistory = 0;
       });
       states.push({name: thetime, data: _});
       localStorage.setItem('afsDevStates', JSON.stringify(states));
-      renderDevStates();
+      devRenderStates();
     }})}
     <div id="dev-states-list"></div>
   `;
 
   feat.js = () => {
-    renderDevStates();
+    devRenderStates();
   };
 
   devSecState.push(feat);
@@ -1663,14 +1686,16 @@ const devSecDisplay = [];
 }
 
 /*
- * CONSOLE HINTS & RESET
+ * RESET
  */
 {
-  const feat = devFeature('Console Hints');
+  const feat = devFeature('Reset');
+  feat.config = {collapsible: true, collapsed: true};
+
   feat.html = `
     Note: <input class="dev-console-hint" type="text" name="Q" value="Q()" style="width:1.6em;" disabled> in console will clear game data
     <br>
-    <a onClick="devClear()">Reset form and reload</a>
+    <a onClick="devClear()">Reset dev panel and reload</a>
   `;
 
   devSecDisplay.push(feat);
@@ -1719,7 +1744,7 @@ const devPanel = () => {
       position: absolute;
       top: .5em;
       left: .5em;
-      padding: .5em .25em 2em;
+      padding: .5em .25em 1em;
       background: rgba(255,255,255,.7);
       border-radius: 5px;
       z-index: 999;
@@ -1730,9 +1755,11 @@ const devPanel = () => {
       h2 {
         text-align: center;
         margin: .25em;
+        color: #222;
       }
       h3 {
         margin: .25em;
+        color: #222;
       }
       input[type=text],
       input[type=number] {
@@ -1742,6 +1769,10 @@ const devPanel = () => {
       button {
         margin: .25em;
         padding: .25em .5em;
+        font-size: 1em;
+      }
+      select {
+        font-size: 1em;
       }
       .monospace {
         font-family: monospace;
@@ -1762,6 +1793,10 @@ const devPanel = () => {
         margin-bottom: .5em;
       }
       .dev-toggle {
+        .dev-tog-lbl {
+          font-size: 1.2em;
+          font-weight: bold;
+        }
         input {
           display: none;
           ~ span .dev-tog-lbl {
@@ -1783,23 +1818,16 @@ const devPanel = () => {
     ${devGlobalCSS}
   `;
 
-  mountDevPanel('Developer panel', 'dev', devSections, {css: css});
+  devMountPanel('Developer panel', 'dev', devSections, {css: css});
 
   // Global: countdown timer for save/remove buttons.
-  let countdownEls = document.querySelectorAll('.countdown');
   let timeLeft = standardDelay / 1000;
-  // Countdown helper function.
-  const updateCountdown = (countdownEls, timeLeft, timer) => {
-    if (timeLeft > 0) {
-      countdownEls.forEach(el => el.textContent = ` (${timeLeft}s)`);
-    }
-    else {
-      countdownEls.forEach(el => el.textContent = '');
-      clearInterval(timer);
-    }
-  };
-  let timer = setInterval(() => {timeLeft--; updateCountdown(countdownEls, timeLeft, timer);}, 1000);
-  updateCountdown(countdownEls, timeLeft, timer);
+  const updateCountdown = (countdownEls, timeLeft, timer) => countdownEls.forEach(el => {el.textContent = timeLeft > 0 ? ` (${timeLeft}s)` : ''});
+  let timer = setInterval(() => {
+    if (--timeLeft >= 0) updateCountdown(document.querySelectorAll('.countdown'), timeLeft, timer)  ;
+    else clearInterval(timer);
+  }, 1000);
+  updateCountdown(document.querySelectorAll('.countdown'), timeLeft, timer);
 
 
 };

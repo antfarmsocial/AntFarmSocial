@@ -7,7 +7,9 @@ Production meeting...
 Here is a list of bugs that have been occasionally observed but were not game-breaking, might be hard to repro, and may have been fixed by virtue of further development.
 - Created a level system for stacking eggs and infants, but have never witnessed that this actually does anything?
 - When carried items (esp infs/eggs) are dropped on the surface level, zero consideration is given to what they are dropped next to or on top of (food/drink/entrances/infants/eggs). Placement inside vials also does not check if they are infront of one another, but I think that's the same with the ants themselves - cramped space so not worth trying to spread them out.  Maybe none of this really matters.
-- Very rare! Sometimes after walking in a 'con' the ant ends up in the wrong tunnel, and if it is in side pose it gets stuck until the algorithm releases it into a prone pose.  Was not observed while happening so cannot give a better description.  At the very least the "severe course correction" branch should have turned the ant around - why didn't it?
+- When an ant goes from side->prone pose in a 'con' it does an awkard sideways slide as (possibly part of a rotWalk) to align with the next tunnel instead of just marching ahead to the next tunnel.
+- Rare bug: Hitting "test tuns" in dev, all tunnels have a y-value that puts them above the farm, looks like it is 510px (surface value) less that it is supposed to be.  Ant spill detector code doesn't detect this situation either.  Further investigation shows that calling dumpFarm(0), dumpFarm(1), and then using a fill item, calling startFarm(1), or hitting "test tuns" again produces some rather horrible results.   Perhaps some hardening to these functions is required.  Possible something doesn't get reset properly.  This is possibly caused by tunnel deletions not being handled properly - removal of references from other tuns .co and .c values!  POSSIBLY FIXED NOW!
+
 
 # OPTIMIZATION
 Optimization ideas that are not too important and would require careful consideration (if worth doing anything about at all).

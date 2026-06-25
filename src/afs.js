@@ -532,14 +532,15 @@ calcFarm = (numEntrances = 2 + randomInt(4), tries = 0, hills = [-50, 1010], sub
       // Adjust hills.
       hills.splice(2 * stubEntIndex + 1, 2);
       // Remove that tun.
-      F.tuns.splice(stubEntIndex, 1);
+      tunDelete(F, F.tuns[stubEntIndex]);
     }
   } while (stubEntIndex != -1);
   // Keep only the accessible tunnels.
-  F.tuns = F.tuns.filter(tun => findPath(F, tun, {t: 'ent'}));
+  F.tuns.filter(tun => !findPath(F, tun, {t: 'ent'})).forEach(tun => tunDelete(F, tun));
+
   // Find bad turn corners and create 'jun' tunnels at those intersections.
   hardTurns(F.tuns).forEach(turn => {
-    // Found an angle an ant must turn through to follow waypoints between two of its connected tunnels (turn.t[0]/turn.t[1]) that exceeds 120deg.
+    // Found an angle an ant must turn through to follow waypoints between two of its connected tunnels (turn.t[0]/turn.t[1]) that exceeds some hard turn threshold.
     // tunWalk() already has a cutoff to abandon waypoints and use prone-pose rotation when this happens, but the resulting ant behaviour still looks undesirable.
     // So we will insert a small 'jun' tunnel at turn.xy (the inner "naughty corner" of the turn) to soften the effective waypoint angle through that area, and
     // to give ants a second, shorter-looking route between tunnels that bypasses the con (turn.c) entirely - adding variety without removing the original route.
@@ -584,6 +585,7 @@ spill = X => {
   // Blame the player and don't give them the fill item back so it looks like a feature.
   switcher = 0;
   spilled = 1;
+  playSound('fail');
   msg(`Woops! You've spilled your ${F.fill || 'farm'} out.  Bad luck.`, 'warn');
   appendHTML(B, html(html(divc('specks'), {class: 'hill'}), {id: 'spill', 'data-fill': F.fill || 'dirt'}));
   dumpFarm();
@@ -750,9 +752,6 @@ tunAverageAngle = (tuns, con, rad, sumX = 0, sumY = 0) => {
   return angleFromDelta(sumX, sumY);
 },
 
-// Parses a CSS border-radius string and returns the smallest radius value in px.
-minBorderRadius = br => min(...br.replace(/[a-z]/g, '').split(/[\s\/]+/).map(Number)),
-
 // Checks if a point falls within the rotated rectangular bounds of a tunnel item (with a small margin).
 pointInQuad = (pt, item, margin = 2, dx = pt.x - (item.x1 + item.x2) / 2, dy = pt.y - (item.y1 + item.y2) / 2, rad = degToRad(-(item.r || 0))) =>
   abs(dx * cos(rad) - dy * sin(rad)) < item.w / 2 + margin && abs(dx * sin(rad) + dy * cos(rad)) < item.h / 2 + margin,
@@ -775,11 +774,7 @@ naughtyCorner = (con, a, b,
   innerA = facing(expandLineToStrip(con.x1, con.y1, con.x1 + dirA.x, con.y1 + dirA.y, a.h), con),
   innerB = facing(expandLineToStrip(con.x1, con.y1, con.x1 + dirB.x, con.y1 + dirB.y, b.h), con),
   pt = lineIntersection(innerA.x, innerA.y, innerA.x + dirA.x, innerA.y + dirA.y, innerB.x, innerB.y, innerB.x + dirB.x, innerB.y + dirB.y),
-  br = con.br ? minBorderRadius(con.br) : 0
-) =>
-  // Nudge the intersection point inward along the bisector by the minimum border-radius
-  // so it doesn't land in the rounded-corner void.
-  pt && br ? {x: pt.x + bisector.x * br, y: pt.y + bisector.y * br} : pt,
+) => pt,
 
 // Computes tunnel turn angles and returns pairs with naughty corners.
 hardTurns = (tuns, seen = new Set(), results = [], key, a, b, turn, xy) => {
@@ -788,11 +783,10 @@ hardTurns = (tuns, seen = new Set(), results = [], key, a, b, turn, xy) => {
       if (i != k && !seen.has(key = [aId, bId].sort().join())) {
         seen.add(key);
         !isRotationTunnel(a = getById(tuns, aId)) && !isRotationTunnel(b = getById(tuns, bId))
-          && abs(turn = normalize180(tunExitAngle(b, tun) - oppositeAngle(tunExitAngle(a, tun)))) > 60
+          && abs(turn = normalize180(tunExitAngle(b, tun) - oppositeAngle(tunExitAngle(a, tun)))) > 120
           && (xy = naughtyCorner(tun, a, b))
           // Sanity check: Corner must touch the 2 tunnels.  Jun not needed if calculation produced an outside coordinate.
-          && pointInQuad(xy, a)
-          && pointInQuad(xy, b)
+          && pointInQuad(xy, a) && pointInQuad(xy, b)
           && results.push({c: tun, t: [a, b], r: turn, xy});
       }
     }));
@@ -839,6 +833,14 @@ tunProgDraw = (tun, progEl = query(`#${tun.id} .prog`), tunEl = getEl(tun.id)) =
         break;
     }
   }
+},
+
+// Removes a tun from a farm, and scrubs any reference to it from other tuns' .co value.
+// Important: DOES NOT HANDLE CON/JUN RELATIONSHIP DELETION.  Not expected to be used on CON/JUN tunnels, at least not safely!
+// Note: Doesn't remove the DOM element, because is intended to be used before the element is created, or just prior to location.reload() for dev usage.
+tunDelete = (farm, tun, el = getEl(tun.id)) => {
+  farm.tuns = farm.tuns.filter(t => t.id != tun.id);
+  farm.tuns.forEach(t => t.co && (t.co = t.co.filter(id => id != tun.id)));
 },
 
 // Updates the wayPoints global.
@@ -2953,7 +2955,10 @@ getFreeAnt = antEl => getAnt(_, antEl?.id),
 getAnt = (dataSet, id) => getById(dataSet.a, id),
 
 // Removes an object (must have .id) from a data set in the array at the subscript property, and remove the corresponding DOM element including its cache. Done in a timer, so it doesn't mess up any loops that call this.
-deleteDataAndEl = (obj, key = 'a', dataSet = getFarm(obj) || _, id = obj.id, el = getEl(id)) => setTimeout(X => {dataSet[key] = dataSet[key]?.filter(d => d.id != id); el && (el.remove() || del(elCache, id))}, 0),
+deleteDataAndEl = (obj, key = 'a', dataSet = getFarm(obj) || _, id = obj.id, el = getEl(id)) => {
+  setTimeout(X => dataSet[key] = dataSet[key]?.filter(d => d.id != id), 0);
+  el && (el.remove() || del(elCache, id))
+},
 
 // Deletes an ant element.
 // Important! This is NOT just a handy alias, by having only one param it allows deleting ants via ".forEach(antDelete)" without overwriting the default params in deleteDataAndEl().
@@ -3675,7 +3680,6 @@ act = {
       }
       else if (action.n == 'bot') {
         ant.area.n == 'bg' && queue.push({act: 'uncrawl'});
-        queue.push({act: 'dive'}); // Note: dive automatically does a 'pace' to the entrance.
       }
       else {
         // Default 'top' area.
@@ -3917,11 +3921,17 @@ act = {
         // But this may potentially also occur if two tuns begin almost parallel with each other and the random direction prone walking algorithm permits ant to cross the waypoint-less threshold into the wrong one.
         temp1 = getTunPosition(ant, farm, action.pt, tun, tun.t);
         if (temp1 && ![tun.id, action.pt].includes(temp1.tun.id)) {
-          if (temp1.tun.t == 'jun' && temp1.tun.c == tun.id) {
-            // Resolved into a sibling junction. Only retarget if it leads directly to nextTun otherwise keep heading for the original con.
-            if (temp1.tun.co.includes(nextTun?.id)) {
-              action.id = temp1.tun.id;
-            }
+          temp2 = getTun(farm, ant.area.t);
+          temp3 = 1; // Do an early return.
+          if (temp1.tun.c == tun.id) {// This is a shortcircuited check for a 'jun'.
+            // Resolved into a sibling junction based on getTunPosition.
+            // Only retarget if it leads directly to nextTun otherwise keep heading for the original con.
+            temp1.tun.co.includes(nextTun?.id) ? (action.id = temp1.tun.id) : (temp3 = 0); // Retarget OR skip early return.
+          }
+          else if (temp2?.c == tun.id) {// This is a shortcircuited check for a 'jun'.
+            // Resolved into a sibling junction based on ant.area.
+            // Only retarget if it leads directly to nextTun otherwise keep heading for the original con.
+            temp2.co.includes(nextTun?.id) ? (action.id = temp2.id) : (temp3 = 0); // Retarget OR skip early return.
           }
           else if (temp1.tun.co.includes(tun.id)) {
             // Wait... the con we want to be in connects to this tun.  Let's prone walk to the con we thought we'd be in and pick this dive path up again.
@@ -3934,7 +3944,7 @@ act = {
             // Note: This situation might not arise very often, and this may be an improper way of handling the case anyway.
             action.id = temp1.tun?.id; // Update the action to where the ant actually is and immediately do another pass.
           }
-          return antActionStill(ant);
+          if (temp3) return antActionStill(ant);
         }
       }
       if (nextTun) {
@@ -3966,6 +3976,11 @@ act = {
           // Override 'dive' with the relevant walking action and execute.
           act: 'rotWalk'
         });
+        if (tun.t == 'jun') {
+          // Hack; ants turning in a jun can't turn too much to nextTunAngle or they "slide" into place. Let's soften their exit angle.
+          temp1 = normalize180(action.rot - action.ang);
+          action.rot = normalize180(action.ang + sign(temp1) * min(abs(temp1) / 2, 30)); // Half the diff, capped at 30deg.
+        }
         if (ant.scale < 0) {
           action.ang = normalize180(mirrorAngle(action.ang));
           action.rot = normalize180(mirrorAngle(action.rot));
@@ -4003,7 +4018,7 @@ act = {
       // Setup.
       temp2 = getTun(farm, ant.area.t);
       // Start by double-checking if the tunnel the ant thinks it is in is actually the tunnel it seems like it is in.
-      if ((temp1 = getTunPosition(ant, farm, action.pt, temp2)) && temp1.tun?.id != ant.area.t) antArea(ant, 'bot', temp1.tun.id);
+      if ((temp1 = getTunPosition(ant, farm, action.pt, temp2, temp2?.t)) && temp1.tun?.id != ant.area.t) antArea(ant, 'bot', temp1.tun.id);
       // No dive queue - select tunnels and create queue.
       if (tun = action.tun ? getTun(farm, action.tun) : pickRandom(farm.tuns.filter(t => t.t == 'cav' && t.dun && !t.morgue))) {
         // findPath() deliberately skips 'jun' tunnels, so if the ant's registered area is a jun we must resolve it to the jun's
@@ -4096,6 +4111,7 @@ act = {
           temp1 = getWaypointAngle(wpSet); // Desired angle.
           if (ant.scale < 0) temp1 = mirrorAngle(temp1);
           temp2 = normalize180(temp1 - ant.r); // Diff.
+          // Test for hard turns - Note: this is rarer since the addition of 'jun' tunnels that soften such waypoint angles.
           if (abs(temp2) > 120) { // Note: This cutoff of 120 can probably go as low as ~90 (to abort on softer angles) and as high as ~160 (if giving up on corners it should attempt).
             // Encountered a waypoint set containing a potential hook turn.  We'd rather not follow the waypoints here, so just use prone pose.
             antToProneWithCorrection(ant, tun, action.rev);
@@ -4108,10 +4124,10 @@ act = {
             abs(temp2) > 15 ? antNudgeToMid(ant, tun) : antNudgeToWP(ant, wp, undefined, 1);
             if (!isRotationTunnel(tun)) {
               // If an ant's body is closer to the waypoint than it's foot, it is possibly out-of-bounds, do a big nudge to mid.
-              squareDistanceCoords(antFootPoint(ant), wp) > squareDistanceCoords(ant, wp) && antNudgeToMid(ant, tun, 1);
+              squareDistanceCoords(antFootPoint(ant), wp) > squareDistanceCoords(ant, wp) && antNudgeToMid(ant, tun, antGetTunnelStep(ant) / 2);
               // Nudge ant to mid if foot is further from mid than body, to prevent weird out-of-bounds situations.
               temp1 = closestPointOnMid(ant, tun);
-              squareDistanceCoords(ant, temp1) > squareDistanceCoords(antFootPoint(ant), temp1) && antNudgeToMid(ant, tun, 1);
+              squareDistanceCoords(ant, temp1) > squareDistanceCoords(antFootPoint(ant), temp1) && antNudgeToMid(ant, tun, antGetTunnelStep(ant) / 2);
             }
           }
         }
@@ -4243,12 +4259,10 @@ act = {
         return antNextStill(ant, pauseDelay); // We cannot allow the remaining code to execute as it relies on ant being in a tun.
       }
     }
-    // Re-resolve any 'jun' tunnel result before the skipped-tunnel check.
-    // Juns are tiny and physically overlap adjacent tunnels, so re-running getTunPosition  without the jun finds the tunnel the ant is actually traversing.
-    // Also performs a queue substitution if this jun supplements a queued con.
-    if (temp3?.tun.t == 'jun') {
-      ant.q.forEach(a => {a.act == 'dive' && a.id == temp3.tun.c && (a.id = temp3.tun.id)});
-      temp3 = getTunPosition(ant, farm, temp3.tun.id, tun, nextTun?.t) || temp3;
+    // Re-resolve any 'jun' tunnel result before the skipped-tunnel check. Also performs a queue substitution if this jun supplements a queued con.
+    if (temp3?.tun.t == 'jun' && nextAction?.act == 'dive' && nextTun?.id == temp3.tun.c) {
+      nextAction.id = temp3.tun.id;
+      nextTun = getTun(farm, nextAction.id);
     }
     // Check skipped tunnels.
     if (temp3 && temp3.tun.id != tun.id && temp3.tun.id != action.pt) {
