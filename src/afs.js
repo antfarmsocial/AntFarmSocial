@@ -3966,9 +3966,7 @@ act = {
         assign(action, {
           r: normalize180(ant.r), // Initial angle.
           td: action.dist, // Initial total distance.
-          ang: nextTun && getTunPosition(antHeadPoint(ant), farm, action.pt, tun, nextTun?.t)?.tun?.id == nextTun.id ? // Check if ant's head is already in the next tunnel.
-            normalize180(nextTunAngle) : // Skip first phase by making travel angle same as final.
-            normalize180(getAngle(ant, dest)), // Travel angle.  Orient to connection point.
+          ang: normalize180(getAngle(ant, dest)), // Travel angle.  Orient to connection point.
           rot: normalize180(nextTunAngle), // Final angle.  Orient to tunnel.
           // Step sizes.
           sX: (dest.x - ant.x) / action.dist,
@@ -3976,6 +3974,10 @@ act = {
           // Override 'dive' with the relevant walking action and execute.
           act: 'rotWalk'
         });
+        // If orienting to ang requires larger or opposite turn than to the rot (final angle), ant has likely passed the connection point.
+        temp1 = normalize180(action.ang - action.r);
+        temp2 = normalize180(action.rot - action.r);
+        if (abs(temp1) > abs(temp2) || sign(temp1) != sign(temp2)) action.ang = action.rot; // Skip phase 1 and go straight to the final angle.
         if (tun.t == 'jun') {
           // Hack; ants turning in a jun can't turn too much to nextTunAngle or they "slide" into place. Let's soften their exit angle.
           temp1 = normalize180(action.rot - action.ang);
