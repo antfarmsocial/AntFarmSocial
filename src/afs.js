@@ -1291,7 +1291,7 @@ useItem = (i, doQuip = 1, doDel = 1, item = _.bag[i], itemKey = item.k, itemType
     cologne(fx = getEl('fx')) {
       playSound('spray', .7);
       fx.classList.add('fog');
-      for (; j < 20;) setTimeout(X => {spawnAnt(0); spawnAnt(0); spawnAnt(0)}, j++ * shortDelay);
+      for (; j < 20;) setTimeout(X => {spawnAnt(0); spawnAnt(0)}, j++ * shortDelay);
       setTimeout(X => {
         fx.classList.add('fog2');
         setTimeout(X => fx.classList.remove('fog', 'fog2'), 4500);
@@ -3246,8 +3246,8 @@ antWaypointCollision = (farm, ant, range, wp, angle) => {
 antCollision = (ant, cone = 30, a, angle) => {
   for (a of ant.f ? getFarm(ant)?.a : _.a) {
     if (!deadInFarm(a) && !a.inf && (!ant.area && !a.area || ant.area.n == a.area.n) && inTargetProximity(a, ant, 30)) {
-      angle = normalize180(getAngle(ant, a));
-      if (angle < cone || angle > mirrorAngle(cone)) return {a, d: sign(angle)};
+      angle = normalize180(getAngle(ant, a) - ant.r);
+      if (abs(angle) < cone) return {a, d: -sign(angle)};
     }
   }
 },
