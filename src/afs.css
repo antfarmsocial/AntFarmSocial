@@ -1769,7 +1769,7 @@ body.glass #l-wrap {
     filter: drop-shadow(0 1px 1px #c0bcad);
     .wip::before,
     .prog {
-      background: #c9d5d5;
+      background: #dce4e4;
     }
   }
 }
