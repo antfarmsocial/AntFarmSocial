@@ -5200,7 +5200,7 @@ checkAchievements = (countWins, count = 0,
       tri: X => new Set(_.farms.filter(farmIsRunning).map(f => f.fill)).size > 2,
       sweep: X => F.sweep,
       kweens: X => F.a.filter(a => isQueen(a) && livesInFarm(a) && (a.t == F.t || F.coex)).length > 1,
-      progeny: X => farmIsDeveloping(F) && !F.stats['cap'],
+      heir: X => farmIsDeveloping(F) && !F.stats['cap'],
       drag: X => _.dq && !_.farms.some(farm => farm.nips.some(nip => nip.item.k == 'tube' && nip.item.a.some(isQueen))), // Extra check to ensure tubes don't contain queen, because that's confusing if this fires early.
       hb: X => F.stats.death.other > 9,
       day: X => F.dur > 86400,

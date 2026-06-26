@@ -1526,8 +1526,8 @@ ach = {
     ico: "👑",
     lvl: 40,
   },
-  'progeny': {
-    n: "Progeny",
+  'heir': {
+    n: "Heir Raising",
     desc: "Start a farm without capturing free ants.",
     ico: "🐜",
     lvl: 45,
@@ -1547,7 +1547,7 @@ ach = {
     lvl: 55,
   },
   'hb': {
-    n: "Heartbreaker",
+    n: "Hard Braker",
     desc: 'Have a nest with 10 "other" causes of death.',
     ico: "💔",
     lvl: 60,
