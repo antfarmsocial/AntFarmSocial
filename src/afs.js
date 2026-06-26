@@ -320,6 +320,8 @@ drawFarmKit = (farmId, swipeDir, farmTpl = getTemplate(farmTemplate)) => {
   getEl('game').appendChild(farmTpl);
   // Show the correct name and color on the frame.
   updateFrame();
+  // Put stickers on immediately (whereas other items are handled in startFarm).
+  addDecals();
   // Resume by recreating farm.
   F.fill && startFarm();
   // Redraw capped ants.
@@ -389,7 +391,6 @@ startFarm = isNew => {
     getEl('Fh')?.remove();
   // Draw items.
   addItems();
-  addDecals();
   addNipItems();
   // Re-add eggs into the farm.
   F.e.forEach(egg => eggDraw(egg));
@@ -928,26 +929,44 @@ filterWaypoints = (segments, inShape = (point, perimeterPoints, y = point.y, n =
   return stitchWaypointSegments(segments.map(points => filterCloseWaypoints(points.filter(p => !p.r))).filter(segment => segment.length > 2));
 },
 
+// Fills large gaps in waypoints and stores the indexes with the waypoints.
+fillWaypointGaps = (points, i, a, b) => {
+  for (i = points.length - 1; i > 0; i--) {
+    a = points[i - 1], b = points[i];
+    squareDistanceCoords(a, b) <= 144 && squareDistanceCoords(a, b) > 64 && points.splice(i, 0, {x: (a.x + b.x) / 2, y: (a.y + b.y) / 2});
+  }
+  return points.map((wp, i) => ({...wp, i}));
+},
+
 // Cleans up the waypoints.
 reorderAndSmoothWaypoints = (points, radius = 2, factor = .2, remaining = [...points], segments = [], i, j) => {
   remaining.sort((a, b) => a.y - b.y);
   while (remaining.length) {
-    let segment = [], current = remaining.shift(), nearestIndex, nearestDist, d;
+    let segment = [], current = remaining.shift(), nearestIndex, nearestDist, d, heading = null, temp;
     segment.push(current);
     while (remaining.length) {
       nearestIndex = -1;
       nearestDist = Infinity;
       for (i = 0; i < remaining.length; i++) {
         d = squareDistanceCoords(remaining[i], current);
-        if (d < nearestDist) {
-          nearestDist = d;
-          nearestIndex = i;
+        if (d <= 144) {
+          if (heading != null) {
+            temp = abs(normalize180(getAngle(current, remaining[i]) - heading)); // Angle.
+            d += temp * temp; // Penalise direction changes.
+          }
+          if (d < nearestDist) {
+            nearestDist = d;
+            nearestIndex = i;
+          }
         }
       }
-      if (nearestDist > 144) break; // (12 * 12) The max distance between points to consider.
-      current = remaining.splice(nearestIndex, 1)[0];
+      if (nearestIndex < 0) break;
+      temp = remaining.splice(nearestIndex, 1)[0]; // Next.
+      heading = getAngle(current, temp);
+      current = temp;
       segment.push(current);
     }
+    // Laplacian smoothing.
     segments.push(segment.length > 2 ? segment.map((p, i, arr, sumX = 0, sumY = 0, count = 0, maxNeighDist = 0, neigh, d, n = arr.length) => {
       if (p.y - surface > 50) {// Skip smoothing for low-y points
         for (j = i - radius; j <= i + radius; j++) {
@@ -963,7 +982,7 @@ reorderAndSmoothWaypoints = (points, radius = 2, factor = .2, remaining = [...po
       return maxNeighDist <= 144 && count ? {x: p.x + (sumX / count - p.x) * factor, y: p.y + (sumY / count - p.y) * factor} : p; // 144 = (12 * 12)
     }) : segment);
   }
-  return stitchWaypointSegments(segments.filter(segment => segment.length > 5));
+  return fillWaypointGaps(stitchWaypointSegments(segments.filter(segment => segment.length > 5)));
 },
 
 // Filters out waypoints that are too close to each other.
@@ -1000,7 +1019,7 @@ stitchWaypointSegments = (segments, stitched = [], current, c, i) => {
     stitched.push(current);
   }
   // The waypoints also store their own index.
-  return stitched.flat().map((wp, i) => ({...wp, i}));
+  return stitched.flat();
 },
 
 // Calculates square distance to a target if it is roughly within the supplied squared proximity, otherwise Infinity.
@@ -1146,7 +1165,6 @@ dumpFarm = restart => {
   }
   // Remove scenery and decor items, and place into bag.
   F.items.forEach(item => item.t != 'food' && item.t != 'drink' && _.bag.push(item));
-  F.items = [];
   getEl('scenery').innerHTML = '';
   getEl('food').innerHTML = '';
   if (!restart) F.fill = '';
@@ -1155,8 +1173,10 @@ dumpFarm = restart => {
   // The rest done in a 1-frame delay to minimise chance of console errors from pending antAction timers that expect
   // the farm object to be some type of way before they loop back and detect the missing ants.  Not a perfect solution.
   setTimeout(X => {
+    let decals = F.decals; // The only thing that doesn't dump is decals.
     // Reset farm to defaults.
     del(assign(F, cloneData(farmDefault)), 'dun', 'hair');
+    F.decals = decals;
     // Save these changes.
     save();
     // Undraw tunnels and hills.
@@ -3073,7 +3093,7 @@ carryUndraw = (ant, dest, farm = getFarm(ant), carry = ant.carry, carryEl = getE
     !['inf', 'dead'].includes(carry.t) && carryEl.remove();
     if (['egg', 'inf', 'dead'].includes(carry.t)) {
       if (!dest) {
-        pc = getTunPosition(headPoint, farm, 0, tun, 'cav')?.pc;
+        pc = findTunPos(headPoint, farm, [tun, ...(tun?.co||[])]).pc;
         dest = {x: headPoint.x, y: tun ? cavFloor(tun, pc)?.y || headPoint.y : antGroundLevel(carryItem, 0) + 2};
         carry.t == 'egg' && (carryItem.pc = pc);
       }
@@ -3333,24 +3353,31 @@ tunGetSide = (tun, point = {x: 0, y: 0}) => tun.t == 'con' ? getSign(point.y < t
 // Determines whether a tunnel is of a centered rotation type.
 isRotationTunnel = tun => ['con', 'ent', 'jun'].includes(tun.t),
 
-// Determines which tun we should consider the ant to be in and roughly at what percent along.  Optionally pass a tun in to limit searches to that one and directly connected tuns.
-getTunPosition = (ant, farm = getFarm(ant), ignoreTun, limitTun, desire, margin = 2, type, tun) => {
-  for (type of [...(desire ? [desire] : []), ...['ent', 'jun', 'con', 'cav', 'tun'].filter(t => t != desire)]) {// 'Desire' moves the expected next tunnel type to the front of the types array.
-    for (tun of farm.tuns.filter(t => (!limitTun || limitTun.id == t.id || limitTun.co.includes(t.id)) && t.t == type && t.id != ignoreTun && t.prog >= tunPercent(t, 8))) {
-      let dxLine = tun.x2 - tun.x1, dyLine = tun.y2 - tun.y1;
-      // Check if ant is inside the rotated rectangle.
-      if (pointInQuad(ant, tun, margin)) {
-        return {tun, pc: clamp(((ant.x - tun.x1) * dxLine + (ant.y - tun.y1) * dyLine) / (dxLine * dxLine + dyLine * dyLine), 0, 1) * 100};
+// Determines which tun (and percent position) an ant/coord is positioned at, given a prioritised list of guesses, falling back to full scan in tunTypeOrder.
+// guesses array can contain tun objects, tun ids, {t: tun.t} - to guess a type, and use ex: 1 in the object to prefer that id/t to be excluded if possible.
+findTunPos = (ant, farm, guesses = [], margin = 2, tunTypeOrder = ['ent', 'jun', 'con', 'cav', 'tun'],
+    exIds = new Set(guesses.filter(g => g?.ex && g.id).map(g => g.id)),
+    exTypes = new Set(guesses.filter(g => g?.ex && !g.id && g.t).map(g => g.t)),
+    positive = guesses.filter(g => g && !g.ex),
+    fits = (t, ignoreEx) => t && (ignoreEx || !exIds.has(t.id) && !exTypes.has(t.t)) && t.prog >= tunPercent(t, 8) && pointInQuad(ant, t, margin),
+    guess, tun, dx, dy, pass
+  ) => {
+  for (pass of (exIds.size || exTypes.size) ? [0, 1] : [0]) {// 2nd pass (ignoring exclusions) only runs if anything was actually excluded.
+    for (guess of [...positive, ...tunTypeOrder.map(t => ({t}))]) {
+      if (typeof guess == 'string') guess = {id: guess};
+      for (tun of guess.id ? [getTun(farm, guess.id)] : farm.tuns.filter(t => t.t == guess.t)) {
+        if (fits(tun, pass)) {
+          dx = tun.x2 - tun.x1; dy = tun.y2 - tun.y1;
+          return {tun, pc: clamp(((ant.x - tun.x1) * dx + (ant.y - tun.y1) * dy) / (dx * dx + dy * dy), 0, 1) * 100};
+        }
       }
     }
   }
-  // If at this point in the function and didn't find a tun and ignoreTun or limitTun was passed in, try again without any restrictions.
-  return (ignoreTun || limitTun) && getTunPosition(ant, farm);
 },
 
 // Determines which tunnel a waypoint is in, and stores the value with the waypoint for future reference, as well as returning it.
 getWpTunnel = (farm, wp, tunHint, tunPos) => {
-  if (!wp.t && (tunPos = getTunPosition(wp, farm, 0, tunHint, 'tun', 3))) wp.t = tunPos.tun.id;
+  if (!wp.t && (tunPos = findTunPos(wp, farm, [tunHint, ...(tunHint?.co || [])], 3))) wp.t = tunPos.tun.id;
   return wp.t;
 },
 
@@ -3400,7 +3427,7 @@ antDeath = (ant, cause, farm = getFarm(assign(ant, {
     hp: 0,
     md: 0,
     q: [],
-  })), tunPos = getTunPosition(ant, farm, 0, 0, 0, 4), stillAlive = farm.a.filter(livesInFarm)) => {
+  })), tunPos = findTunPos(ant, farm, [ant.area.t], 4), stillAlive = farm.a.filter(livesInFarm)) => {
   farm.stats.death[cause]++;
   msg(ant.n + ` died in "${farm.n}" ${deathCauses[cause]}.`, 'err');
   setColonyAndFoe(farm);
@@ -3429,7 +3456,7 @@ updateCorpseState = (ant, farm, twoHours = 7200) => {
   // Extra properties are added for the sake of CSS classes/styles. (note 'rot' and 'decay' also have styles)
   antUpdateClasses(ant, {rot1: ant.rot > 20, rot2: ant.rot > 80, decay1: ant.decay > 60});
   // If ant is out-of-bounds let's just nudge it over on the sly.
-  if (ant.area.t && !getTunPosition(ant, farm, 0, 0, 0, 4)) antNudgeToClosestWp(ant, farm);
+  if (ant.area.t && !findTunPos(ant, farm, [ant.area.t], 4)) antNudgeToClosestWp(ant, farm);
 },
 
 // Returns a random worker, or failing that - a queen.  Must be the same type as the farm's colony, in OK health, and not carrying.
@@ -3737,7 +3764,7 @@ act = {
         else {
           // Default nudger; just brings the ant closer to the edge of the dig area every 2 seconds if needed.
           nudger = setInterval(X => {
-            temp = getTunPosition(ant, farm, 0, tun);
+            temp = findTunPos(ant, farm, [tun]);
             dir = getSign(!tun.rwip);
             temp?.tun?.id == tun.id && dir * (temp.pc + dir * tunPercent(tun, antOffsetX(ant) + antGetTunnelStep(ant))) < dir * (tun.rwip ? 100 - tun.prog : tun.prog) && antMoveTunnel(ant);
             antUpdate(ant);
@@ -3846,7 +3873,7 @@ act = {
       let tun = getTun(farm, ant.area.t), path = findPath(farm, tun, {dun: 1, t: 'ent'}, [], 0, 1);
       // Create a custom queue.
       if (!path && tun.t == 'con' && tun.prog <= 15) {// Sometimes the ant is wrongly pinpointed to be in an unbuilt con from which the path finder fails.
-        tunPos = getTunPosition(ant, farm, ant.area.t);
+        tunPos = findTunPos(ant, farm, [{id: ant.area.t, ex: 1}]);
         antArea(ant, 'bot', tunPos.tun.id);
         path = findPath(farm, tunPos.tun, {dun: 1, t: 'ent'}, [], 0, 1);
       }
@@ -3926,7 +3953,7 @@ act = {
         else return antNextStill(ant); // Side pose, no nextTun: ant is already at the destination con.
         // Check for an unusual "starting dive in the wrong con" scenario.  This situation was observed once near an entrance, and an extra condition for setting badAngle was added above to minimise the chances.
         // But this may potentially also occur if two tuns begin almost parallel with each other and the random direction prone walking algorithm permits ant to cross the waypoint-less threshold into the wrong one.
-        temp1 = getTunPosition(ant, farm, action.pt, tun, tun.t);
+        temp1 = findTunPos(ant, farm, [tun, ...tun.co, {id: action.pt, ex: 1}]);
         if (temp1 && ![tun.id, action.pt].includes(temp1.tun.id)) {
           temp2 = getTun(farm, ant.area.t);
           temp3 = 1; // Do an early return.
@@ -4006,7 +4033,7 @@ act = {
           temp1 = previousTun.t == 'jun' ? getTun(farm, previousTun.c) : previousTun;
           action.rev = tun.x2 == temp1.x2 && tun.y2 == temp1.y2;
         }
-        else if ('pc' in action && (temp1 = getTunPosition(ant, farm, action.pt, tun)) && temp1.tun) {
+        else if ('pc' in action && (temp1 = findTunPos(ant, farm, [tun, ...tun.co, {id: action.pt, ex: 1}])) && temp1.tun) {
           // We're probably going to another spot within the exact same tunnel, so judge whether we're doing a reverse walk based on the relative position of the ant to the supplied target percentage.
           action.rev = temp1.tun.id == tun.id ? temp1.pc > action.pc : squareDistance(ant.x - tun.x1, ant.y - tun.y1) > squareDistance(ant.x - tun.x2, ant.y - tun.y2);
         }
@@ -4027,7 +4054,7 @@ act = {
       // Setup.
       temp2 = getTun(farm, ant.area.t);
       // Start by double-checking if the tunnel the ant thinks it is in is actually the tunnel it seems like it is in.
-      if ((temp1 = getTunPosition(ant, farm, action.pt, temp2, temp2?.t)) && temp1.tun?.id != ant.area.t) antArea(ant, 'bot', temp1.tun.id);
+      if ((temp1 = findTunPos(ant, farm, [temp2, ...(temp2?.co || []), {id: action.pt, ex: 1}])) && temp1.tun?.id != ant.area.t) antArea(ant, 'bot', temp1.tun.id);
       // No dive queue - select tunnels and create queue.
       if (tun = action.tun ? getTun(farm, action.tun) : pickRandom(farm.tuns.filter(t => t.t == 'cav' && t.dun && !t.morgue))) {
         // findPath() deliberately skips 'jun' tunnels, so if the ant's registered area is a jun we must resolve it to the jun's
@@ -4254,7 +4281,7 @@ act = {
     // Walk along tunnel.
     antMoveTunnel(ant);
     // Now check where the ant actually is.
-    temp3 = getTunPosition(ant, farm, action.pt, tun, nextTun?.t);
+    temp3 = findTunPos(ant, farm, [nextTun, tun, ...tun.co, {id: action.pt, ex: 1}]);
     // Suggestion: If doing getTunPosition() on every frame is too expensive for performance, be aware that getWpTunnel() caches the result and it might be a better system to upgrade that functionality for use here?
     if (!temp3) {
       // If we're working on an underbuilt tunnel, let's just say we're in the previous tunnel.
@@ -4262,7 +4289,7 @@ act = {
       temp2 = 0; // Prevent endless/long loop.  Will be detected below.
       while (!temp3 && temp2++ < 9) {
         !randomInt(9) ? antToProneWithCorrection(ant, tun) : antNudgeToMid(ant, tun); // Shuffle the ant back into the tunnel with a random chance to switch side->prone.
-        temp3 = getTunPosition(ant, farm);
+        temp3 = findTunPos(ant, farm, [tun]);
       }
       if (!temp3) {
         // Still out-of-bounds after 9 nudges, let's give it a shove towards the closest waypoint and circle back later.
@@ -4271,7 +4298,7 @@ act = {
       }
     }
     // Re-resolve any 'jun' tunnel result before the skipped-tunnel check. Also performs a queue substitution if this jun supplements a queued con.
-    if (temp3?.tun.t == 'jun' && nextAction?.act == 'dive' && nextTun?.id == temp3.tun.c) {
+    if (temp3?.tun?.t == 'jun' && nextAction?.act == 'dive' && nextTun?.id == temp3.tun.c) {
       nextAction.id = temp3.tun.id;
       nextTun = getTun(farm, nextAction.id);
     }
@@ -4352,7 +4379,7 @@ act = {
 
   // Slip an ant to the floor of a tunnel.
   // This does not use cavFloor() as the ant might be in another type of tunnel and not aligned with a cavity.  Also using waypoints would be too involved.
-  tunSlip: (ant, tunPos = getTunPosition(ant), r = tunPos?.tun.r) => {
+  tunSlip: (ant, tunPos = findTunPos(ant, farm, [ant.area.t]), r = tunPos?.tun.r) => {
     ant.pose = 'pick'; // Note: We never reset the pose back to what it was before, that can change later if needed perhaps by passing a param in the action.
     if (tunPos?.tun) {// Ant still "in" the tunnel.
       // Move downwards.
@@ -4558,7 +4585,7 @@ act = {
             antFinna(ant, 'eat', {...actionProps, tx: chosenFood.t == 'food' ? 25 + parseInt(chosenFood.x) + randomSign(23) * randomInt(chosenFood.sz) / 100 : chosenFood.x});
           }
           else {
-            let tunPos = getTunPosition(chosenFood, farm);
+            let tunPos = findTunPos(chosenFood, farm, [chosenFood.area.t]);
             if (tunPos) {
               goToLocation(ant, {n: 'bot', tun: tunPos.tun.id, pc: tunPos.pc, pos: 'd'});
               antFinna(ant, 'eat', actionProps);
@@ -4682,7 +4709,7 @@ act = {
   },
 
   // Queen lays eggs.
-  lay: (ant, farm = getFarm(ant), action = ant.q[0], lvl = action.lvl || 0, laid = action.laid || 0, tunPos = getTunPosition(ant), eggLvlCount = farm.e.filter(e => e.lvl == lvl && e.area.t == tunPos?.tun).length,
+  lay: (ant, farm = getFarm(ant), action = ant.q[0], lvl = action.lvl || 0, laid = action.laid || 0, tunPos = findTunPos(ant, farm, [ant.area.t]), eggLvlCount = farm.e.filter(e => e.lvl == lvl && e.area.t == tunPos?.tun).length,
     tun = tunPos?.tun, eggSize = tun && tunPercent(tun, 5), thePose = ant.pose, egg = {
       id: ant.id + getTime(),
       Q: ant.id,
@@ -4756,7 +4783,7 @@ act = {
   },
 
   // Drop a carried item.  Carefully though.
-  drop: (ant, farm = getFarm(ant), action = ant.q[0], pkg = getCarry(farm, ant.carry), tunPos = getTunPosition(ant), tun = tunPos?.tun, newSpot,
+  drop: (ant, farm = getFarm(ant), action = ant.q[0], pkg = getCarry(farm, ant.carry), tunPos = findTunPos(ant, farm, [ant.area.t]), tun = tunPos?.tun, newSpot,
     headPoint = antHeadPoint(ant, (6 + antOffsetX(ant)) * ant.scale), spotFinder = (lvl = 0, pkgSize = tunPercent(tun, 5), levelPkgs, aPkg, offset, pc) => {
       for (; lvl < 4; lvl++) {
         levelPkgs = [...farm.e, ...farm.a.filter(a => a.inf)].filter(e => e.area.t == tun.id && e.lvl === lvl).sort((a, b) => a.pc - b.pc);
@@ -4774,7 +4801,7 @@ act = {
     if (pkg) {
       // Set the x/y of the package first.  (These values will be overriden for egg/inf pkgs in tunnels by the code below)
       pkg.x = headPoint.x;
-      pkg.y = tun?.t == 'cav' ? cavFloor(tun, getTunPosition(headPoint, farm, 0, tun, 'cav')).y : ant.area.n == 'top' ? antGroundLevel(headPoint) : headPoint.y;
+      pkg.y = tun?.t == 'cav' ? cavFloor(tun, findTunPos(headPoint, farm, [tun, ...(tun?.co || [])])).y : ant.area.n == 'top' ? antGroundLevel(headPoint) : headPoint.y;
       // Pkgs dropped in tunnels need a lot more special handling so they are displayed next to each other nicely.
       if (tun?.t == 'cav' && ['egg', 'inf'].includes(action.t)) {
         // spotFinder() is different from how the queen picks a spot to lay, as she uses a slow trial-and-error approach, whereas spotFinder() works out a good spot to drop.
@@ -4980,7 +5007,7 @@ antGoToAnt = (ant, destAnt, location = {n: destAnt.area.n}) => {
     location.x = destAnt.x;
     location.y = destAnt.y;
   }
-  if (location.tun = destAnt.area.t) location.pc = getTunPosition(destAnt)?.pc; // Note: assignment in condition on purpose.
+  if (location.tun = destAnt.area.t) location.pc = findTunPos(destAnt, getFarm(destAnt), [destAnt.area.t])?.pc; // Note: assignment in condition on purpose.
   goToLocation(ant, location);
   location.n == 'top' && antFinna(ant, 'pace') && antFinna(ant, 'pace', {tx: clamp(destAnt.x, 1, 959)}); // Gotta use two pace actions, because the first one terminates when it hits the tx of the 2nd one.
 },
@@ -5085,7 +5112,7 @@ director = (temp1, temp2) => {
           }
           else temp1[pickRandom(['add', 'remove'])](pickRandom(temp2)); // Provides randomised animations - HOWEVER these are so subtle I'm not sure this was worth it.
           if (!randomInt(9)) ant.r += randomInt(8) - 4 - normalize180(ant.r * 2) * .02; // Random rotation bump, but bias towards horizontal.
-          if ((temp1 = getTun(farm, ant.area.t)) && temp1.t == 'cav' && (temp2 = cavFloor(temp1, getTunPosition(ant, farm).pc))) ant.y += (temp2.y - ant.y) * .2; // Move infant towards the floor of the cav.
+          if ((temp1 = getTun(farm, ant.area.t)) && temp1.t == 'cav' && (temp2 = cavFloor(temp1, findTunPos(ant, farm, [temp1])?.pc))) ant.y += (temp2.y - ant.y) * .2; // Move infant towards the floor of the cav.
           antUpdate(ant);
           // Fix infants that dodged the 'moveTo' workflow by being in the wrong place at the wrong time.
           if (farm.a.find(a => a.id == ant.Q && livesInFarm(a))) del(ant, 'moveTo'); // Clear moveTo flag if queen came back.
@@ -5175,8 +5202,8 @@ director = (temp1, temp2) => {
     }, num2000);
     // Update jun tuns' progress automatically so they don't have to be dug.
     farm.dun || farm.tuns.forEach(t => {
-      if (t.t == 'jun' && !t.dun && getTun(farm, t.c).dun && t.co.some(id => getTun(farm, id).dun)) {
-        t.prog = clamp(t.prog + 2, 50, 100);
+      if (t.t == 'jun' && !t.dun && getTun(farm, t.c).dun && t.co.some(id => getTun(farm, id).dun) && t.co.every(id => getTun(farm, id).prog > 35)) {
+        t.prog = clamp(t.prog + 2, 20, 100);
         t.dun = t.prog == 100;
         tunProgDraw(t);
       }
