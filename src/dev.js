@@ -325,6 +325,12 @@ const devNotifySwitch = () => {
     feat.html = `<div id="dev-ant-tree"></div>`;
     feat.css = `
       #dev-ant {
+        &.isInfant:not(.isDead) {
+          background: #fcfcd1;
+        }
+        &.isDead {
+          background: #fcdff6;
+        }
         div {
           font-family: monospace;
           display: inline-block;
@@ -384,6 +390,9 @@ const devNotifySwitch = () => {
     feat.js = () => {
       treeTimer = setInterval(() => {
         const treeEl = getEl('dev-ant-tree');
+        const devAntEl = getEl('dev-ant');
+        devAntEl.classList.toggle('isInfant', !!F.a[0].inf);
+        devAntEl.classList.toggle('isDead', F.a[0].state == 'dead');
         if (treeEl) treeEl.innerHTML = devObjectDisplay(F.a[0]);
       }, frameTick);
     };

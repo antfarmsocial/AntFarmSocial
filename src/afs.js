@@ -1152,18 +1152,22 @@ dumpFarm = restart => {
   if (!restart) F.fill = '';
   F.a.forEach(antDelete);
   F.e.forEach(eggDelete);
-  // Reset farm to defaults.
-  del(assign(F, cloneData(farmDefault)), 'dun', 'hair');
-  // Save these changes.
-  save();
-  // Undraw tunnels and hills.
-  if (!spilled) {
-    getEl('tunnels').innerHTML = '';
-    getEl('hills').innerHTML = '';
-    // This should handle the rest...
-    startFarm(restart);
-  }
-  updateSwitcher();
+  // The rest done in a 1-frame delay to minimise chance of console errors from pending antAction timers that expect
+  // the farm object to be some type of way before they loop back and detect the missing ants.  Not a perfect solution.
+  setTimeout(X => {
+    // Reset farm to defaults.
+    del(assign(F, cloneData(farmDefault)), 'dun', 'hair');
+    // Save these changes.
+    save();
+    // Undraw tunnels and hills.
+    if (!spilled) {
+      getEl('tunnels').innerHTML = '';
+      getEl('hills').innerHTML = '';
+      // This should handle the rest...
+      startFarm(restart);
+    }
+    updateSwitcher();
+  }, frameTick);
 },
 
 // "Uses" an inventory item.
