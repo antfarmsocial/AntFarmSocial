@@ -585,7 +585,7 @@ spill = X => {
   // Blame the player and don't give them the fill item back so it looks like a feature.
   switcher = 0;
   spilled = 1;
-  playSound('fail');
+  setTimeout(X => playSound('fail'), pauseDelay);
   msg(`Woops! You've spilled your ${F.fill || 'farm'} out.  Bad luck.`, 'warn');
   appendHTML(B, html(html(divc('specks'), {class: 'hill'}), {id: 'spill', 'data-fill': F.fill || 'dirt'}));
   dumpFarm();
