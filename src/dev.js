@@ -109,7 +109,7 @@ const devButt = (label, opts = {}) => {
 };
 
 // Builds a <select> with id/name derived from label.
-// options: raw HTML string, or an object {value: label} to auto-convert.
+// options: raw HTML string, or an object {value: text} to auto-convert.  Bonus: text can be an array with [class, text] instead.
 // opts: {id (override), attrs, click, change}
 const devSelect = (label, options, opts = {}) => {
   const id = opts.id || devId(label);
@@ -118,8 +118,16 @@ const devSelect = (label, options, opts = {}) => {
   if (opts.change) devListeners.push({id, event: 'change', fn: opts.change});
   if (options !== null && typeof options === 'object') {
     options = Object.entries(options)
-      .map(([value, text]) => `<option value="${value}">${text}</option>`)
-      .join('');
+      .map(([value, text]) => {
+        let outText = '';
+        let outClass = '';
+        if (Array.isArray(text)) {
+          outText = text[1];
+          outClass = text[0];
+        }
+        else outText = text;
+        return `<option class="${outClass}" value="${value}">${outText}</option>`;
+      }).join('');
   }
   return `<select id="${id}" name="${id}" ${extra}>${options}</select>`;
 };
@@ -326,10 +334,10 @@ const devNotifySwitch = () => {
     feat.css = `
       #dev-ant {
         &.isInfant:not(.isDead) {
-          background: #fcfcd1;
+          background: rgba(253, 244, 189, 0.8);
         }
         &.isDead {
-          background: #fcdff6;
+          background: rgba(245, 206, 238, 0.8);
         }
         div {
           font-family: monospace;
@@ -1152,7 +1160,10 @@ let devShowLines = 0;
   const renderTunnelList = () => {
     if (F.tuns.length > 0) {
       const tunIcon = t => t.t == 'con' ? '🟣' : t.t == 'jun' ? '🟦' : t.t == 'ent' ? '🕳️' :  t.t == 'cav' ? '⭕' : '🟡';
-      const options = Object.fromEntries(F.tuns.slice().sort((a, b) => a.y1 - b.y1).map(tun => [tun.id, `${tunIcon(tun)}${tun.id} (${tun.co ? tun.co.join(', ') : 'none'})`]));
+      const options = Object.fromEntries(F.tuns.slice().sort((a, b) => a.y1 - b.y1).map(tun => {
+        const outClass = !tun.prog ? 'dev-tun-noprog' : !tun.dun ? 'dev-tun-nodun' : '';
+        return [tun.id, [outClass, `${tunIcon(tun)}${tun.id} (${tun.co ? tun.co.join(', ') : 'none'})`]];
+      }));
       getEl('dev-tunnel-list-container').innerHTML =
         devSelect('Tunnel List', options, {id: 'dev-tunnel-list', attrs: 'multiple style="height:200px;"'}) +
         '<br>' +
@@ -1220,6 +1231,13 @@ let devShowLines = 0;
       .none {
         color: #999 !important;
       }
+    }
+    .dev-tun-noprog,
+    .dev-tun-nodun {
+      opacity: .5;
+    }
+    .dev-tun-noprog {
+      text-decoration: line-through;
     }
   `;
 
