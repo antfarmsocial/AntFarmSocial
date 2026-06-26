@@ -457,10 +457,6 @@ const devNotifySwitch = () => {
   * ============================================================
   * DEVANTSECTIONS - ordered list of sections to render
   * ============================================================
-  *
-  * Each entry is an array of feature objects.
-  * Sections are separated by a visual gap in the rendered output.
-  * Push a new section array here to add it to the panel.
   */
   const devAntSections = [
     devSecTree,
@@ -1733,10 +1729,6 @@ const devSecDisplay = [];
  * ============================================================
  * DEVSECTIONS - ordered list of sections to render
  * ============================================================
- *
- * Each entry is an array of feature objects.
- * Sections are separated by a visual gap in the rendered output.
- * Push a new section array here to add it to the panel.
  */
 const devSections = [
   devSecScore,
