@@ -1554,13 +1554,13 @@ ach = {
   },
   'day': {
     n: "Twinny Faux",
-    desc: "Keep a farm going for at least a day.",
+    desc: "Keep two virtual farms going for at least a day.",
     ico: "🌗",
     lvl: 65,
   },
   'weak': {
     n: "The Weak End",
-    desc: "Keep a farm going for 7 days.",
+    desc: "Have a struggling farm older than 7 days.",
     ico: "📅",
     lvl: 80,
   },

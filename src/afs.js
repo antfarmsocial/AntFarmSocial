@@ -1653,6 +1653,7 @@ pourCrucible = (audio = ambienceOverride('sizz1'), fx = getEl('fx'), hills = get
 
 // Sets the current farm to be a sculpture.
 farmSetSculpture = farm => {
+  checkAchievements();
   farm.mTuns.forEach(t => t.prog = 100);
   farm.fill = farm.col = farm.plate = 'metal';
   let {id, n, mTuns} = farm;
@@ -5203,8 +5204,8 @@ checkAchievements = (countWins, count = 0,
       heir: X => farmIsDeveloping(F) && !F.stats['cap'],
       drag: X => _.dq && !_.farms.some(farm => farm.nips.some(nip => nip.item.k == 'tube' && nip.item.a.some(isQueen))), // Extra check to ensure tubes don't contain queen, because that's confusing if this fires early.
       hb: X => F.stats.death.other > 9,
-      day: X => F.dur > 86400,
-      weak: X => F.dur > 604800,
+      day: X => _.farms.filter(f => f.dur > 86400).length > 1,
+      weak: X => F.dur > 604800 && (F.a.length < 10 || Object.values(F.stats.death).reduce((sum, v) => sum + v, 0) > 5 || !F.a.some(isQueen)), // Over 7d & either: fewer than 10 ants, over 5 deaths, or no queen.
       mom: X => _.win,
     },
     achKey
