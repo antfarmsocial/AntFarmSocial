@@ -2866,13 +2866,13 @@ antsWillAvoid = (ant, ant2) => (ant2.t == ant.t || getFarm(ant)?.coex) && ant.ca
 // Tracks ant avoidance, scoped per other ant. ant.avoid is an object: { [otherId]: { n, t } }
 // The idea is that for each other ant encountered there is a counter (n) that ticks up on every collision check, in the first 100 ticks the
 // avoidance is allowed, then for the next 100 it is ignored.  Resets the counter after 200 ticks to start the cycle again.
-// If tracker is not triggered for 1s the relevant data removed.
+// If tracker is not triggered for a little while the relevant data removed.
 antTrackAvoidance = (ant, other, avoider) => {
   ant.avoid ||= {};
   avoider = ant.avoid[other.id] ||= {n: 0};
   if (++avoider.n > 200) avoider.n = 0;
   clearTimeout(avoider.t);
-  avoider.t = setTimeout(X => del(ant.avoid, other.id), 999); // Reset if this ant pair goes quiet for a bit.
+  avoider.t = setTimeout(X => del(ant.avoid, other.id), num2000); // Reset if this ant pair goes quiet for a bit.
   antUpdate(antGetStill(ant));
 },
 
@@ -2884,11 +2884,13 @@ antMoveDefault = (ant, callback, allowPause, speedMult = 1, rotMult = 1, rand = 
   antSetWalk(ant);
   if (collision) {
     if (ant.state == 'free' || antsWillAvoid(ant, ant2)) {// Too much trouble to handle collisions near the boundary.
-      if (!(near = ant.area.n == 'bg' && antBgNear(ant, 1)) && antCheckAvoidance(antGetStill(ant), ant2)) {
-        dist = calcDistComponents(ant2.x, ant2.y, ant.x, ant.y);
-        ant.r = normalize360(ant.r + collision.d * randomInt(20));
-        ant.x += dist.x;
-        ant.y += dist.y;
+      if (!(near = ant.area.n == 'bg' && antBgNear(ant, 1))) {
+        if (antCheckAvoidance(antGetStill(ant), ant2)) {
+          dist = calcDistComponents(ant2.x, ant2.y, ant.x, ant.y);
+          ant.r = normalize360(ant.r + collision.d * randomInt(20));
+          ant.x += dist.x;
+          ant.y += dist.y;
+        }
         // Track ant avoidance duration so we can stop doing it if it gets too insane.
         antTrackAvoidance(ant, ant2);
       }
@@ -3236,7 +3238,7 @@ antWaypointCollision = (farm, ant, range, wp, angle) => {
       // For dev debugging, visually indicate the collision (pink) as well as any non-collision points checked in range (orange) up until the collision was found.
       devHighlightWaypoint(farm, wp, angle < 30 || angle > 330 ? '#ec3b83' : '#d69a17');
       /* END-DEV */
-      if (angle < 30 || angle > 330) return 1; // Waypoint is within the forward "cone" tolerance.
+      if (angle < 30 || angle > 330 || inTargetProximity(ant, wp, 1)) return 1; // Waypoint is within the forward "cone" tolerance (or right on top of it).
     }
   }
 },
@@ -3247,7 +3249,7 @@ antCollision = (ant, cone = 30, a, angle) => {
   for (a of ant.f ? getFarm(ant)?.a : _.a) {
     if (!deadInFarm(a) && !a.inf && (!ant.area && !a.area || ant.area.n == a.area.n) && inTargetProximity(a, ant, 30)) {
       angle = normalize180(getAngle(ant, a) - ant.r);
-      if (abs(angle) < cone) return {a, d: -sign(angle)};
+      if (abs(angle) < cone || inTargetProximity(a, ant, 9)) return {a, d: -sign(angle)}; // Waypoint is within the forward "cone" tolerance (or almost on top of it).
     }
   }
 },
@@ -4150,17 +4152,19 @@ act = {
     else {
       // Prone walk roughly towards the destination with collision corrections.
       if (!randomInt(4)) ant.r = normalize360(ant.r + randomSign()); // Add a little random wobble to the angle.
-      if (temp3 = antCollision(ant, 4)) {
+      if (temp3 = antCollision(ant)) {
         // Ant is going to collide with another ant.
         temp2 = temp3.a;
         if (antsWillAvoid(ant, temp2)) {
           // Note: We also give a hall pass to low hp ants as they need to hurry through their queue.
-          if (ant.pose == 'prone' && temp2.pose == 'prone' && tun.t == 'cav' && ant.hp > 9 && antCheckAvoidance(antGetStill(ant), temp2)) {// Note: antGetStill() slipped in here so the ant doesn't treadmill in place when halted by collision.
-            // Avoid this ant.
-            temp1 = calcDistComponents(temp2.x, temp2.y, ant.x, ant.y);
-            ant.r = normalize360(ant.r + temp3.d * 2 * (!randomInt(9) ? -9 : 1));
-            ant.x += temp1.x / 2;
-            ant.y += temp1.y / 3;
+          if (ant.pose == 'prone' && temp2.pose == 'prone' && tun.t == 'cav' && ant.hp > 9) {
+            if (antCheckAvoidance(antGetStill(ant), temp2)) {// Note: antGetStill() slipped in here so the ant doesn't treadmill in place when halted by collision.
+              // Avoid this ant.
+              temp1 = calcDistComponents(temp2.x, temp2.y, ant.x, ant.y);
+              ant.r = normalize360(ant.r + temp3.d * 2 * (!randomInt(9) ? -9 : 1));
+              ant.x += temp1.x / 2;
+              ant.y += temp1.y / 3;
+            }
             // Track ant avoidance duration so we can stop doing it if it gets too insane.
             antTrackAvoidance(ant, temp2);
           }
@@ -4182,7 +4186,7 @@ act = {
       wp && inTargetProximity(ant, wp, antOffsetY(ant) / 2) && antNudgeToMid(ant, tun); // Ant way too close to waypoint, push it away a little.
       // Determine if we're on a collision course with a waypoint and then align the ant with the waypoint angle by 2 degrees to minimise the collision.
       if (antWaypointCollision(farm, ant, 7 + (tun.t == 'cav' && antOffsetX(ant)))) {
-        temp3 ? (randomInt(3) ? antInstaQ(ant, {}, 0) : antNudgeToMid(ant, tun)) : // Ant is dealing with an ant collision as well, give it some hesitation or at least get away from walls.
+        temp3 ? (!randomInt(9) ? antInstaQ(ant, {}, 0) : antNudgeToMid(ant, tun)) : // Ant is dealing with an ant collision as well, give it some hesitation or at least get away from walls.
           // Angle correction in response to waypoint collision:
           ant.r = normalize360(
             ant.r + (
