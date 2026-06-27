@@ -4272,6 +4272,7 @@ act = {
     // Random ant pose switching feature.
     // Ensure we're not at the end of the tunnel, near the beginning (prone -> side only), or have flagged the no-switch.
     else if (!action.ns && !isRotationTunnel(tun) && !randomInt(ant.pose == 'prone' ? 100 : num800) && antWaypointRange(ant, wp) &&
+        (ant.pose == 'prone' || tun.t != 'con') && // Avoid switching into prone if this is a con - looks stupid.
         (ant.pose == 'side' || !(action.rev ? action.dist > tun.prog - tunPercent(tun, 20) : action.dist < tunPercent(tun, 20)))) {
       action.ns = getTime(); // Don't randomly switch again in this tunnel.
       ant.pose == 'side' ? antToProneWithCorrection(ant, tun) : antToSideWithCorrection(ant, tun, wp);
