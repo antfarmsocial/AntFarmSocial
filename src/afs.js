@@ -844,7 +844,11 @@ tunDelete = (farm, tun, el = getEl(tun.id)) => {
 },
 
 // Updates the wayPoints global.
-updateWaypoints = farm => {wayPoints[farm.id] = reorderAndSmoothWaypoints(filterWaypoints(farm.tuns.filter(t => t.prog > 0).map(t => calculateWaypoints(t))))},
+updateWaypoints = farm => {
+  wayPoints[farm.id] =
+    fillWaypointGaps(reorderAndSmoothWaypoints(filterCloseWaypoints(filterWaypoints(farm.tuns.filter(t => t.prog > 0).map(t => calculateWaypoints(t))))))
+      .map((wp, i) => ({...wp, i}));
+},
 
 // Calculates waypoints for the perimeter of the tunnel area.
 calculateWaypoints = (tun, step = tun.t == 'jun' ? 3 : tun.t == 'con' ? 9 : 5, pivotX = tun.x1, pivotY = tun.y1, wipBr = {x: 7, y: 7}, points = [], i) => {
@@ -925,16 +929,16 @@ filterWaypoints = (segments, inShape = (point, perimeterPoints, y = point.y, n =
         }
     });
   });
-  return stitchWaypointSegments(segments.map(points => filterCloseWaypoints(points.filter(p => !p.r))).filter(segment => segment.length > 2));
+  return segments.map(points => points.filter(p => !p.r)).filter(segment => segment.length > 2).flat();
 },
 
-// Fills large gaps in waypoints and stores the indexes with the waypoints.
+// Fills large gaps in waypoints.
 fillWaypointGaps = (points, i, a, b) => {
   for (i = points.length - 1; i > 0; i--) {
     a = points[i - 1], b = points[i];
-    squareDistanceCoords(a, b) <= 144 && squareDistanceCoords(a, b) > 64 && points.splice(i, 0, {x: (a.x + b.x) / 2, y: (a.y + b.y) / 2});
+    a.y - surface > 50 && squareDistanceCoords(a, b) <= 144 && squareDistanceCoords(a, b) > 64 && points.splice(i, 0, {x: (a.x + b.x) / 2, y: (a.y + b.y) / 2});
   }
-  return points.map((wp, i) => ({...wp, i}));
+  return points;
 },
 
 // Cleans up the waypoints.
@@ -951,7 +955,7 @@ reorderAndSmoothWaypoints = (points, radius = 2, factor = .2, remaining = [...po
         if (d <= 144) {
           if (heading != null) {
             temp = abs(normalize180(getAngle(current, remaining[i]) - heading)); // Angle.
-            d += temp * temp; // Penalise direction changes.
+            if (temp > 85) d += temp * temp; // Penalise direction changes.
           }
           if (d < nearestDist) {
             nearestDist = d;
@@ -981,7 +985,7 @@ reorderAndSmoothWaypoints = (points, radius = 2, factor = .2, remaining = [...po
       return maxNeighDist <= 144 && count ? {x: p.x + (sumX / count - p.x) * factor, y: p.y + (sumY / count - p.y) * factor} : p; // 144 = (12 * 12)
     }) : segment);
   }
-  return fillWaypointGaps(stitchWaypointSegments(segments.filter(segment => segment.length > 5)));
+  return stitchWaypointSegments(segments.filter(segment => segment.length > 5));
 },
 
 // Filters out waypoints that are too close to each other.
@@ -1017,7 +1021,6 @@ stitchWaypointSegments = (segments, stitched = [], current, c, i) => {
     }
     stitched.push(current);
   }
-  // The waypoints also store their own index.
   return stitched.flat();
 },
 
@@ -4186,7 +4189,7 @@ act = {
             if (antCheckAvoidance(antGetStill(ant), temp2)) {// Note: antGetStill() slipped in here so the ant doesn't treadmill in place when halted by collision.
               // Avoid this ant.
               temp1 = calcDistComponents(temp2.x, temp2.y, ant.x, ant.y);
-              ant.r = normalize360(ant.r + temp3.d * 2 * (!randomInt(9) ? -9 : 1));
+              ant.r = normalize360(ant.r - temp3.d * 2 * (!randomInt(9) ? -9 : 1));
               ant.x += temp1.x / 2;
               ant.y += temp1.y / 3;
             }
