@@ -1097,7 +1097,7 @@ addItems = X =>
   }) || updateFoodAndDrink(),
 
 // Re-adds placed stickers when switching to farm or loading page.
-addDecals = X => F.decals.forEach(decal => appendDecalImg(getEl('decals'), decal, '')),
+addDecals = X => F.decals?.forEach(decal => appendDecalImg(getEl('decals'), decal, '')),
 
 // Re-adds the nip items if needed.
 addNipItems = X => {
@@ -1172,10 +1172,8 @@ dumpFarm = restart => {
   // The rest done in a 1-frame delay to minimise chance of console errors from pending antAction timers that expect
   // the farm object to be some type of way before they loop back and detect the missing ants.  Not a perfect solution.
   setTimeout(X => {
-    let decals = F.decals; // The only thing that doesn't dump is decals.
     // Reset farm to defaults.
     del(assign(F, cloneData(farmDefault)), 'dun', 'hair');
-    F.decals = decals;
     // Save these changes.
     save();
     // Undraw tunnels and hills.
@@ -1366,6 +1364,7 @@ placeDecal = (i, decals = getEl('decals'), decal = assign(_.bag[i], {id: 'i' + g
         obj.classList.remove('temp');
         decal.x = obj.style.left;
         decal.y = obj.style.top;
+        F.decals ||= [];
         F.decals.push(decal);
         decal.k == 'coexist' && (F.coex = 1);
         deleteBagItem(i);
@@ -5013,7 +5012,7 @@ antGoToAnt = (ant, destAnt, location = {n: destAnt.area.n}) => {
 
 // Rates the farm as to whether it is styling.
 // Returns 0 on fail, and a positive integer with the score on pass.  Never demand players to score more than a 2 to get full benefits.
-farmFlairScore = farm => clamp(farm.items.filter(i => i.t == 'scenery').length + farm.decals.length / 2 + (farm.card ? .5 : 0) - 1, 0, 2),
+farmFlairScore = farm => clamp(farm.items.filter(i => i.t == 'scenery').length + farm.decals?.length / 2 + (farm.card ? .5 : 0) - 1, 0, 2),
 
 // Applies ant stat adjustments.
 antStats = (ant, stats) => keys(stats).forEach(key => ant[key] = clamp(ant[key] + stats[key], 0, 100)),

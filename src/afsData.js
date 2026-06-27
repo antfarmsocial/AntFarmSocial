@@ -1586,11 +1586,9 @@ farmDefault = {
   },
   a: [], // ants
   e: [], // eggs
-  c: [], // carry
   tuns: [],
   hills: [],
   items: [],
-  decals: [],
   nips: [],
   dig: [],
 },
