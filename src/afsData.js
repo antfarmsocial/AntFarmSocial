@@ -1471,7 +1471,7 @@ jokes = [
 ach = {
   'blood': {
     n: "Blood Type",
-    desc: "Have one kind of ant in a farm.",
+    desc: "Have one kind of ant together in a farm.",
     lvls: 1,
     sub: "of a kind",
     ico: "🩸",
@@ -1495,14 +1495,14 @@ ach = {
   },
   'fac': {
     n: "Factory Fourm",
-    desc: "Have four farms developing.",
+    desc: "Have four farms that are really coming along.",
     sub: "farms",
     ico: "🏭",
     lvl: 25,
   },
   'tri': {
     n: "Tri-fill-cta",
-    desc: "Have 3 fill types used at the same time.",
+    desc: "Have three fill types used at the same time.",
     ico: "3️⃣",
     lvl: 30,
   },
@@ -1522,7 +1522,7 @@ ach = {
   },
   'kweens': {
     n: "Kweens",
-    desc: "Have multiple queens in a colony.",
+    desc: "Have multiple queens together in one colony.",
     ico: "👑",
     lvl: 40,
   },

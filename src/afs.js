@@ -174,7 +174,7 @@ antFarmSocial = X => {
   // Start farm activity. Must be run after switchFarm().
   _.farms.forEach(farm => {
     if (!farm.sculpt) {
-      updateWaypoints(farm); // Calculate waypoints.
+      waypointsUpdate(farm); // Calculate waypoints.
       farm.a.forEach(a =>
         a.state == 'free' && antCap(a) // Fix ants that didn't cop a cap before the last save().
         || a.inf || antAction(a) // Activate (unless it is an infant).
@@ -843,15 +843,15 @@ tunDelete = (farm, tun, el = getEl(tun.id)) => {
   farm.tuns.forEach(t => t.co && (t.co = t.co.filter(id => id != tun.id)));
 },
 
-// Updates the wayPoints global.
-updateWaypoints = farm => {
+// Updates the wayPoints global record for one farm.
+waypointsUpdate = farm => {
   wayPoints[farm.id] =
-    fillWaypointGaps(reorderAndSmoothWaypoints(filterCloseWaypoints(filterWaypoints(farm.tuns.filter(t => t.prog > 0).map(t => calculateWaypoints(t))))))
-      .map((wp, i) => ({...wp, i}));
+    waypointsFill(waypointsSmooth(waypointsFilter(farm.tuns.filter(t => t.prog > 0).map(t => waypointsCalc(t)))))
+      .map((wp, i) => ({...wp, i})); // Waypoints store their own index for quick prev/next look-ups.
 },
 
-// Calculates waypoints for the perimeter of the tunnel area.
-calculateWaypoints = (tun, step = tun.t == 'jun' ? 3 : tun.t == 'con' ? 9 : 5, pivotX = tun.x1, pivotY = tun.y1, wipBr = {x: 7, y: 7}, points = [], i) => {
+// Calculates waypoints for the perimeter of a tunnel.
+waypointsCalc = (tun, step = tun.t == 'jun' ? 3 : tun.t == 'con' ? 9 : 5, pivotX = tun.x1, pivotY = tun.y1, wipBr = {x: 7, y: 7}, points = [], i) => {
   let {x1, y1, x2, y2, t, prog, w, h, r} = tun,
     fullW = w,
     brParts = tun.br.split('/').map(s => s.trim()),
@@ -862,7 +862,7 @@ calculateWaypoints = (tun, step = tun.t == 'jun' ? 3 : tun.t == 'con' ? 9 : 5, p
     getEllipseArcPoints = (cx, cy, rx, ry, angleStart, angleEnd, step, points = [], angle = angleStart, rad) => {
       for (; angle <= angleEnd; angle += step * 2) {
         rad = degToRad(angle);
-        points.push({x: cx + rx * cos(rad), y: cy + ry * sin(rad)});
+        points.push({x: cx + (rx + 1) * cos(rad), y: cy + (ry + 1) * sin(rad)}); // The two "+ 1" bits are to relax how tightly wps follow rounded-corner curves.
       }
       return points;
     };
@@ -912,8 +912,8 @@ calculateWaypoints = (tun, step = tun.t == 'jun' ? 3 : tun.t == 'con' ? 9 : 5, p
   return points.map((p, I, A, rad = degToRad(r), dx = p.x - pivotX, dy = p.y - pivotY) => ({x: cos(rad) * dx - sin(rad) * dy + pivotX, y: sin(rad) * dx + cos(rad) * dy + pivotY}));
 },
 
-// Removes points that are inside other shape's perimeters or out-of-bounds.
-filterWaypoints = (segments, inShape = (point, perimeterPoints, y = point.y, n = perimeterPoints.length, inside = 0, i = 0, j = n - 1) => {
+// Removes points that are inside other shape's perimeters or out-of-bounds (i.e. out-of-farm not out-of-tunnel).
+waypointsFilter = (segments, inShape = (point, perimeterPoints, y = point.y, n = perimeterPoints.length, inside = 0, i = 0, j = n - 1) => {
     for (; i < n; j = i++) {
       let xi = perimeterPoints[i].x, yi = perimeterPoints[i].y, yj = perimeterPoints[j].y;
       if ((yi > y) !== (yj > y) && point.x < ((perimeterPoints[j].x - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
@@ -929,11 +929,13 @@ filterWaypoints = (segments, inShape = (point, perimeterPoints, y = point.y, n =
         }
     });
   });
-  return segments.map(points => points.filter(p => !p.r)).filter(segment => segment.length > 2).flat();
+  // Note: `squareDistanceCoords()` is used instead of `getHypot()` for performance reasons.
+  return segments.map(points => points.filter(p => !p.r)).filter(segment => segment.length > 2).flat()
+    .reduce((result, p) => (!result.some(q => squareDistanceCoords(q, p) < 4) && result.push(p), result), []);
 },
 
 // Fills large gaps in waypoints.
-fillWaypointGaps = (points, i, a, b) => {
+waypointsFill = (points, i, a, b) => {
   for (i = points.length - 1; i > 0; i--) {
     a = points[i - 1], b = points[i];
     a.y - surface > 50 && squareDistanceCoords(a, b) <= 144 && squareDistanceCoords(a, b) > 64 && points.splice(i, 0, {x: (a.x + b.x) / 2, y: (a.y + b.y) / 2});
@@ -942,7 +944,7 @@ fillWaypointGaps = (points, i, a, b) => {
 },
 
 // Cleans up the waypoints.
-reorderAndSmoothWaypoints = (points, radius = 2, factor = .2, remaining = [...points], segments = [], i, j) => {
+waypointsSmooth = (points, radius = 2, factor = .2, remaining = [...points], segments = [], i, j) => {
   remaining.sort((a, b) => a.y - b.y);
   while (remaining.length) {
     let segment = [], current = remaining.shift(), nearestIndex, nearestDist, d, heading = null, temp;
@@ -985,18 +987,11 @@ reorderAndSmoothWaypoints = (points, radius = 2, factor = .2, remaining = [...po
       return maxNeighDist <= 144 && count ? {x: p.x + (sumX / count - p.x) * factor, y: p.y + (sumY / count - p.y) * factor} : p; // 144 = (12 * 12)
     }) : segment);
   }
-  return stitchWaypointSegments(segments.filter(segment => segment.length > 5));
-},
-
-// Filters out waypoints that are too close to each other.
-filterCloseWaypoints = (points, result = [], p) => {
-  // Note: `squareDistanceCoords()` is used instead of `getHypot()` for performance reasons.
-  for (p of points) !result.some(q => squareDistanceCoords(q, p) < 4) && result.push(p);
-  return result;
+  return waypointsStitch(segments.filter(segment => segment.length > 2));
 },
 
 // Stitches together segments of waypoints in an intelligent way to preserve as much continuity as possible.
-stitchWaypointSegments = (segments, stitched = [], current, c, i) => {
+waypointsStitch = (segments, stitched = [], current, c, i) => {
   while (segments.length) {
     current = segments.shift();
     go: while (1) {// Named for use with a nested continue statement to avoid juggling a variable to track loooping and breaks.
@@ -3829,7 +3824,7 @@ act = {
             // Perhaps they should automatically 'grow' into place on a slow timer or something, if ONE OF THE adjacent tunnels in their 'co' property is completed.
           }
           // Dig end.
-          updateWaypoints(farm);
+          waypointsUpdate(farm);
           ant.area.n == 'bot' && antInstaQ(ant, {act: 'climb'});
           del(ant, 'digD');
           ant.area.t && antChangeTunDir(ant, tun);

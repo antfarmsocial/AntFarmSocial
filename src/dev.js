@@ -1199,17 +1199,17 @@ let devShowLines = 0;
   // re-run both when the details block is opened and on farm switch.
   const updateSpecialTuns = () => {
     let morgue = F.tuns.find(t => t.morgue)?.id;
-    let out = `<div><b>Morgue:</b><span class="specialVal"> ${morgue || '<span class="none">none</span></span>'}</div>`;
+    let out = `<div><b>Morgue:</b> <span class="specialVal">${morgue || '<span class="none">none</span>'}</span></div>`;
     let antNestMap = Object.fromEntries(F.a.filter(a => a.nest).map(a => [a.id, a.nest]));
-    let nests = `<div><b>Nests:</b><span class="specialVal"> <span class="none">none</span></span></div>`;
+    let nests = `<div><b>Nests:</b> <span class="specialVal"><span class="none">none</span></span></div>`;
     let nestArray = [];
     for (let [antId, nestId] of Object.entries(antNestMap)) {
-      nestArray.push(`<div><b>${antId} nest:</b> ${nestId}</div>`);
+      nestArray.push(`<div><b>${antId} nest:</b> <span class="specialVal">${nestId}</span></div>`);
     }
     if (nestArray.length) nests = nestArray.join('');
     out += nests;
     let junTuns = F.tuns.filter(t => t.t == 'jun').length;
-    out += `<div><b>JUN tunnels:</b><span class="specialVal"> ${junTuns || '<span class="none">none</span></span>'}</div>`;
+    out += `<div><b>JUN tunnels:</b> <span class="specialVal">${junTuns || '<span class="none">none</span>'}</span></div>`;
     getEl('dev-special-tuns').innerHTML = out;
   };
 
@@ -1259,7 +1259,7 @@ const toggleWaypoints = turnOn => {
   wp && wp.remove();
 
   if (turnOn) {
-    updateWaypoints(F);
+    waypointsUpdate(F);
     getEl('farm').innerHTML += '<div id="waypoints" class="fill"></div>';
     wayPoints[F.id].forEach(p => {
       const pointDiv = document.createElement('div');
