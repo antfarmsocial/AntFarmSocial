@@ -1444,7 +1444,7 @@ jokes = [
     ["Why did the ant philosopher stop worrying about the meaning of life?", "He found it in every leaf, crumb, and trail."],
     ["How do ants teach us about joy?", "By showing that even the smallest creatures can lead lives filled with purpose and community."],
     ["What did the ant say when it reached enlightenment?", "I finally understand - it's all about the colony, man!"],
-    ["Why did the ant sit under the Bodhi tree?", "To achieve ant-enlightenment and discover the true nature of crumb-ness."],
+    ["Why did the ant sit under the Bodhi tree?", "To achieve ant-lightenment and discover the true nature of crumb-ness."],
     ["How do ants stay so wise?", "They follow the teachings of their guru, Ant-istotle, who said…", '"Happiness depends on ourselves… and a good picnic."'],
     ["What's an ant's favorite religious philosophy?", "Ant-theism: believing that even the smallest acts of kindness", "can create a ripple effect of joy."],
     ["Why do ants never get lost in existential thoughts?", "Because they know the meaning of life is to carry on and share crumbs with their friends."],
