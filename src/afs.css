@@ -1888,6 +1888,10 @@ body.glass #l-wrap {
   z-index: 2;
   transform-origin: center;
   overflow: hidden;
+}
+
+.jun,
+.con {
   .prog {
     position: absolute;
     left: 50%;
