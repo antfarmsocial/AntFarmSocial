@@ -846,7 +846,7 @@ tunDelete = (farm, tun, el = getEl(tun.id)) => {
 // Updates the wayPoints global record for one farm.
 waypointsUpdate = farm => {
   wayPoints[farm.id] =
-    waypointsFill(waypointsSmooth(waypointsFilter(farm.tuns.filter(t => t.prog > 0).map(t => waypointsCalc(t)))))
+    waypointsFill(waypointsStitch(waypointsSmooth(waypointsFilter(farm.tuns.filter(t => t.prog > 0).map(t => waypointsCalc(t))))))
       .map((wp, i) => ({...wp, i})); // Waypoints store their own index for quick prev/next look-ups.
 },
 
@@ -934,15 +934,6 @@ waypointsFilter = (segments, inShape = (point, perimeterPoints, y = point.y, n =
     .reduce((result, p) => (!result.some(q => squareDistanceCoords(q, p) < 4) && result.push(p), result), []);
 },
 
-// Fills large gaps in waypoints.
-waypointsFill = (points, i, a, b) => {
-  for (i = points.length - 1; i > 0; i--) {
-    a = points[i - 1], b = points[i];
-    a.y - surface > 50 && squareDistanceCoords(a, b) <= 144 && squareDistanceCoords(a, b) > 64 && points.splice(i, 0, {x: (a.x + b.x) / 2, y: (a.y + b.y) / 2});
-  }
-  return points;
-},
-
 // Cleans up the waypoints.
 waypointsSmooth = (points, radius = 2, factor = .2, remaining = [...points], segments = [], i, j) => {
   remaining.sort((a, b) => a.y - b.y);
@@ -987,7 +978,7 @@ waypointsSmooth = (points, radius = 2, factor = .2, remaining = [...points], seg
       return maxNeighDist <= 144 && count ? {x: p.x + (sumX / count - p.x) * factor, y: p.y + (sumY / count - p.y) * factor} : p; // 144 = (12 * 12)
     }) : segment);
   }
-  return waypointsStitch(segments.filter(segment => segment.length > 2));
+  return segments.filter(segment => segment.length > 2);
 },
 
 // Stitches together segments of waypoints in an intelligent way to preserve as much continuity as possible.
@@ -1017,6 +1008,15 @@ waypointsStitch = (segments, stitched = [], current, c, i) => {
     stitched.push(current);
   }
   return stitched.flat();
+},
+
+// Fills large gaps in waypoints.
+waypointsFill = (points, i, a, b) => {
+  for (i = points.length - 1; i > 0; i--) {
+    a = points[i - 1], b = points[i];
+    a.y - surface > 50 && squareDistanceCoords(a, b) <= 144 && squareDistanceCoords(a, b) > 64 && points.splice(i, 0, {x: (a.x + b.x) / 2, y: (a.y + b.y) / 2});
+  }
+  return points;
 },
 
 // Calculates square distance to a target if it is roughly within the supplied squared proximity, otherwise Infinity.
