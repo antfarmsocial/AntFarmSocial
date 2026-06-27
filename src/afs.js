@@ -823,7 +823,6 @@ tunProgDraw = (tun, progEl = query(`#${tun.id} .prog`), tunEl = getEl(tun.id)) =
       case 'con':
       case 'jun':
         progEl.style.height = progEl.style.width = tun.h * tun.prog / 100 + 'px';
-        tunEl.style.marginTop = tunEl.style.marginLeft = -tun.h * tun.prog / 200 + 'px';
         break;
       case 'tun':
         progEl.style.width = tun.prog + '%';
