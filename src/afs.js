@@ -3393,7 +3393,7 @@ cavFloor = (tun, pc, yOffset = 0, r = degToRad(tun.r)) =>
 
 // Slips an ant off the bg area.
 // It is generally OK to call this function directly (note: it will clear the ant's finna queue to simulate a head injury).
-antSlip = ant => !ant.carry && (ant.q = [{act: 'slip'}], antActionStill(ant)),
+antSlip = ant => !ant.carry && (ant.q = [{act: 'slip'}], ant.scale = randomSign(), antActionStill(ant)),
 
 // Handles an ant's end of life transition.
 // Call this function for instant death, but it is often better to queue a 'die' action which will prepare the ant nicely first.
@@ -3425,7 +3425,7 @@ antDeath = (ant, cause, farm = getFarm(assign(ant, {
     if (cause == 'fight' && stillAlive.length === 1 && isQueen(stillAlive[0])) farm.sweep = 1;
     antUpdate(ant);
     // Correct antArea data.
-    if (tunPos?.tun) antArea(ant, 'bot', tunPos.tun.id);
+    tunPos?.tun && antArea(ant, 'bot', tunPos.tun.id);
     addLidFunc(); // Allow plucking dead ants.
   }
   save();
@@ -3623,7 +3623,7 @@ tubeWalker = (farm, nipData, ant, nipItem = nipData.item, otherFarm = getFarm(ni
     // Note: checkExpatQueen() and the "F: otherFarm.id" may seem redundant with deNip() later on but they need to be done here too to avoid problems!
     checkExpatQueen(ant, otherFarm);
     if (ant.carry) {
-      ant.carry.nip = otherData.nip; // Set BEFORE transferObject so antUpdate can find the carried item correctly.
+      ant.carry.nip = otherData.nip; // Set BEFORE antTransfer so antUpdate can find the carried item correctly.
       antTransfer(otherFarm, getCarry(farm, ant.carry, nipItem), nipItem, otherData.item, {nipPh: 3, f: otherFarm.id}, otherNipEl);
       // Note: even though we update the f prop on the carried item, it is not updated in the ant.carry object!
     }
@@ -3725,11 +3725,14 @@ act = {
       ant.r = antHillAngle(ant) + tun.prog / 9 + randomInt(5);
       antUpdate(ant);
     }, num200),
-    conNudge = (ant, tun, nextTun = isRotationTunnel(tun) && ant.digT != tun.id && getTun(farm, ant.digT), nudgeDest = nextTun ? getConnectionPoint(tun, nextTun) : {x: tun.x1, y: tun.y1}) => {
+    conNudge = (ant, tun, nextTun = isRotationTunnel(tun) && ant.digT != tun.id && getTun(farm, ant.digT)) => {
       // Turn ant towards a random point that is roughly facing away from the already-dug tunnels.
       temp = nextTun ? tunExitAngle(nextTun, tun.t == 'jun' ? getTun(farm, tun.c) : tun) : normalize180(tunAverageAngle(farm.tuns.filter(t => t.dun && t.co.includes(tun.id)), tun) + randomInt(60) - 30); // Final angle.
       nudger = setInterval(X => {
-        let distComp = calcDistComponents(ant.x, ant.y, nudgeDest.x, nudgeDest.y), diff = normalize180((ant.scale < 0 ? mirrorAngle(temp) : temp) - ant.r);
+        let frontDist = (tun.w / 2) * (tun.prog / 100),
+          frontRad = degToRad(ant.scale < 0 ? deg180 - ant.r : ant.r),
+          nudgeDest = nextTun ? getConnectionPoint(tun, nextTun) : {x: tun.x1 + cos(frontRad) * frontDist, y: tun.y1 + sin(frontRad) * frontDist}
+          headPoint = antHeadPoint(ant), distComp = calcDistComponents(headPoint.x, headPoint.y, nudgeDest.x, nudgeDest.y), diff = normalize180((ant.scale < 0 ? mirrorAngle(temp) : temp) - ant.r);
         distComp.d > .2 ? (antSetWalk(ant), ant.x += distComp.x * .2, ant.y += distComp.y * .2) : abs(diff) < 1 && (antGetStill(ant), stopInterval(nudger));
         ant.r += sign(diff);
         if (cos(degToRad(ant.r)) < 0) ant.pose = 'prone'; // Enforce prone pose in a legs-up scenario.
@@ -4392,7 +4395,7 @@ act = {
     ant.pose = 'pick';
     if (target - ant.y > 1.2) {
       ant.y += 2;
-      ant.r += sign(deg180 - ant.r) * 2;
+      ant.r += sign(-ant.r) * 2;
       antActionStill(ant);
     }
     else {
@@ -4477,7 +4480,7 @@ act = {
   // Ant stops and regenerates hp and mood.
   rest: (ant, farm = getFarm(ant), action = ant.q[0]) => {
     // Ant needs to find a spot away from other ants, food, and water.
-    if (farm.a.find(a => inTargetProximity(a, ant, 9)) || ant.area.n == 'top' && farm.items.some(i => ['food', 'drink'].includes(i.t) && abs(ant.x - i.x) < 30)) {
+    if (farm.a.find(a => inTargetProximity(a, ant, 9)) || ant.area.n == 'top' && farm.items.some(i => ['food', 'drink'].includes(i.t) && abs(ant.x - i.x) < 30) || ant.area.n == 'bg' && ant.y > antGroundLevel(ant) - 20) {
       if (ant.q.length < 9 && randomInt(9)) {// Only try again if the queue isn't getting too long, also random chance to abort because of two-ant race condition.
         ant.area.n == 'bot' ?
           // Attempt a dive to the same tunnel they're already in, or random chance to pick a random tunnel.
@@ -4688,7 +4691,7 @@ act = {
   kip: (ant, farm = getFarm(ant), nests = [...new Set(farm.a.filter(a => a.nest).map(a => a.nest))], antCount = farm.a.length) => {
     // Try pick a nest if there's a suitable one and/or send to the nest.
     if (getTun(farm, ant.nest)?.morgue) ant.nest = 0;
-    (ant.nest ||= pickRandom(specialTunCandidates(farm, [t => !t.morgue, t => !t.nip, t => t.co.filter(co => getTun(farm, co).dun).length < 2, t => !nests.has(t.id)]))?.id)
+    (ant.nest ||= pickRandom(specialTunCandidates(farm, [t => !t.morgue, t => !t.nip, t => t.co.filter(co => getTun(farm, co).dun).length < 2, t => !nests.includes(t.id)]))?.id)
       && goToLocation(ant, makeDiveStub({tun: ant.nest, pc: 20 + randomInt(60), pos: 'd'}));
     antFinna(ant, 'rest');
     // Queue egg laying if no eggs in the nest, not overpopulated, and random chance passed with respect to various factors.
