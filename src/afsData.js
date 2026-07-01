@@ -959,7 +959,7 @@ achOK = ['Yes', 'I did', 'Cheers', 'Woohoo', 'Bam', 'Boom', 'Nice', 'Yay', 'Righ
 
 // Pools of random messages for specific occasions.
 // NOTE: We gave up putting short message content here part way through development, so now some of it exists here, and some is hardcoded directly in the code.  Should probably choose one approach and rectify this.
-welcome = [['Welcome to Ant Farm Social.', "We're preaching ants."],['Hey Johnny, do you wanna go to an Ant Farm Social?']],
+welcome = [['Welcome to Ant Farm Social.', "We're preaching ants."], ['Hey Johnny, do you wanna go to an Ant Farm Social?']],
 newFarm = [['Here is your new Ant Farm. You need to get you some ants.', 'You may notice some free ants roaming your screen.']],
 biteMsg = [["You've been bit!", "You can't collect ants until you're better"], ["Ouch! You were bitten!", "You'll need to wait until this passes"]],
 tapMsg = [["They don't like that"], ['Stop that'], ["Tappa-Tappa-Tappa"], ['Shh! This is the listening side of the plexiglass'], ['This is supposed to be a quiet activity']],
@@ -1584,8 +1584,7 @@ farmDefault = {
     },
     cap: 0,
   },
-  a: [], // ants
-  e: [], // eggs
+  a: [], // ants (eggs also live here, flagged with egg:1)
   tuns: [],
   hills: [],
   items: [],

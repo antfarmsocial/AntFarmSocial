@@ -3389,6 +3389,8 @@ body.bit .ant {
   background: #e9e5d2;
   outline: 1px solid #e9e5d2;
   box-shadow: 0 0 2px rgba(0, 0, 0, .2);
+  margin-top: 0;
+  margin-left: 0;
   &::after {
     content: '';
     display: block;
@@ -3399,6 +3401,9 @@ body.bit .ant {
     border-radius: 50%;
     width: 2px;
     height: 2px;
+  }
+  > * {
+    display: none;
   }
 }
 .egg, .inf1, .inf2, .inf3, .inf4 {

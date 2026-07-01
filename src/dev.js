@@ -203,7 +203,9 @@ const devBuildPanel = (title, id, sections) => {
 const devMountPanel = (title, id, sections, opts = {}) => {
   let css = '';
   sections.forEach(section => {
-    section.forEach(f => { if (f.css) css += f.css + '\n'; });
+    section.forEach(f => {
+      if (f.css) css += f.css + '\n';
+    });
   });
   // Mount structural HTML
   appendHTML(B, devBuildPanel(title, id, sections));
@@ -244,14 +246,18 @@ const devMountPanel = (title, id, sections, opts = {}) => {
   });
   // Run feature scripts.
   sections.forEach(section => {
-    section.forEach(f => { if (typeof f.js === 'function') f.js(); });
+    section.forEach(f => {
+      if (typeof f.js === 'function') f.js();
+    });
   });
   const el = getEl(id);
   return {
     el,
     cleanup: () => {
       sections.forEach(section => {
-        section.forEach(f => { if (typeof f.cleanup === 'function') f.cleanup(); });
+        section.forEach(f => {
+          if (typeof f.cleanup === 'function') f.cleanup();
+        });
       });
       const styleEl = getEl(styleId);
       if (styleEl) styleEl.remove();
@@ -337,7 +343,13 @@ const devNotifySwitch = () => {
           background: rgba(253, 244, 189, 0.8);
         }
         &.isDead {
-          background: rgba(245, 206, 238, 0.8);
+          background: rgba(155, 155, 155, 0.8);
+        }
+        &.isEgg {
+          background: rgba(118, 255, 113, 0.8);
+        }
+        &.isQueen {
+          background: rgba(255, 161, 255, 0.8);
         }
         div {
           font-family: monospace;
@@ -399,9 +411,14 @@ const devNotifySwitch = () => {
       treeTimer = setInterval(() => {
         const treeEl = getEl('dev-ant-tree');
         const devAntEl = getEl('dev-ant');
-        devAntEl.classList.toggle('isInfant', !!F.a[0].inf);
-        devAntEl.classList.toggle('isDead', F.a[0].state == 'dead');
-        if (treeEl) treeEl.innerHTML = devObjectDisplay(F.a[0]);
+        const firstAnt = F.a[0];
+        if (firstAnt) {
+          devAntEl.classList.toggle('isInfant', !!firstAnt.inf);
+          devAntEl.classList.toggle('isEgg', !!firstAnt.egg);
+          devAntEl.classList.toggle('isDead', !!isDead(firstAnt));
+          devAntEl.classList.toggle('isQueen', !!isQueen(firstAnt));
+        }
+        if (treeEl) treeEl.innerHTML = devObjectDisplay(firstAnt);
       }, frameTick);
     };
     feat.cleanup = () => {
@@ -640,14 +657,12 @@ const devSecAnts = [];
     prefix: '',
     text: ['🛑 Stop ants', '▶️ Start ants'],
     checked: true,
-    attrs: `class="dev-skip-onload"`, // Don't auto trigger this one!
     toggle: checked => {
+      const wasStopped = stopAnts;
       stopAnts = !checked;
-      if (!stopAnts) {
-        F.a.forEach(a => a.inf || antAction(a));
+      if (wasStopped && !stopAnts) {
+        F.a.forEach(a => isEggOrInf(a) || antAction(a));
       }
-      _.a.forEach(antDelete);
-      setTimeout(() => queryAll('.ant.free').forEach(el => el.remove()), 50);
     },
   })}
   `;
@@ -683,11 +698,11 @@ const devSecAnts = [];
       spawnAnt(0);
       spawner = spawnState;
     }})}
-    ${devButt('Clear All Ants', {prefix: '🗑️', click: () => { F.a.forEach(antDelete); _.a.forEach(antDelete); }})}
+    ${devButt('Clear All Ants', {prefix: '🗑️', click: () => {F.a.forEach(antDelete); _.a.forEach(antDelete)}})}
     <br>
-    ${devButt('Clear Dead', {prefix: '💀', click: () => F.a.filter(deadInFarm).forEach(antDelete)})}
+    ${devButt('Clear Dead', {prefix: '💀', click: () => F.a.filter(isDead).forEach(antDelete)})}
 
-    ${devButt('Reset All Ants', {prefix: '🔄', click: () => [...F.a].forEach(a => devResetAnt(a))})}
+    ${devButt('Reset All Ants', {prefix: '🔄', click: () => [...F.a].forEach(a => a.egg || devResetAnt(a))})}
   `;
 
   devSecAnts.push(feat);
@@ -752,49 +767,62 @@ const devSecAnts = [];
 /*
  * FIRST ANT CONTROLS
  */
+
+// Resets a captured ant back to a neutral surface state.
+const devResetAnt = ant => {
+  let stopVal = stopAnts;
+  stopAnts = 1;
+  if (ant && ant.state == 'cap') {
+    ant.r = 0;
+    ant.x = getEl('farm').offsetWidth / 2;
+    ant.y = antGroundLevel(ant);
+    ant.q = [{act: 'idle'}];
+    ant.area = {n: 'top', d: 0, t: 0};
+    ant.md = 100;
+    ant.hp = 100;
+    ant.fd = 100;
+    ant.dr = 100;
+    ant.digDur = 0;
+    ant.side = 1;
+    ant.scale = 1;
+    ant.f = F.id;
+    del(ant, 'carry', 'hist', 'nipPh', 'nipTs');
+    const index = F.a.findIndex(a => ant.id === a.id);
+    if (index !== -1) {
+      F.a[index] = cloneData(F.a[index]);
+      ant = F.a[index];
+    }
+    setTimeout(() => {stopAnts = stopVal; antSurface(ant); antRemAnimUpdate(ant);}, 300);
+  }
+};
+
 {
   const feat = devFeature('First Ant Controls');
   feat.config = {collapsible: true, collapsed: false};
 
   feat.html = `
     ${devButt('Reset First Ant', {prefix: '🔄', click: () => devResetAnt(F.a[0])})}
-    ${devButt('Go', {prefix: '▶️', click: () => (stopAnts = 0, antAction(F.a[0]))})}
+
+
+    ${devToggle('Go', {
+      prefix: '',
+      text: ['⏹️ No', '▶️ Go'],
+      checked: false,
+      attrs: `class="dev-skip-onload dev-btn-style"`, // Don't restore/auto-trigger from storage.
+      toggle: checked => {
+        stopAnts = checked ? 0 : 1;
+        if (checked) antAction(F.a[0]);
+      },
+    })}
+
     <br>
-    ${devButt('L', {prefix: '⬅️', click: () => { F.a[0].x = 10; antUpdate(F.a[0], getEl(F.a[0].id)); }})}
-    ${devButt('C', {prefix: '⏺️', click: () => { F.a[0].x = getEl('farm').offsetWidth / 2; antUpdate(F.a[0], getEl(F.a[0].id)); }})}
-    ${devButt('R', {prefix: '➡️', click: () => { F.a[0].x = 950; antUpdate(F.a[0], getEl(F.a[0].id)); }})}
-    ${devButt('Flip', {prefix: '↔️', click: () => { F.a[0].scale *= -1; antUpdate(F.a[0], getEl(F.a[0].id)); }})}
+    ${devButt('L', {prefix: '⬅️', click: () => {F.a[0].x = 10; antUpdate(F.a[0], getEl(F.a[0].id));}})}
+    ${devButt('C', {prefix: '⏺️', click: () => {F.a[0].x = getEl('farm').offsetWidth / 2; antUpdate(F.a[0], getEl(F.a[0].id));}})}
+    ${devButt('R', {prefix: '➡️', click: () => {F.a[0].x = 950; antUpdate(F.a[0], getEl(F.a[0].id));}})}
+    ${devButt('Flip', {prefix: '↔️', click: () => {F.a[0].scale *= -1; antUpdate(F.a[0], getEl(F.a[0].id));}})}
     <br>
     ${devButt('Cycle ant order', {prefix: '↳', attrs: 'style="font-size:.92em;"', click: () => F.a.push(F.a.shift())})}
   `;
-
-  // Resets a captured ant back to a neutral surface state.
-  const devResetAnt = ant => {
-    let stopVal = stopAnts;
-    stopAnts = 1;
-    if (ant && ant.state == 'cap') {
-      ant.r = 0;
-      ant.x = getEl('farm').offsetWidth / 2;
-      ant.y = antGroundLevel(ant);
-      ant.q = [{act: 'idle'}];
-      ant.area = {n: 'top', d: 0, t: 0};
-      ant.md = 100;
-      ant.hp = 100;
-      ant.fd = 100;
-      ant.dr = 100;
-      ant.digDur = 0;
-      ant.side = 1;
-      ant.scale = 1;
-      ant.f = F.id;
-      del(ant, 'carry', 'hist', 'nipPh', 'nipTs');
-      const index = F.a.findIndex(a => ant.id === a.id);
-      if (index !== -1) {
-        F.a[index] = cloneData(F.a[index]);
-        ant = F.a[index];
-      }
-      setTimeout(() => {stopAnts = stopVal; antSurface(ant); antRemAnimUpdate(ant);}, 300);
-    }
-  };
 
   devSecAnts.push(feat);
 }
@@ -913,7 +941,7 @@ let allActs = cloneData(acts);
     ${devSelect('Act', devActsOpts)}
     ${devButt('Request Action', {prefix: '📢', click: () => {
       let requested = getEl('dev-act').value.split('-');
-      F.a.filter(a => livesInFarm(a)).forEach(ant => antFinnaVia(ant, requested[1], {via: requested[0]}));
+      F.a.filter(a => isCapped(a)).forEach(ant => antFinnaVia(ant, requested[1], {via: requested[0]}));
     }})}
   `;
 
@@ -1049,12 +1077,17 @@ let allActs = cloneData(acts);
   feat.html = `
     ${devButt('Egg laying (random queen)', {prefix: '🥚', click: () => {
       let randomQueen = pickRandom(F.a.filter(isQueen));
-      if (randomQueen) antFinna(randomQueen, 'lay');
+      if (randomQueen) {
+        antFinnaVia(randomQueen, 'kip');
+        antFinnaVia(randomQueen, 'lay');
+      }
     }})}
     <br>
     ${devButt('Nip walk (first ant)', {
       prefix: '<span style="display:inline-block;border-radius:3px;background:#a3da86;font-weight:bold;padding:0 3px;">➜]</span>',
-      click: () => { F.nips.length && antFinnaUnique(F.a[0], 'nip', {nip: pickRandom(F.nips).nip}); }
+      click: () => {
+        F.nips.length && antFinnaUnique(F.a[0], 'nip', {nip: pickRandom(F.nips).nip});
+      }
     })}
   `;
 
@@ -1135,7 +1168,7 @@ let devShowLines = 0;
       F.tuns.forEach(t => {t.prog = 100; t.dun = 1; tunProgDraw(t);});
       F.hills.forEach(h => {h.h = (h.r - h.l) / 4; drawHill(h);});
       devNotifySwitch();
-    }, 0);
+    }, frameTick * 2); // Because dumpFarm() takes 1 frame to kick in.
 
   devSecTunnels.push(feat);
 }
@@ -1150,6 +1183,11 @@ let devShowLines = 0;
   feat.html = `
     <div id="dev-tunnel-list-container"></div>
     <div id="dev-special-tuns"></div>
+    <div id="dev-progress-tuns">
+      ${devButt('Fast-forward current dig jobs', {prefix: '⏩', click: () => {
+        F.tuns.forEach(tun => tun.prog > 0 && !tun.dun && (tun.prog = 99.9));
+      }})}
+    </div>
   `;
 
   // Builds the tunnel <select> list and (re)wires its listeners.  Safe to call again later (e.g. on farm switch).
@@ -1210,6 +1248,10 @@ let devShowLines = 0;
     out += nests;
     let junTuns = F.tuns.filter(t => t.t == 'jun').length;
     out += `<div><b>JUN tunnels:</b> <span class="specialVal">${junTuns || '<span class="none">none</span>'}</span></div>`;
+    let digJobs = [];
+    F.dig.forEach(dig => digJobs.push(dig.id));
+    out += `<div><b>Dig jobs:</b> <span class="specialVal">${digJobs && digJobs.join() || '<span class="none">none</span>'}</span></div>`;
+    out += '<div><small>(Collapse this section to update list)</small></div>';
     getEl('dev-special-tuns').innerHTML = out;
   };
 
@@ -1828,6 +1870,30 @@ const devPanel = () => {
             text-decoration: line-through;
           }
         }
+        input.dev-btn-style {
+          ~ span {
+            display: inline-block;
+            margin: .25em;
+            padding: .25em .5em;
+            background: #64bc41;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-shadow: 2px 2px 1px rgba(0, 0, 0, .2);
+            font-family: sans-serif;
+          }
+          ~ span .dev-tog-lbl {
+            font-size: 1em;
+            font-weight: normal;
+            color: #fff;
+            text-decoration: none;
+          }
+          &:not(:checked) ~ span .dev-tog-lbl {
+            color: #fff;
+            text-decoration: none;
+          }
+        }
       }
       .dev-tog-prefix,
       .dev-btn-prefix {
@@ -1878,7 +1944,7 @@ window.onload = function() {
       del(ant, 'hist');
     }
     // Debugging:
-    if (!livesInFarm(ant)) console.warn('Dead ant walking!');
+    if (!isCapped(ant)) console.warn('Dead ant walking!');
     if (ant.q.length > 99) {
       console.warn(ant.id, getFarm(ant).n, 'has a long queue.', JSON.stringify(ant.q));
       ant.q = [{}];
@@ -1886,3 +1952,4 @@ window.onload = function() {
   };
 
 };
+
