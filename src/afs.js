@@ -97,6 +97,7 @@ getTime = Date.now,
 getTimeSec = (ts = getTime()) => floor(ts / num1000),
 appendHTML = (el, html) => el.insertAdjacentHTML('beforeend', html),
 randomInt = mx => floor(random() * (mx + 1)),
+randomFloat = (mn, mx) => random() * (mx - mn) + mn,
 pickRandom = arr => arr[randomInt(arr.length - 1)],
 randomSign = (mag = 1) => pickRandom([-mag, mag]),
 last = arr => arr.at(-1),
@@ -247,7 +248,7 @@ fixAntPos = X => {
 
 // Retrieves all data from local storage.
 // Note: Start at half volume so you can listen to a podcast while playing.
-load = X => _ = JSON.parse(localStorage.getItem('_') || '{"score":0,"farms":[],"bag":[],"ach":{},"achQ":[],"vol":50,"bg":"","grad":0,"sac":0,"arty":0,"scene":{},"man":0}'),
+load = X => _ = JSON.parse(localStorage.getItem('_') || '{"score":0,"farms":[],"bag":[],"ach":{},"achQ":[],"vol":50,"bg":"","grad":0,"sac":0,"arty":0,"scene":{},"man":0,"wings":0}'),
 
 // Saves all data to local storage.
 // Will not allow saving within 30s of loading the page due to suspected exploit.
@@ -342,7 +343,7 @@ drawFarmKit = (farmId, swipeDir, farmTpl = getTemplate(farmTemplate)) => {
     a.mag = a.flare = 0; // Remove mag styles.
     antDraw(a);
     carryDraw(a);
-    a.fight && !fightSong && fightSongPlay(); // Restart fight music.
+    a.fight && !fightSong && playFightSong(); // Restart fight music.
   });
   // Redraw nipped ants/eggs.
   F.nips.forEach(n => {
@@ -366,7 +367,7 @@ drawFarmKit = (farmId, swipeDir, farmTpl = getTemplate(farmTemplate)) => {
   // Activate or update the switcher if needed.
   updateSwitcher();
   // Handle fight music.
-  fightSongCheckAndStop();
+  checkFightSong();
   // Decide on stow button.
   setTimeout(X => getEl('stow').classList.toggle('vis', !!(F.sculpt && _.farms.length > 1)), num2000); // Whether to show the stow button.
 },
@@ -390,16 +391,16 @@ startFarm = isNew => {
     wayPoints[farm.id] = [];
   }
   // Draw tunnels.
-  F.tuns.forEach(drawTun);
+  F.tuns.forEach(tunDraw);
   if (F.sculpt) {
     // Draw mTuns sculptures.
-    F.mTuns.forEach(drawTun);
+    F.mTuns.forEach(tunDraw);
     mTunsBg();
     getEl('kit').classList.add('sculpt');
     getEl('wrapper').innerHTML += tag(2, F.n);
   }
   // Draw hills.
-  F.hills.forEach(drawHill);
+  F.hills.forEach(hillDraw);
   // Draw card.
   if (F.card) getEl('card').style.background = `url(img/${F.card}.webp)`;
   // Draw anomaly.
@@ -813,7 +814,7 @@ hardTurns = (tuns, seen = new Set(), results = [], key, a, b, turn, xy) => {
 getTun = (farm, id) => id && getById(farm.tuns, id),
 
 // Renders a tunnel.
-drawTun = tun => {
+tunDraw = tun => {
   appendHTML(
     getEl('tunnels'),
     html(divc('prog'), {
@@ -1045,7 +1046,7 @@ inTargetProximity = (coord, target, prox) => (!coord.id || coord.id != target.id
   squareDistanceCoords(coord, target) < prox * prox, // Square distance check.
 
 // Renders hills.
-drawHill = hill => {
+hillDraw = hill => {
   appendHTML(getEl('hills'), html(divc('specks'), {id: 'hill-' + hill.id, class: 'hill', style: `left:${hill.l}px;width:${hill.r - hill.l}px`}));
   hillProgDraw(hill);
 },
@@ -1275,7 +1276,7 @@ useItem = (i, doQuip = 1, doDel = 1, item = _.bag[i], itemKey = item.k, itemType
             else {
               for (let a = 0; a <= (items[itemKey].W || 0); a++) {
                 setTimeout(X => {
-                  dropAntInFarm(assign(createAnt(_, window.innerWidth / 2 + randomInt(num200) - 100, -30, randomInt(30), 'free', a ? 'W' : 'Q', items[itemKey].ant), {
+                  dropAntInFarm(assign(createAnt(_, window.innerWidth / 2 + randomInt(num200) - 100, -30, randomInt(30), 'cap', a ? 'W' : 'Q', items[itemKey].ant), {
                     scale: getSign(randomInt(1)),
                     pose: 'pick',
                     alate: 0,
@@ -1442,7 +1443,7 @@ addLidFunc = (lid = getEl('lid')) => {
 // Lets a drone escape and reschedules itself for another turn.
 droneEscape = (drone = pickRandom(F.a.filter(a => isDrone(a) && isCapped(a) && !a.area.t)),
   exitX = 215 + randomInt(530), exitY = 300, startX = drone?.x, startY = drone?.y, angle = getAngle({x: startX, y: startY}, {x: exitX, y: exitY}), rad = degToRad(angle),
-  elapsed = 0, tick = (t = min(1, (elapsed += frameTick) / num500), e = easeInQuad(t), droneEl = objGetEl(drone), exitTick = X => {
+  elapsed = 0, tick = (t = min(1, (elapsed += frameTick) / num500), e = easeInQuad(t), droneEl = getObjEl(drone), exitTick = X => {
     drone.x += cos(rad) * 3 * frameTick; drone.y += sin(rad) * 3 * frameTick; antUpdate(drone); // 3 - speed multiplier.
     droneEl.getBoundingClientRect().bottom < -25 ? (msg(pickRandom([`${drone.n} has escaped!`, `${drone.n} flew away!`])), antDelete(drone), droneEscape()) : setTimeout(exitTick, frameTick);
   }) => getEl('lid').classList.contains('off') && droneEl?.isConnected && (t < 1 ?
@@ -1492,7 +1493,7 @@ createArrows = (e, pull = createArrowsInit(getEl('pull')), card = getEl('card'),
     });
     // Allow plucking dead ants from surface.
     F.a.filter(a => isDead(a) && !a.area.t).forEach(a => {
-      let arrow = document.createElement('div'), antEl = objGetEl(a), itemRect = antEl.getBoundingClientRect();
+      let arrow = document.createElement('div'), antEl = getObjEl(a), itemRect = antEl.getBoundingClientRect();
       arrow.classList.add('arrow');
       pull.appendChild(arrow);
       arrow.style.width = '16px';
@@ -1626,7 +1627,7 @@ pourCrucible = (audio = ambienceOverride('sizz1'), fx = getEl('fx'), hills = get
         mHillEl.classList.add('vis');
         F.a.filter(a => a.area.n == 'bg' || a.area.n == 'top').forEach(a => {
           a.area.n == 'bg' && randomInt(2) && antSlip(a);
-          objGetEl(a).classList.add('burn');
+          getObjEl(a).classList.add('burn');
           setTimeout(X => {
             playSound('sizz2', .3);
             a.area.n == 'bg' && randomInt(2) && antSlip(a);
@@ -1699,7 +1700,7 @@ pourTun = tun => {
   tunProgDraw(tun);
   if (tun.t == 'ent') query(`#${tun.id} .prog`).style.top = tun.prog / 100 * 30 - 30 + 'px'; // Ent needs to be special cased.
   F.a.filter(a => a.area.t == tun.id).forEach(a => {
-    objGetEl(a)?.classList.add('burn');
+    getObjEl(a)?.classList.add('burn');
     playSound('sizz2', .3);
     setTimeout(X => antDeath(a, 'other'), num1000 + randomInt(num2000));
   });
@@ -1951,7 +1952,7 @@ modal = {
   hat: (el, k, opts = {}) => {
     F.a.forEach(a => {
       if (isCapped(a) && isAdult(a) && (a.t == F.t || F.coex)) {
-        let thumb = objGetEl(a).cloneNode(1);
+        let thumb = getObjEl(a).cloneNode(1);
         thumb.removeAttribute('id');
         opts[a.id] = html(html(thumb.outerHTML, {class: 'ant-thumb'}), {class: 'select-img'}) + tag(3, a.n) + casteIcon(a) + ' ' + types[a.t].n + ' Ant (' + casteLabel(a) + ')';
       }
@@ -2118,9 +2119,9 @@ modal = {
           getStatMarkup('Running', formatTime(f.dur)) +
           getStatMarkup('Ant count', getCasteCount('W') + `, ${getCasteCount('D')},`) +
           getStatMarkup(0, getCasteCount('Q') + `, and ${printCount(f.a.filter(a => !f.coex && isCapped(a) && a.t != f.t).length, 'Foe')}.`) +
-          getStatMarkup('Deaths', tag('em', 'Hunger') + ` ${printInt(f.stats.death.hunger)}, ${tag('em', 'Thirst')} ${printInt(f.stats.death.thirst)},`) +
-          getStatMarkup(0, tag('em', 'Fights') + ` ${printInt(f.stats.death.fight)}, ${tag('em', 'Sickness')} ${printInt(f.stats.death.sick)},`) +
-          getStatMarkup(0, `and ${tag('em', 'Other')} ${printInt(f.stats.death.other)}.`) +
+          getStatMarkup('Deaths', tag('em', 'Hunger') + ` ${printInt(f.death.hunger)}, ${tag('em', 'Thirst')} ${printInt(f.death.thirst)},`) +
+          getStatMarkup(0, tag('em', 'Fights') + ` ${printInt(f.death.fight)}, ${tag('em', 'Sickness')} ${printInt(f.death.sick)},`) +
+          getStatMarkup(0, `and ${tag('em', 'Other')} ${printInt(f.death.other)}.`) +
           getStatMarkup('Tunnels', printCount(getTunCount('ent'), 'entrance') + ', with') +
           getStatMarkup(0, printCount(getTunCount('cav'), 'chamber') + ', and') +
           getStatMarkup(0, printCount(getTunCount('tun'), 'connector') + '. (' + printInt(f.tuns.filter(t => t.prog > 0 && !t.dun).length) + ' WIP)'),
@@ -2446,7 +2447,7 @@ antGetSize = (ant, sz = types[ant.t].s, sizes = ['b', 's', 'm', 'l', 'x'], i = s
 freeAntDraw = ant => {
   antDraw(ant, getEl('game'));
   // Add picking.
-  let antEl = objGetEl(ant);
+  let antEl = getObjEl(ant);
   antEl.addEventListener('pointerdown', pickAnt);
   ['pointerenter', 'pointerdown'].forEach(ev => antEl.addEventListener(ev, spotAnt));
 },
@@ -2456,7 +2457,7 @@ freeAntDraw = ant => {
 antDraw = (ant, cont = getEl('farm')) => antUpdate(ant, cont.appendChild(assign(getTemplate(antTemplate), {id: ant.id})), 1),
 
 // Gets DOM element from the cache or from query (and store in cache if its part of the current farm).
-objGetEl = (obj, cachedEl = elCache[obj.id]) => cachedEl?.isConnected && cachedEl || obj.f == F.id && (elCache[obj.id] = getEl(obj.id)) || getEl(obj.id),
+getObjEl = (obj, cachedEl = elCache[obj.id]) => cachedEl?.isConnected && cachedEl || obj.f == F.id && (elCache[obj.id] = getEl(obj.id)) || getEl(obj.id),
 
 // Updates the antEl's classes.
 antUpdateClasses = (ant, props) => assign(ant, props) && antUpdate(ant),
@@ -2497,6 +2498,7 @@ pickAnt = (e, antEl = e.currentTarget, ant = getFreeAnt(antEl)) => {
           wTop > window.innerHeight + 99 && (leaf.remove() || stopInterval(leafInterval));
         }, frameTick);
       });
+      ++_.wings % 5 == 0 && randomMsg([[`You've winged ${_.wings} ants.`]]);
     }
     del(ant, 'alate');
     // Update ant.
@@ -2716,7 +2718,7 @@ antThot = (ant, thots, farm = getFarm(ant), uniqueActs = antUniqueActs(ant), tho
         "You'll regret that!", "I'm gonna mess you up!", "For my family!", "You're going to pay!", "Don't mess with me!", "This is personal!", "Say your prayers!", "Feel my wrath!",
         "You asked for it!", "I'm unstoppable!", "For the colony!", "Ant power!"],
       X => !randomInt(9) && ["Need. More. Crumbs.", "Who moved my dirt?!", "Don't step on me!", "Lost. Again.", "Why is dirt so heavy?", "Ant gym = life", "Who farted in the nest?", "I should be queen", "I licked it, it's mine",
-        "My back hurts", "Big foot incoming!", "Too many legs, not enough rest", "Keep calm, carry sugar", "I miss leaf duty", "Where's my antenna charger?", "Smells like danger", "Who named us “ants”?",
+        "My back hurts", "Big foot incoming!", "Too many legs, not enough rest", "Keep calm, carry sugar", "I miss leaf duty", "Where's my antenna charger?", "Smells like danger", "Who named us 'ants'?",
         "Why so crumb-y today?", "Dirt in my mandibles", "Smells like home", "Antflix and chill?", "The floor is crumb!", "Dig. Eat. Repeat.", "Antsplain it to me", "Worker of the month (me).", "Mondays… again",
         "What's my purpose?", "I saw a spider!", "Ant-nxiety rising", "Look at me!", "Don't look at me!"],
       X => uniqueActs[0] == 'rest' && ["Zzzzzz…", "I'm sleeping", "Having a nap"],
@@ -2807,13 +2809,13 @@ antMagnify = (middleAnt, a, distSq, minDistSq = 784, lgRect = getEl('lg').getBou
 },
 
 // Handles dragging the magnifying glass around the farm.
-dragGlass = e => {glassDragX = e.clientX; glassDragY = e.clientY},
+glassDrag = e => {glassDragX = e.clientX; glassDragY = e.clientY},
 
 // Adds dragging functionality to the magnifying glass.
-glassAddDrag = e => document.addEventListener('pointermove', dragGlass),
+glassAddDrag = e => document.addEventListener('pointermove', glassDrag),
 
 // Removes dragging from the magnifying glass.
-glassRemDrag = e => document.removeEventListener('pointermove', dragGlass),
+glassRemDrag = e => document.removeEventListener('pointermove', glassDrag),
 
 // Toggles the display of the magnifying glass.
 toggleGlass = (e, lWrap = getEl('l-wrap'), styleGlass = X => {
@@ -2954,17 +2956,17 @@ antFall = (ant, startX = ant.x, startY = ant.y, destX = clamp(ant.x - 20 + rando
   ant.y += 1.2;
   if (ant.r < 0) ant.r += 1.2;
   antUpdate(ant);
-  ant.y < target ? setTimeout(X => antFall(ant, startX, startY, destX), frameTick / 2) : (ant.egg ? antArea(ant, 'top') : antCap(ant, farm));
+  ant.y < target ? setTimeout(X => antFall(ant, startX, startY, destX), frameTick / 2) : (ant.egg ? antArea(ant, 'top') : antCap(ant));
 },
 
 // Captures an ant into the farm.
-antCap = (ant, antEl = objGetEl(ant)) => {
+antCap = (ant, farm = getFarm(ant), antEl = getObjEl(ant)) => {
   antEl?.removeEventListener('pointerdown', pickAnt);
-  if (ant.state != 'cap') getFarm(ant).stats['cap']++;
+  ant.state != 'cap' && farm.cap++;
   ant.state = 'cap';
   ant.dur = 0;
   ant.ts = getTimeSec();
-  setColonyAndFoe(getFarm(ant));
+  setColonyAndFoe(farm);
   score(isQueen(ant) ? 3 : 1);
   !ant.inf && antThot(ant, ["Don't touch me!", "Am I kidnapped?", "WTF is going on?", "I'm confused!"]);
   antSurface(ant);
@@ -3002,7 +3004,7 @@ deleteDataAndEl = (obj, key = 'a', dataSet = getFarm(obj) || _, id = obj.id, el 
 antDelete = ant => deleteDataAndEl(ant),
 
 // Updates the antEl to reflect the state of the object, if possible.
-antUpdate = (ant, antEl = objGetEl(ant), sync, carryItem) => {
+antUpdate = (ant, antEl = getObjEl(ant), sync, carryItem) => {
   rafQueue[ant.id] ||= requestAnimationFrame(X => {// Prevent queuing the same ant object for an update multiple times (to avoid render lag when switching tabs).
     antElUpdate(ant, antEl);
     del(rafQueue, ant.id);
@@ -3012,7 +3014,7 @@ antUpdate = (ant, antEl = objGetEl(ant), sync, carryItem) => {
   if (ant.carry && (carryItem = getCarry(getFarm(ant), ant.carry)) && (isDead(carryItem) || isEggOrInf(carryItem))) {
     ({x: carryItem.x, y: carryItem.y, r: carryItem.r} = antHeadPoint(ant));
     carryItem.area = ant.area; // Keep the area prop matching the carrier for safety.
-    antUpdate(carryItem, objGetEl(carryItem), sync);
+    antUpdate(carryItem, getObjEl(carryItem), sync);
   }
   /* START-DEV */
   isNaN(ant.x + ant.y + ant.r) && console.error("ant is nanned", ant);
@@ -3038,7 +3040,7 @@ antElUpdate = (ant, antEl) => {
 },
 
 // Updates the ant object to reflect the state of the antEl, in NaN situations.
-antFixNaN = (ant, antEl = objGetEl(ant), style = antEl && getComputedStyle(antEl), match = style?.transform.match(/rotate\(([+-]?\d*\.?\d+)deg\)/)) => {
+antFixNaN = (ant, antEl = getObjEl(ant), style = antEl && getComputedStyle(antEl), match = style?.transform.match(/rotate\(([+-]?\d*\.?\d+)deg\)/)) => {
   if (antEl?.isConnected) {
     if (isNaN(ant.x)) ant.x = parseFloat(style.left) || 480; // 480 = getEl('farm').offsetWidth / 2.
     if (isNaN(ant.y)) ant.y = parseFloat(style.top) || antGroundLevel(ant);
@@ -3050,16 +3052,16 @@ antFixNaN = (ant, antEl = objGetEl(ant), style = antEl && getComputedStyle(antEl
 getCarry = (farm, carry, dataSet = carry?.nip && farm.nips.find(n => n.nip == carry.nip)?.item || farm) => carry && (getAnt(dataSet, carry.id) || carry),
 
 // Draws a carried item, or moves it from the farm container to the ant element.
-carryDraw = (ant, farm = getFarm(ant), carry = ant.carry, carryEl = getEl(carry?.id), cEl = query(`#${ant.id} .c`), carryItem = carry && getCarry(farm, carry)) => {// Note: getEl not objGetEl because item can move farm without the carry data being updated.
+carryDraw = (ant, farm = getFarm(ant), carry = ant.carry, carryEl = getEl(carry?.id), cEl = query(`#${ant.id} .c`), carryItem = carry && getCarry(farm, carry)) => {// Note: getEl not getObjEl because item can move farm without the carry data being updated.
   if (carryItem?.f == F.id) {
-    isDead(carryItem) || isEggOrInf(carryItem) ? carryEl?.isConnected && objGetEl(ant)?.after(carryEl) : // Make them next to each other in DOM so nothing passes between them on z-axis.
+    isDead(carryItem) || isEggOrInf(carryItem) ? carryEl?.isConnected && getObjEl(ant)?.after(carryEl) : // Make them next to each other in DOM so nothing passes between them on z-axis.
       appendHTML(cEl, divc(`carry C${carry.t} ` + carry.k, {id: carry.id}));
     // Note: For carried ants/eggs (egg, inf, or dead) an antUpdate() called from antAction() should do the trick.
   }
 },
 
 // Undraws a carried item, or moves it from the ant element into the farm container.
-carryUndraw = (ant, dest, farm = getFarm(ant), carry = ant.carry, carryEl = getEl(carry?.id), carryItem = getCarry(farm, carry), // Note: getEl not objGetEl because item can move farm without the carry data being updated.
+carryUndraw = (ant, dest, farm = getFarm(ant), carry = ant.carry, carryEl = getEl(carry?.id), carryItem = getCarry(farm, carry), // Note: getEl not getObjEl because item can move farm without the carry data being updated.
   headPoint = antHeadPoint(ant, (6 + antOffsetX(ant)) * ant.scale), tun = getTun(farm, ant.area.t), pc) => {
   if (carryItem?.f == F.id && carryEl?.isConnected) {
     if (isDead(carryItem) || isEggOrInf(carryItem)) {
@@ -3170,11 +3172,11 @@ antGetStep = ant => ant.scale * (
 
 // Calculates the step size in a tunnel.
 // An absolute value is returned because we don't care about negative scale.
-antGetTunnelStep = ant => abs(antGetStep(ant)) / 2,
+antGetTunnelStep = ant => randomFloat(0.6, 1.4) * abs(antGetStep(ant)) / 2,
 
 // Makes an ant take one step along the surface.
 antMoveSurface = (ant, maxStep = 3) => {
-  ant.x += min(antGetStep(ant), maxStep);
+  ant.x += clamp(antGetStep(ant), -maxStep, maxStep);
   ant.y = antGroundLevel(ant);
   ant.r = antHillAngle(ant);
 },
@@ -3268,7 +3270,7 @@ antProneCorrection = ant => {
 
 // Corrects an ant's orientation based on which side of a tunnel its waypoint is on.
 antSideCorrection = (ant, tun, wp, action = ant.q[0]) => {
-  if (ant.scale != tunGetSide(tun, wp || ant) * getSign(action.rev)) {
+  if (ant.scale != getTunSide(tun, wp || ant) * getSign(action.rev)) {
     ant.scale *= -1;
     ant.r = mirrorAngle(ant.r);
     if (antDir(ant, tun) == action.rev) ant.r = oppositeAngle(ant.r);
@@ -3320,7 +3322,7 @@ antWaypointRange = (ant, wp, mult = 1) => wp && inTargetProximity(ant, wp, antOf
 
 // Determines the side of a tunnel a point is at.
 // Warning: The default param for 'point' is a hack to prevent this func from failing in exceptional circumstances, and will cause a 50% chance of giving an incorrect result.  (This may be concealing bugs)
-tunGetSide = (tun, point = {x: 0, y: 0}) => tun.t == 'con' ? getSign(point.y < tun.y1) : tun.t == 'ent' ? getSign(point.x > tun.x1) : getSign((tun.x2 - tun.x1) * (point.y - tun.y1) - (tun.y2 - tun.y1) * (point.x - tun.x1) < 0),
+getTunSide = (tun, point = {x: 0, y: 0}) => tun.t == 'con' ? getSign(point.y < tun.y1) : tun.t == 'ent' ? getSign(point.x > tun.x1) : getSign((tun.x2 - tun.x1) * (point.y - tun.y1) - (tun.y2 - tun.y1) * (point.x - tun.x1) < 0),
 
 // Determines whether a tunnel is of a centered rotation type.
 isRotationTunnel = tun => ['con', 'ent', 'jun'].includes(tun.t),
@@ -3360,7 +3362,7 @@ findTunPos = (ant, farm, guesses = [], margin = 2, tunTypeOrder = ['ent', 'jun',
 },
 
 // Determines which tunnel a waypoint is in, and stores the value with the waypoint for future reference, as well as returning it.
-getWpTunnel = (farm, wp, tunHint, tunPos) => {
+getWaypointTunnel = (farm, wp, tunHint, tunPos) => {
   if (!wp.t && (tunPos = findTunPos(wp, farm, [tunHint, ...(tunHint?.co || [])], 3))) wp.t = tunPos.tun.id;
   return wp.t;
 },
@@ -3411,7 +3413,7 @@ antDeath = (ant, cause, farm = getFarm(assign(ant, {
     dig: 0,
     hp: 0,
     md: 0,
-    q: [],
+    q: []
   })), tunPos = findTunPos(ant, farm, [ant.area.t], 4), stillAlive = farm.a.filter(a => isCapped(a) && isAdult(a))) => {
   if (ant.egg) {
     // Eggs don't really have any elaborate handling, they just disappear.
@@ -3419,13 +3421,13 @@ antDeath = (ant, cause, farm = getFarm(assign(ant, {
   }
   else {
     // Not an egg.
-    farm.stats.death[cause]++;
+    farm.death[cause]++;
     msg(ant.n + ` died in "${farm.n}" ${deathCauses[cause]}.`, 'err');
     setColonyAndFoe(farm);
     if (cause == 'fight' && stillAlive.length === 1 && isQueen(stillAlive[0])) farm.sweep = 1;
     antUpdate(ant);
     // Correct antArea data.
-    tunPos?.tun && antArea(ant, 'bot', tunPos.tun.id);
+    abs(ant.y - antGroundLevel(ant, 0)) < antOffsetY(ant) + 1 ? antArea(ant, 'top') : tunPos?.tun && antArea(ant, 'bot', tunPos.tun.id);
     addLidFunc(); // Allow plucking dead ants.
   }
   save();
@@ -3729,7 +3731,7 @@ act = {
       // Turn ant towards a random point that is roughly facing away from the already-dug tunnels.
       temp = nextTun ? tunExitAngle(nextTun, tun.t == 'jun' ? getTun(farm, tun.c) : tun) : normalize180(tunAverageAngle(farm.tuns.filter(t => t.dun && t.co.includes(tun.id)), tun) + randomInt(60) - 30); // Final angle.
       nudger = setInterval(X => {
-        let frontDist = (tun.w / 2) * (tun.prog / 100),
+        let frontDist = (tun.h / 2) * (tun.prog / 100),
           frontRad = degToRad(ant.scale < 0 ? deg180 - ant.r : ant.r),
           nudgeDest = nextTun ? getConnectionPoint(tun, nextTun) : {x: tun.x1 + cos(frontRad) * frontDist, y: tun.y1 + sin(frontRad) * frontDist}
           headPoint = antHeadPoint(ant), distComp = calcDistComponents(headPoint.x, headPoint.y, nudgeDest.x, nudgeDest.y), diff = normalize180((ant.scale < 0 ? mirrorAngle(temp) : temp) - ant.r);
@@ -3866,6 +3868,10 @@ act = {
         antArea(ant, 'bot', tunPos.tun.id);
         path = findPath(farm, tunPos.tun, {dun: 1, t: 'ent'}, [], 0, 1);
       }
+      if (!path && tun.t == 'ent' && !tun.dun) {
+        antArea(ant, 'top');
+        path = [];
+      }
       if (path) {
         ant.area.t && path.length && climbQ.push(makeDiveStub({id: last(path)}));
         climbQ.push({act: 'pace', for: 9 + randomInt(99)});
@@ -3905,7 +3911,7 @@ act = {
           // Ant is about to surface; predict how it should end up.
           !action.pt && antToProneWithCorrection(ant, tun); // Can't remember what this is for, maybe digging?
           data = cloneData(ant); // Set data variable to a fake ant so we can test it out.
-          data.scale = wp && ant.pose == 'side' ? tunGetSide(getTun(farm, action.pt), wayPoints[farm.id][getWaypointIndex(farm, antFootPoint(ant), wp)]) : randomSign();
+          data.scale = wp && ant.pose == 'side' ? getTunSide(getTun(farm, action.pt), wayPoints[farm.id][getWaypointIndex(farm, antFootPoint(ant), wp)]) : randomSign();
           data.x = (data.scale > 0 ? max : min)(ant.x, tun.x1) + 7 * data.scale;
           data.y = antGroundLevel(data);
           dest = data;
@@ -3929,7 +3935,7 @@ act = {
           temp2 = getAntWaypointDirection(ant, farm, wp); // Precalculate this as it is too hefty to do in the do-loop.
           do {
             wp &&= getNextWaypoint(farm, wp, temp2);
-            temp1 = wp && getTun(farm, getWpTunnel(farm, wp, tun));
+            temp1 = wp && getTun(farm, getWaypointTunnel(farm, wp, tun));
           } while (wp && (!temp1 || temp1.id == tun.id || temp1.id == action.pt || temp1.t == 'jun')); // Seek until the first reportable tun that is non-current non-previous non-jun is found.
           // Check if next tunnel is not the one ant is heading to, or any other action's tunnel after that.
           // Note: This assumes there isn't some OTHER kind of act wedged in between expanded future dive actions.
@@ -4233,7 +4239,7 @@ act = {
       // NOTE: This only works for 'cav' tunnels which are roughly horizontal, that isn't checked here, it is assumed the calling code will only use this feature for cavs.
       // NOTE: Doesn't work too well if ant is already near the area it is supposed to go to; best to circle back via another cav or use 'tunOrient' to march straight to a target.
       if (ant.pose == 'prone') {
-        temp2 = wp && tunGetSide(tun, wp); // Determine tunnel side: < 0 is good for 'd', > 0 is good for 'u'.
+        temp2 = wp && getTunSide(tun, wp); // Determine tunnel side: < 0 is good for 'd', > 0 is good for 'u'.
         temp3 = action.pos == 'u' ? temp2 > 0 : temp2 < 0; // Whether ant is on the correct side of the tunnel for its intended position.
         if (temp3 && antWaypointRange(ant, wp, .8)) {// .8 mult so it has a chance to take another couple steps to angle itself.
           ant.r = ant.r > 90 ? deg180 : 0; // Awkward snap.
@@ -4250,7 +4256,7 @@ act = {
         }
       }
       else {
-        temp1 = tunGetSide(tun, ant);
+        temp1 = getTunSide(tun, ant);
         if (action.pos == 'u' && temp1 > 0 || action.pos == 'd' && temp1 < 0) action.ns = getTime(); // Already correct position, flag "no switch" to prevent random pose switching.
         else {
           // Wrong side of the tunnel, switch to prone.
@@ -4278,7 +4284,7 @@ act = {
     antMoveTunnel(ant);
     // Now check where the ant actually is.
     temp3 = findTunPos(ant, farm, [nextTun, tun, ...(nextTun?.co?.filter(co => co != tun.id) || []), {id: action.pt, ex: 1}]);
-    // Suggestion: If doing getTunPosition() on every frame is too expensive for performance, be aware that getWpTunnel() caches the result and it might be a better system to upgrade that functionality for use here?
+    // Suggestion: If doing getTunPosition() on every frame is too expensive for performance, be aware that getWaypointTunnel() caches the result and it might be a better system to upgrade that functionality for use here?
     if (!temp3) {
       // If we're working on an underbuilt tunnel, let's just say we're in the previous tunnel.
       if (tun.prog < 15) temp3 = {tun: farm.tuns.find(t => tun.id == action.pt && t.co.includes(tun.id) && t.dun)};
@@ -4316,7 +4322,7 @@ act = {
         else {
           antToProneWithCorrection(ant, tun);
           // Severe course correction.  Ant is lost, so set up a new path to the original destination (the last dive action in the queue).
-          temp1 = ant.q.slice(1).findIndex(a => a.act != 'dive' || !a.tun); // Calculate the index of the final dive action.
+          temp1 = ant.q.slice(1).findIndex(a => a.act != 'dive' || !a.tun) + 1; // Calculate the index of the final dive action.
           temp2 = ant.q[temp1]; // Store the final action itself because we're about to delete it.
           ant.q.splice(0, temp1); // Remove the dive queue, but keep anything after the final dive. Keeps the final dive so antNext doesn't skip the next action.
           antInstaQ(ant, makeDiveStub(temp2));
@@ -4375,7 +4381,7 @@ act = {
 
   // Slip an ant to the floor of a tunnel.
   // This does not use cavFloor() as the ant might be in another type of tunnel and not aligned with a cavity.  Also using waypoints would be too involved.
-  tunSlip: (ant, tunPos = findTunPos(ant, farm, [ant.area.t]), r = tunPos?.tun.r) => {
+  tunSlip: (ant, tunPos = findTunPos(ant, getFarm(ant), [ant.area.t]), r = tunPos?.tun.r) => {
     ant.pose = 'pick'; // Note: We never reset the pose back to what it was before, that can change later if needed perhaps by passing a param in the action.
     if (tunPos?.tun) {// Ant still "in" the tunnel.
       // Move downwards.
@@ -4740,10 +4746,10 @@ act = {
         laid++;
       }
     }
-    if ((laid < 6 || randomInt(8)) && laid < 26 && lvl < 4 && farmIsDeveloping(farm)) {
+    // Note: the random chances on the following lines are experimental values, because I suspect it needs to be surprisingly high to not happen too often.
+    if ((laid < 6 || randomInt(99)) && laid < 26 && lvl < 4 && farmIsDeveloping(farm)) {
       // Lay more eggs.
       randomInt(num200) ? goToLocation(ant, makeDiveStub({tun: ant.nest, pc: 20 + randomInt(60), pos: 'd'})) : antFinnaVia(ant, 'dive', {pos: 'd', n: 'bot'});
-      // Note: the random chance on the above line is an experimental value, because I suspect it needs to be surprisingly high to not happen too often.
       antFinna(ant, 'lay', {laid: laid, lvl: lvl});
     }
     else {
@@ -4942,7 +4948,7 @@ act = {
   // Ant is "ant" in it's own loop, and it is the "ant2" for one or more other ants.
   fight: (ant, farm = getFarm(ant), ant2 = getAnt(farm, ant.q[0].ant),
     cancelFight = !ant2 || isDead(ant2) || !antUniqueActs(ant2).includes('fight') || ant.area.n != ant2.area.n || farm.coex || !inTargetProximity(ant, ant2, 30),
-    endFight = X => antRemAnimUpdate(ant) && fightSongCheckAndStop()) => {
+    endFight = X => antRemAnimUpdate(ant) && checkFightSong()) => {
     // Fight in prone pose.  Note: antGetStill() slipped in here to avoid setting walk=0 in this block of code.
     if (antGetStill(ant).pose == 'side') ant.area.t ? antToProneWithCorrection(ant, getTun(farm, ant.area.t)) : (ant.pose = 'prone', antProneCorrection(ant));
     // Make ant point at foe.  Don't worry about animating this rotation.
@@ -4965,7 +4971,7 @@ act = {
       antAction(ant);
     }
     else {
-      !fightSong && currentFarm(farm) && fightSongPlay(); // Play fight music if not already playing.
+      !fightSong && currentFarm(farm) && playFightSong(); // Play fight music if not already playing.
       ant.fight = ant.dig = ant.jit = 1;
       ant.thotD = ant.thotD < 7 ? 7 : ant.thotD + 1; // Change thoughts faster.
       // Ant strength is determined by a combo of factors.
@@ -5126,7 +5132,7 @@ director = (temp1, temp2) => {
         setTimeout(X => {// Delay a chunk so the director function doesn't intefere with the displayed farm too much.
           // WARNING! Because this chunk of code is delayed since farm.a was iterated, there is a chance the ant object provided here is NO LONGER in the farm.a data set!  If bugs arise, consider if this is the reason!
           if (ant.inf) {
-            temp1 = objGetEl(ant)?.classList;
+            temp1 = getObjEl(ant)?.classList;
             temp2 = ['a1', 'a2', 'a3'];
             if (canUpgrade(ant, ant.inf)) {
               // Infant upgrader.
@@ -5204,7 +5210,7 @@ director = (temp1, temp2) => {
       });
     }, num2000);
   });
-  fightSongCheckAndStop(); // Check if fight song didn't turn off.
+  checkFightSong(); // Check if fight song didn't turn off.
   updateFoodAndDrink();
   save();
   checkAchievements(1); // Check if game is almost in a winning state.
@@ -5227,11 +5233,11 @@ checkAchievements = (countWins, count = 0,
       tri: X => new Set(_.farms.filter(farmIsRunning).map(f => f.fill)).size > 2,
       sweep: X => F.sweep,
       kweens: X => F.a.filter(a => isQueen(a) && isCapped(a) && (a.t == F.t || F.coex)).length > 1,
-      heir: X => farmIsDeveloping(F) && !F.stats['cap'],
+      heir: X => farmIsDeveloping(F) && !F.cap && F.a.some(isEggOrInf),
       drag: X => _.dq && !_.farms.some(farm => farm.nips.some(nip => nip.item.k == 'tube' && nip.item.a.some(isQueen))), // Extra check to ensure tubes don't contain queen, because that's confusing if this fires early.
-      hb: X => F.stats.death.other > 9,
+      hb: X => F.death.other > 9,
       day: X => _.farms.filter(f => f.dur > 86400).length > 1,
-      weak: X => F.dur > 604800 && (F.a.length < 10 || Object.values(F.stats.death).reduce((sum, v) => sum + v, 0) > 5 || !F.a.some(isQueen)), // Over 7d & either: fewer than 10 ants, over 5 deaths, or no queen.
+      weak: X => F.dur > 604800 && (F.a.length < 10 || Object.values(F.death).reduce((sum, v) => sum + v, 0) > 5 || !F.a.some(isQueen)), // Over 7d & either: fewer than 10 ants, over 5 deaths, or no queen.
       mom: X => _.win,
     },
     achKey
@@ -5366,7 +5372,7 @@ playerHint = (farm, msgs) => {
 },
 
 // Handles the common audio playing functionality between ambience() and ambienceOverride().
-bgAudioPlay = (audioFile, volInc, delay, audio = getEl('audio')) => {
+playAmbientAudio = (audioFile, volInc, delay, audio = getEl('audio')) => {
   stopInterval(volumeUp);
   audio.volume = 0;
   audio.src = `audio/${audioFile}.opus`;
@@ -5379,16 +5385,16 @@ bgAudioPlay = (audioFile, volInc, delay, audio = getEl('audio')) => {
 // Starts playing bg audio.  This is a click-event handler, because browsers don't like playing audio without user interaction first.
 ambience = e => {
   userClicked = 1;
-  bgAudioPlay(_.au || 'wind', .01, num500);
+  playAmbientAudio(_.au || 'wind', .01, num500);
   document.removeEventListener('click', ambience);
 },
 
 // Override the bg audio.  This code assumes it is being run in response to user interaction and does not check that.
 // Calling code is responsible for resuming normal ambience() when done with this.
-ambienceOverride = audioFile => bgAudioPlay(audioFile, .1, 5),
+ambienceOverride = audioFile => playAmbientAudio(audioFile, .1, 5),
 
 // Starts the fight song (if required).
-fightSongPlay = X => {
+playFightSong = X => {
   if (userClicked && !fightVolume) {
     fightSong = new Audio('audio/fight.opus');
     fightSong.volume = .001; // Don't start at zero so as to block successive calls to this func.
@@ -5401,7 +5407,7 @@ fightSongPlay = X => {
 },
 
 // Stops the fight song (if required).
-fightSongCheckAndStop = X => {
+checkFightSong = X => {
   if (fightSong && F.a.every(ant => !ant.fight)) {
     stopInterval(fightVolume);
     fightVolume = setInterval(X => {fightSong.volume > 0 ? fightSong.volume = max(0, fightSong.volume - .01) : (fightSong.pause(), fightSong = 0, fightVolume = stopInterval(fightVolume))}, frameTick);

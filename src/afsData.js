@@ -1528,7 +1528,7 @@ ach = {
   },
   'heir': {
     n: "Heir Raising",
-    desc: "Start a farm without capturing free ants.",
+    desc: "Develop a farm without capturing free ants.",
     ico: "🐜",
     lvl: 45,
   },
@@ -1574,16 +1574,14 @@ ach = {
 
 // The blank data structure of a farm object.
 farmDefault = {
-  stats: {
-    death: {
-      hunger: 0,
-      thirst: 0,
-      fight: 0,
-      sick: 0,
-      other: 0,
-    },
-    cap: 0,
+  death: {
+    hunger: 0,
+    thirst: 0,
+    fight: 0,
+    sick: 0,
+    other: 0,
   },
+  cap: 0,
   a: [], // ants (eggs also live here, flagged with egg:1)
   tuns: [],
   hills: [],

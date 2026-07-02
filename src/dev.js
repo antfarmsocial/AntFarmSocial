@@ -1166,7 +1166,7 @@ let devShowLines = 0;
   const testTuns = () =>
     dumpFarm(1) || setTimeout(() => {
       F.tuns.forEach(t => {t.prog = 100; t.dun = 1; tunProgDraw(t);});
-      F.hills.forEach(h => {h.h = (h.r - h.l) / 4; drawHill(h);});
+      F.hills.forEach(h => {h.h = (h.r - h.l) / 4; hillDraw(h);});
       devNotifySwitch();
     }, frameTick * 2); // Because dumpFarm() takes 1 frame to kick in.
 
@@ -1311,10 +1311,10 @@ const toggleWaypoints = turnOn => {
       pointDiv.style.top = `${p.y - surface - 1}px`;
       pointDiv.style.width = '2px';
       pointDiv.style.height = '2px';
-      let wpTunId = getWpTunnel(F, p);
+      let wpTunId = getWaypointTunnel(F, p);
       let pointColor = '#adff2f'; // default: lime
       if (wpTunId) {
-        let tunSide = tunGetSide(getTun(F, wpTunId), p);
+        let tunSide = getTunSide(getTun(F, wpTunId), p);
         if (tunSide > 0) pointColor = '#66ff00';   // side +1 greener
         if (tunSide < 0) pointColor = '#cae00d';   // side -1 yellower
         if (getTun(F, wpTunId).t == 'jun') pointColor = '#ff00ea'; // junction
