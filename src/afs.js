@@ -1266,7 +1266,7 @@ useItem = (i, doQuip = 1, doDel = 1, item = _.bag[i], itemKey = item.k, itemType
               for (let a = 0; a < ants.length; a++) {
                 setTimeout(X => {
                   let ant = assign(ants[a], {x: window.innerWidth / 2 + randomInt(num200) - 100, y: -30, pose: 'pick'});
-                  del(ant, 'nipPh');
+                  del(ant, 'nipPh', 'nipTs');
                   checkExpatQueen(ant, F);
                   dropAntInFarm(ant, item);
                 }, num500 * a);
@@ -1909,14 +1909,11 @@ modal = {
       `<iframe width="560" height="315" src="https://www.youtube.com/embed/MNgJBIx-hK8?si=zPAJ6x6f-opQqOjF" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>` +
       html(
         tag(4, 'winning level celebratory merriment') +
-        p('This is the highest honor available<br> ') +
+        p('This is the highest honor available<br> ') +
         tag('button', pickRandom(dropOK)),
         {id: 'drop-caption'}
       );
-    query('#drop-top button').addEventListener('click', e => {
-      closePopup();
-      msg("I'd like to thank Penn Jillette for creating that podcast");
-    });
+    setTimeout(msg("I'd like to thank Penn Jillette for creating that podcast"), shortDelay);
     _.dmb = 1;
     save();
   },
@@ -2249,10 +2246,13 @@ xSelect = (k, select, val = query(`input[name=${select}]:checked`)?.value, key =
   }
 },
 
+// Determines if modal popups should not be shown currently.
+denyPopup = X => bodyClasses.contains('pik') || getEl('olay').classList.contains('vis') || getEl('modal')?.classList.contains('vis') || pouring || bodyClasses.contains('car'),
+
 // Opens the modal dialog.
 popup = (modalId, param, delay = num500) => setTimeout(X => {
   !delay && getEl('modal') && closePopup(); // If caller sets delay to 0, it implies they want to close/override any existing popup.  That's just how it is.
-  if (bodyClasses.contains('pik') || getEl('olay').classList.contains('vis') || getEl('modal')?.classList.contains('vis') || pouring)
+  if (denyPopup())
     // Can't show modal yet.
     setTimeout(X => popup(modalId, param, delay), num2000);
   else {
@@ -3121,7 +3121,7 @@ getHillNudge = (l, r, h, x, c = (l + r) / 2, w = (r - l) / 2, xNorm = (x - c) / 
 getHillHeight = (x, farm = F, hill = farm.hills.find(h => h.l < x && h.r > x), h = min(50, hill?.h)) => hill ? max(0, getHillNudge(hill.l, hill.r, h, x) - h * .12) : 0,
 
 // Figures out the ant's "ground" level.  Also used with eggs.
-antGroundLevel = (ant, applyAntOffset = 1) => surface - (applyAntOffset && antOffsetY(ant)) - getHillHeight(ant.x, getFarm(ant)),
+antGroundLevel = (ant, applyAntOffset = isAdult(ant)) => surface - (applyAntOffset && antOffsetY(ant)) - getHillHeight(ant.x, getFarm(ant)),
 
 // Figures out the angle an ant would be due to the sides of hills being steep.
 // Note: The actual angle has been divided here as the ant would lean unnaturally by trying to follow the curve too accurately.
@@ -3578,7 +3578,7 @@ vialActivity = (ant, nipData, farm = getFarm(ant), rand = randomInt(6)) => {
 vialLoop = nipData => vialInterval ||= setInterval((hasAnts = 0) => {
   _.farms.forEach(farm => {
     nipData = getVial(farm);
-    nipData?.item.a.forEach(a => {hasAnts = 1; !a.inf && currentFarm(farm) && vialActivity(a, nipData)});
+    nipData?.item.a.forEach(a => {hasAnts = 1; isAdult(a) && currentFarm(farm) && vialActivity(a, nipData)});
   });
   if (!hasAnts) vialInterval = stopInterval(vialInterval);
 }, pauseDelay + randomInt(shortDelay)),
@@ -5072,7 +5072,7 @@ director = (temp1, temp2) => {
         else if (!ant.moveTo && (temp1 = isAntsQueenInConnectedItem(ant, farm, 1))) ant.moveTo = temp1; // Add a moveTo flag if queen is found in connected vial/farm.
         // Readjust y-value if sitting on surface due to hill heights growing.
         if (ant.area.n == 'top') {
-          ant.y = antGroundLevel(ant, 0) + 2;
+          ant.y = antGroundLevel(ant);
         }
       }
       else {
@@ -5154,7 +5154,7 @@ director = (temp1, temp2) => {
             else if (!ant.moveTo && (temp1 = isAntsQueenInConnectedItem(ant, farm, 1))) ant.moveTo = temp1; // Add a moveTo flag if queen is found in connected vial/farm.
             // Readjust y-value if sitting on surface due to hill heights growing.
             if (ant.area.n == 'top') {
-              ant.y = antGroundLevel(ant, 0) + 2;
+              ant.y = antGroundLevel(ant);
             }
           }
           else if (isQueen(ant)) {
@@ -5247,7 +5247,7 @@ checkAchievements = (countWins, count = 0,
     for (achKey in multiAch) if (!_.ach[achKey] || _.ach[achKey].l != 3) count++;
     for (achKey in singleAch) if (!_.ach[achKey]) count++;
     if (count === 1) drop('mom');
-    else if (!count && !_.dmb) popup('win');
+    else if (!count && !_.dmb && !denyPopup()) popup('win');
   }
   else {
     for (achKey in multiAch)
@@ -5269,7 +5269,7 @@ checkAchievements = (countWins, count = 0,
       }
   }
   // Display first pending achievement.
-  _.achQ.length && popup('ach', 0, shortDelay);
+  _.achQ.length && !denyPopup() && popup('ach', 0, shortDelay);
 },
 
 // Queues an achievement.

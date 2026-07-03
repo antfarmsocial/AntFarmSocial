@@ -52,6 +52,10 @@ p {
   padding: 0;
 }
 
+svg {
+  backface-visibility: hidden;
+}
+
 
 
 
@@ -3419,6 +3423,9 @@ body.bit .ant {
   &.lvl4 {
     margin-top: -20px;
   }
+}
+.nants .egg {
+  margin-top: -3px;
 }
 
 .inf1,
