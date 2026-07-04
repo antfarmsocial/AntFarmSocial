@@ -649,6 +649,7 @@ const devSecAnts = [];
 /*
  * STOP ANTS TOGGLE
  */
+// Note: It occurs to me that rather than a global stopAnts, one could set ant.state='stopped' or something to stop ants individually (antAction won't allow such an ant to act).  Something to keep in mind!
 {
   const feat = devFeature('Stop Ants');
 
@@ -802,19 +803,16 @@ const devResetAnt = ant => {
 
   feat.html = `
     ${devButt('Reset First Ant', {prefix: '🔄', click: () => devResetAnt(F.a[0])})}
-
-
     ${devToggle('Go', {
       prefix: '',
       text: ['⏹️ No', '▶️ Go'],
       checked: false,
       attrs: `class="dev-skip-onload dev-btn-style"`, // Don't restore/auto-trigger from storage.
       toggle: checked => {
-        stopAnts = checked ? 0 : 1;
+        stopAnts = checked ? 0 : 1; // Note: It occurs to me that rather than a global stopAnts, one could set ant.state='stopped' or something to stop ants individually (antAction won't allow such an ant to act).  Something to keep in mind!
         if (checked) antAction(F.a[0]);
       },
     })}
-
     <br>
     ${devButt('L', {prefix: '⬅️', click: () => {F.a[0].x = 10; antUpdate(F.a[0], getEl(F.a[0].id));}})}
     ${devButt('C', {prefix: '⏺️', click: () => {F.a[0].x = getEl('farm').offsetWidth / 2; antUpdate(F.a[0], getEl(F.a[0].id));}})}

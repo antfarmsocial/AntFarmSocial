@@ -2009,7 +2009,7 @@ body.glass #l-wrap {
       transform: translateY(2px);
     }
   }
-  .pyramids {
+  .Ipyramids {
     transform: translateY(2px); /* Conceals a bug where the pyramids SVG has a mysterious ~2px gap underneath */
   }
 }
@@ -2018,69 +2018,73 @@ body.glass #l-wrap {
   height: 200px;
 }
 
-.food {
-  background: url(../img/food.webp);
-  background-size: 200px 150px;
-  width: 50px;
-  height: 30px;
-  position: relative;
-  top: 1px;
-  /* Note: .sz-4 and .saltpork are the default style */
-  &.sz-3 {
-    background-position-y: -30px;
+#food {
+  .food {
+    width: 50px;
+    height: 30px;
+    margin-top: 1px;
+    /* Note: .sz-4 and .saltpork are the default style */
+    > div {
+      width: 50px;
+      height: 30px;
+      background: url(../img/food.webp);
+      background-size: 200px 150px;
+      &.sz-3 {
+        background-position-y: -30px;
+      }
+      &.sz-2 {
+        background-position-y: -60px;
+      }
+      &.sz-1 {
+        background-position-y: -90px;
+      }
+      &.sz-0 {
+        background-position-y: -120px;
+      }
+    }
+    &.hotdog > div {
+      background-position-x: 150px;
+    }
+    &.bread > div {
+      background-position-x: 100px;
+    }
+    &.danish > div {
+      background-position-x: 50px;
+    }
   }
-  &.sz-2 {
-    background-position-y: -60px;
-  }
-  &.sz-1 {
-    background-position-y: -90px;
-  }
-  &.sz-0 {
-    background-position-y: -120px;
-  }
-  &.hotdog {
-    background-position-x: 150px;
-  }
-  &.bread {
-    background-position-x: 100px;
-  }
-  &.danish {
-    background-position-x: 50px;
-  }
-}
 
-.drink {
-  width: 50px;
-  height: 63px;
-  position: relative;
-  top: 1px;
-  > div {
-    content: "";
-    display: block;
-    position: absolute;
-    bottom: 12px;
-    left: 6px;
-    height: 46px;
-    width: 38px;
-    opacity: .4;
-    border-bottom-left-radius: 5px;
-    border-bottom-right-radius: 5px;
-    background: #eec374 url(../img/drops.webp);
-    background-size: 300%;
-    background-blend-mode: overlay;
-  }
-  &.cola > div {
-    background-color: #300a01;
-    background-blend-mode: screen;
-    opacity: .8;
-  }
-  &::after {
-    content: "";
-    display: block;
+  .drink {
     width: 50px;
     height: 63px;
-    background: url(../img/feeder.webp);
-    background-size: 50px 63px;
+    margin-top: 1px;
+    > div {
+      content: "";
+      display: block;
+      position: absolute;
+      bottom: 12px;
+      left: 6px;
+      height: 46px;
+      width: 38px;
+      opacity: .4;
+      border-bottom-left-radius: 5px;
+      border-bottom-right-radius: 5px;
+      background: #eec374 url(../img/drops.webp);
+      background-size: 300%;
+      background-blend-mode: overlay;
+    }
+    &.cola > div {
+      background-color: #300a01;
+      background-blend-mode: screen;
+      opacity: .8;
+    }
+    &::after {
+      content: "";
+      display: block;
+      width: 50px;
+      height: 63px;
+      background: url(../img/feeder.webp);
+      background-size: 50px 63px;
+    }
   }
 }
 
@@ -2833,10 +2837,10 @@ body.glass #l-wrap {
 .dig.prone {
   .body-wrap {
     --d1: 0;
-    --d2: -5deg;
-    --d3: -4deg;
-    --d4: -3deg;
-    animation: dig 3s linear infinite;
+    --d2: -4deg;
+    --d3: -3deg;
+    --d4: -2deg;
+    animation: dig 1.6s linear infinite;
   }
   .head {
     --d1: 25deg;
@@ -3176,6 +3180,7 @@ body.glass #l-wrap {
 }
 
 .rot .spot,
+.burn .spot,
 .fight .spot {
   background: #ff0000;
   opacity: .6;
