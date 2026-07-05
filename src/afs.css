@@ -3191,29 +3191,38 @@ body.glass #l-wrap {
 .rot .spot {
   background: #78a300;
   opacity: .1;
-
 }
+
 .rot1 .spot {
   opacity: .2;
 }
+
 .rot2 .spot {
   opacity: .3;
 }
+
 .rot {
   --RT: 0; /* Ro Tation */
   --AD: 0; /* Anim Duration */
-}
-.rot::after {
-  content: '';
-  display: block;
-  width: 40px;
-  height: 40px;
-  background: url(../img/gif/stink.webp) no-repeat 50% 50%;
-  background-size: 16px 16px;
-  position: absolute;
-  top: -10px;
-  left: -16px;
-  animation: stink var(--AD) linear infinite;
+  &::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 40px;
+    background: url(../img/gif/stink.webp) no-repeat 50% 50%;
+    background-size: 16px 16px;
+    position: absolute;
+    top: -10px;
+    left: -16px;
+    animation: stink var(--AD) linear infinite;
+  }
+  &.m::after {
+    top: -12px;
+  }
+  &.b::after,
+  &.s::after {
+    top: -16px;
+  }
 }
 
 body.bit .ant {

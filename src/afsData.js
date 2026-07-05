@@ -298,7 +298,7 @@ items = {
     n: 'Cloning Kit',
     desc: "Clones one of your worker ants three times.<br> ",
     lvl: 25,
-    max: 1,
+    max: 2,
     t: 'science gizmo',
     quip: [
       ["The best way to predict the future is to create it."],
@@ -312,7 +312,7 @@ items = {
     n: 'Speedo',
     desc: "Warp time with this radio controller to speed up your farm.<br>(burns out after a few minutes)",
     lvl: 45,
-    max: 1,
+    max: 3,
     t: 'science gizmo',
     quip: [
       ['Engage!'], ['Punch it!'], ["Let's light this candle!"], ['Taking the leap!'], ['Warp factor 9 now!'], ['Full burn'], ['Max thrust!'], ['Jumping ahead now!'],
