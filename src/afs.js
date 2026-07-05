@@ -3815,8 +3815,8 @@ act = {
         digAmt *= (tun.t == 'cav' ? .1 : .3); // Long tunnels are dug slow, with cav chambers the slowest of all.
         if (tun.prog < tunPercent(tun, 8)) {
           // Ant would have been blocked from entering tunnel by the dive action, so continue to act like it's digging an entrance or con.
-          tun.co.includes(last(action.path)/*///action.ent*/) ?
-            entNudge(ant, getTun(farm, last(action.path)/*///action.ent*/)) :
+          tun.co.includes(last(action.path)) ?
+            entNudge(ant, getTun(farm, last(action.path))) :
             conNudge(ant, farm.tuns.find(t => tun.co.includes(t.id) && t.t == 'con' && t.dun && t.x1 == (tun.rwip ? tun.x2 : tun.x1)));
         }
         else {
@@ -3841,7 +3841,7 @@ act = {
         if (tun.t == 'tun' || tun.t == 'cav') {
           // Pick an adjacent hill and increase its height slightly.
           // To know it is adjacent; the hill should have the same index as the current tunnel system, or one higher.
-          temp = farm.hills[farm.tuns.findIndex(t => t.id == last(action.path)/*/// action.ent*/) + randomInt(1)]; // Hill.
+          temp = farm.hills[farm.tuns.findIndex(t => t.id == last(action.path)) + randomInt(1)]; // Hill.
           temp.h = min((temp.r - temp.l) / 4, temp.h + .005); // Cap hill heights at a quarter their width.
           setTimeout(X => currentFarm(farm) && hillProgDraw(temp), standardDelay);
         }
@@ -3899,7 +3899,7 @@ act = {
           currentDig = temp.length ? {id: last(temp), path: [tun.id, ...temp].reverse().slice(1)} : {tx: tun.x1, id: tun.id, path: [tun.id]};
           // Reject jobs that are: duplicate jobs, too close to a morgue, or co an entrance that isn't the "random entrance" we just found.
           getById(farm.dig, currentDig.id) || getTun(farm, currentDig.id).co.some(t =>
-            getTun(farm, t).morgue || getTun(farm, t).co.some(nt => nt.morgue) || t != tun.id/*///currentDig.ent*/ && getTun(farm, t).t == 'ent'
+            getTun(farm, t).morgue || getTun(farm, t).co.some(nt => nt.morgue) || t != tun.id && getTun(farm, t).t == 'ent'
           ) ? currentDig = 0 : farm.dig.push(currentDig);
         }
         else {
