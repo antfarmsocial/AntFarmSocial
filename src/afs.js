@@ -718,13 +718,13 @@ buildATun = (lines, joinLines, tun1, func = 'BL',
 // When calculating paths for ant to actually walk on, pathDun should probably be 1, meaning that the tunnels in the path have to be completed.
 // This is different when testing proposed future tunnels for whether yet-to-be-built tunnels would actually connect them properly to an entrance.
 // To understand usage; best to study how this function is used in the various cases where it is employed.  Sometimes used in reverse!
-findPath = (farm, tun, targetAttrs, path = [], invertMatch, pathDun, firstTunId, deterministic, tid, result, tunCo = tun.co.filter(tid => !path.includes(tid) && tid != firstTunId && getTun(farm, tid).t != 'jun')) => {
+findPath = (farm, tun, targetAttrs, pathDun, invertMatch, firstTunId, path = [], tid, result, tunCo = tun.co.filter(tid => !path.includes(tid) && tid != firstTunId && getTun(farm, tid).t != 'jun')) => {
   // If the current tunnel matches all target attributes, return the path.
   if (keys(targetAttrs).every(attr => invertMatch ? tun[attr] != targetAttrs[attr] : tun[attr] == targetAttrs[attr])) return path;
   if (!pathDun || tun.dun || !firstTunId) {
     tunCo = tun.co.filter(tid => !path.includes(tid) && tid != firstTunId && getTun(farm, tid).t != 'jun');
-    for (tid of (deterministic ? tunCo : shuffle(tunCo)))
-      if (result = findPath(farm, getTun(farm, tid), targetAttrs, [...path, tid], invertMatch, pathDun, firstTunId || tun.id, deterministic)) return result;
+    for (tid of shuffle(tunCo))
+      if (result = findPath(farm, getTun(farm, tid), targetAttrs, pathDun, invertMatch, firstTunId || tun.id, [...path, tid])) return result;
   }
 },
 
@@ -1491,32 +1491,32 @@ createArrowsInit = (pull, olay = getEl('olay')) => {
 },
 
 // Shows arrows when lid lifted.
-createArrows = (e, pull = createArrowsInit(getEl('pull')), card = getEl('card'), items = [...(F.card ? [card] : []), ...queryAll('#scenery > *, #food > *')]) => {
+createArrows = (e, pull = createArrowsInit(getEl('pull')), card = getEl('card'), itemEls = [...(F.card ? [card] : []), ...queryAll('#scenery > *, #food > *')]) => {
   getEl('lid').classList.add('off');
   randomMsg(lidLift);
   setTimeout(X => {
-    items.forEach((item) => {
-      let Fitem = getById(F.items, item.id), itemRect = item.getBoundingClientRect(), arrow = document.createElement('div'), itemWidth = itemRect.width, topMap = {card: 100, scenery: 140, drink: 220, food: 220};
+    itemEls.forEach((itemEl) => {
+      let item = getById(F.items, itemEl.id), itemElRect = itemEl.getBoundingClientRect(), arrow = document.createElement('div'), itemElWidth = itemElRect.width, topMap = {card: 100, scenery: 140, drink: 220, food: 220};
       arrow.classList.add('arrow');
       pull.appendChild(arrow);
-      arrow.style.width = itemWidth + 'px';
-      arrow.style.left = `${(itemRect.left + itemWidth / 2) - pull.getBoundingClientRect().left - itemWidth / 2}px`;
-      arrow.style.top = `${topMap[item.id] ?? topMap[item.t] ?? 180}px`;
+      arrow.style.width = itemElWidth + 'px';
+      arrow.style.left = `${(itemElRect.left + itemElWidth / 2) - pull.getBoundingClientRect().left - itemElWidth / 2}px`;
+      arrow.style.top = `${topMap[itemEl.id] ?? topMap[item.t] ?? 180}px`; // itemEl.id is for #card, item.t is for the rest.
       arrow.addEventListener('click', X => {
         arrow.classList.add('hide');
-        if (item == card) {
+        if (itemEl == card) {
           F.card && _.bag.push({k: F.card});
           F.card = 0;
           card.style.bottom = '80vh';
         }
-        else if (item) {
-          if (Fitem.t != 'food' && Fitem.t != 'drink') {
-            _.bag.push(Fitem);
+        else if (itemEl) {
+          if (item.t != 'food' && item.t != 'drink') {
+            _.bag.push(item);
             _.bag = _.bag.filter(bi => bi);
           }
-          F.items = F.items.filter(i => i.id != item.id);
-          item.classList.add('up');
-          setTimeout(X => item.remove(), num1000);
+          F.items = F.items.filter(i => i.id != itemEl.id);
+          itemEl.classList.add('up');
+          setTimeout(X => itemEl.remove(), num1000);
         }
         save();
         updateSwitcher(); // So card image is updated in the thumbnails.
@@ -1893,6 +1893,13 @@ modal = {
     let bagItemsEl = getEl('bag-items');
     bagItemsEl.scrollLeft = parseInt(bagScroll);
     bagItemsEl.addEventListener('scroll', e => {bagScroll = e.currentTarget.scrollLeft});
+    // Let mouse wheel do scroll.
+    bagItemsEl.addEventListener('wheel', e => {
+      if (bagItemsEl.scrollLeft || bagItemsEl.scrollLeft + bagItemsEl.clientWidth < bagItemsEl.scrollWidth) {
+        e.preventDefault();
+        bagItemsEl.scrollLeft += e.deltaY;
+      }
+    });
   },
 
   // Templates the item drop popup.
@@ -3411,6 +3418,9 @@ findTunPos = (ant, farm, guesses = [], margin = 2, tunTypeOrder = ['ent', 'jun',
   }
 },
 
+// Checks whether ant can register as being positioned within its previous tunnel, and returns a shim that can substitute for the returned object from findTunPos().
+checkPrevTun = (ant, tun = getTun(getFarm(ant), ant.q[0].pt)) => tun && pointInQuad(ant, tun, 2) && {tun: tun},
+
 // Determines which tunnel a waypoint is in, and stores the value with the waypoint for future reference, as well as returning it.
 getWaypointTunnel = (farm, wp, tunHint, tunPos) => {
   if (!wp.t && (tunPos = findTunPos(wp, farm, [tunHint, ...(tunHint?.co || [])], 3))) wp.t = tunPos.tun.id;
@@ -3795,7 +3805,6 @@ act = {
     }) => {
     if (farm.dun || isDrone(ant)) antNext(ant); // No digging required.
     else if (ant.digD && tun) {
-      ant.digT = tun.id;
       antRemAnimUpdate(ant); // Reset animations.
       setTimeout(X => antUpdateClasses(ant, {dig: 1, jit: 1}), randomInt(num1000)); // Random delay added so ants aren't synch'd on page load.
       tun.rwip = !isRotationTunnel(tun) && farm.tuns.some(t => t.dun && t.x1 == tun.x2 && t.y2 == tun.y2); // Mark tunnels that are being built backwards.
@@ -3806,8 +3815,8 @@ act = {
         digAmt *= (tun.t == 'cav' ? .1 : .3); // Long tunnels are dug slow, with cav chambers the slowest of all.
         if (tun.prog < tunPercent(tun, 8)) {
           // Ant would have been blocked from entering tunnel by the dive action, so continue to act like it's digging an entrance or con.
-          tun.co.includes(action.ent) ?
-            entNudge(ant, getTun(farm, action.ent)) :
+          tun.co.includes(last(action.path)/*///action.ent*/) ?
+            entNudge(ant, getTun(farm, last(action.path)/*///action.ent*/)) :
             conNudge(ant, farm.tuns.find(t => tun.co.includes(t.id) && t.t == 'con' && t.dun && t.x1 == (tun.rwip ? tun.x2 : tun.x1)));
         }
         else {
@@ -3832,7 +3841,7 @@ act = {
         if (tun.t == 'tun' || tun.t == 'cav') {
           // Pick an adjacent hill and increase its height slightly.
           // To know it is adjacent; the hill should have the same index as the current tunnel system, or one higher.
-          temp = farm.hills[farm.tuns.findIndex(t => t.id == action.ent) + randomInt(1)]; // Hill.
+          temp = farm.hills[farm.tuns.findIndex(t => t.id == last(action.path)/*/// action.ent*/) + randomInt(1)]; // Hill.
           temp.h = min((temp.r - temp.l) / 4, temp.h + .005); // Cap hill heights at a quarter their width.
           setTimeout(X => currentFarm(farm) && hillProgDraw(temp), standardDelay);
         }
@@ -3886,23 +3895,24 @@ act = {
       if (!currentDig || farm.dig.length < 2 && !randomInt(25)) {
         // Pick a random entrance and find an incomplete tunnel that it leads to.
         tun = pickRandom(farm.tuns.filter(t => t.t == 'ent' && t.dun));
-        if (temp = tun && randomInt(9) && findPath(farm, tun, {dun: 1, t: 'ent'}, [], 1, 1, tun.id)) {// Inverted match.
-          currentDig = temp.length ? {id: last(temp), ent: tun.id} : {tx: tun.x1, id: tun.id, ent: tun.id};
+        if (temp = tun && randomInt(9) && findPath(farm, tun, {dun: 1, t: 'ent'}, 1, 1, tun.id)) {// Inverted match.
+          currentDig = temp.length ? {id: last(temp), path: [tun.id, ...temp].reverse().slice(1)} : {tx: tun.x1, id: tun.id, path: [tun.id]};
           // Reject jobs that are: duplicate jobs, too close to a morgue, or co an entrance that isn't the "random entrance" we just found.
           getById(farm.dig, currentDig.id) || getTun(farm, currentDig.id).co.some(t =>
-            getTun(farm, t).morgue || getTun(farm, t).co.some(nt => nt.morgue) || t != currentDig.ent && getTun(farm, t).t == 'ent'
+            getTun(farm, t).morgue || getTun(farm, t).co.some(nt => nt.morgue) || t != tun.id/*///currentDig.ent*/ && getTun(farm, t).t == 'ent'
           ) ? currentDig = 0 : farm.dig.push(currentDig);
         }
         else {
           // Dig a new entrance.
-          if (tun = pickRandom(farm.tuns.filter(t => t.t == 'ent' && !t.dun))) farm.dig.push(currentDig = {tx: tun.x1, id: tun.id, ent: tun.id});
+          if (tun = pickRandom(farm.tuns.filter(t => t.t == 'ent' && !t.dun))) farm.dig.push(currentDig = {tx: tun.x1, id: tun.id, path: [tun.id]});
           else if (farm.tuns.every(t => t.dun)) farm.dun = 1; // Nothing more to do.
         }
       }
       if (currentDig) {
         tun = getTun(farm, currentDig.id);
         currentDig.pc = tun.rwip ? 100 - tun.prog : tun.prog;
-        antFinnaVia(ant, 'dive', {tun: currentDig.id, pc: currentDig.pc}); // Can't use makeDiveStub() because it allows bot->bot dives, we always want from surface.
+        ant.digT = tun.id;
+        antFinnaVia(ant, 'dive', {tun: currentDig.id, pc: currentDig.pc, path: [...currentDig.path]}); // Can't use makeDiveStub() because it allows bot->bot dives, we always want from surface.
         antFinna(ant, 'dig', currentDig);
       }
       save();
@@ -3913,12 +3923,12 @@ act = {
   // Climb sets up a dive path to the surface.
   climb: (ant, farm = getFarm(ant), climbQ = [], tunPos) => {
     if (ant.area.t) {// Sometimes climb is in an ant's queue erroneously :/
-      let tun = getTun(farm, ant.area.t), path = findPath(farm, tun, {dun: 1, t: 'ent'}, [], 0, 1);
+      let tun = getTun(farm, ant.area.t), path = findPath(farm, tun, {dun: 1, t: 'ent'}, 1);
       // Create a custom queue.
       if (!path && tun.t == 'con' && tun.prog <= 15) {// Sometimes the ant is wrongly pinpointed to be in an unbuilt con from which the path finder fails.
         tunPos = findTunPos(ant, farm, [{id: ant.area.t, ex: 1}]);
         antArea(ant, 'bot', tunPos.tun.id);
-        path = findPath(farm, tunPos.tun, {dun: 1, t: 'ent'}, [], 0, 1);
+        path = findPath(farm, tunPos.tun, {dun: 1, t: 'ent'}, 1);
       }
       if (!path && tun.t == 'ent' && !tun.dun) {
         antArea(ant, 'top');
@@ -4035,7 +4045,7 @@ act = {
           tun.id != nextTun.id && antInstaQ(ant, {act: 'dive', tun: nextTun.id}); // Also protect from redirecting when next tun is this tun, which can happen.
           return antNextStill(ant);
         }
-        nextAction.pt = tun.id; // Notify the next action of the previous tunnel under normal conditions.
+        nextAction.pt = nextAction.id == tun.id ? action.pt : tun.id; // Notify the next action of the previous tunnel under normal conditions.
       }
       if (executeAction > 1) {
         // Rot Walk execution.
@@ -4075,6 +4085,11 @@ act = {
       }
       else {
         // Tun Walk execution.
+        if (!tun.dun && ant.digT != tun.id) {
+          // Non-dun tun without matching digT prop - the ant has no business being sent here.  Abandon entire queue.
+          ant.q = [{}];
+          return antActionStill(ant);
+        }
         // Work out whether the ant is meant to be walking in reverse (towards the 0% point of the tunnel).
         if (nextTun) action.rev = tun.x1 == nextTun.x1 && tun.y1 == nextTun.y1; // If there's a nextTun use its connection to this tunnel to judge whether we're doing a reverse walk.
         else if (previousTun) {
@@ -4091,7 +4106,8 @@ act = {
         // Track the current position (in percentage) of the ant.
         action.dist = action.rev ? 100 : 0; // This is wrong if the ant starts inside the target tunnel but it will be corrected after one step in tunWalk.
         // If we're not in a rotational tunnel (even the pt that we ignored earlier), then perform a side-correction in case there's a direction mismatch.
-        !isRotationTunnel(tun) && ant.pose == 'side' && antDir(ant, tun) == action.rev && !isRotationTunnel(findTunPos(ant, farm, [action.pt]).tun) && antSideCorrection(ant, tun, wp);
+        temp2 = checkPrevTun(ant);
+        !isRotationTunnel(tun) && ant.pose == 'side' && antDir(ant, tun) == action.rev && (!temp2 || !isRotationTunnel(temp2.tun)) && antSideCorrection(ant, tun, wp);
         // Store the waypoint.
         action.wp = wp;
         // Override 'dive' with the relevant walking action and execute.
@@ -4111,7 +4127,7 @@ act = {
         // sibling con/ent (.c) first - that con/ent IS navigable and shares the same tunnel connections as the jun.
         // The dive execution branch already knows how to swap a con/ent back for a jun if the ant is physically sitting in one (see getTunPosition / jun check below).
         // Calculate a temp path in reverse for consideration in assembling queue data.
-        temp1 = findPath(farm, tun, ant.area.n == 'top' ? {dun: 1, t: 'ent'} : {id: temp2?.t == 'jun' ? temp2.c : ant.area.t}, [], 0, 1, 0, !!ant.digD); // Note: Diggers use the deterministic version of the path finder.
+        temp1 = action.path ?? findPath(farm, tun, ant.area.n == 'top' ? {dun: 1, t: 'ent'} : {id: temp2?.t == 'jun' ? temp2.c : ant.area.t}, 1);
         if (ant.area.n == 'top' && (temp1 || tun.t == 'ent')) {
           // On the top level, need to pace to the tunnel entrance first.
           dest = tun.t == 'ent' ? tun : getTun(farm, temp1.pop()); // Get the entrance tun.
@@ -4122,7 +4138,7 @@ act = {
           if (ant.area.t && !temp1) {
             // Different tunnel system, need to climb out of the current system.
             data.push({act: 'climb'});
-            data.push({act: 'dive', tun: tun.id});
+            data.push({...action, tun: tun.id});
           }
           else {
             temp1?.reverse().forEach(tunId => data.push({act: 'dive', id: tunId}));
@@ -4333,12 +4349,10 @@ act = {
     }
     // Walk along tunnel.
     antMoveTunnel(ant);
-    // Now check where the ant actually is.
-    temp3 = findTunPos(ant, farm, [nextTun, tun, ...(nextTun?.co?.filter(co => co != tun.id) || []), {id: action.pt, ex: 1}]);
-    // Suggestion: If doing getTunPosition() on every frame is too expensive for performance, be aware that getWaypointTunnel() caches the result and it might be a better system to upgrade that functionality for use here?
+    // Now check where the ant actually is.  If the check fails and we're working on an underbuilt tunnel, let's try to register in the previous tunnel.
+    temp3 = findTunPos(ant, farm, [nextTun, tun, ...(nextTun?.co?.filter(co => co != tun.id) || []), {id: action.pt, ex: 1}]) || tun.prog < tunPercent(tun, 8) && checkPrevTun(ant);
+    // Suggestion: If doing findTunPos() on every frame is too expensive for performance, be aware that getWaypointTunnel() caches the result and it might be a better system to upgrade that functionality for use here?
     if (!temp3) {
-      // If we're working on an underbuilt tunnel, let's try to register in the previous tunnel.
-      if (tun.prog < tunPercent(tun, 8)) temp3 = findTunPos(ant, farm, [action.pt]);
       temp2 = 0; // Prevent endless/long loop.  Will be detected below.
       while (!temp3 && temp2++ < 9) {
         !randomInt(9) ? antToProneWithCorrection(ant, tun) : antNudgeToMid(ant, tun); // Shuffle the ant back into the tunnel with a random chance to switch side->prone.
@@ -4355,9 +4369,9 @@ act = {
       nextAction.id = temp3.tun.id;
       nextTun = getTun(farm, nextAction.id);
     }
+    temp2 = checkPrevTun(ant)?.tun; // Consider the pt tunnel we possibly ignored earlier.  This is kind of redundant to something in the line where temp3 is set above, and that's a bit annoying.
     // Check skipped tunnels.
-    temp2 = findTunPos(ant, farm, [action.pt])?.tun; // Consider the pt tunnel we ignored earlier.
-    if (temp3 && temp3.tun?.id != tun.id && temp3.tun?.id != action.pt && (ant.pose == 'prone' || temp2?.id != action.pt || temp2?.t != 'con')) {// If side pose then consider the pt tunnel we ignored earlier.
+    if (temp3 && temp3.tun?.id != tun.id && temp3.tun?.id != action.pt && (ant.pose == 'prone' || temp2?.t != 'con')) {// If side pose then consider the pt tunnel we ignored earlier.
       // Ant is in a different tunnel than the one it is supposed to be in.
       // This could be normal in which case antNext() will continue the journey, but there are some cases to check first.
       if (nextTun && temp3.tun.id != nextTun?.id) {
@@ -4389,7 +4403,7 @@ act = {
       antAction(ant); // Special case for rotation tunnels.  Just loopback to this action without doing further checks.
     }
     else if (temp3.tun.id == tun.id && antDir(ant, tun) == action.rev && !(action.rev ? action.dist < temp1 : action.dist > tun.prog - temp1) // IMPORTANT: temp1 here should still be 42px as a percentage as defined above!!!
-      && !isRotationTunnel(temp2)) {// Consider the pt tunnel we ignored earlier - could be a rotational tunnel and these areas can give false positives for direction mismatches.
+      && (!temp2 || !isRotationTunnel(temp2))) {// Consider the pt tunnel we ignored earlier - could be a rotational tunnel and these areas can give false positives for direction mismatches.
       // Wrong way!  Ant needs to be flipped around safely.
       antChangeTunDir(ant, tun, wp);
       action.act = 'dive';
@@ -4498,7 +4512,7 @@ act = {
       antInstaQ(ant, {act: 'land'});
       antNext(ant);
     }
-    else if (!action.x && !action.for && nextAction && acts.bg.includes(nextAction.act) || action.x && inTargetProximity(ant, action, antOffsetX(ant)) || action.y > clearance)
+    else if (!action.x && !action.for && nextAction && acts.bg.includes(nextAction.act) || action.x && inTargetProximity(ant, action, antOffsetX(ant)) || action.y > clearance || action.y < 315)
       antNextStill(ant); // Ant has crawled for long enough, or reached the destination, or destination unreachable, move on to the next action.
     else {
       if (ant.area.d < 49 && near && near[0] == 90) ant.r = normalize360(ant.r + randomInt(5) * getSign(90 + ant.r > deg180)); // Ant is starting the crawl; ignore the "near" collision and orient it slightly upwards.
@@ -5196,6 +5210,7 @@ director = (temp1, temp2) => {
                 antAction(ant);
                 isDrone(ant) && _.man++;
                 msg(`${ant.n} in "${farm.n}" is now an adult ${types[ant.t].n} ant ${casteLabel(ant).toLowerCase()}!`);
+                score(1);
               }
               ant.inf == 2 && msg(`Larva ${ant.n} in "${farm.n}" has puped!`);
             }

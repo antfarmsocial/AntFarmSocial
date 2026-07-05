@@ -775,33 +775,33 @@ items = {
     lvl: 30,
     max: 2
   },
-  obelisk: {
-    n: 'Obelisk',
-    desc: "You may tell one person about your ant farm.<br>(we don't talk about the tiny pyramid at the top)",
-    t: 'decor',
-    max: 1,
-    lvl: 30
-  },
   barn: {
     n: 'Barn',
     desc: "Ants have sophisticated ways to store food.<br>A barn is not one of those ways.",
     t: 'decor',
-    max: 2,
-    lvl: 30
+    lvl: 30,
+    max: 2
+  },
+  obelisk: {
+    n: 'Obelisk',
+    desc: "You may tell one person about your ant farm.<br>(we don't talk about the tiny pyramid at the top)",
+    t: 'decor',
+    lvl: 30,
+    max: 1
   },
   piff: {
     n: 'Piff',
     desc: "Best show I've seen in ages.<br>(chairs were uncomfortable - one star)",
     t: 'decor',
-    max: 1,
-    lvl: 60
+    lvl: 60,
+    max: 1
   },
   jesus: {
     n: 'Jesus',
     desc: "The Ant Christ<br>Not to be confused with the other guy.",
     t: 'decor',
-    max: 1,
-    lvl: 70
+    lvl: 70,
+    max: 1
   },
 
   // BACKGROUND CARD ITEMS
@@ -1496,7 +1496,6 @@ ach = {
   'fac': {
     n: "Factory Fourm",
     desc: "Have four farms that are really coming along.",
-    sub: "farms",
     ico: "🏭",
     lvl: 25,
   },
