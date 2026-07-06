@@ -2393,7 +2393,7 @@ isWorker = ant => ant.caste == 'W',
 isServant = (queen, ant) => isCapped(ant) && isWorker(ant) && isAdult(ant) && queen.t == ant.t,
 
 // Checks if an ant is a mature adult.
-isAdult = ant => !ant.egg && !ant.inf,
+isAdult = ant => !ant.egg && !ant.inf, // WARNING: Gives false positives on non-ant objects! This is not an "is this an ant?" test, whereas the other functions like this are (unless they're negated).
 
 // Checks if an ant is either an egg or infant.
 isEggOrInf = ant => ant.egg || ant.inf,
@@ -3470,7 +3470,10 @@ cavFloor = (tun, pc, yOffset = 0, r = degToRad(tun.r)) =>
 
 // Slips an ant off the bg area.
 // It is generally OK to call this function directly (note: it will clear the ant's finna queue to simulate a head injury).
-antSlip = ant => !ant.carry && (ant.q = [{act: 'slip'}], ant.scale = randomSign(), antActionStill(ant)),
+antSlip = ant => {
+  !ant.carry && (ant.q = [{act: 'slip'}], ant.scale = randomSign());
+  antActionStill(ant);
+},
 
 // Handles an ant's end of life transition.
 // Call this function for instant death, but it is often better to queue a 'die' action which will prepare the ant nicely first.
@@ -5113,7 +5116,7 @@ farmHasQueen = farm => farm.a.some(a => isQueen(a) && isCapped(a)),
 
 // Determines if an egg or infant can upgrade to the next phase.
 // Note: The time calculations in this function do not speed up by using the superspeed feature.
-canUpgrade = (pkg, day = 1) => pkg.area.t && pkg.hp > 90 && !randomInt(pkg.dur > 8640 * (1 + day) ? 50 : num500) && pkg.dur > 8640 * day && !getAnt(getFarm(pkg), pkg.Q)?.lc,
+canUpgrade = (pkg, day = 1) => pkg.area.t && pkg.hp > 90 && !randomInt(pkg.dur > 8640 * (1 + day) ? 50 : num500) && pkg.dur > 8640 * day,
 
 // Directs farms by running checks every 30 seconds.
 // Adds deliberate tasks to the ants' finna queues so the action loops aren't responsible for checking everything.
@@ -5131,7 +5134,7 @@ director = (temp1, temp2) => {
           antDeath(ant); // Remove dead egg.
           msg(`An egg in "${farm.n}" perished due to neglect.`, 'err');
         }
-        else if (canUpgrade(ant)) {
+        else if (canUpgrade(ant) && !getAnt(getFarm(ant), ant.Q)?.lc) {
           // Egg can upgrade into an infant.
           del(ant, 'egg');
           antUpdate(assign(ant, {
@@ -5239,7 +5242,7 @@ director = (temp1, temp2) => {
           }
           else if (isQueen(ant)) {
             // Extra handling for Queens.
-            if (!farmIsDeveloping(farm) && !farm.a.filter(a => isServant(ant, a)).length && ant.q.length < 2 && !randomInt(3)) antFinnaUnique(ant, 'dig'); // A queen without workers may dig a nest to start a colony.
+            if (!farmIsDeveloping(farm) && farm.a.filter(a => isServant(ant, a)).length < 2 && !randomInt(3)) antFinnaUnique(ant, 'dig'); // A queen without workers may dig a nest to start a colony.
             if (!isQueenAwaiting(ant) && (ant.fd < 90 || ant.dr < 90))
               antFinnaUnique(pickRandom(farm.a.filter(a => isServant(ant, a) && !a.carry && a.q.length < 9 && !hasCarryTasks(a))), 'srv'); // Reduces the possibility of a queen having to eat or drink by herself.
             if (ant.hp < 95 && ant.q.length < 2 || ant.hp < 80) antFinnaUnique(ant, 'kip');
