@@ -703,7 +703,7 @@ const devSecAnts = [];
     <br>
     ${devButt('Clear Dead', {prefix: '💀', click: () => F.a.filter(isDead).forEach(antDelete)})}
 
-    ${devButt('Reset All Ants', {prefix: '🔄', click: () => [...F.a].forEach(a => a.egg || devResetAnt(a))})}
+    ${devButt('Reset All Ants', {prefix: '🔄', click: () => [...F.a].forEach(a => /*a.egg || */devResetAnt(a))})}
   `;
 
   devSecAnts.push(feat);

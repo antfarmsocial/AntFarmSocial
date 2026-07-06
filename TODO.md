@@ -5,7 +5,7 @@ Production meeting...
 
 # PLAYTESTING
 Stuff that needs to be playtested.
-- Created a level system for stacking eggs and infants, but have never witnessed that this actually does anything?
+*none*
 
 # MINOR BUGS
 Here is a list of bugs that have been occasionally observed but were not game-breaking, might be hard to repro, and may have been fixed by virtue of further development.

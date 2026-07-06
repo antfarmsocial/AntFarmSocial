@@ -2446,7 +2446,7 @@ createAnt = (data = F, x, y, r, state = 'free', caste = !randomInt(F.fill == 'lu
   caste: caste,
   scale: 1,
   pose: 'prone',
-  alate: caste == 'Q',
+  alate: caste == 'Q', // Only used for free queens?  Not drones.
   fd: 80 + randomInt(20), // Food Satisfaction
   dr: 80 + randomInt(20), // Drink Satisfaction
   hp: 80 + randomInt(20), // Health Points
@@ -3113,7 +3113,7 @@ carryDraw = (ant, farm = getFarm(ant), carry = ant.carry, carryEl = getEl(carry?
 
 // Undraws a carried item, or moves it from the ant element into the farm container.
 carryUndraw = (ant, dest, farm = getFarm(ant), carry = ant.carry, carryEl = getEl(carry?.id), carryItem = getCarry(farm, carry), // Note: getEl not getObjEl because item can move farm without the carry data being updated.
-  headPoint = antHeadPoint(ant, (6 + antOffsetX(ant)) * ant.scale), tun = getTun(farm, ant.area.t), pc) => {
+  headPoint = antHeadPoint(ant, 6 + antOffsetX(ant)), tun = getTun(farm, ant.area.t), pc) => {
   if (carryItem?.f == F.id && carryEl?.isConnected) {
     if (isDead(carryItem) || isEggOrInf(carryItem)) {
       if (!dest) {
@@ -3135,6 +3135,21 @@ antTransfer = (farm, obj, oldSet, newSet, newVals, newCont) => {
   newSet.a.push(assign(obj.id ? obj : getById(oldSet.a, obj), newVals));
   deleteDataAndEl(obj, 'a', oldSet, 1);
   currentFarm(farm) && antDraw(obj, newCont);
+},
+
+// Handles moving a carried egg/infant alongside its carrier during nip/tube transfers.
+carryTransfer = (ant, getCarryFarm, getCarryDataSet, destFarm, oldSet, newSet, transferVals, newCont, newNip, pkg = getCarry(getCarryFarm, ant.carry, getCarryDataSet)) => {
+  if (ant.carry) {
+    if (isEggOrInf(pkg)) {
+      antTransfer(destFarm, pkg, oldSet, newSet, transferVals, newCont);
+      ant.carry.nip = newNip;
+    }
+    else {
+      // Carry item did not resolve into a valid thing to carryTransfer.  We have no choice but to get of the carried item because the ant is transferring.
+      getEl(ant.carry?.id)?.remove();
+      del(ant, 'carry');
+    }
+  }
 },
 
 // Gets the X offset of "where" an ant is at based on its size.
@@ -3606,8 +3621,7 @@ vialActivity = (ant, nipData, farm = getFarm(ant), rand = randomInt(6)) => {
   ant.nipPh === 1 && getTime() - ant.nipTs > longDelay && antNipWalk(ant, nipData, 40 + randomInt(170)); // Ant was stuck in nipPh 1.
   if (ant.nipPh == 2) {
     if (ant.carry) {
-      // Note: The pattern "antHeadPoint(ant, (6 + antOffsetX(ant))" is used in a few places, but HERE it is NOT multiplied by the ant's scale like it is elsewhere.
-      ant.carry && carryUndraw(ant, {x: antHeadPoint(ant, (6 + antOffsetX(ant))).x, y: 36, el: getEl('a-' + nipIds[nipData.nip])});
+      ant.carry && carryUndraw(ant, {x: antHeadPoint(ant, 6 + antOffsetX(ant)).x, y: 36, el: getEl('a-' + nipIds[nipData.nip])});
       del(getCarry(farm, ant.carry), 'moveTo');
       del(ant, 'carry');
     }
@@ -3653,11 +3667,7 @@ deNip = (ant, nipData, farm, nip = nipData.nip, tun = farm.tuns.find(t => t.nip 
     thot: pickRandom(["That was a long walk!", "I've travelled to another world", "I'm a neighbor", "Moving in!"]),
     nipPh: 0, nipTs: 0, f: farm.id, y: tun ? (isLeftSide ? tun.y1 : tun.y2) : antGroundLevel(ant), scale: 1
   });
-  if (ant.carry) {
-    antTransfer(farm, getCarry(0, ant.carry, nipData.item), nipData.item, farm, {f: farm.id}); // Don't pass first param to getCarry() because we're specifying the 3rd param for dataset.
-    ant.carry.nip = 0;
-    // Note: even though we update the f prop on the carried item, it is not updated in the ant.carry object!
-  }
+  carryTransfer(ant, 0, nipData.item, farm, nipData.item, farm, {f: farm.id}, undefined, 0);
   setColonyAndFoe(farm);
   ant.q = [{act: 'nip', nip: nip, rev: 1}]; // Create a new queue with the reverse nip walk action.
   ant.carry?.q2?.forEach(q => antFinnaVia(ant, q.act, {...q})); // Queue up any carry.q2 tasks that were supplied.
@@ -3684,11 +3694,7 @@ tubeWalker = (farm, nipData, ant, nipItem = nipData.item, otherFarm = getFarm(ni
   else if (ant.nipPh == 2) {// Phase 2. Move ant to other half of tube.
     // Note: checkExpatQueen() and the "F: otherFarm.id" may seem redundant with deNip() later on but they need to be done here too to avoid problems!
     checkExpatQueen(ant, otherFarm);
-    if (ant.carry) {
-      ant.carry.nip = otherData.nip; // Set BEFORE antTransfer so antUpdate can find the carried item correctly.
-      antTransfer(otherFarm, getCarry(farm, ant.carry, nipItem), nipItem, otherData.item, {nipPh: 3, f: otherFarm.id}, otherNipEl);
-      // Note: even though we update the f prop on the carried item, it is not updated in the ant.carry object!
-    }
+    carryTransfer(ant, farm, nipItem, otherFarm, nipItem, otherData.item, {nipPh: 3, f: otherFarm.id}, otherNipEl, otherData.nip);
     antTransfer(otherFarm, ant, nipItem, otherData.item, {nipPh: 3, f: otherFarm.id}, otherNipEl);
   }
   else if (ant.nipPh == 3 || ant.nipPh == 4 && getTime() - ant.nipTs > longDelay) antNipWalk(ant, nipData, -35, 3); // Phase 3.
@@ -3697,7 +3703,7 @@ tubeWalker = (farm, nipData, ant, nipItem = nipData.item, otherFarm = getFarm(ni
 
 // Starts a tube animation loop if it isn't running already.
 tubeLoop = X => tubeInterval ||= setInterval((hasAnts = 0) => {
-  _.farms.forEach(farm => farm.nips.forEach(nipData => nipData.item.k == 'tube' && nipData.item.a.forEach(a => {hasAnts = 1; !a.inf && tubeWalker(farm, nipData, a)})));
+  _.farms.forEach(farm => farm.nips.forEach(nipData => nipData.item.k == 'tube' && nipData.item.a.forEach(a => {hasAnts = 1; isAdult(a) && tubeWalker(farm, nipData, a)})));
   if (!hasAnts) tubeInterval = stopInterval(tubeInterval);
 }, microDelay),
 
@@ -4769,18 +4775,19 @@ act = {
     antFinna(ant, 'rest');
     // Queue egg laying if no eggs in the nest, not overpopulated, and random chance passed with respect to various factors.
     // Note: The 'lay' action will protect from laying if something went wrong in the queue and she's not in a cav, and actually has a high chance of requeueing another dive/lay cycle.
-    ant.lay ??= 300; // Initialize the lay chance factor if it doesn't exist yet.
     antCount < 40 ?
-     ant.hp > 40 && !farm.a.some(a => a.egg) && !randomInt(max(9, num1000 * Math.ceil(antCount / 30) - (farm.fill == 'lube' ? num500 : 0) - (antCount < 9 ? num500 : 0) - ant.lay++)) && antFinnaUnique(ant, 'lay')
+     ant.hp > 40 && farmIsDeveloping(farm) && !farm.a.some(a => a.egg) && !randomInt(max(9, (num1000 * Math.ceil(antCount / 30) - (farm.fill == 'lube' ? num500 : 0) - (antCount < 9 ? num500 : 0) - ant.lay)) * 5) && antFinnaUnique(ant, 'lay')
      : playerHint(farm, ["Queen won't lay eggs due to overpopulation."]);
     // Note: free ant spawning stops at 25 ants, ant vials disallow use at 30, and laying stops at 40.  This seems like a decent progression allowance.
     antNextStill(ant);
   },
 
   // Queen lays eggs.
-  lay: (ant, farm = getFarm(ant), action = ant.q[0], lvl = action.lvl || 0, laid = action.laid || 0, tunPos = findTunPos(ant, farm, [ant.area.t]), antLvlCount = farm.a.filter(e => e.lvl == lvl && e.area.t == tunPos?.tun).length,
-    tun = tunPos?.tun, pkgSize = tun && tunPercent(tun, 5), thePose = ant.pose, floorCoord = tun && cavFloor(tun, tunPos.pc)) => {
+  lay: (ant, farm = getFarm(ant), action = ant.q[0], lvl = action.lvl || 0, laid = action.laid || 0, tunPos = findTunPos(ant, farm, [ant.area.t]),
+    tun = tunPos?.tun, antLvlCount = farm.a.filter(e => e.lvl == lvl && e.area.t == tun?.id).length,
+    pkgSize = tun && tunPercent(tun, 5), thePose = ant.pose, floorCoord = tun && cavFloor(tun, tunPos.pc)) => {
     ant.lc = 1; // Mark this ant as having a "lay cycle".
+    antLvlCount > 6 - lvl * 2 && (antLvlCount > 8 - lvl * 2 || !randomInt(4)) && lvl++; // Go up a level when there are lots of eggs on the current level.
     if (ant.hp < 40) {
       // Queen weak, requeue after a kip.  Requeue should trigger near the bottom of this function.
       antFinnaUnique(ant, 'kip');
@@ -4793,7 +4800,6 @@ act = {
         antFinna(ant, 'dive', {tun: tun.id, pc: tunPos.pc + randomInt(pkgSize) * (tunPos.pc < 20 ? 1 : tunPos.pc > 80 ? -1 : randomSign()), pos: 'd'});
       }
       else {
-        if (antLvlCount > 6 - lvl * 2 && (antLvlCount > 8 - lvl * 2 || !randomInt(4))) lvl++; // Go up a level when there are lots of eggs on the current level.
         // Animate.
         antUpdateClasses(ant, {pose: 'pick', jit: 1});
         setTimeout(X => {
@@ -4811,17 +4817,20 @@ act = {
           antStats(ant, {hp: -9, fd: 4, dr: 4, md: 4}); // Increase chance of queen being forced to sleep between eggs.  Queens self-feed during this time.
         }, pauseDelay);
         laid++;
+        msg(ant.n + (laid < 2 ? ' laid an egg!' : ` laid ${laid} eggs!`));
       }
     }
     // Note: the random chances on the following lines are experimental values, because I suspect it needs to be surprisingly high to not happen too often.
-    if ((laid < 6 || randomInt(99)) && laid < 26 && lvl < 4 && farmIsDeveloping(farm)) {
+    if ((laid < 6 || randomInt(99)) && laid < 26 && lvl < 4) {
       // Lay more eggs.
-      randomInt(num200) ? goToLocation(ant, makeDiveStub({tun: ant.nest, pc: 20 + randomInt(60), pos: 'd'})) : antFinnaVia(ant, 'dive', {pos: 'd', n: 'bot'});
+      randomInt(9) ? goToLocation(ant, makeDiveStub({tun: ant.nest, pc: 20 + randomInt(60), pos: 'd'})) : antFinnaVia(ant, 'dive', {pos: 'd', n: 'bot'});
       antFinna(ant, 'lay', {laid: laid, lvl: lvl});
     }
     else {
       ant.lay = 0; // Lay chance is handled by the 'kip' action, but we need to reset this after each lay session is complete.
       del(ant, 'lc');
+      score(1);
+      msg(ant.n + ` done laid a brood of ${laid} eggs!`);
     }
     antNext(ant, shortDelay + randomInt(standardDelay));
   },
@@ -4833,14 +4842,16 @@ act = {
         if (!getTun(farm, pkg?.area.t)?.morgue) {// Extra guard added here to prevent pickup if the dead ant is already in the morgue.
           antGoToAnt(ant, pkg);
           let morgueTun = farm.tuns.find(t => t.morgue);
-          antFinna(ant, 'get', assign(action, {q: [{act: 'dive', tun: morgueTun.id, pc: (morgueTun.rwip ? 10 : 70) + randomInt(20), pos: 'd', n: 'bot'}, {...action, act: 'drop', n: 'bot'}]}));
+          antFinna(ant, 'get', {...action, q: [{act: 'dive', tun: morgueTun.id, pc: (morgueTun.rwip ? 10 : 70) + randomInt(20), pos: 'd', n: 'bot'}, {...action, act: 'drop', n: 'bot'}]});
         }
       }
-      else if (pkg.moveTo)
-        nipData ? antFinna(ant, 'get', assign(action, {f: farm.id, q: [{act: 'nip', nip: nipData.nip}], q2: [{act: 'pace', for: randomInt(999)}, {...action, act: 'drop'}]})) : del(pkg, 'moveTo');
-      else {
-        antFinnaVia(ant, 'dive', {tun: pkg.area.t, pc: pkg.pc, pos: 'd'});
-        antFinna(ant, 'get', {...action, q: [{act: 'dive', tun: getAnt(farm, pkg.Q)?.nest, pos: 'd', n: 'bot'}, {...action, act: 'drop', n: 'bot'}]});
+      else if (isEggOrInf(pkg)) {// This check explicitly instead of just an 'else' because it is possible that pkg did not resolve to an ant-object (egg perished or egg/inf already moved out of farm).
+        if (pkg.moveTo)
+          nipData ? antFinna(ant, 'get', {...action, f: farm.id, q: [{act: 'nip', nip: nipData.nip}], q2: [{act: 'pace', for: randomInt(999)}, {...action, act: 'drop'}]}) : del(pkg, 'moveTo');
+        else {
+          antFinnaVia(ant, 'dive', {tun: pkg.area.t, pc: pkg.pc, pos: 'd'});
+          antFinna(ant, 'get', {...action, q: [{act: 'dive', tun: getAnt(farm, pkg.Q)?.nest, pos: 'd', n: 'bot'}, {...action, act: 'drop', n: 'bot'}]});
+        }
       }
     }
     antNext(ant);
@@ -4848,11 +4859,10 @@ act = {
 
   // Drop a carried item.  Carefully though.
   drop: (ant, farm = getFarm(ant), action = ant.q[0], pkg = getCarry(farm, ant.carry), tunPos = findTunPos(ant, farm, [ant.area.t]), tun = tunPos?.tun, newSpot,
-    headPoint = antHeadPoint(ant, (6 + antOffsetX(ant)) * ant.scale), spotFinder = (lvl = 0, pkgSize = tunPercent(tun, 5), levelPkgs, aPkg, offset, pc) => {
+    headPoint = antHeadPoint(ant, 6 + antOffsetX(ant)), spotFinder = (lvl = 0, pkgSize = tunPercent(tun, 5), levelPkgs, aPkg, offset, pc) => {
       for (; lvl < 4; lvl++) {
         levelPkgs = farm.a.filter(e => isEggOrInf(e) && e.area.t == tun.id && e.lvl === lvl).sort((a, b) => a.pc - b.pc);
-        if (!levelPkgs.length) levelPkgs = [{pc: tunPos.pc}]; // If there are no pkgs on this level, create a dummy value here to allow the following code to run.
-        for (aPkg of levelPkgs) {
+        for (aPkg of levelPkgs.length ? levelPkgs : [{pc: tunPos.pc}]) {
           for (offset of [-pkgSize, pkgSize]) {
             pc = aPkg.pc + offset;
             if (pc > 20 && pc < 80 && !farm.a.some(e => isEggOrInf(e) && e.area.t == tun.id && e.lvl === lvl && abs(pc - e.pc) < pkgSize * .99) && // The .99 is because of float precision weirdness.
@@ -4864,7 +4874,7 @@ act = {
     }) => {
     if (pkg) {
       // Set the x/y of the package first.  (These values will be overriden for egg/inf pkgs in tunnels by the code below)
-      pkg.x = headPoint.x;
+      pkg.x = clamp(headPoint.x, 1, 959);
       pkg.y = tun?.t == 'cav' ? cavFloor(tun, findTunPos(headPoint, farm, [tun, ...(tun?.co || [])]).pc).y : ant.area.n == 'top' ? antGroundLevel(headPoint) : headPoint.y;
       // Pkgs dropped in tunnels need a lot more special handling so they are displayed next to each other nicely.
       if (tun?.t == 'cav' && isEggOrInf(pkg)) {
@@ -4882,7 +4892,7 @@ act = {
         }
         else {
           // No spots.  Egg will be dropped here anyway, but we'll tell the queen her nest sucks.  This may cause ants to keep moving nest, fun!
-          getAnt(farm, pkg.Q).nest = 0;
+          if (aPkg = getAnt(farm, pkg.Q)) aPkg.nest = 0;
           assign(pkg, {pc: tunPos.pc, lvl: 0, area: {t: tun.id}});
         }
         (({x, y}) => assign(pkg, {x, y}))(cavFloor(getTun(getFarm(pkg), pkg.area.t), pkg.pc)); // Pkg is in a tunnel (assumed by context), update the x/y coords from the tunnel.
@@ -4951,7 +4961,11 @@ act = {
       // Exiting farm into a nip area.
       if (isLeftSide ? antX > -35 : antX < 995) {
         antSetWalk(ant);
-        if (isTop) antMoveSurface(ant); // Top area.
+        if (isTop) {
+          // Top area.
+          ant.scale = getSign(!isLeftSide);
+          antMoveSurface(ant);
+        }
         else {
           // Tunnel.
           // Can't use antToProneWithCorrection() because the nudger is a fudger.
@@ -4965,10 +4979,7 @@ act = {
         // Done! Move ant into "nip item space".
         antArea(ant, 'nip'); // This is just to invalidate any existing area.n the ant has, because the director function on a delay will try to do things to this ant if they're in a valid farm area.
         antTransfer(farm, ant, farm, nipItem, {x: -35, y: 28 - antOffsetY({...ant, x: -35}), q: [], digT: 0}, getEl('a-' + nipIds[id])); // Invalidate q and digT to prevent any problems down the line.
-        if (ant.carry) {
-          antTransfer(farm, getCarry(farm, ant.carry), farm, nipItem, {q: []}, getEl('a-' + nipIds[id]));
-          ant.carry.nip = nipData.nip; // Now that the carried item is stored in the nipItem, we have to flag that in the carry data so we know where to fetch it from later.
-        }
+        carryTransfer(ant, farm, undefined, farm, farm, nipItem, {q: []}, getEl('a-' + nipIds[id]), nipData.nip);
         setColonyAndFoe(farm);
         // Set the 'moveTo' flag immediately on any dependant eggs or infants that should be moved to wherever the queen went.
         // Note: the director function does this anyway in case this workflow skipped an egg/ant that was not in the dataset at this time.
@@ -4982,12 +4993,12 @@ act = {
     else {
       // Setup.
       if (nipItem && nip) {
-        if (!ant.carry || !['food', 'drink', 'ant'].includes(getCarry(farm, ant.carry).t)) {
+        if (!ant.carry || isEggOrInf(getCarry(farm, ant.carry))) {
           isTop ? goToLocation(ant, {n: 'top'}) : goToLocation(ant, {n: 'bot', tun: tun.id, pc: 100 * !isLeftSide + getSign(isLeftSide) * tunPercent(tun, 25 - randomInt(20))});
           antFinna(ant, 'nip', {id: nip, tun: tun?.id, tx: isLeftSide ? 1 : 959}); // note: tx and tun are only used in their own respective areas.
         }
       }
-      else if (ant.carry) antFinna(ant, 'drop', ant.carry); // Ant was carrying something to a nip, but nip is not there.
+      else if (ant.carry) antFinnaVia(ant, 'drop', {...ant.carry}); // Ant was carrying something to a nip, but nip is not there.
       antNext(ant);
     }
   },
@@ -5102,7 +5113,7 @@ farmHasQueen = farm => farm.a.some(a => isQueen(a) && isCapped(a)),
 
 // Determines if an egg or infant can upgrade to the next phase.
 // Note: The time calculations in this function do not speed up by using the superspeed feature.
-canUpgrade = (pkg, day = 1) => pkg.area.t && pkg.hp > 90 && !randomInt(pkg.dur > 8640 * (1 + day) ? 50 : num500) && pkg.dur > 8640 * day,
+canUpgrade = (pkg, day = 1) => pkg.area.t && pkg.hp > 90 && !randomInt(pkg.dur > 8640 * (1 + day) ? 50 : num500) && pkg.dur > 8640 * day && !getAnt(getFarm(pkg), pkg.Q)?.lc,
 
 // Directs farms by running checks every 30 seconds.
 // Adds deliberate tasks to the ants' finna queues so the action loops aren't responsible for checking everything.
@@ -5151,7 +5162,7 @@ director = (temp1, temp2) => {
         isDead(ant) ? updateCorpseState(ant, farm) : setTimeout(X => {// Perform a chunk of this without overloading the main thread with heaps of these at once.
           // Decrement stats.
           antStats(ant, {fd: -.05, dr: -.1, md: -.05, hp: -.1});
-          !ant.area.t && antStats(ant, {md: farmFlairScore(farm) / 20}); // Boost mood stat based on presence of scenery (when not in tunnels).
+          !ant.area?.t && antStats(ant, {md: farmFlairScore(farm) / 20}); // Boost mood stat based on presence of scenery (when not in tunnels).
           // Decrement hp stats based on other stats.
           antStats(ant, ant.fd <= 0 || ant.dr <= 0 ? {hp: -9, md: -2} : ant.fd < 9 || ant.dr < 9 ? {hp: -.05, md: -.05} : {hp: ant.md < 9 ? -.05 : -.01});
           // Detect hunger/thirst deaths.
@@ -5191,7 +5202,7 @@ director = (temp1, temp2) => {
               ant.md < 20 && !farmFlairScore(farm) && playerHint(farm, ['Some of your ants are complaining about the lack of scenery and decor.', "This farm doesn't have flair, the ants would like some decorations."]);
             }
             // Randomly go to vial or tube.
-            farm.nips.length && !farm.foe
+            farm.nips.length && !farm.foe && !ant.lc
               && !randomInt((farm.dun ? 90 : farmIsDeveloping(farm) ? 120 : deg180) - (farm.items.some(i => i.t == 'food' && i.sz > 0) ? 0 : 30) - (farm.items.some(i => i.t == 'drink' && i.sz > 0) ? 0 : 40))
               && antFinnaUnique(ant, 'nip', {nip: pickRandom(farm.nips).nip});
           }
@@ -5237,6 +5248,8 @@ director = (temp1, temp2) => {
             // Queen's presence boosts moodiest ant's MD.
             if (temp1 = farm.a.filter(a => a.caste != 'Q').reduce((min, a) => !min || a.md < min.md ? a : min, 0)) antStats(temp1, {md: .3});
             randomInt(2) && farm.a.filter(a => isServant(ant, a)).length < 3 && ant.q.length < 20 && care4kids(farm, ant); // Farm with not enough workers?  Queen maybe performs an extra care task per cycle.
+            ant.lay ??= 0; // Initialize the lay chance factor if it doesn't exist yet.
+            ant.lay++;
           }
           else if (isDrone(ant)) {
             // Being an adult drone takes an extra toll.
@@ -5248,7 +5261,7 @@ director = (temp1, temp2) => {
             ant.area.t && !randomInt(2) && antFinnaUnique(ant, 'climb');
           }
           // If ant didn't drop, it needs to be requeued.
-          if (ant.carry && !hasCarryTasks(ant)) ant.carry.q ? ant.carry[ant.carry.f && ant.f != ant.carry.f ? 'q2' : 'q'].forEach(q => antFinnaUnique(ant, q.act, {...q})) : ant.carry.Q ? antFinna(ant, 'srv', ant.carry) : ant.q.push(ant.carry);
+          if (ant.carry && !hasCarryTasks(ant)) ant.carry.q ? ant.carry[ant.carry.f && ant.f != ant.carry.f ? 'q2' : 'q'].forEach(q => antFinnaUnique(ant, q.act, {...q})) : ant.carry.Q ? antFinna(ant, 'srv', {...ant.carry}) : ant.q.push({...ant.carry});
         }, num500);
         // Update the ant's thoughts, but limit it to changing every 10th loop (~5 minutes) so as not to override thoughts, particularly those set within other functions, too soon.
         ant.thotD > 9 ? antThot(ant) : ant.thotD++;
