@@ -2776,7 +2776,8 @@ antThot = (ant, thots, farm = getFarm(ant), uniqueActs = antUniqueActs(ant), tho
       X => ant.md < 20 && ["I ain't happy", "I'm having a mood", "I am so annoyed"],
       X => ant.t != farm.t && !farm.coex && ["Oops, wrong colony", "I'm so screwed", "I shouldn't be here"],
       X => !randomInt(3) && ant.md < 40 && !farmHasQueen(farm) && ["We could really use a Queen", "I wish there was a Queen", "There should be a Queen!"],
-      X => !randomInt(3) && isWorker(ant) && farmHasQueen(farm) && ["Queen's watching… act busy", "Just following orders", "I hear the queen gossiping"],
+      X => !randomInt(3) && isWorker(ant) && farmHasQueen(farm) && ["Queen's watching… act busy", "Just following orders", "I hear the queen gossiping", "Is the queen happy?"],
+      X => randomInt(3) && ant.lc && ["Babies!!!!", "I'm feelin' clucky", "Fulfilling my destiny!", "I am your mother!", "Busy laying eggs"],
       X => !randomInt(3) && isQueen(ant) && ["Who ate my larvae?!", "Carrying? I'm supervising", "It's good to be queen"],
       X => !randomInt(3) && farm.a.length > 12 && ["Tunnel traffic again", "Our colony is pretty big", "I have so many friends"],
       X => uniqueActs.includes('dig') && ['Off to work…', 'Busy, busy!', 'Got to dig', 'Is this tunnel crooked?', "I'm basically a builder"],
@@ -2791,7 +2792,8 @@ antThot = (ant, thots, farm = getFarm(ant), uniqueActs = antUniqueActs(ant), tho
         (farm.dun ? ["This nest is sweet", "I love my home", "Our colony is great", "Why so many tunnels?"] : // Farm development completed dive thoughts.
         farmIsDeveloping(farm) && randomInt(3) ? ["Exploring tunnels", "Mapping the nest", "Learning the tunnels"] : // Young farm dive thoughts.
           ["Planning chambers", "Assessing dig sites"]), // Incomplete farm dive thoughts
-      X => ["Hmm, what to do?", "What shall I do?"], // Last resort for a thot.
+      X => ["Hmm, what to do?", "What shall I do?", "Same tunnel, new dread", "I think therefore I overthink", "Six legs, zero answers", "Am I me or the colony?", "Question everything", "To toil is to be. Ouch.",
+          "Sisyphus had it easy", "I'm expendable", "We build. But why?", "Nobody asks me anything", "I have trauma"], // Last resort for a thot.
     ].find(f => (thot = f())) && thot);
     ant.thotD = 0; // See director() func for where this is incremented and reaching a max value triggers a call to this func.
   }
@@ -3076,9 +3078,9 @@ antUpdate = (ant, antEl = getObjEl(ant), sync, carryItem) => {
 antElUpdate = (ant, antEl) => {
   if (antEl?.isConnected) {
     antEl.style.left = ant.x + 'px';
-    antEl.style.top = ant.y + 'px';
+    antEl.style.top = ((ant.lvl || 0) * -5 + ant.y) + 'px';
     antEl.className = [
-      'ant', ant.caste, ant.t, ant.state, ant.pose, antGetSize(ant), ant.inf && 'inf' + ant.inf, ant.lvl && 'lvl' + ant.lvl, // String values.
+      'ant', ant.caste, ant.t, ant.state, ant.pose, antGetSize(ant), ant.inf && 'inf' + ant.inf, // String values.
       ...['walk', 'jit', 'dig', 'wig', 'h', 'fall', 'fight', 'mag', 'alate', 'flare', 'burn', 'rot', 'rot1', 'rot2', 'decay', 'decay1', 'egg'].filter(f => ant[f]), // Boolean values.
       ...ant.rm // Body part removal.
     ].join(' ');
@@ -4782,7 +4784,7 @@ act = {
     // Note: The 'lay' action will protect from laying if something went wrong in the queue and she's not in a cav, and actually has a high chance of requeueing another dive/lay cycle.
     antCount < 40 ?
      ant.hp > 40 && farmIsDeveloping(farm) && !farm.a.some(a => a.egg) && !randomInt(max(9, (num1000 * Math.ceil(antCount / 30) - (farm.fill == 'lube' ? num500 : 0) - (antCount < 9 ? num500 : 0) - ant.lay)) * 5) && antFinnaUnique(ant, 'lay')
-     : playerHint(farm, ["Queen won't lay eggs due to overpopulation."]);
+     : (playerHint(farm, ["Queen won't lay eggs due to overpopulation."]), ant.lay = -num1000);
     // Note: free ant spawning stops at 25 ants, ant vials disallow use at 30, and laying stops at 40.  This seems like a decent progression allowance.
     antNextStill(ant);
   },
@@ -4820,9 +4822,9 @@ act = {
             lvl: lvl
           }), undefined, 1); // Instant display update.
           antStats(ant, {hp: -9, fd: 4, dr: 4, md: 4}); // Increase chance of queen being forced to sleep between eggs.  Queens self-feed during this time.
+          msg(ant.n + (laid < 2 ? ' laid an egg!' : ` laid ${laid} eggs!`));
         }, pauseDelay);
         laid++;
-        msg(ant.n + (laid < 2 ? ' laid an egg!' : ` laid ${laid} eggs!`));
       }
     }
     // Note: the random chances on the following lines are experimental values, because I suspect it needs to be surprisingly high to not happen too often.
@@ -4834,8 +4836,10 @@ act = {
     else {
       ant.lay = 0; // Lay chance is handled by the 'kip' action, but we need to reset this after each lay session is complete.
       del(ant, 'lc');
-      score(1);
-      msg(ant.n + ` done laid a brood of ${laid} eggs!`);
+      setTimeout(X => {
+        score(1);
+        msg(ant.n + ` done laid a brood of ${laid} eggs!`);
+      }, shortDelay);
     }
     antNext(ant, shortDelay + randomInt(standardDelay));
   },

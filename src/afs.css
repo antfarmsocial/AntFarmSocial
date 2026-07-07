@@ -3424,20 +3424,6 @@ body.bit .ant {
     display: none;
   }
 }
-.egg, .inf1, .inf2, .inf3, .inf4 {
-  &.lvl1 {
-    margin-top: -5px;
-  }
-  &.lvl2 {
-    margin-top: -10px;
-  }
-  &.lvl3 {
-    margin-top: -15px;
-  }
-  &.lvl4 {
-    margin-top: -20px;
-  }
-}
 .nants .egg {
   margin-top: -3px;
 }
