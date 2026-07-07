@@ -3759,7 +3759,7 @@ act = {
       antActionStill(ant, randomInt(microDelay) + (action.flp ? randomInt(pauseDelay) : 0));
       ant.scale *= -1; // <-- Yes, this has to be here after antAction() to set up the next loopback, rather than do it right away.  Looks better.
       ant.r = antHillAngle(ant); // <-- And yes, thanks to setting the scale here we gotta do this too on a flip'n'pause or it looks silly.
-      ant.carry && antUpdate(ant); // <-- Ugh yeah and that too, or whatever it's carrying lags behind by one frame upon a direction flip.
+      ant.carry && antUpdate(ant); // <-- Ugh yeah and that too, or whatever it's carrying lags behind upon a direction flip.
     }
     else rand < 5 ? antActionStill(ant, randomInt(pauseDelay)) : antAction(ant); // Pause or continue.
     // Apply corpse proximity penalty.
@@ -3905,6 +3905,7 @@ act = {
         // Pick a random entrance and find an incomplete tunnel that it leads to.
         tun = pickRandom(farm.tuns.filter(t => t.t == 'ent' && t.dun));
         if (temp = tun && randomInt(9) && findPath(farm, tun, {dun: 1, t: 'ent'}, 1, 1, tun.id)) {// Inverted match.
+          // Store the path to get to a dig job, and pass it along to the dive action, so all ants use the same trail to get there otherwise they will enter the dig tunnel from the wrong end later.
           currentDig = temp.length ? {id: last(temp), path: [tun.id, ...temp].reverse().slice(1)} : {tx: tun.x1, id: tun.id, path: [tun.id]};
           // Reject jobs that are: duplicate jobs, too close to a morgue, or co an entrance that isn't the "random entrance" we just found.
           getById(farm.dig, currentDig.id) || getTun(farm, currentDig.id).co.some(t =>
@@ -4023,29 +4024,30 @@ act = {
         temp1 = findTunPos(ant, farm, [tun, ...tun.co, {id: action.pt, ex: 1}]);
         if (temp1 && ![tun.id, action.pt].includes(temp1.tun.id)) {
           temp2 = getTun(farm, ant.area.t);
-          temp3 = 1; // Do an early return.
           if (temp1.tun.c == tun.id) {// This is a shortcircuited check for a 'jun'.
             // Resolved into a sibling junction based on getTunPosition.
             // Only retarget if it leads directly to nextTun otherwise keep heading for the original con.
-            temp1.tun.co.includes(nextTun?.id) ? (action.id = temp1.tun.id) : (temp3 = 0); // Retarget OR skip early return.
+            if (temp1.tun.co.includes(nextTun?.id)) action.id = temp1.tun.id; // Retarget OR skip early return.
           }
           else if (temp2?.c == tun.id) {// This is a shortcircuited check for a 'jun'.
             // Resolved into a sibling junction based on ant.area.
             // Only retarget if it leads directly to nextTun otherwise keep heading for the original con.
-            temp2.co.includes(nextTun?.id) ? (action.id = temp2.id) : (temp3 = 0); // Retarget OR skip early return.
-          }
-          else if (temp1.tun.co.includes(tun.id)) {
-            // Wait... the con we want to be in connects to this tun.  Let's prone walk to the con we thought we'd be in and pick this dive path up again.
-            antToProneWithCorrection(ant, tun);
-            antInstaQ(ant, {act: 'dive', id: temp1.tun.id}, 1);
+            if (temp2.co.includes(nextTun?.id)) action.id = temp2.id; // Retarget OR skip early return.
           }
           else {
-            // Somethings wrong.  The ant wandered into the wrong tunnel on a previous iteration, but our tunnel walking functions didn't handle this exact situation properly and redirected ant backwards,
-            // and now the queue expects that we're up to a certain 'con' piece (we probably are not) and that may be because that con is the site of a current dig operation.
-            // Note: This situation might not arise very often, and this may be an improper way of handling the case anyway.
-            action.id = temp1.tun?.id; // Update the action to where the ant actually is and immediately do another pass.
+            if (temp1.tun.co.includes(tun.id)) {
+              // Wait... the con we want to be in connects to this tun.  Let's prone walk to the con we thought we'd be in and pick this dive path up again.
+              antToProneWithCorrection(ant, tun);
+              antInstaQ(ant, {act: 'dive', id: temp1.tun.id}, 0);
+            }
+            else {
+              // Somethings wrong.  The ant wandered into the wrong tunnel on a previous iteration, but our tunnel walking functions didn't handle this exact situation properly and redirected ant backwards,
+              // and now the queue expects that we're up to a certain 'con' piece (we probably are not) and that may be because that con is the site of a current dig operation.
+              // Note: This situation might not arise very often, and this may be an improper way of handling the case anyway.
+              action.id = temp1.tun?.id; // Update the action to where the ant actually is and immediately do another pass.
+            }
+            return antActionStill(ant);
           }
-          if (temp3) return antActionStill(ant);
         }
       }
       if (nextTun) {
@@ -4891,12 +4893,12 @@ act = {
             antFinna(ant, 'drop', action);
             return antAction(ant);
           }
-          else assign(pkg, {...newSpot, area: {t: tun.id}});
+          else assign(pkg, {...newSpot, area: {n: 'bot', t: tun.id}});
         }
         else {
           // No spots.  Egg will be dropped here anyway, but we'll tell the queen her nest sucks.  This may cause ants to keep moving nest, fun!
           if (aPkg = getAnt(farm, pkg.Q)) aPkg.nest = 0;
-          assign(pkg, {pc: tunPos.pc, lvl: 0, area: {t: tun.id}});
+          assign(pkg, {pc: tunPos.pc, lvl: 0, area: {n: 'bot', t: tun.id}});
         }
         (({x, y}) => assign(pkg, {x, y}))(cavFloor(getTun(getFarm(pkg), pkg.area.t), pkg.pc)); // Pkg is in a tunnel (assumed by context), update the x/y coords from the tunnel.
       }
