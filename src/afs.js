@@ -2156,7 +2156,7 @@ modal = {
     // Scores output.
     _.farms.forEach((f, i, A,
       getTunCount = tt => f.tuns.filter(t => t.t == tt && t.dun).length,
-      getCasteCount = caste => printCount(f.a.filter(a => isCapped(a) && a.caste == caste && (a.t == f.t || f.coex)).length, castes[caste]),
+      getCasteCount = caste => printCount(f.a.filter(a => !a.egg && isCapped(a) && a.caste == caste && (a.t == f.t || f.coex)).length, castes[caste]),
       getStatMarkup = (label, stat) => html(tag('b', label ? label + ' . . . ' : '') + stat, {class: 'stat'})) => {
       if (!f.mTuns) {// Don't show sculptures.
         scores += html(
@@ -4783,7 +4783,7 @@ act = {
     // Queue egg laying if no eggs in the nest, not overpopulated, and random chance passed with respect to various factors.
     // Note: The 'lay' action will protect from laying if something went wrong in the queue and she's not in a cav, and actually has a high chance of requeueing another dive/lay cycle.
     antCount < 40 ?
-     ant.hp > 40 && farmIsDeveloping(farm) && !farm.a.some(a => a.egg) && !randomInt(max(9, (num1000 * Math.ceil(antCount / 30) - (farm.fill == 'lube' ? num500 : 0) - (antCount < 9 ? num500 : 0) - ant.lay)) * 5) && antFinnaUnique(ant, 'lay')
+     ant.hp > 40 && farmIsDeveloping(farm) && !farm.a.some(a => isEggOrInf(a) && a.Q == ant.id) && !randomInt(max(9, (num1000 * Math.ceil(antCount / 30) - (farm.fill == 'lube' ? num500 : 0) - (antCount < 9 ? num500 : 0) - ant.lay)) * 5) && antFinnaUnique(ant, 'lay')
      : (playerHint(farm, ["Queen won't lay eggs due to overpopulation."]), ant.lay = -num1000);
     // Note: free ant spawning stops at 25 ants, ant vials disallow use at 30, and laying stops at 40.  This seems like a decent progression allowance.
     antNextStill(ant);
@@ -5124,6 +5124,18 @@ farmHasQueen = farm => farm.a.some(a => isQueen(a) && isCapped(a)),
 // Note: The time calculations in this function do not speed up by using the superspeed feature.
 canUpgrade = (pkg, day = 1) => pkg.area.t && pkg.hp > 90 && !randomInt(pkg.dur > 8640 * (1 + day) ? 50 : num500) && pkg.dur > 8640 * day,
 
+// Checks all eggs/infants and corrects any unsupported ones by dropping the lvl.
+checkPkgSupport = (farm, lvl) => {
+  for (lvl = 1; lvl < 4; lvl++) {
+    farm.a.forEach(pkg => {
+      if (isEggOrInf(pkg) && pkg.lvl == lvl && farm.a.filter(e => isEggOrInf(e) && e.area.t && e.area.t == pkg.area.t && e.lvl == lvl - 1 && abs(pkg.pc - e.pc) < tunPercent(getTun(farm, pkg.area.t), 5)).length < 2) {
+        pkg.lvl--;
+        antUpdate(pkg);
+      }
+    });
+  }
+},
+
 // Directs farms by running checks every 30 seconds.
 // Adds deliberate tasks to the ants' finna queues so the action loops aren't responsible for checking everything.
 // Also updates ants stats, autosaves, updates food & drink display, checks achievements, updates ant thoughts.
@@ -5231,6 +5243,7 @@ director = (temp1, temp2) => {
                 isDrone(ant) && _.man++;
                 msg(`${ant.n} in "${farm.n}" is now an adult ${types[ant.t].n} ant ${casteLabel(ant).toLowerCase()}!`);
                 score(1);
+                checkPkgSupport(farm);
               }
               ant.inf == 2 && msg(`Larva ${ant.n} in "${farm.n}" has puped!`);
             }
@@ -5442,8 +5455,8 @@ randomMsg = (msgs, isJoke, i = 0, randMsg) => {
 },
 
 // Randomly shows a joke message.
-joker = (i = _.farms.filter(farmIsRunning).length - 1) => {
-  randomMsg(jokes[i < 5 ? max(0, i) : 0], 1);
+joker = (i = _.farms.filter(farmIsRunning).length - 1, lastmsgEl = getEl('messages').firstChild) => {
+  !lastmsgEl && randomMsg(jokes[i < 5 ? max(0, i) : 0], 1);
   setTimeout(joker, randomInt(longDelay) + longDelay);
 },
 

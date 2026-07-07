@@ -21,4 +21,6 @@ This file lists a few things that are never obvious.
   if they see another type of ant in there.
 - Ant corpse's are most toxic to nearby ants when the ROT value is 100% and the DECAY value is 0%.
 - Using an emoji in the farm's name plate is a three-pointer.  No such thing with ant hats though.
+- A queen won't begin an egg laying cycle if there are any of her own eggs or infants in her current farm.
+- Eggs won't hatch if their own queen is still in an egg laying cycle in their current farm.
 
