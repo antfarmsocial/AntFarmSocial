@@ -4731,6 +4731,7 @@ act = {
       action.Q && antFinna(ant, 'srv', action);
       // Queue up the items that this action was told to queue up once the carry item was fetched.
       action.q?.forEach(q => antFinnaVia(ant, q.act, {...q}));
+      isEggOrInf(carryItem) && checkPkgSupport(farm);
     }
     antNext(ant, pauseDelay);
   },
