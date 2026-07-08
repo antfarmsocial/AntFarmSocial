@@ -249,7 +249,7 @@ fixAntPos = X => {
 
 // Retrieves all data from local storage.
 // Note: Start at half volume so you can listen to a podcast while playing.
-load = X => _ = JSON.parse(localStorage.getItem('_') || '{"score":0,"farms":[],"bag":[],"ach":{},"achQ":[],"vol":50,"bg":"","grad":0,"sac":0,"arty":0,"scene":{},"man":0,"wings":0}'),
+load = X => _ = JSON.parse(localStorage.getItem('_') || '{"score":0,"farms":[],"bag":[],"ach":{},"achQ":[],"vol":50,"bg":"","grad":0,"sac":0,"arty":0,"scene":{},"man":0,"wings":0,"rm":0}'),
 
 // Saves all data to local storage.
 // Will not allow saving within 30s of loading the page due to suspected exploit.
@@ -294,6 +294,11 @@ getFarm = fid => getById(_.farms, fid?.f || fid),
 
 // Determines if a farm object is of the currently displayed farm.
 currentFarm = farm => farm.id == F.id,
+
+// Provides a farm count for decision making that includes farms that pass farmIsRunning, PLUS sculptures, PLUS removed farms.
+// So it really isn't an accurate farm count, but more like an estimate of how much progress the player has made in the game.
+// This is because the tone of joker messages, kudos messages, and bus ticket backgrounds changes during the mid-game phase.
+totalFarmCount = X => _.farms.filter(f => farmIsRunning(f) || f.sculpt).length + _.rm,
 
 // Adds a blank farm, and switches to it.
 addFarm = (fid = 'f' + getTime()) => {
@@ -1350,7 +1355,7 @@ useItem = (i, doQuip = 1, doDel = 1, item = _.bag[i], itemKey = item.k, itemType
         setTimeout(X => fx.classList.remove('fog', 'fog2'), 4500);
       }, 19 * shortDelay);
     },
-    bus(countFarms = _.farms.filter(farmIsRunning).length, loc = pickRandom(countFarms == 4 ? ['dystopia'] : keys(locs).filter(lk => countFarms < 3 || countFarms > 4 ? lk != 'dystopia' : lk)), newBg = loc + (randomInt(locs[loc].c - 1) + 1)) {
+    bus(countFarms = totalFarmCount(), loc = pickRandom(countFarms == 4 ? ['dystopia'] : keys(locs).filter(lk => countFarms < 3 || countFarms > 4 ? lk != 'dystopia' : lk)), newBg = loc + (randomInt(locs[loc].c - 1) + 1)) {
       if (newBg == _.bg) return keyHandlers.bus(); // Note: this could potentially recurse infinitely causing stack problems, but the odds are low enough to be negligible.
       _.bg = newBg;
       _.au = locs[loc].a;
@@ -1364,7 +1369,7 @@ useItem = (i, doQuip = 1, doDel = 1, item = _.bag[i], itemKey = item.k, itemType
     antFarm() {addFarm(); score(20, 1)},
     mom() {msg('<b>Win.</b>', 'err'); _.win = 1; score(100, 1)},
     crucible() {pourCrucible()},
-    sculpt() {_.farms.push(item.f); switchFarm(item.f.id)},
+    sculpt() {_.farms.push(item.f); switchFarm(item.f.id); _.rm--;},
   },
   handler = keyHandlers[itemKey] || typeHandlers[itemType]
 ) => {
@@ -1472,12 +1477,12 @@ addLidFunc = (lid = getEl('lid')) => {
 },
 
 // Lets a drone escape and reschedules itself for another turn.
-droneEscape = (drone = pickRandom(F.a.filter(a => isDrone(a) && isCapped(a) && !a.area.t)),
+droneEscape = (drone = pickRandom(F.a.filter(a => isDrone(a) && isCapped(a) && !a.area.t && !drone.esc)),
   exitX = 215 + randomInt(530), exitY = 300, startX = drone?.x, startY = drone?.y, angle = getAngle({x: startX, y: startY}, {x: exitX, y: exitY}), rad = degToRad(angle),
   elapsed = 0, tick = (t = min(1, (elapsed += frameTick) / num500), e = easeInQuad(t), droneEl = getObjEl(drone), exitTick = X => {
     drone.x += cos(rad) * 3 * frameTick; drone.y += sin(rad) * 3 * frameTick; antUpdate(drone); // 3 - speed multiplier.
     droneEl.getBoundingClientRect().bottom < -25 ? (msg(pickRandom([`${drone.n} has escaped!`, `${drone.n} flew away!`])), antDelete(drone), droneEscape()) : setTimeout(exitTick, frameTick);
-  }) => getEl('lid').classList.contains('off') && droneEl?.isConnected && (t < 1 ?
+  }) => getEl('lid').classList.contains('off') && droneEl?.isConnected && (drone.esc = 1) && (t < 1 ?
     antUpdate(assign(drone, {x: startX + (exitX - startX) * e, y: startY + (exitY - startY) * e, r: angle, scale: 1, pose: 'prone'})) || setTimeout(tick, frameTick) : exitTick()),
 ) => drone && antInstaQ(drone, {min: 5000}, 0) && setTimeout(tick, num500 + randomInt(num2000)),
 
@@ -1665,13 +1670,13 @@ pourCrucible = (audio = ambienceOverride('sizz1'), fx = getEl('fx'), hills = get
         playSizzle(.8);
         mHillEl.classList.add('vis');
         F.a.filter(a => (a.area.n == 'bg' || a.area.n == 'top') && !a.burn).forEach(a => {
-          a.area.n == 'bg' && randomInt(2) && antSlip(a);
+          a.area.n == 'bg' && randomInt(2) && antActionSlip(a);
           a.burn = 1;
           antUpdate(a);
           antInstaQ(a, {min: 10000});
           setTimeout(X => {
             playSizzle();
-            a.area.n == 'bg' && randomInt(2) && antSlip(a);
+            a.area.n == 'bg' && randomInt(2) && antActionSlip(a);
             antDeath(a, 'other');
           }, num1000 + randomInt(num2000));
         });
@@ -1765,6 +1770,7 @@ stow = e => {
     _.bag.push({k: 'sculpt', f: F});
     _.farms = _.farms.filter(f => f.id != F.id);
     switchFarm(_.farms[0].id);
+    _.rm++;
   }
 },
 
@@ -1836,7 +1842,10 @@ modal = {
         tube() {!_.farms.some(f => f.fill && f.id != F.id && getNips(1, f)) && (cta = 'No other farm to connect', disable = 1); fillCheck()},
         antfax() {cta = 'View'},
         antfaxpro() {cta = 'View'},
-        clonekit() {!F.a.some(a => isWorker(a) && !a.inf && isCapped(a)) && (cta = 'No eligible donor found', disable = 1)},
+        clonekit() {
+          !F.a.some(a => isWorker(a) && !a.inf && isCapped(a)) && (cta = 'No eligible donor found', disable = 1);
+          F.a.length > 29 && (cta = 'Ant farm overpopulated', disable = 1);
+        },
         speedo() {_.ss && (cta = 'A second Speedo would tear a hole in space', disable = 1)},
         ebay() {cta = 'Sell ant farm'; F.fill && (cta = 'Farm has not been cleaned out', disable = 1); _.farms.length < 2 && (cta = 'This is your only farm', disable = 1)},
         mom() {cta = '🏆 WIN GAME 🏆'; if (_.win) (cta = 'Game won', disable = 1)},
@@ -2290,6 +2299,7 @@ xSelect = (k, select, val = query(`input[name=${select}]:checked`)?.value, key =
         if (valParts[0] > 1) for (let i = 0; i < valParts[0]; i++) drop(valParts[1]);
         else valParts[1].split(',').forEach(v => drop(v));
         randomMsg([['A++++ fantastic seller.'], ['Thank you for an easy pleasant transaction.'], ['Fast shipping, good communication. Highly recommended!']]);
+        _.rm++; // Count removed farms.
       }, num1000);
       closePopup();
     }
@@ -2728,7 +2738,7 @@ score = (inc, isBonus, win = _.win ? span('🏆', {class: 'win'}) : '', scoreEl 
 
 // Drops an item either according to the random value passed in (0=guaranteed) or when some conditions are met.
 scoreDrop = (rand, dropItem, scoreCompare = _.score > 149 ? .3 : _.score > 9 ? .4 : .5, i,
-  itemKeys = keys(items).filter(key => items[key].lvl < min(_.score, _.farms.length < 2 ? 50 : _.farms.length < 3 ? 100 : num2000) && !items[key].nodrop && (!items[key].max || _.bag.filter(item => item.k == key).length < items[key].max))
+  itemKeys = keys(items).filter(key => items[key].lvl < min(_.score, totalFarmCount() < 2 ? 50 : totalFarmCount() < 3 ? 100 : num2000) && !items[key].nodrop && (!items[key].max || _.bag.filter(item => item.k == key).length < items[key].max))
 ) => {
   if (rand < scoreCompare) {
     // Random drops.
@@ -2746,7 +2756,7 @@ scoreDrop = (rand, dropItem, scoreCompare = _.score > 149 ? .3 : _.score > 9 ? .
       .reduce((lowestItem, currentItem) => (!lowestItem || items[currentItem].lvl < items[lowestItem].lvl ? currentItem : lowestItem), 0);
   }
   else if (random() < scoreCompare) {
-    i = _.farms.filter(farmIsRunning).length - 1;
+    i = totalFarmCount() - 1;
     setTimeout(X => randomMsg(kudos[i < 4 ? i : i == 4 ? 1 : 0]), num1000);
   }
   dropItem && drop(dropItem);
@@ -3021,7 +3031,7 @@ antCap = (ant, farm = getFarm(ant), antEl = getObjEl(ant)) => {
   setColonyAndFoe(farm);
   score(isQueen(ant) ? 3 : 1);
   !ant.inf && antThot(ant, ["Don't touch me!", "Am I kidnapped?", "WTF is going on?", "I'm confused!"]);
-  antSurface(ant);
+  antNextSurface(ant);
 },
 
 // Replaces ant's queue with a single fight action, if it's not already fighting.
@@ -3033,7 +3043,7 @@ antFight = (ant, ant2) => !ant.carry && !ant2.carry && addFight(ant, ant2) && !a
 // Resets an ant to sit properly on the surface level and executes the next item in the queue.
 // Note: For newly captured ants this is how the ant's queue is "activated".
 // Note: This calls antNext() and should be considered an alternative to calling antNext() in some situations.
-antSurface = ant => {
+antNextSurface = ant => {
   antArea(ant, 'top');
   !ant.inf && antNext(assign(ant, {r: antHillAngle(ant), y: antGroundLevel(ant), scale: ant.scale * getSign(ant.r < 90), pose: 'side', fall: 0, walk: 0, run: 0}));
 },
@@ -3078,7 +3088,7 @@ antUpdate = (ant, antEl = getObjEl(ant), sync, carryItem) => {
 antElUpdate = (ant, antEl) => {
   if (antEl?.isConnected) {
     antEl.style.left = ant.x + 'px';
-    antEl.style.top = ((ant.lvl || 0) * -5 + ant.y) + 'px';
+    antEl.style.top = ((ant.lvl ? ant.lvl * (types[ant.t].s == 's' ? -3 : -5) : 0) + ant.y) + 'px';
     antEl.className = [
       'ant', ant.caste, ant.t, ant.state, ant.pose, antGetSize(ant), ant.inf && 'inf' + ant.inf, // String values.
       ...['walk', 'jit', 'dig', 'wig', 'h', 'fall', 'fight', 'mag', 'alate', 'flare', 'burn', 'rot', 'rot1', 'rot2', 'decay', 'decay1', 'egg'].filter(f => ant[f]), // Boolean values.
@@ -3305,8 +3315,8 @@ antWaypointCollision = (farm, ant, range, wp, angle) => {
   }
 },
 
-// Determines if ant will collide with any others.  Optionally pass in an ant array to only check that group of ants.
-// The goal of this is just to make it look like ants are aware of each other's presence, but we have to allow them to ignore collisions under many conditions.
+// Determines if ant will collide with any others.
+// The goal of this is just to make it look like ants are aware of each other's presence, and we have to allow them to ignore collisions under many conditions.
 antCollision = (ant, cone = 30, a, angle) => {
   for (a of ant.f ? getFarm(ant)?.a : _.a) {
     if (a != ant && !isDead(a) && isAdult(a) && ant.state == a.state && ant.area.n == a.area.n && inTargetProximity(a, ant, 30)) {
@@ -3471,8 +3481,9 @@ cavFloor = (tun, pc, yOffset = 0, r = degToRad(tun.r)) =>
   ({id: tun.id, x: (tun.x1 + (tun.x2 - tun.x1) * (pc / 100)) - sin(r) * (tun.h / 2), y: (tun.y1 + (tun.y2 - tun.y1) * (pc / 100)) + cos(r) * (tun.h / 2) - yOffset}),
 
 // Slips an ant off the bg area.
+// Since this triggers an antAction() it should be considered as an alternative to calling that function.
 // It is generally OK to call this function directly (note: it will clear the ant's finna queue to simulate a head injury).
-antSlip = ant => {
+antActionSlip = ant => {
   !ant.carry && (ant.q = [{act: 'slip'}], ant.scale = randomSign());
   antActionStill(ant);
 },
@@ -3813,12 +3824,13 @@ act = {
         if (cos(degToRad(ant.r)) < 0) ant.pose = 'prone'; // Enforce prone pose in a legs-up scenario.
         antUpdate(ant);
       }, frameTick);
-    }) => {
+    }, ent) => {
     if (farm.dun || isDrone(ant)) antNext(ant); // No digging required.
     else if (ant.digD && tun) {
       antRemAnimUpdate(ant); // Reset animations.
       setTimeout(X => antUpdateClasses(ant, {dig: 1, jit: 1}), randomInt(num1000)); // Random delay added so ants aren't synch'd on page load.
-      tun.rwip = !isRotationTunnel(tun) && farm.tuns.some(t => t.dun && t.x1 == tun.x2 && t.y2 == tun.y2); // Mark tunnels that are being built backwards.
+      temp = getTun(farm, action.path[0]);
+      tun.rwip = !isRotationTunnel(tun) && temp.x1 == tun.x2 && temp.y1 == tun.y2; // Mark tunnels that are being built backwards, based on which end the ant actually entered from.
       // Digging movement and animations.
       if (!farmIsDeveloping(farm) && farmHasQueen(farm)) digAmt *= 1.5; // Ants dig faster if there is a Queen and farm is undeveloped.
       if (isQueen(ant)) digAmt *= 3; // Queens only dig when there are no workers, but do it much faster.
@@ -3905,13 +3917,16 @@ act = {
       // If none was picked, or there is only one to choose from plus random chance, find where ant could dig.
       if (!currentDig || farm.dig.length < 2 && !randomInt(25)) {
         // Pick a random entrance and find an incomplete tunnel that it leads to.
-        tun = pickRandom(farm.tuns.filter(t => t.t == 'ent' && t.dun));
-        if (temp = tun && randomInt(9) && findPath(farm, tun, {dun: 1, t: 'ent'}, 1, 1, tun.id)) {// Inverted match.
+        ent = pickRandom(farm.tuns.filter(t => t.t == 'ent' && t.dun));
+        if (temp = ent && randomInt(9) && findPath(farm, ent, {dun: 1, t: 'ent'}, 1, 1, ent.id)) {// Inverted match.
+          tun = getTun(farm, last(temp));
           // Store the path to get to a dig job, and pass it along to the dive action, so all ants use the same trail to get there otherwise they will enter the dig tunnel from the wrong end later.
-          currentDig = temp.length ? {id: last(temp), path: [tun.id, ...temp].reverse().slice(1)} : {tx: tun.x1, id: tun.id, path: [tun.id]};
-          // Reject jobs that are: duplicate jobs, too close to a morgue, or co an entrance that isn't the "random entrance" we just found.
+          currentDig = temp.length ? {id: tun.id, path: [ent.id, ...temp].reverse().slice(1)} : {tx: ent.x1, id: ent.id, path: [ent.id]};
+          // Reject jobs that are: duplicate jobs, too close to a morgue.
+          temp = getTun(farm, currentDig.path[0]).y1 == tun.y2 ? tun.y2 : tun.y1; // If the entry con's y sits at tun.y2, the entry-side y is tun.y2; otherwise it's tun.y1.  Degenerate case of perfectly level tunnel doesn't matter!
           getById(farm.dig, currentDig.id) || getTun(farm, currentDig.id).co.some(t =>
-            getTun(farm, t).morgue || getTun(farm, t).co.some(nt => nt.morgue) || t != tun.id && getTun(farm, t).t == 'ent'
+            getTun(farm, t).morgue || getTun(farm, t).co.some(nt => getTun(farm, nt).morgue)
+            || (tun.t == 'tun' && temp > (temp == tun.y2 ? tun.y1 : tun.y2)) // Also can't be the lower end of a 'tun' because ants digging upwards looks dumb.
           ) ? currentDig = 0 : farm.dig.push(currentDig);
         }
         else {
@@ -4184,7 +4199,7 @@ act = {
     else {
       // Rotation complete.
       antRemAnimUpdate(ant);
-      if (!nextTun && tun?.t == 'ent') antSurface(assign(ant, {scale: action.sc || 1})); // Special case for ants that have just surfaced.
+      if (!nextTun && tun?.t == 'ent') antNextSurface(assign(ant, {scale: action.sc || 1})); // Special case for ants that have just surfaced.
       else {
         ant.pose == 'prone' && antProneCorrection(ant);
         antNext(ant);
@@ -4487,7 +4502,7 @@ act = {
     else {
       // Target reached.
       ant.q = []; // Clear the queue because the ant now has a concussion and it's complicated to consider which queue items are still valid.
-      antSurface(ant);
+      antNextSurface(ant);
     }
   },
 
@@ -4499,7 +4514,7 @@ act = {
       ant.r += sign(deg180 - ant.r) * 2; // We know ant is heading downwards (~90deg) now adjust orient towards horizontal.
       antActionStill(ant);
     }
-    else antSurface(ant);
+    else antNextSurface(ant);
   },
 
   // Uncrawl action.
@@ -4519,7 +4534,7 @@ act = {
     if (!ant.area.d && (ant.x < 30 && ant.scale < 0 || ant.x > 930 && ant.scale > 0)) ant.scale *= -1; // Ant is about to walk into the edge of the farm, let's flip it first.
     ant.pose = 'prone';
     antProneCorrection(ant);
-    if (!action || (!action.x && ant.y < clearance && !randomInt(standardDelay))) antSlip(ant); // Slip off.
+    if (!action || (!action.x && ant.y < clearance && !randomInt(standardDelay))) antActionSlip(ant); // Slip off.
     else if (!action.x && near && near[0] == 90 && (!action.for || action.for < 1) && (nextAction && !acts.bg.includes(nextAction.act) || action.top || ant.area.d > standardDelay && !randomInt(3))) {
       // At the bottom boundary, land the ant.
       antInstaQ(ant, {act: 'land'});
@@ -4784,8 +4799,8 @@ act = {
     // Queue egg laying if no eggs in the nest, not overpopulated, and random chance passed with respect to various factors.
     // Note: The 'lay' action will protect from laying if something went wrong in the queue and she's not in a cav, and actually has a high chance of requeueing another dive/lay cycle.
     antCount < 40 ?
-     ant.hp > 40 && farmIsDeveloping(farm) && !farm.a.some(a => isEggOrInf(a) && a.Q == ant.id) && !randomInt(max(9, (num1000 * Math.ceil(antCount / 30) - (farm.fill == 'lube' ? num500 : 0) - (antCount < 9 ? num500 : 0) - ant.lay)) * 5) && antFinnaUnique(ant, 'lay')
-     : (playerHint(farm, ["Queen won't lay eggs due to overpopulation."]), ant.lay = -num1000);
+     ant.hp > 40 && farmIsDeveloping(farm) && !farm.a.some(a => isEggOrInf(a) && a.Q == ant.id) && !randomInt(max(9, (8000 * Math.ceil(antCount / 30) - (farm.fill == 'lube' ? num2000 : 0) - (antCount < 9 ? num2000 : 0) - ant.lay))) && antFinnaUnique(ant, 'lay')
+     : (playerHint(farm, ["Queen won't lay eggs due to overpopulation."]), ant.lay = -num2000);
     // Note: free ant spawning stops at 25 ants, ant vials disallow use at 30, and laying stops at 40.  This seems like a decent progression allowance.
     antNextStill(ant);
   },
@@ -5024,7 +5039,7 @@ act = {
           del(ant, 'carry', 'run');
         }
         if (ant.area.n == 'top') ant.y = antGroundLevel(ant, 0); // Ant is at the top, need to adjust it to ground level.
-        if (ant.area.n == 'bg') antInstaQ(ant, [{act: 'slip'}, action]); // Ant is on the bg, let's have it drop off first.  Can't use antSlip() here because it will forget to die.
+        if (ant.area.n == 'bg') antInstaQ(ant, [{act: 'slip'}, action]); // Ant is on the bg, let's have it drop off first.  Can't use antActionSlip() here because it will forget to die.
         else if (ant.area.t && ant.pose == 'prone' && !ant.slip) antInstaQ(ant, [{act: 'tunSlip'}, action]);
         else return antDeath(ant, action.r);
       }
@@ -5045,7 +5060,7 @@ act = {
     if (cancelFight || ant.hp < 10 && ant.area.n == 'bg' && !randomInt(3)) {
       // Quit fighting.
       endFight();
-      cancelFight ? antNext(ant) : antSlip(ant);
+      cancelFight ? antNext(ant) : antActionSlip(ant);
     }
     else if (ant.hp <= 0) {
       endFight();
@@ -5152,6 +5167,7 @@ director = (temp1, temp2) => {
           // Note: Ideally there'd be a dead-egg state/graphic for a while instead of just deleting it, but this will do for now.
           antDeath(ant); // Remove dead egg.
           msg(`An egg in "${farm.n}" perished due to neglect.`, 'err');
+          setTimeout(X => checkPkgSupport(farm), 1);
         }
         else if (canUpgrade(ant) && !getAnt(getFarm(ant), ant.Q)?.lc) {
           // Egg can upgrade into an infant.
@@ -5406,7 +5422,7 @@ checkExpatQueen = (a, farm) => isQueen(a) && a.f != farm.id && (_.dq = 1),
 // Checks and... displays messages.
 displayMessage = X => {
   if (messages.length) {
-    if (hasFocus()) {
+    if (hasFocus() && queryAll('.msg').length < 9) {
       showMsgs = 1;
       let message = messages.shift(), msgDiv = getEl('messages');
       msgDiv.innerHTML += html(p(message.msg), {'data-ts': getTime(), class: 'msg ' + message.t});
@@ -5456,7 +5472,7 @@ randomMsg = (msgs, isJoke, i = 0, randMsg) => {
 },
 
 // Randomly shows a joke message.
-joker = (i = _.farms.filter(farmIsRunning).length - 1, lastmsgEl = getEl('messages').firstChild) => {
+joker = (i = totalFarmCount() - 1, lastmsgEl = getEl('messages').firstChild) => {
   !lastmsgEl && randomMsg(jokes[i < 5 ? max(0, i) : 0], 1);
   setTimeout(joker, randomInt(longDelay) + longDelay);
 },

@@ -6,6 +6,7 @@ The game is designed without any instructions, as most of it can be worked out t
 This file lists a few things that are never obvious.
 
 ## Tips
+
 - Speedo makes ants walk and dig faster, but does not speed up egg hatching, infant maturation, or dead ant decay.
 - Speedo combined with Cologne can bring a lot of ants in but lasts shorter.  Multiple colognes stack.
 - Mood is affected by flair score (+1 per scenery item, +0.5 for card, +0.5 per sticker, and 1 is subtracted from
@@ -23,4 +24,14 @@ This file lists a few things that are never obvious.
 - Using an emoji in the farm's name plate is a three-pointer.  No such thing with ant hats though.
 - A queen won't begin an egg laying cycle if there are any of her own eggs or infants in her current farm.
 - Eggs won't hatch if their own queen is still in an egg laying cycle in their current farm.
+
+## Average Nominal Egg Laying
+
+Gap (with lube vs without) - must have 2 usable cavities.
+
+| ant count | not lube  | lube   |
+|-----------|-----------|--------|
+| 1–8       | 25h       | 16h    |
+| 9–30      | 33h       | 25h    |
+| 31–39     | 67h       | 58h    |
 

@@ -793,7 +793,7 @@ const devResetAnt = ant => {
       F.a[index] = cloneData(F.a[index]);
       ant = F.a[index];
     }
-    setTimeout(() => {stopAnts = stopVal; antSurface(ant); antRemAnimUpdate(ant);}, 300);
+    setTimeout(() => {stopAnts = stopVal; antNextSurface(ant); antRemAnimUpdate(ant);}, 300);
   }
 };
 
