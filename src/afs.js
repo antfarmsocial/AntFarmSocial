@@ -2966,7 +2966,7 @@ screenWalk = (ant, frameDelay = 0) =>
 // Determines if two ants are peaceful towards each other, and also not trying to do a hand-off.
 antsWillAvoid = (ant, ant2) => (ant2.t == ant.t || getFarm(ant)?.coex) && ant.carry?.Q != ant2.id && ant2.carry?.Q != ant.id,
 
-// Tracks ant avoidance, scoped per other ant. ant.avoid is an object: { [otherId]: { n, t } }
+// Tracks ant avoidance, scoped per other ant.
 // The idea is that for each other ant encountered there is a counter (n) that ticks up on every collision check, in the first 100 ticks the
 // avoidance is allowed, then for the next 100 it is ignored.  Resets the counter after 200 ticks to start the cycle again.
 // If tracker is not triggered for a little while the relevant data removed.
@@ -3565,6 +3565,7 @@ trySetCarryTask = (farm, morgue = farm.tuns.find(t => t.morgue), morgueCandidate
     // Pick a new morgue.
     if (morgue) morgue.morgue = 0; // Unmorgue existing morgue.
     if (morgue = pickRandom(morgueCandidates)) morgue.morgue = 1;
+    farm.dig = farm.dig.filter(d => d.id != morgue.id); // Remove the morgue from current dig jobs.
   }
   if (itemToMove = [[deadAnt, morgue], [dependant, 1]].find(([pkg, param]) =>
     pkg && param && !farm.a.some(a => a.carry?.id == pkg.id || a.q.some(q => q.act == 'carry' && q.id == pkg.id)))) {
@@ -4248,7 +4249,7 @@ act = {
           if (ant.scale < 0) temp1 = mirrorAngle(temp1);
           temp2 = normalize180(temp1 - ant.r); // Diff.
           // Test for hard turns - Note: this is rarer since the addition of 'jun' tunnels that soften such waypoint angles.
-          if (temp2 > 120) { // Note: This cutoff of 120 can probably go as low as ~90 (to abort on softer angles) and as high as ~160 (if giving up on corners it should attempt).
+          if (temp2 > 120) {// Note: This cutoff of 120 can probably go as low as ~90 (to abort on softer angles) and as high as ~160 (if giving up on corners it should attempt).
             // Encountered a waypoint set containing a potential hook turn.  We'd rather not follow the waypoints here, so just use prone pose.
             antToProneWithCorrection(ant, tun, action.rev);
             action.ns = 1; // Mark this action as "no switch" to prevent random pose switching. (no need for getTime() on this one because it is in prone pose)
