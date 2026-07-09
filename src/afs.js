@@ -1492,7 +1492,7 @@ addLidFunc = (lid = getEl('lid')) => {
 },
 
 // Lets a drone escape and reschedules itself for another turn.
-droneEscape = (drone = pickRandom(F.a.filter(a => isDrone(a) && isCapped(a) && !a.area.t && !a.esc)),
+droneEscape = (drone = pickRandom(F.a.filter(a => isDrone(a) && isCapped(a) && isAdult(a) && !a.area.t && !a.esc)),
   exitX = 215 + randomInt(530), exitY = 300, startX = drone?.x, startY = drone?.y, angle = getAngle({x: startX, y: startY}, {x: exitX, y: exitY}), rad = degToRad(angle),
   elapsed = 0, tick = (t = min(1, (elapsed += frameTick) / num500), e = easeInQuad(t), droneEl = getObjEl(drone), exitTick = X => {
     drone.x += cos(rad) * 3 * frameTick; drone.y += sin(rad) * 3 * frameTick; antUpdate(drone); // 3 - speed multiplier.
@@ -3565,7 +3565,7 @@ trySetCarryTask = (farm, morgue = farm.tuns.find(t => t.morgue), morgueCandidate
     // Pick a new morgue.
     if (morgue) morgue.morgue = 0; // Unmorgue existing morgue.
     if (morgue = pickRandom(morgueCandidates)) morgue.morgue = 1;
-    farm.dig = farm.dig.filter(d => d.id != morgue.id); // Remove the morgue from current dig jobs.
+    farm.dig = farm.dig.filter(d => d.id != morgue?.id); // Remove the morgue from current dig jobs.
   }
   if (itemToMove = [[deadAnt, morgue], [dependant, 1]].find(([pkg, param]) =>
     pkg && param && !farm.a.some(a => a.carry?.id == pkg.id || a.q.some(q => q.act == 'carry' && q.id == pkg.id)))) {
