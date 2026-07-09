@@ -3543,7 +3543,7 @@ updateCorpseState = (ant, farm) => {
   // Extra properties are added for the sake of CSS classes/styles. (note 'rot' and 'decay' also have styles)
   antUpdateClasses(ant, {rot1: ant.rot > 20, rot2: ant.rot > 80, decay1: ant.decay > 60});
   // If ant is out-of-bounds let's just nudge it over on the sly.
-  if (ant.area.t && !findTunPos(ant, farm, [ant.area.t], 4)) antNudgeToClosestWp(ant, farm);
+  ant.area.t && !findTunPos(ant, farm, [ant.area.t], 4) && antNudgeToClosestWp(ant, farm);
 },
 
 // Returns a random worker, or failing that - a queen.  Must be the same type as the farm's colony, in OK health, and not carrying.
