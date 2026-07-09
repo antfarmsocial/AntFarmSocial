@@ -1111,14 +1111,22 @@ setupMsgLog = (msgLogEl = getEl('msglog'), msgLogDn = getEl('msglog-dn'), msgLog
   });
 },
 
-// Set up the switch control panel.
-setupSwitcher = (switchEl = getEl('switch'), switchUp = getEl('switch-up')) => {
-  switchUp.addEventListener('click', (e, isUp = switchEl.classList.toggle('up')) => switchUp.innerText = isUp ? '▼' : '▲');
-  getEl('switch-control').addEventListener('click', switchFunc);
+// Lets the mouse wheel do horizontal scrolling.
+enableHzScrollWheel = el => {
+  el.addEventListener('wheel', e => {
+    if (el.scrollLeft || el.scrollLeft + el.clientWidth < el.scrollWidth) {
+      e.preventDefault();
+      el.scrollLeft += e.deltaY;
+    }
+  });
 },
 
-// Supports the switcher functionality.
-switchFunc = (e, farmId = e.target.closest('.switch-f')?.dataset.id) => farmId && F.id != farmId && switcher && switchFarm(farmId),
+// Set up the switch control panel.
+setupSwitcher = (switchUp = getEl('switch-up'), switchControl = getEl('switch-control')) => {
+  switchUp.addEventListener('click', X => switchUp.innerText = getEl('switch').classList.toggle('up') ? '▼' : '▲');
+  switchControl.addEventListener('click', (e, farmId = e.target.closest('.switch-f')?.dataset.id) => farmId && F.id != farmId && switcher && switchFarm(farmId));
+  enableHzScrollWheel(switchControl);
+},
 
 // Updates the farm switch control panel.
 updateSwitcher = X => {
@@ -1910,13 +1918,7 @@ modal = {
     let bagItemsEl = getEl('bag-items');
     bagItemsEl.scrollLeft = parseInt(bagScroll);
     bagItemsEl.addEventListener('scroll', e => {bagScroll = e.currentTarget.scrollLeft});
-    // Let mouse wheel do scroll.
-    bagItemsEl.addEventListener('wheel', e => {
-      if (bagItemsEl.scrollLeft || bagItemsEl.scrollLeft + bagItemsEl.clientWidth < bagItemsEl.scrollWidth) {
-        e.preventDefault();
-        bagItemsEl.scrollLeft += e.deltaY;
-      }
-    });
+    enableHzScrollWheel(bagItemsEl);
   },
 
   // Templates the item drop popup.
