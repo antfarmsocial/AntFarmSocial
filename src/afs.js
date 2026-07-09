@@ -633,7 +633,7 @@ calcFarm = (numEntrances = 2 + randomInt(4), tries = 0, hills = [-50, 1010], sub
 },
 
 // Determines and marks trans-lvl tunnels that must be built downwards, aka "Down Tuns".
-// This is because ants typically don't build vertically upwards, so we try to avoid this where possible.
+// This is because real-world ants typically don't build vertically upwards, so we enforce similar behaviour where possible (sometimes it ain't!).
 calcDownTuns = (dt = [], conn = (t, pT, cT) => !t.lvl || dt.includes(t.id) || (t.co.some(co => co != pT && (cT = getTun(F, co)) && cT.lvl <= t.lvl && conn(cT, t.id)) && dt.push(t.id))) =>
   F.tuns.forEach(tun => tun.lvl % 1 && conn(tun) && (tun.dt = 1)), // Implied tun.t == 'tun', because every other type of tun won't pass tun.lvl%1 test.
 
@@ -731,13 +731,12 @@ buildATun = (lines, joinLines, tun1, func = 'BL',
 // When calculating paths for ant to actually walk on, pathDun should probably be 1, meaning that the tunnels in the path have to be completed.
 // This is different when testing proposed future tunnels for whether yet-to-be-built tunnels would actually connect them properly to an entrance.
 // To understand usage; best to study how this function is used in the various cases where it is employed.  Sometimes used in reverse!
-findPath = (farm, tun, targetAttrs, pathDun, invertMatch, firstTunId, path = [], tid, result, tunCo = tun.co.filter(tid => !path.includes(tid) && tid != firstTunId && getTun(farm, tid).t != 'jun')) => {
+findPath = (farm, tun, targetAttrs, pathDun, invertMatch, firstTunId, path = [], tId, result, dig = !tun.dun && !firstTunId && getById(farm.dig, tun.id)) => {
   // If the current tunnel matches all target attributes, return the path.
   if (keys(targetAttrs).every(attr => invertMatch ? tun[attr] != targetAttrs[attr] : tun[attr] == targetAttrs[attr])) return path;
   if (!pathDun || tun.dun || !firstTunId) {
-    tunCo = tun.co.filter(tid => !path.includes(tid) && tid != firstTunId && getTun(farm, tid).t != 'jun');
-    for (tid of shuffle(tunCo))
-      if (result = findPath(farm, getTun(farm, tid), targetAttrs, pathDun, invertMatch, firstTunId || tun.id, [...path, tid])) return result;
+    for (tId of shuffle(dig ? [dig.path[0]] : tun.co.filter(coId => !path.includes(coId) && coId != firstTunId && getTun(farm, coId).t != 'jun')))
+      if (result = findPath(farm, getTun(farm, tId), targetAttrs, pathDun, invertMatch, firstTunId || tun.id, [...path, tId])) return result;
   }
 },
 
@@ -1493,7 +1492,7 @@ addLidFunc = (lid = getEl('lid')) => {
 },
 
 // Lets a drone escape and reschedules itself for another turn.
-droneEscape = (drone = pickRandom(F.a.filter(a => isDrone(a) && isCapped(a) && !a.area.t && !drone.esc)),
+droneEscape = (drone = pickRandom(F.a.filter(a => isDrone(a) && isCapped(a) && !a.area.t && !a.esc)),
   exitX = 215 + randomInt(530), exitY = 300, startX = drone?.x, startY = drone?.y, angle = getAngle({x: startX, y: startY}, {x: exitX, y: exitY}), rad = degToRad(angle),
   elapsed = 0, tick = (t = min(1, (elapsed += frameTick) / num500), e = easeInQuad(t), droneEl = getObjEl(drone), exitTick = X => {
     drone.x += cos(rad) * 3 * frameTick; drone.y += sin(rad) * 3 * frameTick; antUpdate(drone); // 3 - speed multiplier.
@@ -3077,17 +3076,17 @@ deleteDataAndEl = (obj, key = 'a', dataSet = getFarm(obj) || _, preserveState, e
 antDelete = ant => deleteDataAndEl(ant),
 
 // Updates the antEl to reflect the state of the object, if possible.
-antUpdate = (ant, antEl = getObjEl(ant), sync, carryItem) => {
+antUpdate = (ant, antEl = getObjEl(ant), sync, pkg) => {
   rafQueue[ant.id] ||= requestAnimationFrame(X => {// Prevent queuing the same ant object for an update multiple times (to avoid render lag when switching tabs).
     antElUpdate(ant, antEl);
     del(rafQueue, ant.id);
   });
   sync && antElUpdate(ant, antEl); // Allows doing an immediate synchronous pass.
   // Also update any ants or eggs the ant is carrying.
-  if (ant.carry && (carryItem = getCarry(getFarm(ant), ant.carry)) && (isDead(carryItem) || isEggOrInf(carryItem))) {
-    ({x: carryItem.x, y: carryItem.y, r: carryItem.r} = antHeadPoint(ant));
-    carryItem.area = ant.area; // Keep the area prop matching the carrier for safety.
-    antUpdate(carryItem, getObjEl(carryItem), sync);
+  if (ant.carry?.pkg && (pkg = getCarry(getFarm(ant), ant.carry))) {
+    ({x: pkg.x, y: pkg.y, r: pkg.r} = antHeadPoint(ant));
+    pkg.area = ant.area; // Keep the area prop matching the carrier for safety.
+    antUpdate(pkg, getObjEl(pkg), sync);
   }
   /* START-DEV */
   isNaN(ant.x + ant.y + ant.r) && console.error("ant is nanned", ant);
@@ -3122,13 +3121,13 @@ antFixNaN = (ant, antEl = getObjEl(ant), style = antEl && getComputedStyle(antEl
 },
 
 // Gets a carried item.
-getCarry = (farm, carry, dataSet = carry?.nip && farm.nips.find(n => n.nip == carry.nip)?.item || farm) => carry && (getAnt(dataSet, carry.id) || carry),
+getCarry = (farm, carry, dataSet = carry?.nip && farm.nips.find(n => n.nip == carry.nip)?.item || farm) => carry?.pkg ? getAnt(dataSet, carry.id) : carry,
 
 // Draws a carried item, or moves it from the farm container to the ant element.
-carryDraw = (ant, farm = getFarm(ant), carry = ant.carry, carryEl = getEl(carry?.id), cEl = query(`#${ant.id} .c`), carryItem = carry && getCarry(farm, carry)) => {// Note: getEl not getObjEl because item can move farm without the carry data being updated.
-  if (carryItem?.f == F.id) {
-    isDead(carryItem) || isEggOrInf(carryItem) ? carryEl?.isConnected && getObjEl(ant)?.after(carryEl) : // Make them next to each other in DOM so nothing passes between them on z-axis.
-      appendHTML(cEl, divc(`carry C${carry.t} ` + carry.k, {id: carry.id}));
+carryDraw = (ant, carry = ant.carry, carryEl = getEl(carry?.id)) => {// Note: getEl not getObjEl because item can move farm without the carry data being updated.
+  if (getCarry(getFarm(ant), carry)?.f == F.id) {
+    carry.pkg ? carryEl?.isConnected && getObjEl(ant)?.after(carryEl) : // Make them next to each other in DOM so nothing passes between them on z-axis.
+      appendHTML(query(`#${ant.id} .c`), divc(`carry C${carry.t} ` + carry.k, {id: carry.id}));
     // Note: For carried ants/eggs (egg, inf, or dead) an antUpdate() called from antAction() should do the trick.
   }
 },
@@ -3137,7 +3136,7 @@ carryDraw = (ant, farm = getFarm(ant), carry = ant.carry, carryEl = getEl(carry?
 carryUndraw = (ant, dest, farm = getFarm(ant), carry = ant.carry, carryEl = getEl(carry?.id), carryItem = getCarry(farm, carry), // Note: getEl not getObjEl because item can move farm without the carry data being updated.
   headPoint = antHeadPoint(ant, 6 + antOffsetX(ant)), tun = getTun(farm, ant.area.t), pc) => {
   if (carryItem?.f == F.id && carryEl?.isConnected) {
-    if (isDead(carryItem) || isEggOrInf(carryItem)) {
+    if (carry.pkg) {
       if (!dest) {
         pc = findTunPos(headPoint, farm, [tun, ...(tun?.co || [])]).pc;
         dest = {x: headPoint.x, y: tun ? cavFloor(tun, pc)?.y || headPoint.y : antGroundLevel(carryItem, 0) + 2};
@@ -3536,11 +3535,13 @@ antDeath = (ant, cause, farm = getFarm(assign(ant, {
 
 // Updates the decomposition state of a corpse and handles ant removal.
 updateCorpseState = (ant, farm) => {
+  timeLog(ant, 'tsd', 'dts'); // Track time-since-death.
   if (lockoutExpired()) {
     ant.rAd ||= randomInt(3) + 3; // Stink animation duration (so adjacent ants don't have matching animations).
-    ant.rot < 100 ? (ant.rot += .2) : // Rotting phase.
-     ant.decay < 100 ? (ant.decay += .4) : // Decaying / shrinking phase.
-     antDelete(ant); // Fully decomposed.
+    ant.tsd < 2400 ? 0 : // ~40 minute pre-rot cooldown.
+      ant.rot < 100 ? (ant.rot += .2) : // Rotting phase.
+      ant.decay < 100 ? (ant.decay += .4) : // Decaying / shrinking phase.
+      antDelete(ant); // Fully decomposed.
   }
   // Extra properties are added for the sake of CSS classes/styles. (note 'rot' and 'decay' also have styles)
   antUpdateClasses(ant, {rot1: ant.rot > 20, rot2: ant.rot > 80, decay1: ant.decay > 60});
@@ -3553,7 +3554,7 @@ getWorkerOrQueen = (farm, testCond = X => 1, data = farm.a, eligible = data?.fil
   pickRandom(workers.length ? workers : eligible),
 
 // Determines what, if anything, needs to be carried by a random worker.
-trySetCarryTask = (farm, morgue = farm.tuns.find(t => t.morgue), morgueCandidates = specialTunCandidates(farm, [t => !t.nip, t => t.co.filter(co => getTun(farm, co).dun).length < 2]),
+trySetCarryTask = (farm, morgue = farm.tuns.find(t => t.morgue), morgueCandidates = specialTunCandidates(farm, [t => !t.nip, t => t.co.filter(co => getTun(farm, co).dun).length < 2]), // Note: We allow nests to become morgues, so that ants will move nests.
   carrierAnt = getWorkerOrQueen(farm, ant => !hasCarryTasks(ant)), queen, itemToMove, temp,
   deadAnt = farm.a.find(a => isDead(a) && a.tsd > num2000 && !getTun(farm, a.area.t)?.morgue),
   // No need to check if eggs/infants are in morgue because queen will move her nest soon if that's the case.  'moveTo' was set if queen left farm.
@@ -3567,7 +3568,7 @@ trySetCarryTask = (farm, morgue = farm.tuns.find(t => t.morgue), morgueCandidate
   }
   if (itemToMove = [[deadAnt, morgue], [dependant, 1]].find(([pkg, param]) =>
     pkg && param && !farm.a.some(a => a.carry?.id == pkg.id || a.q.some(q => q.act == 'carry' && q.id == pkg.id)))) {
-    if (carrierAnt) antFinna(carrierAnt, 'carry', {id: itemToMove[0].id}); // Find the first item that is available to move and not already assigned.
+    if (carrierAnt) antFinna(carrierAnt, 'carry', {id: itemToMove[0].id, pkg: 1}); // Find the first item that is available to move and not already assigned.
     else if (itemToMove[0].moveTo) {
       // No in-farm carrier found. The item has a moveTo nip destination (vial or tube), so we need to summon one.
       // Last chance #1: if the matching vial has an eligible ant, call it out so it can take the task next pass.
@@ -4115,8 +4116,8 @@ act = {
       }
       else {
         // Tun Walk execution.
-        if (!tun.dun && ant.digT != tun.id) {
-          // Non-dun tun without matching digT prop - the ant has no business being sent here.  Abandon entire queue.
+        if (!tun.dun && ant.digT != tun.id && nextAction.act != 'dive') {
+          // Non-dun tun destination without matching digT prop - the ant has no business being sent here.  Abandon entire queue.
           ant.q = [{}];
           return antActionStill(ant);
         }
@@ -4864,6 +4865,7 @@ act = {
   },
 
   // Ant carries an egg, infant, or a dead ant to another location.
+  // Note: Anything queuing this function should add 'pkg: 1' into the action data for the sake of the other actions that will be executed down the line.
   carry: (ant, farm = getFarm(ant), action = ant.q[0], pkg = getCarry(farm, action), nipData = pkg && farm.nips.find(n => n.nip == pkg.moveTo)) => {
     if (pkg && !farm.a.some(a => a.id != ant.id && a.carry?.id == action.id)) {
       if (isDead(pkg)) {

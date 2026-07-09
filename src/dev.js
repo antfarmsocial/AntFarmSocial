@@ -6,6 +6,7 @@
  * It is not included in production releases, and may not be written as carefully as the main program.
  * This script is included in the app when gulp is run with the --dev flag.
  * Most of the functionality is easily accessible in a GUI when ?dev=1 is added to the app's URL.
+ * This isn't an all-purpose ant farm manager and often functionality works *just* enough to aid debugging.
  *
  * UPDATE: This file has been restructured so that the HTML/CSS/JS for any piece of dev functionality
  * is all very close together for ease of editing.  KEEP THAT GOING!
@@ -1246,6 +1247,7 @@ let devShowLines = 0;
     out += nests;
     let junTuns = F.tuns.filter(t => t.t == 'jun').length;
     out += `<div><b>JUN tunnels:</b> <span class="specialVal">${junTuns || '<span class="none">none</span>'}</span></div>`;
+    out += `<div><b>Up tuns:</b> <span class="specialVal">${F.tuns.filter(t => t.lvl % 1 && !t.dt).map(t => t.id).join(', ') || '<span class="none">none</span>'}</span></div>`; // Vertical tuns that ants must dig upwards :/
     let digJobs = [];
     F.dig.forEach(dig => digJobs.push(dig.id + '<small> (' + getTun(F, dig.id).prog.toFixed(0) + '%)</small>'));
     out += `<div><b>Dig jobs:</b> <span class="specialVal">${digJobs && digJobs.join(', ') || '<span class="none">none</span>'}</span></div>`;
