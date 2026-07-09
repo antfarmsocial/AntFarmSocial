@@ -7,7 +7,6 @@ This file lists a few things that are never obvious.
 
 ## Tips
 
-- Speedo makes ants walk and dig faster, but does not speed up egg hatching, infant maturation, or dead ant decay.
 - Speedo combined with Cologne can bring a lot of ants in but lasts shorter.  Multiple colognes stack.
 - Mood is affected by flair score (+1 per scenery item, +0.5 for card, +0.5 per sticker, and 1 is subtracted from
   the total).  Min flair is 0 and max for full benefit is 2. So just 3 scenery items gets you the full mood boost,
@@ -31,7 +30,7 @@ Gap (with lube vs without) - must have 2 usable cavities.
 
 | ant count | not lube  | lube   |
 |-----------|-----------|--------|
-| 1–8       | 25h       | 16h    |
+| 1–8       | 25h       | 17h    |
 | 9–30      | 33h       | 25h    |
 | 31–39     | 67h       | 58h    |
 

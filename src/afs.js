@@ -254,7 +254,7 @@ load = X => _ = JSON.parse(localStorage.getItem('_') || '{"score":0,"farms":[],"
 // Saves all data to local storage.
 // Will not allow saving within 30s of loading the page due to suspected exploit.
 // Note: This func does not filter zero/default values, round floats, or compress/smol-string/minson data before saving, all worth considering for future updates if data size becomes an issue.
-save = X => {checkAchievements(); getTime() - loadTime > standardDelay && !quitting && localStorage.setItem('_', JSON.stringify(_))},
+save = X => {checkAchievements(); lockoutExpired() && !quitting && localStorage.setItem('_', JSON.stringify(_))},
 
 // Logs a time duration field on an object for calculating running times, as well as a timestamp for when the time duration field was last updated.
 // Must be called on app load and then at regular intervals such as 30 seconds.  Developer must default fields on objects to dur=0 and ts=getTimeSec() upon creation.
@@ -262,6 +262,9 @@ timeLog = (obj, dur = 'dur', ts = 'ts', now = getTimeSec()) => {
   obj[dur] += now - max(getTimeSec(loadTime), obj[ts]); // Time duration field.
   obj[ts] = now; // Timestamp field.
 },
+
+// Reports whether the standardDelay lockout period has lapsed since page load, to prevent the director func doing certain things on load.
+lockoutExpired = X => getTime() - loadTime > standardDelay,
 
 // Formats a time duration in seconds to an d/h/m/s output string.
 formatTime = (s, d = floor(s / 86400), h = floor(s / 3600) % 24, m = floor(s / 60) % 60) =>
@@ -587,7 +590,6 @@ calcFarm = (numEntrances = 2 + randomInt(4), tries = 0, hills = [-50, 1010], sub
   } while (stubEntIndex != -1);
   // Keep only the accessible tunnels.
   F.tuns.filter(tun => !findPath(F, tun, {t: 'ent'})).forEach(tun => tunDelete(F, tun));
-
   // Find bad turn corners and create 'jun' tunnels at those intersections.
   hardTurns(F.tuns).forEach(turn => {
     // Found an angle an ant must turn through to follow waypoints between two of its connected tunnels (turn.t[0]/turn.t[1]) that exceeds some hard turn threshold.
@@ -614,6 +616,7 @@ calcFarm = (numEntrances = 2 + randomInt(4), tries = 0, hills = [-50, 1010], sub
     turn.t[1].co.push(jun.id);
     F.tuns.push(jun);
   });
+  calcDownTuns();
   // In the rare cases where:
   // - No tuns left after filtering
   // - Adjusted tun is gone
@@ -628,6 +631,11 @@ calcFarm = (numEntrances = 2 + randomInt(4), tries = 0, hills = [-50, 1010], sub
   // Store hills.
   for (i = 0; i < hills.length; i += 2) F.hills.push({id: i / 2, l: hills[i], r: hills[i + 1], h: 0});
 },
+
+// Determines and marks trans-lvl tunnels that must be built downwards, aka "Down Tuns".
+// This is because ants typically don't build vertically upwards, so we try to avoid this where possible.
+calcDownTuns = (dt = [], conn = (t, pT, cT) => !t.lvl || dt.includes(t.id) || (t.co.some(co => co != pT && (cT = getTun(F, co)) && cT.lvl <= t.lvl && conn(cT, t.id)) && dt.push(t.id))) =>
+  F.tuns.forEach(tun => tun.lvl % 1 && conn(tun) && (tun.dt = 1)), // Implied tun.t == 'tun', because every other type of tun won't pass tun.lvl%1 test.
 
 // Handles the generation of random border radius values.
 borderRadius = (min, range) => Array.from({length: 6}, X => `${min + randomInt(range)}px`).reduce((acc, val, i) => acc + (i == 4 ? ' / ' : ' ') + val),
@@ -3525,18 +3533,12 @@ antDeath = (ant, cause, farm = getFarm(assign(ant, {
 },
 
 // Updates the decomposition state of a corpse and handles ant removal.
-// Note: The time calculations in this function do not speed up by using the superspeed feature.
-updateCorpseState = (ant, farm, twoHours = 7200) => {
-  timeLog(ant, 'tsd', 'dts'); // Update time-since-death duration.
-  if (ant.tsd > twoHours) {// Wait time before corpse gets nasty.
-    ant.rAd ||= randomInt(3) + 3; // Stink animation duration.
-    if (ant.tsd < twoHours * 3) ant.rot = ((ant.tsd - twoHours) / (twoHours * 2)) * 100; // Rotting phase (2h to 6h).
-    else if (ant.tsd < twoHours * 4) {
-      // Decaying / shrinking phase (6h to 8h).
-      ant.rot = 100;
-      ant.decay = ((ant.tsd - twoHours * 3) / twoHours) * 100;
-    }
-    else antDelete(ant); // Fully decomposed.
+updateCorpseState = (ant, farm) => {
+  if (lockoutExpired()) {
+    ant.rAd ||= randomInt(3) + 3; // Stink animation duration (so adjacent ants don't have matching animations).
+    ant.rot < 100 ? (ant.rot += .2) : // Rotting phase.
+     ant.decay < 100 ? (ant.decay += .4) : // Decaying / shrinking phase.
+     antDelete(ant); // Fully decomposed.
   }
   // Extra properties are added for the sake of CSS classes/styles. (note 'rot' and 'decay' also have styles)
   antUpdateClasses(ant, {rot1: ant.rot > 20, rot2: ant.rot > 80, decay1: ant.decay > 60});
@@ -3922,11 +3924,9 @@ act = {
           tun = getTun(farm, last(temp));
           // Store the path to get to a dig job, and pass it along to the dive action, so all ants use the same trail to get there otherwise they will enter the dig tunnel from the wrong end later.
           currentDig = temp.length ? {id: tun.id, path: [ent.id, ...temp].reverse().slice(1)} : {tx: ent.x1, id: ent.id, path: [ent.id]};
-          // Reject jobs that are: duplicate jobs, too close to a morgue.
-          temp = getTun(farm, currentDig.path[0]).y1 == tun.y2 ? tun.y2 : tun.y1; // If the entry con's y sits at tun.y2, the entry-side y is tun.y2; otherwise it's tun.y1.  Degenerate case of perfectly level tunnel doesn't matter!
+          // Reject jobs that are: duplicate jobs, too close to a morgue, or a "down tun" being dug from the bottom end.
           getById(farm.dig, currentDig.id) || getTun(farm, currentDig.id).co.some(t =>
-            getTun(farm, t).morgue || getTun(farm, t).co.some(nt => getTun(farm, nt).morgue)
-            || (tun.t == 'tun' && temp > (temp == tun.y2 ? tun.y1 : tun.y2)) // Also can't be the lower end of a 'tun' because ants digging upwards looks dumb.
+            getTun(farm, t).morgue || getTun(farm, t).co.some(nt => getTun(farm, nt).morgue) || (tun.dt && getTun(farm, currentDig.path[0]).lvl > tun.lvl)
           ) ? currentDig = 0 : farm.dig.push(currentDig);
         }
         else {
@@ -4799,8 +4799,8 @@ act = {
     // Queue egg laying if no eggs in the nest, not overpopulated, and random chance passed with respect to various factors.
     // Note: The 'lay' action will protect from laying if something went wrong in the queue and she's not in a cav, and actually has a high chance of requeueing another dive/lay cycle.
     antCount < 40 ?
-     ant.hp > 40 && farmIsDeveloping(farm) && !farm.a.some(a => isEggOrInf(a) && a.Q == ant.id) && !randomInt(max(9, (8000 * Math.ceil(antCount / 30) - (farm.fill == 'lube' ? num2000 : 0) - (antCount < 9 ? num2000 : 0) - ant.lay))) && antFinnaUnique(ant, 'lay')
-     : (playerHint(farm, ["Queen won't lay eggs due to overpopulation."]), ant.lay = -num2000);
+      ant.hp > 40 && farmIsDeveloping(farm) && !farm.a.some(a => isEggOrInf(a) && a.Q == ant.id) && ant.lay > 100 && !randomInt(9) && antFinnaUnique(ant, 'lay')
+      : (playerHint(farm, ["Queen won't lay eggs due to overpopulation."]), ant.lay = 0);
     // Note: free ant spawning stops at 25 ants, ant vials disallow use at 30, and laying stops at 40.  This seems like a decent progression allowance.
     antNextStill(ant);
   },
@@ -4835,7 +4835,8 @@ act = {
             egg: 1,
             area: ant.area,
             pc: tunPos.pc,
-            lvl: lvl
+            lvl: lvl,
+            prog: 0
           }), undefined, 1); // Instant display update.
           antStats(ant, {hp: -9, fd: 4, dr: 4, md: 4}); // Increase chance of queen being forced to sleep between eggs.  Queens self-feed during this time.
           msg(ant.n + (laid < 2 ? ' laid an egg!' : ` laid ${laid} eggs!`));
@@ -4850,7 +4851,7 @@ act = {
       antFinna(ant, 'lay', {laid: laid, lvl: lvl});
     }
     else {
-      ant.lay = 0; // Lay chance is handled by the 'kip' action, but we need to reset this after each lay session is complete.
+      ant.lay = 0; // Reset lay wait progress after each lay session is complete.
       del(ant, 'lc');
       setTimeout(X => {
         score(1);
@@ -5169,7 +5170,7 @@ director = (temp1, temp2) => {
           msg(`An egg in "${farm.n}" perished due to neglect.`, 'err');
           setTimeout(X => checkPkgSupport(farm), 1);
         }
-        else if (canUpgrade(ant) && !getAnt(getFarm(ant), ant.Q)?.lc) {
+        else if (ant.hp > 50 && lockoutExpired() && (ant.prog += .2) > 100 && !randomInt(9) && !getAnt(getFarm(ant), ant.Q)?.lc) {
           // Egg can upgrade into an infant.
           del(ant, 'egg');
           antUpdate(assign(ant, {
@@ -5179,7 +5180,8 @@ director = (temp1, temp2) => {
             thot: pickRandom(["🧩🔒⏳", "🙂💡🚫", "🐢✨🚗", "🎎💁🍛"]),
             thotD: 1,
             inf: 1,
-            pose: 'prone'
+            pose: 'prone',
+            prog: 0
           }));
           msg(`An egg in "${farm.n}" hatched into larval ${types[ant.t].n} ant ${casteLabel(ant).toLowerCase()} ${ant.n}!`);
         }
@@ -5250,11 +5252,12 @@ director = (temp1, temp2) => {
           if (ant.inf) {
             temp1 = getObjEl(ant)?.classList;
             temp2 = ['a1', 'a2', 'a3'];
-            if (canUpgrade(ant, ant.inf)) {
+            if (ant.hp > 50 && lockoutExpired() && (ant.prog += .2) > 100 && !randomInt(9)) {
               // Infant upgrader.
+              ant.prog = 0;
               if (++ant.inf > 4) {
                 ant.pose = 'prone';
-                del(ant, 'inf', 'moveTo', 'Q', 'pc', 'lvl');
+                del(ant, 'inf', 'moveTo', 'Q', 'pc', 'lvl', 'prog');
                 temp1?.remove(...temp2);
                 antAction(ant);
                 isDrone(ant) && _.man++;
@@ -5287,8 +5290,7 @@ director = (temp1, temp2) => {
             // Queen's presence boosts moodiest ant's MD.
             if (temp1 = farm.a.filter(a => a.caste != 'Q').reduce((min, a) => !min || a.md < min.md ? a : min, 0)) antStats(temp1, {md: .3});
             randomInt(2) && farm.a.filter(a => isServant(ant, a)).length < 3 && ant.q.length < 20 && care4kids(farm, ant); // Farm with not enough workers?  Queen maybe performs an extra care task per cycle.
-            ant.lay ??= 0; // Initialize the lay chance factor if it doesn't exist yet.
-            ant.lay++;
+            if (lockoutExpired()) ant.lay = (ant.lay || 0) + 100 / ((8000 * Math.ceil(farm.a.length / 30) - (farm.fill == 'lube' ? num2000 : 0) - (farm.a.length < 9 ? num2000 : 0)) / 2);
           }
           else if (isDrone(ant)) {
             // Being an adult drone takes an extra toll.
