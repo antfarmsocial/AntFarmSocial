@@ -71,6 +71,14 @@ let devGlobalCSS = '';
  * ============================================================
  */
 
+const getCallerName = () => {
+  const orig = Error.prepareStackTrace;
+  Error.prepareStackTrace = (error, stack) => stack;
+  const {stack} = new Error();
+  Error.prepareStackTrace = orig;
+  return stack && stack[1] ? stack[1].getFunctionName() : undefined;
+};
+
 // Slugifies a label to a DOM id: "Ant Points" -> "dev-ant-points"
 const devId = label => 'dev-' + label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
@@ -1944,10 +1952,10 @@ window.onload = function() {
       del(ant, 'hist');
     }
     // Debugging:
-    if (!isCapped(ant)) console.warn('Dead ant walking!');
+    if (!isCapped(ant)) console.warn('Dead ant walking!'); // Normal for this to happen for one frame after death - but if it keeps happening later something is wrong!
     if (ant.q.length > 99) {
       console.warn(ant.id, getFarm(ant).n, 'has a long queue.', JSON.stringify(ant.q));
-      ant.q = [{}];
+      ant.q = [];
     }
   };
 

@@ -2578,20 +2578,12 @@ body.glass #l-wrap {
       display: none;
     }
   }
-  &.decay {
-    transform: scale(.8) rotate(90deg) !important;
-  }
-  &.decay1 {
-    transform: scale(.6) rotate(90deg) !important;
-  }
-
 }
 
 .spot {
   opacity: 0;
   border-radius: 50%;
   background: white;
-  /*transition: .5s all;*/ /* Transitioning 'all' is intefering with infants upon page load, I don't remember why it was written this way in the first place.  Probably safe to remove this line in the future. */
   transition: opacity .5s;
   width: 40px;
   height: 40px;
@@ -3171,11 +3163,11 @@ body.glass #l-wrap {
   }
   50% {
     opacity: .5;
-    transform: rotate(var(--RT)) translateY(-9px);
+    transform: rotate(var(--RT)) translateY(calc(var(--SD) * -9px));
   }
   100% {
     opacity: 0;
-    transform: rotate(var(--RT)) translateY(-24px);
+    transform: rotate(var(--RT)) translateY(calc(var(--SD) * -24px));
   }
 }
 
@@ -3204,6 +3196,7 @@ body.glass #l-wrap {
 .rot {
   --RT: 0; /* Ro Tation */
   --AD: 0; /* Anim Duration */
+  --SD: 1; /* Stink Direction */
   &::after {
     content: '';
     display: block;
