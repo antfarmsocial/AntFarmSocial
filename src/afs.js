@@ -3873,7 +3873,8 @@ act = {
           nudger = setInterval(X => {
             temp = findTunPos(ant, farm, [tun]);
             dir = getSign(!tun.rwip);
-            temp?.tun?.id == tun.id && dir * (temp.pc + dir * tunPercent(tun, antOffsetX(ant) + antGetTunnelStep(ant))) < dir * (tun.rwip ? 100 - tun.prog : tun.prog) && antMoveTunnel(ant);
+            // Note: Small ants in cavs on the next line are fudged to get a little closer to the frontline because it looks better.
+            temp?.tun?.id == tun.id && dir * (temp.pc + dir * tunPercent(tun, (antGetSize(ant) == 's' && tun.t == 'cav' ? 0 : antOffsetX(ant)) + antGetTunnelStep(ant))) < dir * (tun.rwip ? 100 - tun.prog : tun.prog) && antMoveTunnel(ant);
             antUpdate(ant);
           }, num2000);
         }
