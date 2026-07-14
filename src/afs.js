@@ -4104,7 +4104,7 @@ act = {
         }
         if (dest && getHypot(ant.x - dest.x, ant.y - dest.y) > 80) {
           // An ant is attempting to do a rotWalk but it is so far away from the tunnel that it is suspicious.
-          //! This is a workaround for a rare bug.  Status unknown.
+          // @WORKAROUND
           /* START-DEV */
           console.error(ant.id, "rotWalk setup too far! tun:", tun.id, "antArea:", ant.area.t, "tunPos:", temp1.tun.id,
             `ant:(${ant.x.toFixed(0)},${ant.y.toFixed(0)})`, `dest:(${dest.x.toFixed(0)},${dest.y.toFixed(0)})`, "distance:", getDistance(ant, dest).toFixed(0),
@@ -4163,7 +4163,7 @@ act = {
         // Tun Walk execution.
         if (!tun.dun && ant.digT != tun.id && nextAction.act != 'dive') {
           // Non-dun tun destination without matching digT prop - the ant has no business being sent here.  Abandon entire queue.
-          //! This is a workaround for a rare bug. Status unknown.
+          // @WORKAROUND
           /* START-DEV */
           console.log(ant.id, "destination is incomplete tunnel and ant is not digging there", JSON.stringify(ant), JSON.stringify(tun), JSON.stringify(farm.dig));
           /* END-DEV */
@@ -5375,7 +5375,7 @@ director = (temp1, temp2) => {
         // Update the ant's thoughts, but limit it to changing every 10th loop (~5 minutes) so as not to override thoughts, particularly those set within other functions, too soon.
         ant.thotD > 9 ? antThot(ant) : ant.thotD++;
       }
-      if (ant.q.length > num200) ant.q = []; //! This is a workaround for a rare bug. Status unknown. (Note: there is a tighter check in dev.js)
+      if (ant.q.length > num200) ant.q = []; // @WORKAROUND (Note: there is a tighter check in dev.js)
     }, 0));
     setTimeout(X => {// Delay these extra bits to not perform everything all at the same time.
       // Look for dead ants, eggs, or infants that need moving.

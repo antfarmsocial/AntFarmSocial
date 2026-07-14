@@ -2,7 +2,7 @@ Production meeting...
 
 # PRIORITY
 - Check code for TODO, ///, console., /* for current tasks.  This may include the CSS file and other files too.
-- There are unresolved issues (marked with //! in the code) that may require sophisticated state recording/monitoring to solve.  But I also haven't encountered them again after days of testing, and workarounds were added to prevent catastrophes.
+- There are unresolved issues (marked with @WORKAROUND in the code) that may require sophisticated state recording/monitoring to properly solve.  But I also haven't encountered them again after days of testing, and workarounds were added to prevent catastrophes.
 
 # PLAYTESTING
 Stuff that needs to be playtested.
