@@ -15,6 +15,7 @@ Here is a list of bugs that have been occasionally observed but were not game-br
 # OPTIMIZATION
 Optimization ideas that are not too important and would require careful consideration (if worth doing anything about at all).
 - Several actions (care, get, srv, fight) need to retarget a potentially moving coordinate before doing their business.  They all handle this slightly differently, could be simplified/unified, but there isn't enough reason for an upheaval - yet.  Given the amount of testing involved, I'm inclined to not touch any of it for now.  I've looked into it and I like the varied behaviour too.  Plus there's just enough special case stuff (e.g. freezing the queen) that clean unification is not feasible.  If more actions are written in the future this could be reconsidered as part of that?
+- Unified stats checking.  A function like "all stats green?" and another one "any stat red?" - but mood is only considered if you pass a flag in.  Use these for more consistent decision making.
 
 # NEW FEATURE IDEAS
 Some ideas for new features that are a bit of a project to build.  They're fun ideas but a lot of work, not crucial, and wouldn't be seen very often.  Additionally the core codebase is a sufficient maintenance burden as it is.

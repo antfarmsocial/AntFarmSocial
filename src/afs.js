@@ -4961,11 +4961,12 @@ act = {
           }
         }
       }
-    }) => {
+    }, temp) => {
     if (pkg) {
-      // Set the x/y of the package first.  (These values will be overriden for egg/inf pkgs in tunnels by the code below)
+      // Set the x/y of the package first.  (These values will be overridden for egg/inf pkgs in tunnels by the code below)
       pkg.x = clamp(headPoint.x, 1, 959);
-      pkg.y = tun?.t == 'cav' ? cavFloor(tun, findTunPos(headPoint, farm, [tun, ...(tun?.co || [])]).pc).y : ant.area.n == 'top' ? antGroundLevel(headPoint) : headPoint.y;
+      temp = findTunPos(headPoint, farm, [tun, ...(tun?.co || [])]) ?? findTunPos(ant, farm); // Fallback to full ant pos search if head poking out of tunnel or something.
+      pkg.y = tun?.t == 'cav' ? cavFloor(tun, temp?.pc ?? 50).y : ant.area.n == 'top' ? antGroundLevel(headPoint) : headPoint.y;
       // Pkgs dropped in tunnels need a lot more special handling so they are displayed next to each other nicely.
       if (tun?.t == 'cav' && isEggOrInf(pkg)) {
         // spotFinder() is different from how the queen picks a spot to lay, as she uses a slow trial-and-error approach, whereas spotFinder() works out a good spot to drop.
@@ -4982,7 +4983,7 @@ act = {
         }
         else {
           // No spots.  Egg will be dropped here anyway, but we'll tell the queen her nest sucks.  This may cause ants to keep moving nest, fun!
-          if (aPkg = getAnt(farm, pkg.Q)) aPkg.nest = 0;
+          if (temp = getAnt(farm, pkg.Q)) temp.nest = 0;
           assign(pkg, {pc: tunPos.pc, lvl: 0, area: {n: 'bot', t: tun.id}});
         }
         (({x, y}) => assign(pkg, {x, y}))(cavFloor(getTun(getFarm(pkg), pkg.area.t), pkg.pc)); // Pkg is in a tunnel (assumed by context), update the x/y coords from the tunnel.
