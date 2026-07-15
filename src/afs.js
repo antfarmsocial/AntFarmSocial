@@ -4455,7 +4455,7 @@ act = {
       nextTun = getTun(farm, nextAction.id);
     }
     // Check skipped tunnels.
-    if (temp3 && temp3.tun?.id != tun.id /*///&& temp3.tun?.id != action.pt*/) {
+    if (temp3 && temp3.tun?.id != tun.id) {
       // Ant is in a different tunnel than the one it is supposed to be in.
       // This could be normal in which case antNext() will continue the journey, but there are some cases to check first.
       if (nextTun && temp3.tun.id != nextTun?.id) {
@@ -4480,7 +4480,6 @@ act = {
           antInstaQ(ant, makeDiveStub(temp2));
         }
       }
-      console.log(ant.id, "skipped tun exit", ant.area, temp3, ant.q);
       // Execute queue.
       antNextStill(ant);
     }
@@ -4497,7 +4496,6 @@ act = {
       antActionStill(ant, randomInt(pauseDelay));
     }
     else if (!ant.frz && (temp2 = getSign(!action.rev)) && temp2 * (action.pc - (temp3.pc + temp2 * tunPercent(tun, antOffsetX(ant)))) < 0) {// Face reached goal (or overshot).
-      console.log(ant.id, "done exit", ant.area, temp3, ant.q);
       antNextStill(ant); // Ant reached action.pc
     }
     else {
