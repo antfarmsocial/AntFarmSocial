@@ -226,6 +226,8 @@ antFarmSocial = X => {
   getEl('score').addEventListener('click', X => popup('stats', 0, 0));
   // Add an event handler for the stow link.
   getEl('stow').addEventListener('click', stow);
+  // Handle preloading images if user is about to use the menu.
+  getEl('menu').addEventListener('mouseenter', preloadImages);
   // Activate message log button.
   setupMsgLog();
   // Set up the switch control panel.
@@ -239,6 +241,7 @@ fixAntPos = X => {
   F.a.forEach(a => antUpdate(a, undefined, 1));
   _.a.forEach(antUpdate);
   F.nips.forEach(n => n.item.a.forEach(a => antUpdate(a, undefined, 1)));
+  preloadImages();
 },
 
 // Retrieves all data from local storage.
@@ -284,6 +287,18 @@ divc = (className, attrs = {}) => html('', assign(attrs, {class: className})),
 
 // Generates a HTML tag with a different order of params.  Supports heading tags by just passing in the number as the first param, e.g. 4 for 'h4'.
 tag = (tag, content, attrs, tagName = tag % 1 == 0 ? 'h' + tag : tag) => html(content, attrs, tagName),
+
+// Preloads one image.
+preloadImage = (key, attrs, ext = 'webp', image = new Image()) => {
+  image.src = `img/${key}.${ext}`;
+  image.decode().catch(X => 1);
+},
+
+// Preloads images.
+preloadImages = () => {
+  _.bag.forEach(item => bagImg(item, preloadImage));
+  preloadImage('social');
+},
 
 // Gets a farm by id or an object with a .f property which is the farm id.
 // Note: This function must fail silently when fid is invalid because it is often used without checking that first.
@@ -1210,10 +1225,10 @@ foodCode = item => html(divc('sz-' + min(4, floor(item.sz / 20))), {class: item.
 sceneImg = item => SVG(item.k, items[item.col].col, items[item.col].fx == 'm' ? '#fff' : '#000', items[item.col].fx == 'm' ? '.6' : '.25'),
 
 // Get img/svg tag for a bag/drop item.
-bagImg = (bagItem, item = items[bagItem.k]) => ['scenery', 'decor'].includes(item.t) ? sceneImg(bagItem) :
+bagImg = (bagItem, callback = img, item = items[bagItem.k]) => ['scenery', 'decor'].includes(item.t) ? sceneImg(bagItem) :
   ['paintm', 'paint'].includes(item.t) ? sceneImg({k: item.fx == 'm' ? 'paintm' : 'paint', col: bagItem.k }) :
   item.t == 'ants' ? sceneImg({k: 'ants', col: item.col || bagItem.col }) :
-  img(item.t == 'hat' ? 'hat' : bagItem.k, {}, item.ext),
+  callback(item.t == 'hat' ? 'hat' : bagItem.k, {}, item.ext),
 
 // Dumps the current farm, and optionally restart.
 dumpFarm = restart => {
@@ -2952,10 +2967,12 @@ denyClick = el => {
 // Drops an item.
 drop = (dropItem, itemType = items[dropItem].t) => {
   dropItem = {k: dropItem}; // At this point the item becomes an object because it can take on other attributes.
+  bagImg(dropItem, preloadImage); // Preloads the image.
   // Choose arbitrary colour - get a list of paints, but randomly cap the list at some level so low level paints are more common.
   ['scenery', 'decor'].includes(itemType) && (dropItem.col = pickRandom(keys(items).filter(k => items[k].t == 'paint' && items[k].lvl < randomInt(70) + 21)));
   itemType == 'sticker' && (dropItem.r = randomInt(40) - 20);
-  _.bag.push(dropItem) && popup('drop', dropItem);
+  _.bag.push(dropItem);
+  popup('drop', dropItem);
 },
 
 // Walks a free ant around the screen, and mainly checks if the ant has walked past the edge.
@@ -3593,7 +3610,7 @@ trySetCarryTask = (farm, morgue = farm.tuns.find(t => t.morgue), morgueCandidate
 },
 
 // Sends an ant to care for an egg or larva.
-care4kids = (farm, carerAnt = getWorkerOrQueen(farm, ant => (isQueen(ant) && ant.q.length < 20 || !antUniqueActs(ant).includes('care'))),
+care4kids = (farm, carerAnt = getWorkerOrQueen(farm, ant => !hasCarryTasks(ant) && (isQueen(ant) && ant.q.length < 20 || !antUniqueActs(ant).includes('care'))),
   target = farm.a.filter(isEggOrInf).sort((a, b) => a.hp - b.hp)[0], // Pick whichever egg or infant has the lowest hp.
   isInf = target?.inf) => {
   // Ensure target exists, needs care, and that ant is not already caring for an egg/infant (in case carer is a queen we allow queuing extra care actions if her queue is not too long).
@@ -4112,7 +4129,7 @@ act = {
             "ant", JSON.stringify(ant), "action", JSON.stringify(action), 'tuns', JSON.stringify(farm.tuns)
           );
           /* END-DEV */
-          ant.q = [];
+          ant.q = [{}];
           return antActionStill(ant);
         }
       }
@@ -4168,7 +4185,7 @@ act = {
           /* START-DEV */
           console.log(ant.id, "destination is incomplete tunnel and ant is not digging there", JSON.stringify(ant), JSON.stringify(tun), JSON.stringify(farm.dig));
           /* END-DEV */
-          ant.q = [];
+          ant.q = [{}];
           return antActionStill(ant);
         }
         // Work out whether the ant is meant to be walking in reverse (towards the 0% point of the tunnel).
@@ -4559,7 +4576,7 @@ act = {
     }
     else {
       // Target reached.
-      ant.q = []; // Clear the queue because the ant now has a concussion and it's complicated to consider which queue items are still valid.
+      ant.q = [{}]; // Clear the queue because the ant now has a concussion and it's complicated to consider which queue items are still valid.
       antNextSurface(ant);
     }
   },
@@ -4787,7 +4804,7 @@ act = {
   // Ant picks up a bit of food or drink for the queen, or an infant or a dead ant, this assumes the ant is already in a location where they can do a pick-up.
   get: (ant, farm = getFarm(ant), action = ant.q[0], carryItem = getCarry(farm, action)) => {
     if (carryItem && !farm.a.some(a => a.carry?.id == action.id) && !(isAdult(carryItem) && isCapped(carryItem))) {// Ensure carryItem exists and is not being carried by someone else. Additional check to prevent pickup of infants that have matured.
-      ant.q = []; // Clear the ant's queue, they have only one mission right now.
+      ant.q = [{}]; // Clear the ant's queue, they have only one mission right now.
       // Note: No proximity check for food/drink items; that is the responsibility of 'eat' and 'drink' actions.  Those check whether it exists, and moving the item changes the id number.
       if (carryItem.x && !inTargetProximity(ant, carryItem, antOffsetX(ant) + 12)) {// Very permissive margin due to targetting troubles.
         // Too far.
@@ -4817,7 +4834,7 @@ act = {
         // Has ant really reached the queen's head?
         if (!inTargetProximity(ant, antHeadPoint(queen), antOffsetX(ant) + 6)) {// Very permissive margin due to targetting troubles (also 6px is the size of small carried items).
           // Ant too far from queen's face.  This code can produce some odd ant behaviours, but it is fun to watch.
-          ant.q = []; // Clear the ant's queue, they have only one mission right now.
+          ant.q = [{}]; // Clear the ant's queue, they have only one mission right now.
           ant.area.t && ant.area.t == queen.area.t && getTun(farm, ant.area.t)?.t == 'cav' ?
             antFinna(ant, 'tunOrient', {target: antHeadPoint(queen), ant: queen.id}) : antGoToAnt(ant, antHeadPoint(queen));
           antFinna(ant, 'srv', action);
@@ -4972,7 +4989,7 @@ act = {
           // Found a spot.
           if (abs(tunPos.pc - newSpot.pc) > tunPercent(tun, antOffsetX(ant))) {
             // Too far away!
-            ant.q = []; // Clear the ant's queue so it can focus on the current mission.
+            ant.q = [{}]; // Clear the ant's queue so it can focus on the current mission.
             antFinna(ant, 'dive', {tun: tun.id, pc: newSpot.pc, pos: 'd'/* START-DEV */, reason: 'spotFinder'/* END-DEV */});
             antFinna(ant, 'drop', action);
             return antAction(ant);
@@ -5375,7 +5392,7 @@ director = (temp1, temp2) => {
         // Update the ant's thoughts, but limit it to changing every 10th loop (~5 minutes) so as not to override thoughts, particularly those set within other functions, too soon.
         ant.thotD > 9 ? antThot(ant) : ant.thotD++;
       }
-      if (ant.q.length > num200) ant.q = []; // @WORKAROUND (Note: there is a tighter check in dev.js)
+      if (ant.q.length > num200) ant.q = [{}]; // @WORKAROUND (Note: there is a tighter check in dev.js)
     }, 0));
     setTimeout(X => {// Delay these extra bits to not perform everything all at the same time.
       // Look for dead ants, eggs, or infants that need moving.
