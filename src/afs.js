@@ -4381,7 +4381,7 @@ act = {
       temp1 = normalize180(tun.r - (action.rev && deg180) - ant.r);
       if (tun.t == 'tun' && abs(temp1) > 5) ant.r = normalize360(ant.r + sign(temp1) * 3);
       if (tun.t == 'cav' && abs(temp1) > 60) ant.r = normalize360(ant.r + sign(temp1) * 5);
-      wp && inTargetProximity(ant, wp, antOffsetY(ant) / 2) && antNudgeToMid(ant, tun); // Ant way too close to waypoint, push it away a little.
+      wp && inTargetProximity(ant, wp, antOffsetY(ant)) && antNudgeToMid(ant, tun); // Ant way too close to waypoint, push it away a little.
       // Determine if we're on a collision course with a waypoint and then align the ant with the waypoint angle by 2 degrees to minimise the collision.
       if (antWaypointCollision(farm, ant, 7 + (tun.t == 'cav' && antOffsetX(ant)))) {
         temp3 ? (!randomInt(9) ? antInstaQ(ant, {}, 0) : antNudgeToMid(ant, tun)) : // Ant is dealing with an ant collision as well, give it some hesitation or at least get away from walls.
