@@ -4030,7 +4030,7 @@ act = {
   ) => {
     if (tun) {
       // This is a fully expanded dive queue; determine destinations.
-      if (!isRotationTunnel(tun) && tun.prog < tunPercent(tun, 8) || isRotationTunnel(tun) && nextTun && (nextTun.prog < tunPercent(nextTun, 8) || !tun.dun)) return antNext(ant); // Protect against entering underbuilt tunnels.
+      if (!isRotationTunnel(tun) && tun.prog < tunPercent(tun, 8) || isRotationTunnel(tun) && (!nextTun || nextTun.prog < tunPercent(nextTun, 8) || !tun.dun)) return antNext(ant); // Protect against entering underbuilt tunnels.
       if (tun.t == 'ent') {
         if (nextTun) {// If there is a nextTun it must mean that ant.area.n=='top', by virtue of other code knowing not to queue a dive into an entrance with no nextTun.
           if (tun.co.length > 1) badAngle = 1; // Reduce risk of ants trying to side-walk down the wrong tunnel from a two-way entrance. Same issue as con's "Figure out where the ant will wind up" below, except handled in a lazy way.
