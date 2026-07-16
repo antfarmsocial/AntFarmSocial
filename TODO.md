@@ -6,13 +6,13 @@ Production meeting...
 
 # PLAYTESTING
 Stuff that needs to be playtested.
+
 *none*
 
 # MINOR BUGS
 Here is a list of bugs that have been occasionally observed but were not game-breaking, might be hard to repro, and may have been fixed by virtue of further development.
-- Messages triggered by some condition are not displayed until the user has focuses the window, and then those conditions might no longer be true, and that's confusing.  For example "two ants are fighting" displayed once the fight is over.  One approach may be to have a new message system where messages are tied to 1) A farm (so we don't have to keep writing the name of the farm in the msg), 2) An ant (ditto with ant's name), and 3) That ant's state or a property value - if one of those conditions changes we don't show the msg, or do an alternate past-tense message.   This is an overhaul of the message system and the messages themselves.
+- Messages triggered by some condition are not displayed until the user focuses the window, and then those conditions might no longer be true, and that's confusing.  For example "two ants are fighting" displayed once the fight is over.  One approach may be to have a new message system where messages are tied to 1) A farm (so we don't have to keep writing the name of the farm in the msg), 2) An ant (ditto with ant's name), and 3) That ant's state or a property value - if one of those conditions changes we don't show the msg, or do an alternate past-tense message.   This is an overhaul of the message system and the messages themselves.
 - With latest changes to findPath/findTunPos Ants can now start a climb/dive in an unbuilt con tunnel and that's no good - they can look like they're walking around in no-mans-land for a bit.  But I think the fix should be external to those functions (in the callers) - don't mess with the functions as they're quite straightforward now!  But actually thinking it through, it always tries to register the ant in the "nextTun" first (i.e. the second tunnel in the dive queue), so if they truly were standing in an overlapped area they would skip the initial underbuilt tunnel altogether anyway - so perhaps allowing the current behaviour of letting it do the thing we don't want in an edge case actually prevents a "stuck" ant whose location can't be determined?
-- Ants going to dig entrances are doing a rotwalk at the entrance.  Should look into that!
 
 # OPTIMIZATION
 Optimization ideas that are not too important and would require careful consideration (if worth doing anything about at all).
