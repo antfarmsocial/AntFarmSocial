@@ -3125,7 +3125,7 @@ antElUpdate = (ant, antEl) => {
       ...['walk', 'jit', 'dig', 'wig', 'h', 'fall', 'fight', 'mag', 'alate', 'flare', 'burn', 'rot', 'rot1', 'rot2', 'decay', 'egg'].filter(f => ant[f]), // Boolean values.
       ...ant.rm // Body part removal.
     ].join(' ');
-    antEl.style.transform = `scaleX(${ant.scale}) scaleY(${abs(ant.scale % 1 ? ant.scale : 1)}) rotate(${ant.r + 90}deg)`; // +90 because the ant was built facing north instead of east in CSS.
+    antEl.style.transform = `scale(${ant.scale}, ${abs(ant.scale % 1 ? ant.scale : 1)}) rotate(${ant.r + 90}deg)`; // +90 because the ant was built facing north instead of east in CSS.
     if (ant.rot) {
       let upright = sin(degToRad(ant.r)) < 0;
       antEl.style.setProperty('--RT', ((upright ? 0 : deg180) - ant.r - 90) + 'deg'); // Counter-rotate stink lines.
@@ -4673,8 +4673,8 @@ act = {
       // After wait time, increment ant's stats, and check whether to wake up.
       setTimeout(X => {
         antStats(ant, {hp: .8, md: .1});
-        // Ensure it is not a queen awaiting service, and then decide whether to continue resting or wake up based on other factors.
-        !(isQueen(ant) && isQueenAwaiting(ant)) &&
+        // Ensure it is not a queen awaiting service (but allow an escape clause), and then decide whether to continue resting or wake up based on other factors.
+        !(isQueen(ant) && (isQueenAwaiting(ant)) || !randomInt(9)) &&
           (
             ant.dr < 9 || ant.fd < 9 || // Ant's other stats are very low, wake it up so it can deal with those.
             ant.hp > 99 || ant.hp > 90 && !randomInt(9) || ant.hp > 20 && !randomInt(90) || // Higher chance to wake up the more hp it has.
