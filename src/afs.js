@@ -1376,7 +1376,7 @@ useItem = (i, doQuip = 1, doDel = 1, item = _.bag[i], itemKey = item.k, itemType
     plate() {popup('plate', i)},
     tube() {popup('tube', i)},
     feng() {popup('feng', i)},
-    antfax() {popup('antfax', i)},
+    antfax() {keys(items).forEach(k => items[k].t == 'card' && preloadImage(k)); popup('antfax', i)},
     antfaxpro() {keyHandlers.antfax()},
     antyvenom,
     cologne(fx = getEl('fx')) {
