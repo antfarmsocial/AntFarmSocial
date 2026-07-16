@@ -2344,7 +2344,7 @@ popup = (modalId, param, delay = num500) => setTimeout(X => {
     setTimeout(X => modalCanClose = 1, 400);
     // Call the modal template function and activate the modal.
     modal[modalId](getEl(modalId), param);
-    getEl('modal')?.classList.add('vis');
+    getEl(modalId)?.innerHTML.trim() ? getEl('modal')?.classList.add('vis') : closePopup();
   }
 }, delay),
 
@@ -4668,8 +4668,7 @@ act = {
       antNext(ant);
     }
     else {
-      !action.rest && antThot(ant, ['😴', '🥱', '💤', '🛌', 'Nice spot for a rest', "Just relaxin'", "Time for a break!"]);
-      action.rest ||= 1;
+      antThot(ant, ['😴', '🥱', '💤', '🛌', 'Nice spot for a rest', "Just relaxin'", "Time for a break!"]);
       // After wait time, increment ant's stats, and check whether to wake up.
       setTimeout(X => {
         antStats(ant, {hp: .8, md: .1});
