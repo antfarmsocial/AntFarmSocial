@@ -4674,7 +4674,7 @@ act = {
       setTimeout(X => {
         antStats(ant, {hp: .8, md: .1});
         // Ensure it is not a queen awaiting service (but allow an escape clause), and then decide whether to continue resting or wake up based on other factors.
-        !(isQueen(ant) && (isQueenAwaiting(ant)) || !randomInt(9)) &&
+        !(isQueen(ant) && isQueenAwaiting(ant) && randomInt(9)) &&
           (
             ant.dr < 9 || ant.fd < 9 || // Ant's other stats are very low, wake it up so it can deal with those.
             ant.hp > 99 || ant.hp > 90 && !randomInt(9) || ant.hp > 20 && !randomInt(90) || // Higher chance to wake up the more hp it has.
