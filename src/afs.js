@@ -47,6 +47,7 @@ quitting, // quitting game flag
 pickedAntEl, // picked ant element
 pouring, // crucible pour flag
 sizzler = 0, // sizzler tracker
+achPopupPending = 0, // achievement popup pending flag
 
 // These variables exist purely to support the developer panel.
 /* START-DEV */ // For use with gulp-strip-code.
@@ -2344,7 +2345,7 @@ popup = (modalId, param, delay = num500) => setTimeout(X => {
     setTimeout(X => modalCanClose = 1, 400);
     // Call the modal template function and activate the modal.
     modal[modalId](getEl(modalId), param);
-    getEl(modalId)?.innerHTML.trim() ? getEl('modal')?.classList.add('vis') : closePopup();
+    getEl('modal')?.classList.add('vis');
   }
 }, delay),
 
@@ -3125,7 +3126,7 @@ antElUpdate = (ant, antEl) => {
       ...['walk', 'jit', 'dig', 'wig', 'h', 'fall', 'fight', 'mag', 'alate', 'flare', 'burn', 'rot', 'rot1', 'rot2', 'decay', 'egg'].filter(f => ant[f]), // Boolean values.
       ...ant.rm // Body part removal.
     ].join(' ');
-    antEl.style.transform = `scale(${ant.scale}, ${abs(ant.scale % 1 ? ant.scale : 1)}) rotate(${ant.r + 90}deg)`; // +90 because the ant was built facing north instead of east in CSS.
+    antEl.style.transform = `scale(${ant.scale},${abs(ant.scale % 1 ? ant.scale : 1)}) rotate(${ant.r + 90}deg)`; // +90 because the ant was built facing north instead of east in CSS.
     if (ant.rot) {
       let upright = sin(degToRad(ant.r)) < 0;
       antEl.style.setProperty('--RT', ((upright ? 0 : deg180) - ant.r - 90) + 'deg'); // Counter-rotate stink lines.
@@ -5475,7 +5476,10 @@ checkAchievements = (countWins, count = 0,
       }
   }
   // Display first pending achievement.
-  _.achQ.length && !denyPopup() && popup('ach', 0, shortDelay);
+  if (_.achQ.length && !denyPopup() && !achPopupPending) {
+    achPopupPending = 1;
+    popup('ach', 0, shortDelay);
+  };
 },
 
 // Queues an achievement.
