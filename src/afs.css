@@ -3662,6 +3662,11 @@ body.bit .ant {
   right: 0;
   left: 0;
   bottom: 0;
+  transition: background 3s;
+  &.win {
+    background: rgba(0, 0, 0, .5);
+    pointer-events: none;
+  }
 }
 
 #modal-content {

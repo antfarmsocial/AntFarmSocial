@@ -532,7 +532,7 @@ const devTruncate = str => str.length > 15 ? str.slice(0, 12) + '…' : str;
   feat.html = `
     ${devInput('Score', 'number', {value: 1})}
     ${devInput('Bonus', 'checkbox', {labelText: 'bonus'})}
-    ${devButt('Score', {prefix: '➕', click: () => score(parseInt(getEl('dev-score').value), getEl('dev-bonus').checked)})}
+    ${devButt('Score', {prefix: '➕', id: 'dev-score-btn', click: () => score(parseInt(getEl('dev-score').value), getEl('dev-bonus').checked)})}
     <br>
     ${devSelect('Drop Item', devDropOpts)}
     ${devButt('Drop', {prefix: '🎁', click: () => drop(getEl('dev-drop-item').value)})}

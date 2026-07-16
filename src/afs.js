@@ -1997,10 +1997,11 @@ modal = {
       html(
         tag(4, 'winning level celebratory merriment') +
         p('This is the highest honor available<br> ') +
-        tag('button', pickRandom(dropOK)),
+        tag('button', pickRandom(["I'd prefer something different", "Got anything else?", "Is that it?"]), {onclick: "window.open('https://heyscoops.com', '_blank')"}),
         {id: 'drop-caption'}
       );
-    setTimeout(msg("I'd like to thank Penn Jillette for creating that podcast"), shortDelay);
+      getEl('modal-close').classList.add('win');
+    setTimeout(X => {getEl('modal-close').classList.remove('win'); msg("I'd like to thank Penn Jillette for creating that podcast")}, shortDelay);
     _.dmb = 1;
     save();
   },
@@ -2759,7 +2760,7 @@ score = (inc, isBonus, win = _.win ? span('🏆', {class: 'win'}) : '', scoreEl 
       }, num800 * 3);
     }
     else _.score === 1 ? randomMsg(firstPoint) : _.score == 2 ? randomMsg(secondPoint) : scoreDrop(random());
-    inc > 1 && scoreDrop(0); // Force a drop when they scored more than 1 point at once.
+    inc > 1 && !isBonus && scoreDrop(0); // Force a drop when they scored more than 1 point at once.
     save();
   }
   if (!inc || !isBonus) scoreEl.innerHTML = span(win + _.score);
