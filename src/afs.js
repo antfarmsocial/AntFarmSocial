@@ -2967,10 +2967,10 @@ denyClick = el => {
 // Drops an item.
 drop = (dropItem, itemType = items[dropItem].t) => {
   dropItem = {k: dropItem}; // At this point the item becomes an object because it can take on other attributes.
-  bagImg(dropItem, preloadImage); // Preloads the image.
   // Choose arbitrary colour - get a list of paints, but randomly cap the list at some level so low level paints are more common.
   ['scenery', 'decor'].includes(itemType) && (dropItem.col = pickRandom(keys(items).filter(k => items[k].t == 'paint' && items[k].lvl < randomInt(70) + 21)));
   itemType == 'sticker' && (dropItem.r = randomInt(40) - 20);
+  bagImg(dropItem, preloadImage); // Preloads the image.
   _.bag.push(dropItem);
   popup('drop', dropItem);
 },
