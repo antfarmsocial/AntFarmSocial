@@ -3969,10 +3969,10 @@ act = {
       if (!currentDig || farm.dig.length < 2 && !randomInt(25)) {
         // Pick a random entrance and find an incomplete tunnel that it leads to.
         ent = pickRandom(farm.tuns.filter(t => t.t == 'ent' && t.dun));
-        if (temp = ent && randomInt(9) && findPath(farm, ent, {dun: 1, t: 'ent'}, 1, 1, ent.id)) {// Inverted match.
+        if ((temp = ent && randomInt(9) && findPath(farm, ent, {dun: 1, t: 'ent'}, 1, 1, ent.id)) && temp.length) {// Inverted match.
           tun = getTun(farm, last(temp));
           // Store the path to get to a dig job, and pass it along to the dive action, so all ants use the same trail to get there otherwise they will enter the dig tunnel from the wrong end later.
-          currentDig = temp.length ? {id: tun.id, path: [ent.id, ...temp].reverse().slice(1)} : {tx: ent.x1, id: ent.id, path: [ent.id]};
+          currentDig = {id: tun.id, path: [ent.id, ...temp].reverse().slice(1)};
           // Reject jobs that are: duplicate jobs, too close to a morgue, or a "down tun" being dug from the bottom end.
           getById(farm.dig, currentDig.id) || getTun(farm, currentDig.id).co.some(t =>
             getTun(farm, t).morgue || getTun(farm, t).co.some(nt => getTun(farm, nt).morgue) || (tun.dt && getTun(farm, currentDig.path[0]).lvl > tun.lvl)
@@ -3980,7 +3980,7 @@ act = {
         }
         else {
           // Dig a new entrance.
-          if (tun = pickRandom(farm.tuns.filter(t => t.t == 'ent' && !t.dun))) farm.dig.push(currentDig = {tx: tun.x1, id: tun.id, path: [tun.id]});
+          if (tun = pickRandom(farm.tuns.filter(t => t.t == 'ent' && !t.dun))) farm.dig.push(currentDig = {tx: tun.x1, id: tun.id, path: []});
           else if (farm.tuns.every(t => t.dun)) farm.dun = 1; // Nothing more to do.
         }
       }
