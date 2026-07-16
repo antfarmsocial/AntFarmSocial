@@ -4129,7 +4129,7 @@ act = {
             "ant", JSON.stringify(ant), "action", JSON.stringify(action), 'tuns', JSON.stringify(farm.tuns)
           );
           /* END-DEV */
-          ant.q = [{}];
+          ant.q = [];
           return antActionStill(ant);
         }
       }
@@ -4185,7 +4185,7 @@ act = {
           /* START-DEV */
           console.log(ant.id, "destination is incomplete tunnel and ant is not digging there", JSON.stringify(ant), JSON.stringify(tun), JSON.stringify(farm.dig));
           /* END-DEV */
-          ant.q = [{}];
+          ant.q = [];
           return antActionStill(ant);
         }
         // Work out whether the ant is meant to be walking in reverse (towards the 0% point of the tunnel).
@@ -4804,7 +4804,7 @@ act = {
   // Ant picks up a bit of food or drink for the queen, or an infant or a dead ant, this assumes the ant is already in a location where they can do a pick-up.
   get: (ant, farm = getFarm(ant), action = ant.q[0], carryItem = getCarry(farm, action)) => {
     if (carryItem && !farm.a.some(a => a.carry?.id == action.id) && !(isAdult(carryItem) && isCapped(carryItem))) {// Ensure carryItem exists and is not being carried by someone else. Additional check to prevent pickup of infants that have matured.
-      ant.q = [{}]; // Clear the ant's queue, they have only one mission right now.
+      ant.q = [{}]; // Clear the ant's queue, they have only one mission right now.  We have to put a dummy {} action in so the antNext() below doesn't hose anything queued in this function.
       // Note: No proximity check for food/drink items; that is the responsibility of 'eat' and 'drink' actions.  Those check whether it exists, and moving the item changes the id number.
       if (carryItem.x && !inTargetProximity(ant, carryItem, antOffsetX(ant) + 12)) {// Very permissive margin due to targetting troubles.
         // Too far.
@@ -4834,7 +4834,7 @@ act = {
         // Has ant really reached the queen's head?
         if (!inTargetProximity(ant, antHeadPoint(queen), antOffsetX(ant) + 6)) {// Very permissive margin due to targetting troubles (also 6px is the size of small carried items).
           // Ant too far from queen's face.  This code can produce some odd ant behaviours, but it is fun to watch.
-          ant.q = [{}]; // Clear the ant's queue, they have only one mission right now.
+          ant.q = []; // Clear the ant's queue, they have only one mission right now.
           ant.area.t && ant.area.t == queen.area.t && getTun(farm, ant.area.t)?.t == 'cav' ?
             antFinna(ant, 'tunOrient', {target: antHeadPoint(queen), ant: queen.id}) : antGoToAnt(ant, antHeadPoint(queen));
           antFinna(ant, 'srv', action);
@@ -4989,7 +4989,7 @@ act = {
           // Found a spot.
           if (abs(tunPos.pc - newSpot.pc) > tunPercent(tun, antOffsetX(ant))) {
             // Too far away!
-            ant.q = [{}]; // Clear the ant's queue so it can focus on the current mission.
+            ant.q = []; // Clear the ant's queue so it can focus on the current mission.
             antFinna(ant, 'dive', {tun: tun.id, pc: newSpot.pc, pos: 'd'/* START-DEV */, reason: 'spotFinder'/* END-DEV */});
             antFinna(ant, 'drop', action);
             return antAction(ant);
@@ -5392,7 +5392,7 @@ director = (temp1, temp2) => {
         // Update the ant's thoughts, but limit it to changing every 10th loop (~5 minutes) so as not to override thoughts, particularly those set within other functions, too soon.
         ant.thotD > 9 ? antThot(ant) : ant.thotD++;
       }
-      if (ant.q.length > num200) ant.q = [{}]; // @WORKAROUND (Note: there is a tighter check in dev.js)
+      if (ant.q.length > num200) ant.q = [{}]; // @WORKAROUND (Note: there is a tighter check in dev.js) (We put an empty {} idle action in just in case so that an antNext doesn't hose anything that comes afterwards)
     }, 0));
     setTimeout(X => {// Delay these extra bits to not perform everything all at the same time.
       // Look for dead ants, eggs, or infants that need moving.
