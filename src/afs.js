@@ -3363,7 +3363,7 @@ antCollision = (ant, cone = 30, a, angle) => {
 antCorpseProximity = (ant, farm = getFarm(ant), nearestCorpse = farm.a.find(a => a.rot && inTargetProximity(a, ant, 20)), cavCount = farm.tuns.filter(t => t.t == 'cav' && t.prog).length) => {
   if (nearestCorpse && ant.area.t == nearestCorpse.area.t) {
     antStats(ant, {hp: (nearestCorpse.decay - nearestCorpse.rot) / num1000}); // Penalty increases as rot increases, but decreases as decay increases.
-    !cavCount ? playerHint(farm, ["Dead ants are rotting and making ants sick. Pluck them out!"]) :
+    !cavCount ? playerHint(farm, ["Corpses are rotting and making ants sick. Pluck them out!"]) :
       cavCount < 2 ? playerHint(farm, ["Not enough chambers built to handle rotten corpse storage."]) :
       playerHint(farm, ["Ants are getting sick from rotting corpses."]);
     if (ant.hp <= 0) {

@@ -19,7 +19,8 @@ This file lists a few things that are never obvious.
 - In multispecies setups the queen's servants must still be of the same type, and ants may avoid tubes and vials
   if they see another type of ant in there.
 - Ant corpse's are most toxic to nearby ants when the ROT value is 100% and the DECAY value is 0%.
-- Ants sleeping near corpses hardly get sick while they're asleep.  Sickness is confined to a corpse's tunnel.
+- Ants sleeping/digging near corpses hardly get sick while sleeping and working.  Sickness is confined to a corpse's 
+  tunnel.
 - Using an emoji in the farm's name plate is a three-pointer.  No such thing with ant hats though.
 - A queen won't begin an egg laying cycle if there are any of her own eggs or infants in her current farm.
 - Eggs won't hatch if their own queen is still in an egg laying cycle in their current farm.
