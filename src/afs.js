@@ -218,13 +218,13 @@ antFarmSocial = X => {
   // Start ambient audio.
   document.addEventListener('click', ambience);
   // Add an event handler for the bag link.
-  getEl('a-bag').addEventListener('click', X => popup('bag', 0, 0));
+  getEl('a-bag').addEventListener('click', X => {preloadImages(); popup('bag', 0, 9)});
   // Add an event handler for the magnifying glass link.
   getEl('a-tg').addEventListener('click', toggleGlass);
   // Add an event handler for the carousel link.
   getEl('a-car').addEventListener('click', toggleCarousel);
   // Handle the score/stats popup button.
-  getEl('score').addEventListener('click', X => popup('stats', 0, 0));
+  getEl('score').addEventListener('click', X => {preloadImages(1); popup('stats', 0, 9)});
   // Add an event handler for the stow link.
   getEl('stow').addEventListener('click', stow);
   // Handle preloading images if user is about to use the menu.
@@ -242,7 +242,7 @@ fixAntPos = X => {
   F.a.forEach(a => antUpdate(a, undefined, 1));
   _.a.forEach(antUpdate);
   F.nips.forEach(n => n.item.a.forEach(a => antUpdate(a, undefined, 1)));
-  preloadImages();
+  preloadImages(); // May as well remind the browser to load bag images.
 },
 
 // Retrieves all data from local storage.
@@ -295,10 +295,14 @@ preloadImage = (key, attrs, ext = 'webp', image = new Image()) => {
   image.decode().catch(X => 1);
 },
 
-// Preloads images.
-preloadImages = () => {
-  _.bag.forEach(item => bagImg(item, preloadImage));
+// Preloads images for the two menu-based popups.
+// Set 'statsOnly' to skip straight to loading the scores/stats images.
+preloadImages = statsOnly => {
+  // Bag (inventory) popup:
+  !statsOnly && _.bag.forEach(item => bagImg(item, preloadImage));
+  // Scores & stats popup:
   preloadImage('social');
+  preloadImage('paper');
 },
 
 // Gets a farm by id or an object with a .f property which is the farm id.
@@ -1334,7 +1338,7 @@ useItem = (i, doQuip = 1, doDel = 1, item = _.bag[i], itemKey = item.k, itemType
                   del(ant, 'nipPh', 'nipTs');
                   checkExpatQueen(ant, F);
                   dropAntInFarm(ant, item);
-                }, num500 * a);
+                }, min(num500, shortDelay * 1.4 / ants.length) * a);
               }
               emptyVial.a = [];
             }
@@ -1982,6 +1986,7 @@ modal = {
       save();
     }
     else closePopup();
+    achPopupPending = 0;
   },
 
   // Templates the win popup.
@@ -5372,6 +5377,7 @@ director = (temp1, temp2) => {
             if (temp1 = farm.a.filter(a => a.caste != 'Q').reduce((min, a) => !min || a.md < min.md ? a : min, 0)) antStats(temp1, {md: .3});
             randomInt(2) && farm.a.filter(a => isServant(ant, a)).length < 3 && ant.q.length < 20 && care4kids(farm, ant); // Farm with not enough workers?  Queen maybe performs an extra care task per cycle.
             if (ant.hp > 50 && lockoutExpired()) ant.lay = (ant.lay || 0) + 100 / ((8000 * Math.ceil(farm.a.length / 30) - (farm.fill == 'lube' ? num2000 : 0) - (farm.a.length < 9 ? num2000 : 0)) / 2);
+            if (ant.lc && !antUniqueActs(ant).includes('lay')) antFinnaUnique(ant, 'lay'); // Re-add lay action if q was dumped.
           }
           else if (isDrone(ant)) {
             // Being an adult drone takes an extra toll.
@@ -5477,6 +5483,7 @@ checkAchievements = (countWins, count = 0,
   }
   // Display first pending achievement.
   if (_.achQ.length && !denyPopup() && !achPopupPending) {
+    preloadImage(_.achQ[0].l ? 'medal' + _.achQ[0].l : 'trophy');
     achPopupPending = 1;
     popup('ach', 0, shortDelay);
   };
