@@ -1621,7 +1621,7 @@ nipEl = getEl(nipId), nipRect = nipEl.getBoundingClientRect(), nantEl = getEl('a
         otherFarm.nips = otherFarm.nips.filter(n => n.id != nipData.id);
         // Note: tubeLoop() and antNipWalk() detect when they're no longer needed and clear their own animation loops when this happens.
       }
-      if (nipItem.a.length) nipItem.k = 'collected';
+      else if (nipItem.a.length) nipItem.k = 'collected';
       del(F.nips, nipData.nip);
       F.nips = F.nips.filter(n => n.nip != nipData.nip);
       _.bag.push(nipItem);
@@ -1724,13 +1724,13 @@ pourCrucible = (audio = ambienceOverride('sizz1'), fx = getEl('fx'), hills = get
           getEl('card').classList.add('fade');
           F.mTuns.filter(tun => tun.t == 'ent').forEach(pourTun);
           getEl('tunnels').classList.add('pouring');
-          queryAll('.frame').forEach(el => el.classList.add('burn'));
+          queryAll('.frame, #decals > div').forEach(el => el.classList.add('burn'));
         }, num1000);
         setTimeout(X => {
           mTunsEl.style.overflow = 'visible';
           pourEl.classList.remove('vis');
           mHillEl.classList.remove('vis');
-          getEl('decals').classList.add('fade');
+          queryAll('#decals > div').forEach(el => el.classList.add('fade'));
           F.a.forEach(antDelete);
           setTimeout(X => {
             farmSetSculpture(F); // Resets farm object to defaults, and adds 'metal' elements.
@@ -1738,7 +1738,6 @@ pourCrucible = (audio = ambienceOverride('sizz1'), fx = getEl('fx'), hills = get
             audio.pause();
             pourEl.remove();
             setTimeout(X => {
-              queryAll('#menu > a').forEach(a => a.classList.remove('hide'));
               query('#kit #wrapper').dataset.col = query('#kit #base').dataset.col = 'metal';
               mTunsBg();
               save();
@@ -1748,6 +1747,7 @@ pourCrucible = (audio = ambienceOverride('sizz1'), fx = getEl('fx'), hills = get
                 fx.classList.add('fog2');
                 setTimeout(X => fx.classList.remove('smoke', 'fog2'), 4500);
                 setTimeout(X => {
+                  queryAll('#menu > a').forEach(a => {a.classList.remove('hide'); a.classList.add('vis')});
                   pouring = 0;
                   score(20, 1);
                   updateSwitcher(); // Will re-enable switcher.
@@ -1768,15 +1768,15 @@ farmSetSculpture = farm => {
   farm.fill = farm.col = farm.plate = 'metal';
   let {id, n, mTuns} = farm;
   del(farm, 'card');
-  assign(farm, cloneData(farmDefault), {id, n, mTuns, sculpt: 1});
+  assign(farm, cloneData(farmDefault), {id, n, mTuns, sculpt: 1, decals: []});
 },
 
 // Draws progress of a tunnel pour.
 pourTun = tun => {
   tun.pour = 1;
-  tun.prog += 2;
+  tun.prog = min(tun.cap, tun.prog + 2);
   if (tun.t == 'con' || tun.t == 'jun') tun.prog = tun.cap;
-  tunProgDraw(tun);
+  tun.cap && tunProgDraw(tun);
   if (tun.t == 'ent') query(`#${tun.id} .prog`).style.top = tun.prog / tun.cap * 30 - 30 + 'px'; // Ent needs to be special cased.
   F.a.filter(a => 'm' + a.area.t == tun.id && !a.burn).forEach(a => {
     a.burn = 1;
@@ -3915,9 +3915,10 @@ act = {
         if (tun.t == 'tun' || tun.t == 'cav') {
           // Pick an adjacent hill and increase its height slightly.
           // To know it is adjacent; the hill should have the same index as the current tunnel system, or one higher.
-          temp = farm.hills[farm.tuns.findIndex(t => t.id == last(action.path)) + randomInt(1)]; // Hill.
-          temp.h = min((temp.r - temp.l) / 4, temp.h + .005); // Cap hill heights at a quarter their width.
-          setTimeout(X => currentFarm(farm) && hillProgDraw(temp), standardDelay);
+          if (temp = farm.hills[farm.tuns.findIndex(t => t.id == last(action.path)) + randomInt(1)]) { // Hill.
+            temp.h = min((temp.r - temp.l) / 4, temp.h + .005); // Cap hill heights at a quarter their width.
+            setTimeout(X => currentFarm(farm) && hillProgDraw(temp), standardDelay);
+          }
         }
         // Track how long ant has been digging.
         ant.digD++;
