@@ -3467,17 +3467,17 @@ specialTunCandidates = (farm, tests, candidates = farm.tuns.filter(t => t.t == '
 // The reason for providing guesses is two-fold: We want to avoid a full scan if possible for efficiency, and secondly we usually have an ordered list of
 // things we care about; "are we up to the next tunnel? no, are we still in the current tunnel? no, did we slip into a tunnel that adjoins the next one? etc..."
 // guesses array can contain tun objects or just tun ids.
-findTunPos = (ant, farm, guesses = [], margin = 2, secondPass, guessed = [], guess, tun, dx, dy) => {
+findTunPos = (ant, farm, guesses = [], strict, margin = 2, secondPass, guessed = [], guess, tun, dx, dy) => {
   for (guess of guesses) {
     if ((tun = guess?.id ? guess : getTun(farm, guess)) && !guessed.includes(tun.id)) {
-      if ((tun.prog >= tunPercent(tun, 8) || isRotationTunnel(tun)) && pointInTun(ant, tun, margin)) {
+      if ((tun.prog >= tunPercent(tun, 8) || (!strict && isRotationTunnel(tun))) && pointInTun(ant, tun, margin)) {
         dx = tun.x2 - tun.x1; dy = tun.y2 - tun.y1;
         return {tun: tun, pc: (dx || dy) ? clamp(((ant.x - tun.x1) * dx + (ant.y - tun.y1) * dy) / squareDistance(dx, dy), 0, 1) * 100 : 0};
       }
       guessed.push(tun.id);
     }
   }
-  if (!secondPass) return findTunPos(ant, farm, farm.tuns, margin, 1, guessed);
+  if (!secondPass) return findTunPos(ant, farm, farm.tuns, strict, margin, 1, guessed);
 },
 
 // Determines which tunnel a waypoint is in, and stores the value with the waypoint for future reference, as well as returning it.
@@ -3540,7 +3540,7 @@ antDeath = (ant, cause, farm = getFarm(assign(ant, {
     hp: 0,
     md: 0,
     q: []
-  })), tunPos = findTunPos(ant, farm, [ant.area.t], 4), stillAlive = farm.a.filter(a => isCapped(a) && isAdult(a))) => {
+  })), tunPos = findTunPos(ant, farm, [ant.area.t], 0, 4), stillAlive = farm.a.filter(a => isCapped(a) && isAdult(a))) => {
   if (ant.egg) {
     // Eggs don't really have any elaborate handling, they just disappear.
     antDelete(ant);
@@ -3574,7 +3574,7 @@ updateCorpseState = (ant, farm) => {
   // Extra properties are added for the sake of CSS styles.
   antUpdateClasses(ant, {rot1: ant.rot > 20, rot2: ant.rot > 80});
   // If ant is out-of-bounds let's just nudge it over on the sly.
-  ant.area.t && !findTunPos(ant, farm, [ant.area.t], 4) && antNudgeToClosestWp(ant, farm);
+  ant.area.t && !findTunPos(ant, farm, [ant.area.t], 0, 4) && antNudgeToClosestWp(ant, farm);
 },
 
 // Returns a random worker, or failing that - a queen.  Must be the same type as the farm's colony, in OK health, and not carrying.
@@ -4228,7 +4228,7 @@ act = {
       // Setup.
       temp2 = getTun(farm, ant.area.t);
       // Start by double-checking if the tunnel the ant thinks it is in is actually the tunnel it seems like it is in.
-      if (temp2 && (temp1 = findTunPos(ant, farm, [temp2, ...temp2.co])) && temp1.tun?.id != temp2.id) antArea(ant, 'bot', temp1.tun.id);
+      if (temp2 && (temp1 = findTunPos(ant, farm, [action.tun, temp2, ...temp2.co], 1)) && temp1.tun?.id != temp2.id) antArea(ant, 'bot', temp1.tun.id);
       (temp2 = getTun(farm, ant.area.t))?.t == 'jun' && antArea(ant, 'bot', temp2.c); // Cheat jun starting tuns by saying ant is in the con instead.
       // No dive queue - select tunnels and create queue.
       if (tun = action.tun ? getTun(farm, action.tun) : pickRandom(farm.tuns.filter(t => t.t == 'cav' && t.dun && !t.morgue))) {
@@ -4246,6 +4246,7 @@ act = {
             || !temp1.length && (temp3.id != tun.id) // Empty path given or calculated, but target tun is not ant's positioned tun.
             || temp1.length && (temp3.id != last(temp1) || getTun(farm, last(temp1)).t == 'ent') // Path given or calculated, but start tun is not ant's positioned tun or it is an entrance.
           )) {
+            temp1 = findTunPos(ant, farm, [tun]);
             // Need to climb out of the current tunnel system and do a fresh retry.
             data.push({act: 'climb'});
             data.push({...action, tun: tun.id});
@@ -4260,6 +4261,9 @@ act = {
         }
         // Add the queue data to the front of the finna queue for instant execution.
         antInstaQ(ant, data);
+      }
+      else if (ant.area.t) { // Ant stuck underground but there is no cavity built.
+        antFinnaUnique(ant, 'climb');
       }
       // Execute queue.
       antNext(ant);
@@ -4461,7 +4465,6 @@ act = {
     antMoveTunnel(ant);
     // Now check where the ant actually is.  If the check fails and we're working on an underbuilt tunnel, let's try to register in the previous tunnel.
     temp3 = findTunPos(ant, farm, [nextTun, tun, ...(nextTun?.co || []), ...tun.co]); // Seems like a good idea to keep this test exactly consistent with the one in dive().
-    // Suggestion: If doing findTunPos() on every frame is too expensive for performance, be aware that getWaypointTunnel() caches the result and it might be a better system to upgrade that functionality for use here?
     if (!temp3) {
       temp2 = 0; // Prevent endless/long loop.  Will be detected below.
       while (!temp3 && temp2++ < 9) {
