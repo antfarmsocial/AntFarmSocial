@@ -2806,6 +2806,8 @@ antThot = (ant, thots, farm = getFarm(ant), uniqueActs = antUniqueActs(ant), tho
     ant.thot = pickRandom(thots || [
       // Auto thots are ordered from high priority to low priority, only the first valid one is used.
       X => ant.inf && ["😘🎮", "✏❓🎨", "🌵📥🍗🍖", "💥👍💥", "🔥🔥👅", "👀👑🌍", "👃💩", "🎨🎾", "🔵🌊", "💪🎀", "👄👄", "💪⚡🐭", "🐛🔜"],
+      X => isDrone(ant) && ["Orange Mocha Frappuccino!", "I turned left!", "What is this? A center for ants?!", "What say we settle this on the runway.", "Really, really, ridiculously good looking.",
+        "I should be a model.", "I look just like a model.", "I should try to be a man who models.", "Of course I'm a model."],
       X => ant.fight && ["Why I oughta!", "Put em up! Put em up!", "Tough guy eh?", "Is that all you've got?", "You're going down!", "Take that!", "Come on then!", "En garde!", "Have at you!",
         "You'll regret that!", "I'm gonna mess you up!", "For my family!", "You're going to pay!", "Don't mess with me!", "This is personal!", "Say your prayers!", "Feel my wrath!",
         "You asked for it!", "I'm unstoppable!", "For the colony!", "Ant power!"],
