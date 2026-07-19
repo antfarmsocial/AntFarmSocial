@@ -5523,7 +5523,7 @@ checkExpatQueen = (a, farm) => isQueen(a) && a.f != farm.id && (_.dq = 1),
 // Checks and... displays messages.
 displayMessage = X => {
   if (messages.length) {
-    if (hasFocus() && queryAll('.msg').length < 9) {
+    if (hasFocus() && queryAll('#messages .msg').length < 9) {
       showMsgs = 1;
       let message = messages.shift(), msgDiv = getEl('messages');
       msgDiv.innerHTML += html(p(message.msg), {'data-ts': getTime(), class: 'msg ' + message.t});
