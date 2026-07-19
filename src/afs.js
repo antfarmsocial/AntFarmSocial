@@ -5314,7 +5314,6 @@ director = (temp1, temp2) => {
               temp1 && !randomInt(2) && antGoToAnt(temp1, ant);
             }
             // Curb major problems.
-            if (ant.dr < 5 || ant.fd < 5) ant.q = [{}]; // Dump queues for very low stat ants.
             ant.dr < 20 && antFinnaUnique(ant, 'drink');
             ant.fd < 20 && antFinnaUnique(ant, 'eat');
             ant.hp < 9 && antFinnaUnique(ant, 'rest', {n: 1}); // n:1 means "do it anywhere" since antFinnaUnique() passes through to antFinnaVia().
