@@ -5460,11 +5460,11 @@ checkAchievements = (countWins, count = 0,
     },
     achKey
   ) => {
-  if (countWins) {
+  if (countWins && !achPopupPending && !_.achQ.length) {
     // Checks if game is almost in a winning state.
     for (achKey in multiAch) if (!_.ach[achKey] || _.ach[achKey].l != 3) count++;
     for (achKey in singleAch) if (!_.ach[achKey]) count++;
-    if (count === 1) drop('mom');
+    if (count === 1) !_.bag.some(i => i.k == 'mom') && drop('mom');
     else if (!count && !_.dmb && !denyPopup()) popup('win');
   }
   else {
