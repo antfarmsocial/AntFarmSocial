@@ -4893,13 +4893,13 @@ act = {
   lay: (ant, farm = getFarm(ant), action = ant.q[0], lvl = action.lvl || 0, laid = farm.a.filter(a => a.egg && a.Q == ant.id).length || 0, tunPos = findTunPos(ant, farm, [ant.area.t]),
     tun = tunPos?.tun, antLvlCount = farm.a.filter(e => e.lvl == lvl && e.area.t == tun?.id).length,
     pkgSize = tun && tunPercent(tun, 5), thePose = ant.pose, floorCoord = tun && cavFloor(tun, tunPos.pc)) => {
-    ant.lc = 1; // Mark this ant as having a "lay cycle".
+    ant.lc ||= getTimeSec(); // Mark this ant as having a "lay cycle".
     antLvlCount > 6 - lvl * 2 && (antLvlCount > 8 - lvl * 2 || !randomInt(4)) && lvl++; // Go up a level when there are lots of eggs on the current level.
     if (ant.hp < 40) {
       // Queen weak, requeue after a kip.  Requeue should trigger near the bottom of this function.
       antFinnaUnique(ant, 'kip');
     }
-    else if (tunPos && tun.t == 'cav' && !tun.nip && !tun.morgue) {// Layable tunnel and position.
+    else if (tunPos && tun.t == 'cav' && !tun.morgue) {// Layable tunnel and position.
       if (tunPos.pc < 20 || tunPos.pc > 80 || farm.a.some(e => isEggOrInf(e) && e.area.t == tun.id && e.lvl == lvl && abs(e.pc - tunPos.pc) < pkgSize) // Check there is nothing occupying current space.
         || (farm.a.some(e => isEggOrInf(e) && e.area.t == tun.id && e.lvl == lvl) && !farm.a.some(e => isEggOrInf(e) && e.area.t == tun.id && e.lvl == lvl && abs(e.pc - tunPos.pc) < pkgSize * 1.4)) // Check it is right next to an existing one or there is no other one
         || lvl && farm.a.filter(e => isEggOrInf(e) && e.area.t == tun.id && e.lvl == lvl - 1 && abs(e.pc - tunPos.pc) < pkgSize).length < 2) {// Check there are two supporting eggs to stack an egg on.
@@ -4928,7 +4928,7 @@ act = {
       }
     }
     // Note: the random chances on the following lines are experimental values, because I suspect it needs to be surprisingly high to not happen too often.
-    if ((laid < 6 || randomInt(99)) && laid < 26 && lvl < 4) {
+    if (getTimeSec() - ant.lc < 20000 && (laid < 6 || randomInt(99)) && laid < 26 && lvl < 4) {
       // Lay more eggs.
       randomInt(9) ?
         goToLocation(ant, makeDiveStub({tun: ant.nest, pc: 20 + randomInt(60), pos: 'd'/* START-DEV */, stub: 'layAgain'/* END-DEV */})) :
@@ -5312,8 +5312,9 @@ director = (temp1, temp2) => {
               temp1 && !randomInt(2) && antGoToAnt(temp1, ant);
             }
             // Curb major problems.
-            ant.dr < 9 && antFinnaUnique(ant, 'drink');
-            ant.fd < 9 && antFinnaUnique(ant, 'eat');
+            if (ant.dr < 5 || ant.fd < 5) ant.q = [{}]; // Dump queues for very low stat ants.
+            ant.dr < 20 && antFinnaUnique(ant, 'drink');
+            ant.fd < 20 && antFinnaUnique(ant, 'eat');
             ant.hp < 9 && antFinnaUnique(ant, 'rest', {n: 1}); // n:1 means "do it anywhere" since antFinnaUnique() passes through to antFinnaVia().
             // Keep ants with low food/drink stats climbing to the surface so they're more likely to do something about it.
             ant.area.t && (ant.dr < 30 || ant.fd < 30) && !randomInt(2) && antFinnaUnique(ant, 'climb');
