@@ -4890,7 +4890,7 @@ act = {
   },
 
   // Queen lays eggs.
-  lay: (ant, farm = getFarm(ant), action = ant.q[0], lvl = action.lvl || 0, laid = action.laid || 0, tunPos = findTunPos(ant, farm, [ant.area.t]),
+  lay: (ant, farm = getFarm(ant), action = ant.q[0], lvl = action.lvl || 0, laid = farm.a.filter(a => a.egg && a.Q == ant.id).length || 0, tunPos = findTunPos(ant, farm, [ant.area.t]),
     tun = tunPos?.tun, antLvlCount = farm.a.filter(e => e.lvl == lvl && e.area.t == tun?.id).length,
     pkgSize = tun && tunPercent(tun, 5), thePose = ant.pose, floorCoord = tun && cavFloor(tun, tunPos.pc)) => {
     ant.lc = 1; // Mark this ant as having a "lay cycle".
@@ -4900,7 +4900,7 @@ act = {
       antFinnaUnique(ant, 'kip');
     }
     else if (tunPos && tun.t == 'cav' && !tun.nip && !tun.morgue) {// Layable tunnel and position.
-      if (tunPos.pc < 20 || tunPos.pc > 80 || farm.a.some(e => isEggOrInf(e) && e.area.t == tun.id && e.lvl == lvl && abs(e.pc - tunPos.pc) < pkgSize) // Check there is nothing occupying current space
+      if (tunPos.pc < 20 || tunPos.pc > 80 || farm.a.some(e => isEggOrInf(e) && e.area.t == tun.id && e.lvl == lvl && abs(e.pc - tunPos.pc) < pkgSize) // Check there is nothing occupying current space.
         || (farm.a.some(e => isEggOrInf(e) && e.area.t == tun.id && e.lvl == lvl) && !farm.a.some(e => isEggOrInf(e) && e.area.t == tun.id && e.lvl == lvl && abs(e.pc - tunPos.pc) < pkgSize * 1.4)) // Check it is right next to an existing one or there is no other one
         || lvl && farm.a.filter(e => isEggOrInf(e) && e.area.t == tun.id && e.lvl == lvl - 1 && abs(e.pc - tunPos.pc) < pkgSize).length < 2) {// Check there are two supporting eggs to stack an egg on.
         // Can't lay here, walk a bit and try again.
@@ -4925,7 +4925,6 @@ act = {
           antStats(ant, {hp: -9, fd: 4, dr: 4, md: 4}); // Increase chance of queen being forced to sleep between eggs.  Queens self-feed during this time.
           msg(ant.n + (laid < 2 ? ' laid an egg!' : ` laid ${laid} eggs!`));
         }, pauseDelay);
-        laid++;
       }
     }
     // Note: the random chances on the following lines are experimental values, because I suspect it needs to be surprisingly high to not happen too often.
@@ -4934,7 +4933,7 @@ act = {
       randomInt(9) ?
         goToLocation(ant, makeDiveStub({tun: ant.nest, pc: 20 + randomInt(60), pos: 'd'/* START-DEV */, stub: 'layAgain'/* END-DEV */})) :
         antFinnaVia(ant, 'dive', {pos: 'd', n: 'bot'/* START-DEV */, reason: 'layElsewhere'/* END-DEV */});
-      antFinna(ant, 'lay', {laid: laid, lvl: lvl});
+      antFinna(ant, 'lay', {lvl: lvl});
     }
     else {
       ant.lay = 0; // Reset lay wait progress after each lay session is complete.
