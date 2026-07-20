@@ -5491,7 +5491,6 @@ body.bit .ant {
 
 /* Carry styles */
 
-
 .ant .c {
   transform: scale(5) rotate(25deg);
   position: absolute;
@@ -5615,5 +5614,4 @@ body.bit .ant {
     left: -27px;
   }
 }
-
 
