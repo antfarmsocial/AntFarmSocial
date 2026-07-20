@@ -4893,7 +4893,7 @@ act = {
   },
 
   // Queen lays eggs.
-  lay: (ant, farm = getFarm(ant), action = ant.q[0], lvl = action.lvl || 0, laid = farm.a.filter(a => a.egg && a.Q == ant.id).length || 0, tunPos = findTunPos(ant, farm, [ant.area.t]),
+  lay: (ant, farm = getFarm(ant), action = ant.q[0], lvl = action.lvl || 0, laid = farm.a.filter(a => a.egg && a.Q == ant.id).length, tunPos = findTunPos(ant, farm, [ant.area.t]),
     tun = tunPos?.tun, antLvlCount = farm.a.filter(e => e.lvl == lvl && e.area.t == tun?.id).length,
     pkgSize = tun && tunPercent(tun, 5), thePose = ant.pose, floorCoord = tun && cavFloor(tun, tunPos.pc)) => {
     ant.lc ||= getTimeSec(); // Mark this ant as having a "lay cycle".
