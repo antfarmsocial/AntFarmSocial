@@ -1512,12 +1512,11 @@ addLidFunc = (lid = getEl('lid')) => {
 // Lets a drone escape and reschedules itself for another turn.
 droneEscape = (drone = pickRandom(F.a.filter(a => isDrone(a) && isCapped(a) && isAdult(a) && !a.area.t && !a.esc)),
   exitX = 215 + randomInt(530), exitY = 300, startX = drone?.x, startY = drone?.y, angle = getAngle({x: startX, y: startY}, {x: exitX, y: exitY}), rad = degToRad(angle),
-  elapsed = 0, tick = (t = min(1, (elapsed += frameTick) / num500), e = easeInQuad(t), droneEl = getObjEl(drone), exitTick = X => {
+  elapsed = 0, tick = (t = min(1, (elapsed += frameTick) / num500), e = easeInQuad(t), exitTick = X => {
     drone.x += cos(rad) * 3 * frameTick; drone.y += sin(rad) * 3 * frameTick; antUpdate(drone); // 3 - speed multiplier.
-    droneEl.getBoundingClientRect().bottom < -25 ? (msg(pickRandom([`${drone.n} has escaped!`, `${drone.n} flew away!`])), antDelete(drone), droneEscape()) : setTimeout(exitTick, frameTick);
-  }) => getEl('lid').classList.contains('off') && droneEl?.isConnected && (drone.esc = 1) && (t < 1 ?
-    antUpdate(assign(drone, {x: startX + (exitX - startX) * e, y: startY + (exitY - startY) * e, r: angle, scale: 1, pose: 'prone'})) || setTimeout(tick, frameTick) : exitTick()),
-) => drone && antInstaQ(drone, {min: 5000}, 0) && setTimeout(tick, num500 + randomInt(num2000)),
+    getObjEl(drone).getBoundingClientRect().bottom < -25 ? (msg(pickRandom([`${drone.n} has escaped!`, `${drone.n} flew away!`])), antDelete(drone), droneEscape()) : setTimeout(exitTick, frameTick);
+  }) => (t < 1 ? antUpdate(assign(drone, {x: startX + (exitX - startX) * e, y: startY + (exitY - startY) * e, r: angle, scale: 1, pose: 'prone'})) || setTimeout(tick, frameTick) : exitTick()),
+) => drone && (drone.esc = 1) && antInstaQ(drone, {min: 5000}, 0) && setTimeout(X => {getEl('lid').classList.contains('off') && getObjEl(drone)?.isConnected && tick()}, num500 + randomInt(num2000)),
 
 // Provides the common initialisation workflow for createArrows() and createNipArrows().
 createArrowsInit = (pull, olay = getEl('olay')) => {
