@@ -2475,7 +2475,7 @@ spawnAnt = (autoLoop = 1, randomEdge = randomInt(3), x, y, r, wHeight = window.i
 
 // Creates an ant, stores it in data, and attaches a DOM representation of it (if needed).
 createAnt = (data = F, x, y, r, state = 'free', caste = !randomInt(F.fill == 'lube' ? 12 : 24) ? 'Q' : 'W',
-  type = caste == 'Q' && !farmHasQueen(F) && !randomInt(2) && F.t ? F.t : pickRandom(keys(types).filter(t => !types[t].p)), id = newAntId(type, caste), ant = {
+  type = caste == 'Q' && !farmHasQueen(F) && !randomInt(2) && !types[F.t].p && F.t ? F.t : pickRandom(keys(types).filter(t => !types[t].p)), id = newAntId(type, caste), ant = {
   id: id,
   n: id, // Name
   t: type,
