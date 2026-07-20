@@ -334,7 +334,9 @@ addFarm = (fid = 'f' + getTime()) => {
 },
 
 // Switches currently displayed kit to a particular farm.
-switchFarm = (farmId, kit = getEl('kit'), getFarmIndex = fid => _.farms.findIndex(f => f.id == fid)) => {
+switchFarm = (farmId, kit = getEl('kit'), getFarmIndex = fid => _.farms.findIndex(f => f.id == fid), farm = getFarm(farmId)) => {
+  farm.card && preloadImage(farm.card);
+  farm.decals?.forEach(d => preloadImage(d.k));
   switcher = 0;
   hideTubeFollowLinks();
   if (F && F.id != farmId) {
