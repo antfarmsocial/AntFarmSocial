@@ -5395,7 +5395,7 @@ director = (temp1, temp2) => {
             // Keep drones coming back to the surface so they can fly away.
             ant.area.t && !randomInt(2) && antFinnaUnique(ant, 'climb');
             // Sometimes esc property remains on a drone that missed the escape attempt.  Must be removed so it can try again later.
-            !getEl('lid').classList.contains('off') && del(ant, 'esc');
+            !getEl('lid').classList.contains('off') && del(ant, 'esc'); // @TODO due to changes in how droneEscape works, this could probably be resolved in there instead?
           }
           // If ant didn't drop, it needs to be requeued.
           if (ant.carry && !hasCarryTasks(ant)) ant.carry.q ? ant.carry[ant.carry.f && ant.f != ant.carry.f ? 'q2' : 'q'].forEach(q => antFinnaUnique(ant, q.act, {...q})) : ant.carry.Q ? antFinna(ant, 'srv', {...ant.carry}) : ant.q.push({...ant.carry});
