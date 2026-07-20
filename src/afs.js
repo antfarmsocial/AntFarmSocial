@@ -5297,8 +5297,8 @@ director = (temp1, temp2) => {
           antStats(ant, ant.fd <= 0 || ant.dr <= 0 ? {hp: -9, md: -2} : ant.fd < 9 || ant.dr < 9 ? {hp: -.05, md: -.05} : {hp: ant.md < 9 ? -.05 : -.01});
           // Detect hunger/thirst deaths.
           if (ant.hp <= 0 && !ant.fight) {
-            if (ant.fd <= 0) antFinnaUnique(ant, 'die', {r: 'hunger', n: 1});
-            else if (ant.dr <= 0) antFinnaUnique(ant, 'die', {r: 'thirst', n: 1});
+            if (ant.fd <= 0) ant.q = [{}, {act: 'die', r: 'hunger'}];
+            else if (ant.dr <= 0) ant.q = [{}, {act: 'die', r: 'thirst'}];
             // Note: 'fight' and 'other' deaths should be handled elsewhere.
           }
           // Cap ant's mood at the maximum its ant type can have.
