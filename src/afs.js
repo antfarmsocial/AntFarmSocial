@@ -3581,7 +3581,7 @@ updateCorpseState = (ant, farm) => {
 },
 
 // Returns a random worker, or failing that - a queen.  Must be the same type as the farm's colony, in OK health, and not carrying.
-getWorkerOrQueen = (farm, testCond = X => 1, data = farm.a, eligible = data?.filter(a => !a.carry && a.t == farm.t && a.hp > 40 && !isDrone(a) && isAdult(a) && !a.lc && testCond(a)), workers = eligible.filter(isWorker)) =>
+getWorkerOrQueen = (farm, testCond = X => 1, data = farm.a, eligible = data?.filter(a => !a.carry && (farm.coex || a.t == farm.t) && a.hp > 40 && !isDrone(a) && isAdult(a) && !a.lc && testCond(a)), workers = eligible.filter(isWorker)) =>
   pickRandom(workers.length ? workers : eligible),
 
 // Determines what, if anything, needs to be carried by a random worker.
