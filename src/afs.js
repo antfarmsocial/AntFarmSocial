@@ -4926,7 +4926,7 @@ act = {
             prog: 0
           }), undefined, 1); // Instant display update.
           antStats(ant, {hp: -9, fd: 4, dr: 4, md: 4}); // Increase chance of queen being forced to sleep between eggs.  Queens self-feed during this time.
-          msg(ant.n + (laid < 2 ? ' laid an egg!' : ` laid ${laid} eggs!`));
+          msg(ant.n + (++laid < 2 ? ' laid an egg!' : ` laid ${laid} eggs!`));
         }, pauseDelay);
       }
     }
