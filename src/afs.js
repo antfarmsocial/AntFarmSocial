@@ -4893,7 +4893,7 @@ act = {
   },
 
   // Queen lays eggs.
-  lay: (ant, farm = getFarm(ant), action = ant.q[0], lvl = action.lvl || 0, laid = farm.a.filter(a => a.egg && a.Q == ant.id).length, tunPos = findTunPos(ant, farm, [ant.area.t]),
+  lay: (ant, farm = getFarm(ant), action = ant.q[0], lvl = action.lvl || 0, laid = farm.a.filter(a => a.egg && a.Q == ant.id).length + 1, tunPos = findTunPos(ant, farm, [ant.area.t]),
     tun = tunPos?.tun, antLvlCount = farm.a.filter(e => e.lvl == lvl && e.area.t == tun?.id).length,
     pkgSize = tun && tunPercent(tun, 5), thePose = ant.pose, floorCoord = tun && cavFloor(tun, tunPos.pc)) => {
     ant.lc ||= getTimeSec(); // Mark this ant as having a "lay cycle".
@@ -4926,7 +4926,7 @@ act = {
             prog: 0
           }), undefined, 1); // Instant display update.
           antStats(ant, {hp: -9, fd: 4, dr: 4, md: 4}); // Increase chance of queen being forced to sleep between eggs.  Queens self-feed during this time.
-          msg(ant.n + (++laid < 2 ? ' laid an egg!' : ` laid ${laid} eggs!`));
+          msg(ant.n + (laid < 2 ? ' laid an egg!' : ` laid ${laid} eggs!`));
         }, pauseDelay);
       }
     }
