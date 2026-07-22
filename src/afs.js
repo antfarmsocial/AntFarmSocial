@@ -337,6 +337,7 @@ addFarm = (fid = 'f' + getTime()) => {
 switchFarm = (farmId, kit = getEl('kit'), getFarmIndex = fid => _.farms.findIndex(f => f.id == fid), farm = getFarm(farmId)) => {
   farm.card && preloadImage(farm.card);
   farm.decals?.forEach(d => preloadImage(d.k));
+  farm.fill && preloadImage(items[farm.fill].bg);
   switcher = 0;
   hideTubeFollowLinks();
   if (F && F.id != farmId) {
@@ -1274,6 +1275,7 @@ useItem = (i, doQuip = 1, doDel = 1, item = _.bag[i], itemKey = item.k, itemType
   typeHandlers = {
     filler() {
       if (!F.fill) {
+        preloadImage(items[itemKey].bg);
         F.fill = itemKey;
         F.hair = itemKey == 'lube' ? [20 + randomInt(400), 20 + randomInt(860), randomInt(deg360)] : 0;
         startFarm(1);
@@ -3144,13 +3146,12 @@ antElUpdate = (ant, antEl) => {
   }
 },
 
-// Updates the ant object to reflect the state of the antEl, in NaN situations.
-antFixNaN = (ant, antEl = getObjEl(ant), style = antEl && getComputedStyle(antEl), match = style?.transform.match(/rotate\(([+-]?\d*\.?\d+)deg\)/)) => {
-  if (antEl?.isConnected) {
-    if (isNaN(ant.x)) ant.x = parseFloat(style.left) || 480; // 480 = getEl('farm').offsetWidth / 2.
-    if (isNaN(ant.y)) ant.y = parseFloat(style.top) || antGroundLevel(ant);
-    if (isNaN(ant.r)) ant.r = match ? parseFloat(match[1]) - 90 : 0; // -90 to reverse the +90 offset applied in antUpdate.
-  }
+// Updates the ant object to reflect the state of the antEl, or reasonable defaults, in NaN situations.
+antFixNaN = (ant, antEl = getObjEl(ant), style = antEl?.isConnected && getComputedStyle(antEl), match = style?.transform?.match(/rotate\(([+-]?\d*\.?\d+)deg\)/)) => {
+  if (isNaN(ant.x)) ant.x = parseFloat(style?.left || 0) || (antArea(ant, 'top'), 480); // 480 = getEl('farm').offsetWidth / 2.
+  if (isNaN(ant.y)) ant.y = parseFloat(style?.top || 0) || antGroundLevel(ant);
+  if (isNaN(ant.r)) ant.r = match ? parseFloat(match[1]) - 90 : 0; // -90 to reverse the +90 offset applied in antUpdate.
+  ant.q = [{}];
 },
 
 // Gets a carried item.

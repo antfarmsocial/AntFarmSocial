@@ -1639,7 +1639,7 @@ body.glass #l-wrap {
 
 .hill .specks,
 .hill .specks:after {
-  background-position: 100%;
+  background-position: 100% 100%;
 }
 
 #tunnels {
@@ -1650,10 +1650,6 @@ body.glass #l-wrap {
   }
 }
 
-:root {
-  --speckle: repeating-conic-gradient(#0003 .000001%, #fff0 .00005%, #fff0 .00035%, #fff0 .00005%), repeating-conic-gradient(#fff2 .00002%, #fff0 .00008%, #fff0 .0008%, #fff0 .00008%);
-}
-
 [data-fill=sand] {
   .hill, .fll,
   #fill {
@@ -1661,12 +1657,12 @@ body.glass #l-wrap {
   }
   .specks,
   .specks:after {
-    background: var(--speckle);
-    opacity: .75;
-    filter: blur(1px);
+    background-image: url(../img/speck.webp);
+    mix-blend-mode: multiply;
+    opacity: .4;
   }
   .specks:after {
-    transform: rotate(180deg) scale(100);
+    transform: rotate(180deg) scale(150);
     filter: none;
     height: 100%;
   }
@@ -1682,13 +1678,13 @@ body.glass #l-wrap {
 [data-fill=dirt] {
   .hill, .fll,
   #fill {
-    background: #65351b;
+    background: #6e3c20;
   }
   .specks,
   .specks:after {
-    background: var(--speckle);
-    opacity: .95;
-    filter: blur(1px);
+    background-image: url(../img/speck.webp);
+    mix-blend-mode: multiply;
+    opacity: .8;
   }
   .specks:after {
     transform: rotate(180deg) scale(300);

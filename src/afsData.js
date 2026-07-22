@@ -120,6 +120,7 @@ items = {
     t: 'filler',
     max: 1,
     keep: 1,
+    bg: 'speck',
     quip: [
       ["Here's your dirt, enjoy!", "Enjoy. Your. Dirt."],
       ["It's gonna get DIRRTY"],
@@ -645,6 +646,7 @@ items = {
     t: 'filler',
     max: 1,
     keep: 1,
+    bg: 'speck',
     quip: [
       ['These are the days of our lives.'],
       ['Like sands through an ant farm glass…'],
@@ -659,6 +661,7 @@ items = {
     lvl: 20,
     t: 'filler',
     max: 2,
+    bg: 'drops',
     quip: [
       ["I don't think you're ready for this."],
       ['Can you dig it? (Yes)'],
@@ -674,6 +677,7 @@ items = {
     lvl: 50,
     t: 'filler',
     max: 1,
+    bg: 'drops',
     quip: [
       ['Can you dig it? (Yes)'],
       ['Open your world'],
@@ -692,6 +696,7 @@ items = {
     lvl: 60,
     t: 'filler',
     max: 1,
+    bg: 'drops',
     quip: [
       ['For all ant types'],
       ['For flip, bounce, and hold'],
@@ -706,6 +711,7 @@ items = {
     lvl: 69,
     t: 'filler',
     max: 1,
+    bg: 'ink',
     quip: [
       ["I don't think you're ready for this."],
       ['Lube glorious lube'],
@@ -721,6 +727,7 @@ items = {
     lvl: 76,
     t: 'filler',
     max: 1,
+    bg: 'glit',
     quip: [
       ['Slime… anyone?'],
       ["I don't know about this"],
@@ -736,6 +743,7 @@ items = {
     lvl: 84,
     t: 'filler',
     max: 1,
+    bg: 'ripple',
     quip: [
       ['Get ready to ooze with excitement'],
       ["That's no ordinary ooze… it's the secret of our past!"],
