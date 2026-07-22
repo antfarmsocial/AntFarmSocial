@@ -174,10 +174,12 @@ items = {
       ["Why you never drink water, fatty?"],
       ["She shoot Coca-Cola"],
       ["Oy Scarface, settle down with the coke"],
-      ["Who is this?  Whitney Houston?"],
+      ["Who is this? Whitney Houston?"],
       ["You want some fries to go with that coke?"],
       ["And the waters prevailed upon the earth an hundred and fifty days"],
-      ["Ants actually prefer fANTa!"]
+      ["Ants actually prefer fANTa!"],
+      ["Always refreshing"],
+      ["Wherever there is fun"]
     ]
   },
   bread: {
@@ -207,6 +209,7 @@ items = {
       ['Let them eat crumbs!'],
       ["Happiness is a warm Cheese Danish."],
       ['Sweet cheese wrapped in dough,', 'A burst of warmth in each bite,', 'Mornings taste so right.'],
+      ['Smells like cheese'],
     ]
   },
   saltpork: {
@@ -221,6 +224,17 @@ items = {
       ['You could have just used bacon.'],
       ['I never eat a pig, cos a pig is a cop.'],
       ['Get some pork on your fork.'],
+      ['Mmmm, salty'],
+      ['Rascal and a basket'],
+      ["She's beepin along, actin the fool"],
+      ["Where's the salt pork!"],
+      ['Walmart has salt pork?'],
+      ["Y'all got salt pork?"],
+      ['Sweet Georgia Brown…'],
+      ['You put it in with greens!'],
+      ['You want a ham hock, right?'],
+      ["A good 8 minutes of salt pork huntin'"],
+      ["We all have other terms for what we assume she was seekin'"],
     ]
   },
   asti: {
@@ -239,6 +253,7 @@ items = {
       ["It's imported champagne"],
       ["Mmm it's delicious champagne"],
       ['A good taste for good friends'],
+      ['Martini and Rossi Asti Spumante…'],
     ]
   },
   hotdog: {

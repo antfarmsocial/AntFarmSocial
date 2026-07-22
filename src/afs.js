@@ -112,6 +112,7 @@ del = (obj, ...keys) => keys.forEach(k => delete obj[k]),
 getById = (arr, id) => arr.find(i => i.id == id),
 mapJoin = (arr, fn) => arr.map(fn).join(''),
 repeat = (c, fn) => mapJoin(Array(c).fill(), fn),
+invalid = val => !Number.isFinite(val),
 
 // Converts radians to degrees.
 radToDeg = radians => radians * (deg180 / PI),
@@ -3052,7 +3053,7 @@ antBgNear = (ant, ignoreAngle, margin = antOffsetX(ant) * 2) =>
 
 // Moves ant (or egg) to the middle of #farm.
 antFall = (ant, startX = ant.x, startY = ant.y, destX = clamp(ant.x - 20 + randomInt(40), 440, 520), target = antGroundLevel(ant)) => {
-  ant.x = startX + (destX - startX) * easeOutQuad(clamp((ant.y - startY) / (260 - startY), 0, 1));
+  ant.x = startX + (destX - startX) * easeOutQuad(clamp(260 - startY ? (ant.y - startY) / (260 - startY) : 1, 0, 1));
   ant.y += 1.2;
   if (ant.r < 0) ant.r += 1.2;
   antUpdate(ant);
@@ -3122,7 +3123,7 @@ antUpdate = (ant, antEl = getObjEl(ant), sync, pkg) => {
     antUpdate(pkg, getObjEl(pkg), sync);
   }
   /* START-DEV */
-  isNaN(ant.x + ant.y + ant.r) && console.error("ant is nanned", ant);
+  invalid(ant.x + ant.y + ant.r) && console.error("ant vals invalid", ant);
   /* END-DEV */
 },
 
@@ -3147,10 +3148,10 @@ antElUpdate = (ant, antEl) => {
 },
 
 // Updates the ant object to reflect the state of the antEl, or reasonable defaults, in NaN situations.
-antFixNaN = (ant, antEl = getObjEl(ant), style = antEl?.isConnected && getComputedStyle(antEl), match = style?.transform?.match(/rotate\(([+-]?\d*\.?\d+)deg\)/)) => {
-  if (isNaN(ant.x)) ant.x = parseFloat(style?.left || 0) || (antArea(ant, 'top'), 480); // 480 = getEl('farm').offsetWidth / 2.
-  if (isNaN(ant.y)) ant.y = parseFloat(style?.top || 0) || antGroundLevel(ant);
-  if (isNaN(ant.r)) ant.r = match ? parseFloat(match[1]) - 90 : 0; // -90 to reverse the +90 offset applied in antUpdate.
+antFixInvalid = (ant, antEl = getObjEl(ant), style = antEl?.isConnected && getComputedStyle(antEl), match = style?.transform?.match(/rotate\(([+-]?\d*\.?\d+)deg\)/)) => {
+  if (invalid(ant.x)) ant.x = parseFloat(style?.left || 0) || (antArea(ant, 'top'), 480); // 480 = getEl('farm').offsetWidth / 2.
+  if (invalid(ant.y)) ant.y = parseFloat(style?.top || 0) || antGroundLevel(ant);
+  if (invalid(ant.r)) ant.r = match ? parseFloat(match[1]) - 90 : 0; // -90 to reverse the +90 offset applied in antUpdate.
   ant.q = [{}];
 },
 
@@ -3720,7 +3721,7 @@ deNip = (ant, nipData, farm, nip = nipData.nip, tun = farm.tuns.find(t => t.nip 
     thot: pickRandom(["That was a long walk!", "I've travelled to another world", "I'm a neighbor", "Moving in!"]),
     nipPh: 0, nipTs: 0, f: farm.id, y: tun ? (isLeftSide ? tun.y1 : tun.y2) : antGroundLevel(ant), scale: 1
   });
-  carryTransfer(ant, 0, nipData.item, farm, nipData.item, farm, {f: farm.id}, undefined, 0);
+  carryTransfer(ant, 0, nipData.item, farm, nipData.item, farm, {f: farm.id, nipPh: 0}, undefined, 0);
   setColonyAndFoe(farm);
   ant.q = [{act: 'nip', nip: nip, rev: 1}]; // Create a new queue with the reverse nip walk action.
   ant.carry?.q2?.forEach(q => antFinnaVia(ant, q.act, {...q})); // Queue up any carry.q2 tasks that were supplied.
@@ -4992,6 +4993,16 @@ act = {
       pkg.x = clamp(headPoint.x, 1, 959);
       temp = findTunPos(headPoint, farm, [tun, ...(tun?.co || [])]) ?? findTunPos(ant, farm); // Fallback to full ant pos search if head poking out of tunnel or something.
       pkg.y = tun?.t == 'cav' ? cavFloor(tun, temp?.pc ?? 50).y : ant.area.n == 'top' ? antGroundLevel(headPoint) : headPoint.y;
+      /* START-DEV */
+      invalid(pkg.y) && console.error('drop: bad pkg.y', {
+        pkgId: pkg.id, pkgY: pkg.y, branch: tun?.t == 'cav' ? 'cavFloor' : ant.area.n == 'top' ? 'antGroundLevel' : 'headPoint.y',
+        antId: ant.id, antX: ant.x, antY: ant.y, antAreaN: ant.area.n, antAreaT: ant.area.t,
+        tunId: tun?.id, tunT: tun?.t, tunX1: tun?.x1, tunY1: tun?.y1, tunX2: tun?.x2, tunY2: tun?.y2, tunH: tun?.h, tunR: tun?.r,
+        tunPosPc: tunPos?.pc, tempPc: temp?.pc,
+        headPointX: headPoint.x, headPointY: headPoint.y,
+        stack: new Error().stack
+      });
+      /* END-DEV */
       // Pkgs dropped in tunnels need a lot more special handling so they are displayed next to each other nicely.
       if (tun?.t == 'cav' && isEggOrInf(pkg)) {
         // spotFinder() is different from how the queen picks a spot to lay, as she uses a slow trial-and-error approach, whereas spotFinder() works out a good spot to drop.
@@ -5251,6 +5262,8 @@ director = (temp1, temp2) => {
   _.farms.forEach(farm => {
     timeLog(farm); // Update duration.
     setTimeout(X => farm.a.forEach(ant => {
+      // Fix NaN bugs that might be happening.
+      invalid(ant.x + ant.y + ant.r) && antFixInvalid(ant);
       if (ant.egg) {
         // Decrease egg stats.
         antStats(ant, {hp: -.2}); // We don't care about other stats for eggs.
@@ -5287,8 +5300,6 @@ director = (temp1, temp2) => {
       else {
         // NOT EGGS...
         timeLog(ant); // Update duration.
-        // Fix NaN bugs that might be happening.
-        isNaN(ant.x + ant.y + ant.r) && antFixNaN(ant);
         // Update corpse or handle living ant.
         isDead(ant) ? updateCorpseState(ant, farm) : setTimeout(X => {// Perform a chunk of this without overloading the main thread with heaps of these at once.
           // Decrement stats.
