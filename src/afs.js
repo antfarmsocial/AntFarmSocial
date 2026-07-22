@@ -846,9 +846,8 @@ naughtyCorner = (con, a, b,
   bisector = calcDistComponents(0, 0, dirA.x + dirB.x, dirA.y + dirB.y),
   facing = (edges, j) => edges[+((edges[0].x - j.x1) * bisector.x + (edges[0].y - j.y1) * bisector.y <= 0)],
   innerA = facing(expandLineToStrip(con.x1, con.y1, con.x1 + dirA.x, con.y1 + dirA.y, a.h), con),
-  innerB = facing(expandLineToStrip(con.x1, con.y1, con.x1 + dirB.x, con.y1 + dirB.y, b.h), con),
-  pt = lineIntersection(innerA.x, innerA.y, innerA.x + dirA.x, innerA.y + dirA.y, innerB.x, innerB.y, innerB.x + dirB.x, innerB.y + dirB.y),
-) => pt,
+  innerB = facing(expandLineToStrip(con.x1, con.y1, con.x1 + dirB.x, con.y1 + dirB.y, b.h), con)
+) => lineIntersection(innerA.x, innerA.y, innerA.x + dirA.x, innerA.y + dirA.y, innerB.x, innerB.y, innerB.x + dirB.x, innerB.y + dirB.y),
 
 // Computes tunnel turn angles and returns pairs with naughty corners.
 hardTurns = (tuns, seen = new Set(), results = [], key, a, b, turn, xy) => {
