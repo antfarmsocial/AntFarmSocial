@@ -673,7 +673,7 @@ spill = X => {
   getEl('kit').remove();
 },
 
-// Hides the menu buttons instantly, but allows other code to be reactivate.
+// Hides the menu buttons instantly, but allows other code to reactivate.
 hideMenus = X => {
   queryAll('#menu > a, #score').forEach(a => {a.classList.add('hide'); a.classList.remove('vis')});
   setTimeout(X => queryAll('#menu > a, #score').forEach(a => a.classList.remove('hide')), num2000 * 2);
