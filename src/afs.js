@@ -1866,7 +1866,7 @@ modal = {
           }
           else cta = `Release ${types[item.ant].n} Ant Queen${item.W ? ` and ${item.W} Workers` : ''}`;
           fillCheck();
-          F.a.length > 29 && (cta = 'Ant farm overpopulated', disable = 1);
+          itemKey != 'vial' && F.a.length > 29 && (cta = 'Ant farm overpopulated', disable = 1);
         },
         gift() {cta = 'Unbox'},
       },
