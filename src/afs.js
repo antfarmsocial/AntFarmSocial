@@ -3077,7 +3077,7 @@ antCap = (ant, farm = getFarm(ant)) => {
 },
 
 // Replaces ant's queue with a single fight action, if it's not already fighting.
-addFight = (ant, ant2) => !antUniqueActs(ant).includes('fight') && (ant.q = [{}, {act: 'fight', ant: ant2.id}]), // The empty action will default to idle to prevent antNext() in calling code from dropping the fight action.
+addFight = (ant, ant2) => !antUniqueActs(ant).includes('fight') && ant.hp > 0 && (ant.q = [{}, {act: 'fight', ant: ant2.id}]), // The empty action will default to idle to prevent antNext() in calling code from dropping the fight action.
 
 // Sets up a fight between two ants.  However it does not execute any actions, and relies on the calling action to give up control.
 antFight = (ant, ant2) => !ant.carry && !ant2.carry && addFight(ant, ant2) && !ant2.fight && addFight(ant2, ant),
