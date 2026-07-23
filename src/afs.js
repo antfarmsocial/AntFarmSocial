@@ -4545,6 +4545,13 @@ act = {
   // Note: action.target (required) is any object/shim with x/y coords, and action.ant (if set) is just the id of an ant if temporary freeze of an ant target is desired.
   // Important: This assumes the ant is already in the same cavity as the target, so nothing too funky happens.
   tunOrient: (ant, action = ant.q[0], tun = getTun(getFarm(ant), ant.area.t), margin = antOffsetX(ant) + (action.margin || 6), dr) => {
+    /* START-DEV */
+    invalid(action.target.x + action.target.y) && console.error('tunOrient: bad target', {
+      action: action,
+      ant: ant,
+      stack: new Error().stack
+    });
+    /* END-DEV */
     // Track time spent doing orient action to reduce breakdancing ants bug when target is in an odd orientation.
     action.orient ||= 0;
     ant.pose = 'prone'; antProneCorrection(ant); // Can't use antToProneWithCorrection() correction here because the nudger is a fudger.
