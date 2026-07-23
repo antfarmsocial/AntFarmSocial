@@ -338,7 +338,7 @@ addFarm = (fid = 'f' + getTime()) => {
 switchFarm = (farmId, kit = getEl('kit'), getFarmIndex = fid => _.farms.findIndex(f => f.id == fid), farm = getFarm(farmId)) => {
   farm.card && preloadImage(farm.card);
   farm.decals?.forEach(d => preloadImage(d.k));
-  farm.fill && preloadImage(items[farm.fill].bg);
+  !farm.sculpt && farm.fill && preloadImage(items[farm.fill].bg);
   switcher = 0;
   hideTubeFollowLinks();
   if (F && F.id != farmId) {
@@ -1791,7 +1791,7 @@ pourTun = tun => {
   if (tun.prog >= tun.cap) tun.co.forEach(tunId => {
     let nextTun = getById(F.mTuns, 'm' + tunId);
     if (!nextTun.pour) {
-      if (!isRotationTunnel(nextTun) && nextTun.x2 == tun.x2) query('#' + nextTun.id + ' .prog').style.float = 'right';
+      if (!isRotationTunnel(nextTun) && nextTun.rwip) query(`#${nextTun.id} .prog`).style.float = 'right';
       pourTun(nextTun);
     }
   });
