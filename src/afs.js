@@ -5113,7 +5113,7 @@ act = {
         // Done! Move ant into "nip item space".
         antArea(ant, 'nip'); // This is just to invalidate any existing area.n the ant has, because the director function on a delay will try to do things to this ant if they're in a valid farm area.
         antTransfer(farm, ant, farm, nipItem, {x: -35, y: 28 - antOffsetY({...ant, x: -35}), q: [], digT: 0}, getEl('a-' + nipIds[id])); // Invalidate q and digT to prevent any problems down the line.
-        carryTransfer(ant, farm, undefined, farm, farm, nipItem, {q: []}, getEl('a-' + nipIds[id]), nipData.nip);
+        carryTransfer(ant, farm, undefined, farm, farm, nipItem, {q: [], moveTo: 0}, getEl('a-' + nipIds[id]), nipData.nip);
         setColonyAndFoe(farm);
         // Set the 'moveTo' flag immediately on any dependant eggs or infants that should be moved to wherever the queen went.
         // Note: the director function does this anyway in case this workflow skipped an egg/ant that was not in the dataset at this time.
@@ -5174,7 +5174,7 @@ act = {
     else if (ant.hp <= 0) {
       endFight();
       ant.wig = 1;
-      antFinna(ant, 'die', {r: 'fight'});
+      ant.q = [{}, {act: 'die', r: 'fight'}];
       setTimeout(X => {ant.wig = 0; antNext(ant)}, standardDelay);
     }
     else if (!inTargetProximity(ant, ant2, antOffsetX(ant) + antOffsetX(ant2))) {
