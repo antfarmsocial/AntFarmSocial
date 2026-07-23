@@ -3099,10 +3099,10 @@ getFreeAnt = antEl => getAnt(_, antEl?.id),
 getAnt = (dataSet, id) => getById(dataSet.a, id),
 
 // Removes an object (must have .id) from a data set in the array at the subscript property, and remove the corresponding DOM element including its cache. Done in a timer, so it doesn't mess up any loops that call this.
-deleteDataAndEl = (obj, key = 'a', dataSet = getFarm(obj) || _, preserveState, el = getObjEl(obj)) => {
-  if (!preserveState) obj.state = 0; // Prevent antAction() from using this object if it is an ant.
+deleteDataAndEl = (obj, key = 'a', dataSet = getFarm(obj) || _, el = getObjEl(obj)) => {
+  obj.state = 0; // Prevent antAction() from using this object if it is an ant.
   setTimeout(X => dataSet[key] = dataSet[key]?.filter(d => d.id != obj.id), 0);
-  el && (el.remove() || del(elCache, obj.id))
+  el && (el.remove() || del(elCache, obj.id));
 },
 
 // Deletes an ant element.
@@ -3187,9 +3187,11 @@ carryUndraw = (ant, dest, farm = getFarm(ant), carry = ant.carry, carryEl = getE
 // Transfers an ant from one data set to another and removes/draws the DOM elements as well - assumes ant array is subscript '.a'.
 // Important: 'farm' parameter does not mean "the source farm".  The source is the oldSet.  This is a bit of a gotcha.
 // Note: newCont defaults to #farm container if undefined, that's handled in antDraw().
-antTransfer = (farm, obj, oldSet, newSet, newVals, newCont) => {
+antTransfer = (farm, obj, oldSet, newSet, newVals, newCont, el = getObjEl(obj)) => {
   newSet.a.push(assign(obj.id ? obj : getById(oldSet.a, obj), newVals));
-  deleteDataAndEl(obj, 'a', oldSet, 1);
+  // Cannot use deleteDataAndEl() as it causes problems in this particular scenario due to not being synchronous and also state flagging.
+  oldSet.a = oldSet.a?.filter(d => d.id != obj.id);
+  el && (el.remove() || del(elCache, obj.id));
   currentFarm(farm) && antDraw(obj, newCont);
 },
 
