@@ -3765,13 +3765,23 @@ tubeLoop = X => tubeInterval ||= setInterval((hasAnts = 0) => {
   if (!hasAnts) tubeInterval = stopInterval(tubeInterval);
 }, microDelay),
 
-// Consumes a super food.
-consumeSuper = (ant, skipStats, item) => {
-  if (item) {
-    item.sz -= .01;
-    !randomInt(5) && antThot(ant, ["Superfood, super mood!", "Full and hydrated? Living the dream.", "Two birds, one nectar.", "This hits different.", "Snack AND drink? Yes please.", "My tummy is thriving."]);
+// Consumes food, drink, or a super item. Depletes item and adjusts ant stats.
+// skipStats defers stats to a later consume() call (worker fetching food/drink for the queen through 'get').
+consume = (ant, item, skipStats, pref, forQueen, prefStat = base => pref ? abs(base) * 3 : base) => {
+  item.sz = max(item.sz - (item.k == 'super' ? .01 : item.t == 'drink' ? .1 : .4), 0); // Doesn't do anything permanent when called from 'srv' function, but was already depleted when worker fetched it so that's OK.
+  !randomInt(5) && antThot(ant,
+    item.k == 'super' ? ["Superfood, super mood!", "Full and hydrated? Living the dream.", "Two birds, one nectar.", "This hits different.", "Snack AND drink? Yes please.", "My tummy is thriving."] :
+    item.t == 'drink' ? ["Ahh, refreshing!", "Thirst: quenched.", "Best drop in the whole farm", "Bottoms up!", "Now THAT'S hydration"] :
+    items[item.k]?.sweet ? ["Breadcrumb jackpot!", "Sugar high!", "Someone touched my crumb", "New crumb dropped!"] : ["Is this edible?", "Mmm… mystery flavor", "Meat sweats… achieved", "Smells dead - tastes worse"]
+  );
+  if (!skipStats) {
+    antStats(ant, item.k == 'super' ? {fd: 12, dr: 12, md: 4, hp: 3} : item.t == 'drink' ? {dr: 12, md: 1, hp: 1} : {fd: item.t == 'flesh' ? 60 : prefStat(4), md: prefStat(-1), hp: 1});
+    forQueen && antStats(ant, {md: 2}); // Queen is happy she was served.
+    if (item.t == 'food' && !pref && !randomInt(3)) {
+      playerHint(getFarm(ant), ["Some of your ants are complaining about the food.", "The food does not meet the needs of some ants."]);
+      antThot(ant, ["I can't find any food I like", "This isn't my kind of food!", "Ewww, gross food!"]);
+    }
   }
-  skipStats || antStats(ant, {fd: 12, dr: 12, hp: 3, md: 6});
 },
 
 // Ant actions come in a namespaced package so that the action names can be compared to strings.
@@ -4735,25 +4745,10 @@ act = {
           ate = 1;
         }
         else if (food = farm.items.find(i => i.id == action.id && i.sz > 0)) {// Check food still exists at this point in case it was removed/eaten.
-          if (food.k == 'super') {
-            consumeSuper(ant, action.Q, food);
-          }
-          else {
-            food.sz -= .4;
-            !randomInt(5) && antThot(ant, items[food.k].sweet ?
-              ["Breadcrumb jackpot!", "Sugar high!", "Someone touched my crumb", "New crumb dropped!"] :
-              ["Is this edible?", "Mmm… mystery flavor", "Meat sweats… achieved", "Smells dead - tastes worse"]);
-          }
           ate = 1;
         }
         if (ate) {
-          if (food.k != 'super') {
-            !action.Q && antStats(ant, {fd: isFlesh ? 60 : action.pref ? 12 : 3, md: action.pref ? 4 : 0, hp: 1});
-            if (!action.pref && !randomInt(3)) {
-              playerHint(farm, ["Some of your ants are complaining about the food.", "The food does not meet the needs of some ants."]);
-              antThot(ant, ["I can't find any food I like", "This isn't my kind of food!", "Ewww, gross food!"]);
-            }
-          }
+          consume(ant, isFlesh ? {t: 'flesh'} : food, action.Q, action.pref);
           ant.dig = 0;
           (ant.fd < 80 && !action.Q && ant.q.length < 2 && !randomInt(1) ? antAction : antNext)(ant); // Whether to go again or move on.
         }
@@ -4816,13 +4811,7 @@ act = {
       // Ant has reached the target drink.
       setTimeout(X => {
         if (drink = farm.items.find(i => i.id == action.id && i.sz > 0)) {// Got to recheck here incase the drink got removed/exhausted.
-          if (drink.k == 'super') {
-            consumeSuper(ant, action.Q, drink);
-          }
-          else {
-            drink.sz = max(drink.sz - .1, 0);
-            !action.Q && antStats(ant, {dr: 12, md: .5, hp: .5});
-          }
+          consume(ant, drink, action.Q);
           (ant.dr < 80 && !action.Q && ant.q.length < 2 && !randomInt(1) ? antAction : antNext)(ant); // Whether to go again or move on.
         }
         else antNext(ant);
@@ -4887,7 +4876,7 @@ act = {
         // Reached the queen.
         // Update stats based on what the queen is probably being given.
         // The 'md' boost is a bit higher than in 'eat' and 'drink' actions because queen has servants.
-        action.k == 'super' ? consumeSuper(queen) : action.t == 'drink' ? antStats(queen, {dr: 12, md: 2, hp: .5}) : antStats(queen, {fd: action.t == 'flesh' ? 60 : action.pref ? 12 : 3, md: action.pref ? 6 : 2, hp: 1});
+        consume(queen, action, 0, action.pref, 1);
         // Worker ant is happier.
         antStats(ant, {md: 9});
         // Animate the exchange.
