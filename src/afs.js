@@ -3767,7 +3767,7 @@ tubeLoop = X => tubeInterval ||= setInterval((hasAnts = 0) => {
 
 // Consumes food, drink, or a super item. Depletes item and adjusts ant stats.
 // skipStats defers stats to a later consume() call (worker fetching food/drink for the queen through 'get').
-consume = (ant, item, skipStats, pref, forQueen, prefStat = base => pref ? abs(base) * 3 : base) => {
+consume = (ant, item, skipStats, pref, prefStat = base => pref ? abs(base) * 3 : base) => {
   item.sz = max(item.sz - (item.k == 'super' ? .01 : item.t == 'drink' ? .1 : .4), 0); // Doesn't do anything permanent when called from 'srv' function, but was already depleted when worker fetched it so that's OK.
   !randomInt(5) && antThot(ant,
     item.k == 'super' ? ["Superfood, super mood!", "Full and hydrated? Living the dream.", "Two birds, one nectar.", "This hits different.", "Snack AND drink? Yes please.", "My tummy is thriving."] :
@@ -3776,7 +3776,6 @@ consume = (ant, item, skipStats, pref, forQueen, prefStat = base => pref ? abs(b
   );
   if (!skipStats) {
     antStats(ant, item.k == 'super' ? {fd: 12, dr: 12, md: 4, hp: 3} : item.t == 'drink' ? {dr: 12, md: 1, hp: 1} : {fd: item.t == 'flesh' ? 60 : prefStat(4), md: prefStat(-1), hp: 1});
-    forQueen && antStats(ant, {md: 2}); // Queen is happy she was served.
     if (item.t == 'food' && !pref && !randomInt(3)) {
       playerHint(getFarm(ant), ["Some of your ants are complaining about the food.", "The food does not meet the needs of some ants."]);
       antThot(ant, ["I can't find any food I like", "This isn't my kind of food!", "Ewww, gross food!"]);
@@ -4876,9 +4875,9 @@ act = {
         // Reached the queen.
         // Update stats based on what the queen is probably being given.
         // The 'md' boost is a bit higher than in 'eat' and 'drink' actions because queen has servants.
-        consume(queen, action, 0, action.pref, 1);
-        // Worker ant is happier.
-        antStats(ant, {md: 9});
+        consume(queen, action, 0, action.pref);
+        antStats(queen, {md: 2}); // Queen is happy she was served.
+        antStats(ant, {md: 9}); // Worker ant is happier.
         // Animate the exchange.
         [queen, ant].forEach(a => {
           antUpdateClasses(a, {dig: 1});
