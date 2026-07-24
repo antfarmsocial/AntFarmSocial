@@ -3771,7 +3771,7 @@ consumeSuper = (ant, skipStats, item) => {
     item.sz -= .01;
     !randomInt(5) && antThot(ant, ["Superfood, super mood!", "Full and hydrated? Living the dream.", "Two birds, one nectar.", "This hits different.", "Snack AND drink? Yes please.", "My tummy is thriving."]);
   }
-  skipStats || antStats(ant, {fd: 12, dr: 12, hp: 1.5, md: item ? 1 : 2.5});
+  skipStats || antStats(ant, {fd: 12, dr: 12, hp: 3, md: 6});
 },
 
 // Ant actions come in a namespaced package so that the action names can be compared to strings.
