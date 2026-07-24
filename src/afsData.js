@@ -273,6 +273,20 @@ items = {
       ['Leaking. Leaking! The Hot Dogs are leaking, people!'],
     ]
   },
+  super: {
+    n: 'Superfood Nectar',
+    desc: "Sucrose, Shrimp Meal, Quinoa, and Vitamins<br>Proven to be popular with all types of ants.",
+    lvl: 250,
+    t: 'nutrition & hydration',
+    max: 1,
+    keep: 1,
+    quip: [
+      ['This is getting serious.'],
+      ['A succulent meal!'],
+      ["Delicious!"],
+      ['Your ants will love it.'],
+    ]
+  },
 
   // PLAYER POWER-UPS
   cologne: {

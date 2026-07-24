@@ -1407,6 +1407,7 @@ useItem = (i, doQuip = 1, doDel = 1, item = _.bag[i], itemKey = item.k, itemType
     mom() {msg('<b>Win.</b>', 'err'); _.win = 1; score(100, 1)},
     crucible() {pourCrucible()},
     sculpt() {_.farms.push(item.f); switchFarm(item.f.id); _.rm--;},
+    super() {typeHandlers.hydration()},
   },
   handler = keyHandlers[itemKey] || typeHandlers[itemType]
 ) => {
@@ -1886,7 +1887,8 @@ modal = {
         ebay() {cta = 'Sell ant farm'; F.fill && (cta = 'Farm has not been cleaned out', disable = 1); _.farms.length < 2 && (cta = 'This is your only farm', disable = 1)},
         mom() {cta = '🏆 WIN GAME 🏆'; if (_.win) (cta = 'Game won', disable = 1)},
         crucible() {cta = 'Pour'; !farmIsDeveloping(F) && (cta = 'Farm undeveloped', disable = 1); F.nips.length && (cta = 'Farm has attached items', disable = 1)},
-        sculpt() {cta = 'Put on display'; customDesc = 'Ant nest art of<br>' + bagItem.f.n}
+        sculpt() {cta = 'Put on display'; customDesc = 'Ant nest art of<br>' + bagItem.f.n},
+        super() {typeHandlers.hydration()},
       },
       handler = keyHandlers[itemKey] || typeHandlers[itemType];
       handler && handler();
@@ -3763,6 +3765,15 @@ tubeLoop = X => tubeInterval ||= setInterval((hasAnts = 0) => {
   if (!hasAnts) tubeInterval = stopInterval(tubeInterval);
 }, microDelay),
 
+// Consumes a super food.
+consumeSuper = (ant, skipStats, item) => {
+  if (item) {
+    item.sz -= .01;
+    !randomInt(5) && antThot(ant, ["Superfood, super mood!", "Full and hydrated? Living the dream.", "Two birds, one nectar.", "This hits different.", "Snack AND drink? Yes please.", "My tummy is thriving."]);
+  }
+  skipStats || antStats(ant, {fd: 12, dr: 12, hp: 1.5, md: item ? 1 : 2.5});
+},
+
 // Ant actions come in a namespaced package so that the action names can be compared to strings.
 // Also includes things that the ants "do" to support actions.
 act = {
@@ -4724,19 +4735,26 @@ act = {
           ate = 1;
         }
         else if (food = farm.items.find(i => i.id == action.id && i.sz > 0)) {// Check food still exists at this point in case it was removed/eaten.
-          food.sz -= .4;
-          !randomInt(5) && antThot(ant, items[food.k].sweet ?
-            ["Breadcrumb jackpot!", "Sugar high!", "Someone touched my crumb", "New crumb dropped!"] :
-            ["Is this edible?", "Mmm… mystery flavor", "Meat sweats… achieved", "Smells dead - tastes worse"]);
+          if (food.k == 'super') {
+            consumeSuper(ant, action.Q, food);
+          }
+          else {
+            food.sz -= .4;
+            !randomInt(5) && antThot(ant, items[food.k].sweet ?
+              ["Breadcrumb jackpot!", "Sugar high!", "Someone touched my crumb", "New crumb dropped!"] :
+              ["Is this edible?", "Mmm… mystery flavor", "Meat sweats… achieved", "Smells dead - tastes worse"]);
+          }
           ate = 1;
         }
         if (ate) {
-          !action.Q && antStats(ant, {fd: isFlesh ? 60 : action.pref ? 12 : 3, md: action.pref ? 4 : 0, hp: 1});
-          ant.dig = 0;
-          if (!action.pref && !randomInt(3)) {
-            playerHint(farm, ["Some of your ants are complaining about the food.", "The food does not meet the needs of some ants."]);
-            antThot(ant, ["I can't find any food I like", "This isn't my kind of food!", "Ewww, gross food!"]);
+          if (food.k != 'super') {
+            !action.Q && antStats(ant, {fd: isFlesh ? 60 : action.pref ? 12 : 3, md: action.pref ? 4 : 0, hp: 1});
+            if (!action.pref && !randomInt(3)) {
+              playerHint(farm, ["Some of your ants are complaining about the food.", "The food does not meet the needs of some ants."]);
+              antThot(ant, ["I can't find any food I like", "This isn't my kind of food!", "Ewww, gross food!"]);
+            }
           }
+          ant.dig = 0;
           (ant.fd < 80 && !action.Q && ant.q.length < 2 && !randomInt(1) ? antAction : antNext)(ant); // Whether to go again or move on.
         }
         else {
@@ -4749,10 +4767,10 @@ act = {
     else {
       if (ant.fd < 90 || action.Q) {
         // No target selected yet.
-        let foods = farm.items.filter(i => i.t == 'food' && i.sz > 0),
+        let foods = farm.items.filter(i => (i.t == 'food' || i.k == 'super') && i.sz > 0),
           antType = types[ant.t],
           pref = 1,
-          isPreference = (antType, food, foodItem = items[food.k]) => !antType.d || antType.d < 2 && foodItem.sweet || antType.d > 1 && foodItem.meat,
+          isPreference = (antType, food, foodItem = items[food.k]) => food.k == 'super' || !antType.d || antType.d < 2 && foodItem.sweet || antType.d > 1 && foodItem.meat,
           deadAnts = farm.a.filter(a => isDead(a) && !a.rot), // Find dead ants that are not rotten yet.
           chosenFood = shuffle(foods).find(f => isPreference(antType, f)) || pickRandom(foods);
         if (!chosenFood || !isPreference(antType, chosenFood)) {
@@ -4772,11 +4790,11 @@ act = {
         }
         if (chosenFood) {
           // Building `actionProps` instead of using `...chosenFood` directly prevents excess data being stored in the ant's action.
-          actionProps = {id: chosenFood.id, k: chosenFood.k, t: chosenFood.t != 'food' ? 'flesh' : chosenFood.t, pref: pref, Q: action.Q};
+          actionProps = {id: chosenFood.id, k: chosenFood.k, t: chosenFood.k == 'super' ? chosenFood.t : chosenFood.t != 'food' ? 'flesh' : chosenFood.t, pref: pref, Q: action.Q};
           // Now calculate where to go.
-          if (chosenFood.t == 'food' || chosenFood.area.n == 'top') {
+          if (chosenFood.t == 'food' || chosenFood.k == 'super' || chosenFood.area.n == 'top') {
             goToLocation(ant, {n: 'top'});
-            antFinna(ant, 'eat', {...actionProps, tx: chosenFood.t == 'food' ? 25 + parseInt(chosenFood.x) + randomSign(23) * randomInt(chosenFood.sz) / 100 : chosenFood.x});
+            antFinna(ant, 'eat', {...actionProps, tx: chosenFood.t == 'food' || chosenFood.k == 'super' ? 25 + parseInt(chosenFood.x) + randomSign(23) * randomInt(chosenFood.sz) / 100 : chosenFood.x});
           }
           else {
             let tunPos = findTunPos(chosenFood, farm, [chosenFood.area.t]);
@@ -4798,8 +4816,13 @@ act = {
       // Ant has reached the target drink.
       setTimeout(X => {
         if (drink = farm.items.find(i => i.id == action.id && i.sz > 0)) {// Got to recheck here incase the drink got removed/exhausted.
-          drink.sz = max(drink.sz - .1, 0);
-          !action.Q && antStats(ant, {dr: 12, md: .5, hp: .5});
+          if (drink.k == 'super') {
+            consumeSuper(ant, action.Q, drink);
+          }
+          else {
+            drink.sz = max(drink.sz - .1, 0);
+            !action.Q && antStats(ant, {dr: 12, md: .5, hp: .5});
+          }
           (ant.dr < 80 && !action.Q && ant.q.length < 2 && !randomInt(1) ? antAction : antNext)(ant); // Whether to go again or move on.
         }
         else antNext(ant);
@@ -4864,7 +4887,7 @@ act = {
         // Reached the queen.
         // Update stats based on what the queen is probably being given.
         // The 'md' boost is a bit higher than in 'eat' and 'drink' actions because queen has servants.
-        action.t == 'drink' ? antStats(queen, {dr: 12, md: 2, hp: .5}) : antStats(queen, {fd: action.t == 'flesh' ? 60 : action.pref ? 12 : 3, md: action.pref ? 6 : 2, hp: 1});
+        action.k == 'super' ? consumeSuper(queen) : action.t == 'drink' ? antStats(queen, {dr: 12, md: 2, hp: .5}) : antStats(queen, {fd: action.t == 'flesh' ? 60 : action.pref ? 12 : 3, md: action.pref ? 6 : 2, hp: 1});
         // Worker ant is happier.
         antStats(ant, {md: 9});
         // Animate the exchange.

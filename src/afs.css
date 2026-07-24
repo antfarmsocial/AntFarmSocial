@@ -2074,6 +2074,11 @@ body.glass #l-wrap {
       background-blend-mode: screen;
       opacity: .8;
     }
+    &.super > div {
+      background-color: #5ec0c6;
+      background-blend-mode: screen;
+      opacity: .8;
+    }
     &::after {
       content: "";
       display: block;
@@ -5507,6 +5512,9 @@ body.bit .ant {
       opacity: .8;
       &.cola {
         background: #300a01;
+      }
+      &.super {
+        background: #5cbfc6;
       }
     }
     &.Cfood {
