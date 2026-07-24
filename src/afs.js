@@ -3766,16 +3766,16 @@ tubeLoop = X => tubeInterval ||= setInterval((hasAnts = 0) => {
 }, microDelay),
 
 // Consumes food, drink, or a super item. Depletes item and adjusts ant stats.
-// skipStats defers stats to a later consume() call (worker fetching food/drink for the queen through 'get').
-consume = (ant, item, skipStats, pref, prefStat = base => pref ? abs(base) * 3 : base) => {
+// dontEat defers actual eating to a later consume() call (worker fetching food/drink for the queen through 'get').
+consume = (ant, item, dontEat, pref, prefStat = base => pref ? abs(base) * 3 : base) => {
   item.sz = max(item.sz - (item.k == 'super' ? .01 : item.t == 'drink' ? .1 : .4), 0); // Doesn't do anything permanent when called from 'srv' function, but was already depleted when worker fetched it so that's OK.
-  !randomInt(5) && antThot(ant,
-    item.k == 'super' ? ["Superfood, super mood!", "Full and hydrated? Living the dream.", "Two birds, one nectar.", "This hits different.", "Snack AND drink? Yes please.", "My tummy is thriving."] :
-    item.t == 'drink' ? ["Ahh, refreshing!", "Thirst: quenched.", "Best drop in the whole farm", "Bottoms up!", "Now THAT'S hydration"] :
-    items[item.k]?.sweet ? ["Breadcrumb jackpot!", "Sugar high!", "Someone touched my crumb", "New crumb dropped!"] : ["Is this edible?", "Mmm… mystery flavor", "Meat sweats… achieved", "Smells dead - tastes worse"]
-  );
-  if (!skipStats) {
+  if (!dontEat) {
     antStats(ant, item.k == 'super' ? {fd: 12, dr: 12, md: 4, hp: 3} : item.t == 'drink' ? {dr: 12, md: 1, hp: 1} : {fd: item.t == 'flesh' ? 60 : prefStat(4), md: prefStat(-1), hp: 1});
+    !randomInt(5) && antThot(ant,
+      item.k == 'super' ? ["Superfood, super mood!", "Full and hydrated? Living the dream.", "Two birds, one nectar.", "This hits different.", "Snack AND drink? Yes please.", "My tummy is thriving."] :
+      item.t == 'drink' ? ["Ahh, refreshing!", "Thirst: quenched.", "Best drop in the whole farm", "Bottoms up!", "Now THAT'S hydration"] :
+      items[item.k]?.sweet ? ["Breadcrumb jackpot!", "Sugar high!", "Someone touched my crumb", "New crumb dropped!"] : ["Is this edible?", "Mmm… mystery flavor", "Meat sweats… achieved", "Smells dead - tastes worse"]
+    );
     if (item.t == 'food' && !pref && !randomInt(3)) {
       playerHint(getFarm(ant), ["Some of your ants are complaining about the food.", "The food does not meet the needs of some ants."]);
       antThot(ant, ["I can't find any food I like", "This isn't my kind of food!", "Ewww, gross food!"]);
